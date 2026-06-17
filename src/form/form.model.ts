@@ -1,8 +1,10 @@
 import type { Branded } from './branded'
 
-export type ParamsDom<K extends string, Param = {}> = Branded<Record<K, Param>, 'params'>
+export type TheParams<Params> = Branded<Params, 'params'>
+export type ParamsDom<K extends string, Param = {}> = TheParams<Record<K, Param>>
 export type ContextDom = Branded<unknown, 'context'>
-export type VariantsDom<K extends string, T = {}> = Branded<Record<K, T>, 'variants'>
+export type TheVariants<Variants> = Branded<Variants, 'variants'>
+export type VariantsDom<K extends string, T = {}> = TheVariants<Record<K, T>>
 export type ExtraDom = Branded<unknown, 'viewer-extra'>
 export type ViewExtraKeys = 'view' | 'children'
 
