@@ -7,32 +7,18 @@ import type {
   TypedFormItem,
   TheVariants,
 } from "./form.model";
-import type { ViewerProps, Viewers, WithChildren } from "./form-react";
+import type {
+  GetChild,
+  ViewerProps,
+  Viewers,
+  WithChildren,
+} from "./form-react";
 
 type TypeNames = "text" | "group";
 
-type TextFieldData = {
-  id: string;
-  type: "text";
-  variant: "default" | "compact";
-  deleted: boolean;
-  params: { label: string };
-  value: string;
-};
-
-type GroupFieldData = {
-  id: string;
-  type: "group";
-  variant: "default" | "bordered";
-  deleted: boolean;
-  params: { title: string; children: TextFieldData[] };
-};
-
-type FieldData = TextFieldData | GroupFieldData;
-
 type Params = TheParams<{
   text: { label: string };
-  group: { title: string; children: TextFieldData[] };
+  group: { title: string };
 }>;
 
 type Variants = TheVariants<{
@@ -42,15 +28,24 @@ type Variants = TheVariants<{
 
 type Context = ContextDom & { accent: string };
 
+type FieldData = {
+  id: string;
+  type: TypeNames;
+  variant: Variants[TypeNames];
+  deleted: boolean;
+  params: Params[TypeNames];
+  value: string;
+  childFields: FieldData[];
+};
+
 type ItemExtra = ExtraDom & {
   value: string;
   onChange: (value: string) => void;
-  getChild: (suffix: string) => React.ReactNode;
+  childFields: FieldData[];
 };
 
-type ItemViewExtra = ItemExtra & {
-  children: Record<string, React.ReactNode>;
-};
+type FormExtra = WithChildren<ItemExtra>;
+type ViewExtra = FormExtra["view"];
 
 const asExtra = <T extends object>(extra: T) => extra as T & ExtraDom;
 
@@ -62,77 +57,63 @@ const DEFAULT_FIELDS: FieldData[] = [
     deleted: false,
     params: { label: "Name" },
     value: "Alice",
+    childFields: [],
   },
   {
     id: "group-1",
     type: "group",
     variant: "bordered",
     deleted: false,
-    params: {
-      title: "Tagged items",
-      children: [
-        {
-          id: "text-2",
-          type: "text",
-          variant: "default",
-          deleted: false,
-          params: { label: "Item 1" },
-          value: "alpha",
-        },
-        {
-          id: "text-3",
-          type: "text",
-          variant: "default",
-          deleted: false,
-          params: { label: "Item 2" },
-          value: "beta",
-        },
-        {
-          id: "text-4",
-          type: "text",
-          variant: "default",
-          deleted: false,
-          params: { label: "Item 3" },
-          value: "gamma",
-        },
-      ],
-    },
+    params: { title: "Tagged items" },
+    value: "",
+    childFields: [
+      {
+        id: "text-2",
+        type: "text",
+        variant: "default",
+        deleted: false,
+        params: { label: "Item 1" },
+        value: "alpha",
+        childFields: [],
+      },
+      {
+        id: "text-3",
+        type: "text",
+        variant: "default",
+        deleted: false,
+        params: { label: "Item 2" },
+        value: "beta",
+        childFields: [],
+      },
+      {
+        id: "text-4",
+        type: "text",
+        variant: "default",
+        deleted: false,
+        params: { label: "Item 3" },
+        value: "gamma",
+        childFields: [],
+      },
+    ],
   },
 ];
 
 const updateFieldValue = (
-  fields: TextFieldData[],
-  id: string,
-  value: string,
-): TextFieldData[] =>
-  fields.map((field) => (field.id === id ? { ...field, value } : field));
-
-const updateFields = (
   fields: FieldData[],
   id: string,
   value: string,
 ): FieldData[] =>
-  fields.map((field) => {
-    if (field.id === id && field.type === "text") {
-      return { ...field, value };
-    }
-    if (field.type === "group") {
-      return {
-        ...field,
-        params: {
-          ...field.params,
-          children: updateFieldValue(field.params.children, id, value),
-        },
-      };
-    }
-    return field;
-  });
+  fields.map((field) => ({
+    ...field,
+    value: field.id === id ? value : field.value,
+    childFields: updateFieldValue(field.childFields, id, value),
+  }));
 
 const viewers: Viewers<
   TypeNames,
   Params,
   Variants,
-  WithChildren<ItemExtra>,
+  FormExtra,
   Context,
   string
 > = {
@@ -145,7 +126,7 @@ const viewers: Viewers<
         extra: { value, onChange },
       },
     }: {
-      props: ViewerProps<Params, Variants, "text", ItemViewExtra, Context>;
+      props: ViewerProps<Params, Variants, "text", ViewExtra, Context>;
     }) => (
       <label
         style={{
@@ -172,7 +153,7 @@ const viewers: Viewers<
         extra: { children },
       },
     }: {
-      props: ViewerProps<Params, Variants, "group", ItemViewExtra, Context>;
+      props: ViewerProps<Params, Variants, "group", ViewExtra, Context>;
     }) => (
       <fieldset
         style={{
@@ -189,15 +170,34 @@ const viewers: Viewers<
         </div>
       </fieldset>
     ),
-    repeatChildren: (formItem) =>
-      formItem.params.children.map((_, i) => String(i)),
+    repeatChildren: (_formItem, extra) =>
+      extra.childFields.map((_, i) => String(i)),
   },
 };
 
 const FormItem = FormItemHOC(viewers, (x) => x);
 
-const fieldChildren = (field: FieldData): FieldData[] | undefined =>
-  (field.params as { children?: FieldData[] }).children;
+const toFormItem = (field: FieldData): TypedFormItem<Params, TypeNames> => ({
+  id: field.id,
+  type: field.type,
+  params: field.params,
+  deleted: field.deleted,
+});
+
+const toViewExtra = (
+  field: FieldData,
+  onValueChange: (id: string, value: string) => void,
+  renderFieldTree: (field: FieldData) => React.ReactNode,
+): ItemExtra & GetChild =>
+  asExtra({
+    value: field.value,
+    onChange: (value) => onValueChange(field.id, value),
+    childFields: field.childFields,
+    getChild: (suffix) => {
+      const child = field.childFields[Number(suffix)];
+      return child ? renderFieldTree(child) : null;
+    },
+  });
 
 const renderField = (
   field: FieldData,
@@ -207,27 +207,13 @@ const renderField = (
 ): React.ReactNode => {
   if (field.deleted) return null;
 
-  const type = field.type;
-
   return (
     <FormItem
       viewProps={{
-        formItem: {
-          id: field.id,
-          type,
-          params: field.params,
-          deleted: field.deleted,
-        } as TypedFormItem<Params, typeof type>,
+        formItem: toFormItem(field),
         ctx,
         variant: field.variant,
-        extra: asExtra({
-          value: "value" in field ? field.value : "",
-          onChange: (value) => onValueChange(field.id, value),
-          getChild: (suffix) => {
-            const child = fieldChildren(field)?.[Number(suffix)];
-            return child ? renderFieldTree(child) : null;
-          },
-        }),
+        extra: toViewExtra(field, onValueChange, renderFieldTree),
       }}
       renderCard={(view) => (
         <div style={{ background: "#f5f5f5", borderRadius: 4 }}>{view}</div>
@@ -265,7 +251,7 @@ export const FormTest = () => {
     setFieldsJson((prev) => {
       try {
         const parsed = JSON.parse(prev) as FieldData[];
-        return JSON.stringify(updateFields(parsed, id, value), null, 2);
+        return JSON.stringify(updateFieldValue(parsed, id, value), null, 2);
       } catch {
         return prev;
       }
