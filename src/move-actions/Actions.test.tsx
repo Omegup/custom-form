@@ -62,15 +62,12 @@ const ItemElement = ({
 }) => {
   const actions = makeActions<Item, {}, Ctx>(
     {
-      clone: () => {
-
-        return [
-          {
-            del: false,
-            name: cloneName(item, items, x => x.name, tClone),
-          },
-        ];
-      },
+      clone: () => [
+        {
+          del: false,
+          name: cloneName(item, items, (x) => x.name, tClone),
+        },
+      ],
       index,
       total: 1,
       items,

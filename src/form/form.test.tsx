@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { FormItemHOC } from "./FormItem";
+import { createFormItemByGetChild } from "./createFormItemByGetChild";
 import type {
   ContextDom,
   ExtraDom,
@@ -7,9 +7,9 @@ import type {
   TheParams,
   TypedFormItem,
   TheVariants,
-} from "./form.model";
-import type { ViewerProps, Viewers, WithChildren } from "./form-react";
-import { branded } from "./branded-cast";
+} from "./form.t";
+import type { ViewerProps, Viewers, WithChildren } from "./form-react.t";
+import { branded } from "./branded";
 
 type TypeNames = "text" | "group";
 
@@ -150,7 +150,7 @@ const viewers: Viewers<
   },
 };
 
-const FormItem = FormItemHOC(viewers, (x) => x);
+const FormItem = createFormItemByGetChild(viewers, (x) => x);
 
 const renderItem = (
   formItem: SomeFormItem<TypeNames, Params>,

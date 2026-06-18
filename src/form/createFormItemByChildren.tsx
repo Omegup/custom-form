@@ -1,7 +1,7 @@
-import type { FormItemProps, ViewerProps, Viewers } from "./form-react";
-import type { ContextDom, ExtraDom, ParamsDom, SomeFormItem, VariantsDom, ViewExtraKeys } from "./form.model";
+import type { FormItemProps, ViewerProps, Viewers } from "./form-react.t";
+import type { ContextDom, ExtraDom, ParamsDom, SomeFormItem, VariantsDom, ViewExtraKeys } from "./form.t";
 
-export const getFormItemWithChildren = <
+export const createFormItemByChildren = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
   Variants extends VariantsDom<TypeNames>,
@@ -22,7 +22,7 @@ export const getFormItemWithChildren = <
     const { repeatChildren } = viewers[props.formItem.type]
     return repeatChildren?.(props.formItem, props.extra) ?? []
   }
-  const FormItem = <K extends TypeNames>(
+  const FormItemByChildren = <K extends TypeNames>(
     props: FormItemProps<
       Params,
       Variants,
@@ -36,6 +36,6 @@ export const getFormItemWithChildren = <
     const updatedViewProps = useUpdatedViewProps(viewProps)
     return renderCard(<Viewer props={updatedViewProps} />, updatedViewProps)
   }
-  return { FormItem, childrenInstances }
+  return { FormItem: FormItemByChildren, childrenInstances }
 }
 

@@ -1,2 +1,3 @@
-declare const brand: unique symbol
-export type Branded<T, B> = T & { [brand]: B }
+import type { Branded } from "./branded.t";
+
+export const branded = <T, B>(x: Omit<T, keyof Branded<{}, B>>) => x as Branded<T, B>

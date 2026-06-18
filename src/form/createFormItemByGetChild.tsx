@@ -1,11 +1,11 @@
 import { useMemo, type ReactNode } from "react";
-import type { FormItemProps, GetChild, ViewerProps, Viewers, WithChildren } from "./form-react";
-import type { ContextDom, ExtraDom, ParamsDom, VariantsDom } from "./form.model";
-import { getFormItemWithChildren } from "./getFormItem";
+import type { FormItemProps, GetChild, ViewerProps, Viewers, WithChildren } from "./form-react.t";
+import type { ContextDom, ExtraDom, ParamsDom, VariantsDom } from "./form.t";
+import { createFormItemByChildren } from "./createFormItemByChildren";
 
 type Children = { children: Record<string, ReactNode> }
 
-export const FormItemHOC = <
+export const createFormItemByGetChild = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
   Variants extends VariantsDom<TypeNames>,
@@ -18,7 +18,7 @@ export const FormItemHOC = <
     props: ViewerProps<Params, Variants, K, ExtraView & Children, Context>,
   ) => ViewerProps<Params, Variants, K, Extra & Children, Context>,
 ) => {
-  const { FormItem: useFormItem, childrenInstances } = getFormItemWithChildren<
+  const { FormItem: useFormItem, childrenInstances } = createFormItemByChildren<
     TypeNames,
     Params,
     Variants,

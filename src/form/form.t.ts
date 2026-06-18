@@ -1,4 +1,4 @@
-import type { Branded } from './branded'
+import type { Branded } from './branded.t'
 
 export type TheParams<Params> = Branded<Params, 'params'>
 export type ParamsDom<K extends string, Param = {}> = TheParams<Record<K, Param>>
