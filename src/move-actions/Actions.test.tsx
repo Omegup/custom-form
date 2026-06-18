@@ -2,6 +2,8 @@ import { useState } from "react";
 import { makeActions } from "./MakeActions";
 import type { MoveActions } from "./MoveActions";
 import type { AutoFocusCtx } from "./AutoFocus";
+import { escapeRegExp } from "lodash-es";
+
 
 const Button = ({
   onClick,
@@ -60,24 +62,23 @@ const ItemElement = ({
 }) => {
   const actions = makeActions<Item, {}, Ctx>(
     {
-      clone: () => [
-        {
-          del: false,
-          name: `${item.name} (clone${
-            [
-              "",
-              ...items
-                .filter((x) => x.name.startsWith(item.name))
-                .flatMap((x) => [
-                  ...x.name
-                    .slice(item.name.length)
-                    .matchAll(/^ \(clone( \d+)?\)$/g),
-                ])
-                .map((x) => ` ${+(x[1] || 0) + 1}`),
-            ].sort((a, b) => (+b || 0) - (+a || 0))[0]
-          })`,
-        },
-      ],
+      clone: () => {
+        const t = (n: string) => `${item.name} (clone${n})`;
+        const r = Math.random().toString(36).substring(2, 15);
+        const pattern = new RegExp(escapeRegExp(t(r)).replace(r, '( \\d+)?'), 'g');
+
+        return [
+          {
+            del: false,
+            name: t(
+              items
+                .flatMap((x) => [...x.name.matchAll(pattern)])
+                .map((x) => ` ${+(x[1] || 1) + 1}`)
+                .reduce((a, b) => ((+b || 0) > (+a || 0) ? b : a), ""),
+            ),
+          },
+        ];
+      },
       index,
       total: 1,
       items,
