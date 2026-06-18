@@ -8,18 +8,14 @@ import type {
   TypedFormItem,
   TheVariants,
 } from "./form.model";
-import type {
-  ViewerProps,
-  Viewers,
-  WithChildren,
-} from "./form-react";
+import type { ViewerProps, Viewers, WithChildren } from "./form-react";
 import { branded } from "./branded-cast";
 
 type TypeNames = "text" | "group";
 
 type Params = TheParams<{
   text: { label: string };
-  group: { title: string; k: TypedFormItem<Params, "text">[] };
+  group: { title: string; item: TypedFormItem<Params, "text"> };
 }>;
 
 type Variants = TheVariants<{
@@ -47,46 +43,40 @@ type FormData = {
 };
 
 const DEFAULT_FORM: FormData = {
-  variants: { text: "default", group: "bordered" },
+  variants: {
+    text: "default",
+    group: "bordered",
+  },
   values: {
-    "text-1": "Alice",
-    "text-2": "alpha",
-    "text-3": "beta",
-    "text-4": "gamma",
+    t: "Alice",
+    g: "1,2,3",
+    "g:1": "Apple",
+    "g:2": "Banana",
+    "g:3": "Carrot",
   },
   items: [
     {
-      id: "text-1",
+      id: "t",
       type: "text",
       deleted: false,
-      params: { label: "Name" },
+      params: {
+        label: "Name",
+      },
     },
     {
-      id: "group-1",
+      id: "g",
       type: "group",
       deleted: false,
       params: {
-        title: "Tagged items",
-        k: [
-          {
-            id: "text-2",
-            type: "text",
-            deleted: false,
-            params: { label: "Item 1" },
+        title: "Inventory",
+        item: {
+          id: "g",
+          type: "text",
+          deleted: false,
+          params: {
+            label: "Item",
           },
-          {
-            id: "text-3",
-            type: "text",
-            deleted: false,
-            params: { label: "Item 2" },
-          },
-          {
-            id: "text-4",
-            type: "text",
-            deleted: false,
-            params: { label: "Item 3" },
-          },
-        ],
+        },
       },
     },
   ],
@@ -153,7 +143,10 @@ const viewers: Viewers<
         </div>
       </fieldset>
     ),
-    repeatChildren: (formItem) => formItem.params.k.map((_, i) => String(i)),
+    repeatChildren: ({ id }, { value: ids }) =>
+      ids
+        ?.split(",")
+        .map((i) => `:${[...id.split(":").slice(1), i].join(":")}`) ?? [],
   },
 };
 
@@ -165,23 +158,25 @@ const renderItem = (
   values: Record<string, string>,
   ctx: Context,
   onValueChange: (id: string, value: string) => void,
-  renderItemTree: (item: SomeFormItem<TypeNames, Params>) => React.ReactNode,
 ): React.ReactNode => {
   if (formItem.deleted) return null;
 
-  return (
+  const render = (
+    formItem: SomeFormItem<TypeNames, Params>,
+    idSuffix: string,
+  ) => (
     <FormItem
       viewProps={{
         formItem,
         ctx,
         variant: variants[formItem.type],
         extra: branded({
-          value: values[formItem.id] ?? "",
-          onChange: (value) => onValueChange(formItem.id, value),
+          value: values[formItem.id + idSuffix] ?? "",
+          onChange: (value) => onValueChange(formItem.id + idSuffix, value),
           getChild: (suffix) => {
             if (formItem.type !== "group") return null;
-            const child = formItem.params.k[Number(suffix)];
-            return child ? renderItemTree(child) : null;
+            const child = formItem.params.item;
+            return child ? render(child, suffix) : null;
           },
         }),
       }}
@@ -190,6 +185,8 @@ const renderItem = (
       )}
     />
   );
+
+  return render(formItem, "");
 };
 
 const parseForm = (json: string): { form: FormData; error: string | null } => {
@@ -233,14 +230,7 @@ export const FormTest = () => {
 
   const renderItemTree = useCallback(
     (item: SomeFormItem<TypeNames, Params>) =>
-      renderItem(
-        item,
-        variants,
-        form.values,
-        ctx,
-        onValueChange,
-        renderItemTree,
-      ),
+      renderItem(item, variants, form.values, ctx, onValueChange),
     [variants, form.values, ctx, onValueChange],
   );
 

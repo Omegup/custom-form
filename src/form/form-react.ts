@@ -44,7 +44,7 @@ export type Viewers<
   [K in TypeNames]: {
     viewer: Viewer<Params, Variants, K, Extra['view'], Context>
     repeatChildren?: (
-      question: TypedFormItem<Params, K>,
+      formItem: TypedFormItem<Params, K>,
       extra: Extra['children'],
     ) => ChildInstanceId[]
   }
