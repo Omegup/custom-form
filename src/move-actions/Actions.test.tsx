@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { makeActions } from "./MakeActions";
-import type { MoveActions } from "./MoveActions";
-import type { AutoFocusCtx } from "./AutoFocus";
-import { cloneName } from "./clone.utils";
+import { makeActions } from "./makeActions";
+import type { MoveActions } from "./MoveActions.t";
+import type { AutoFocus } from "./autofocus.t";
+import { cloneName } from "./cloneName";
 
 const Button = ({
   onClick,
@@ -104,7 +104,7 @@ const ItemElement = ({
   );
 };
 
-type Ctx = AutoFocusCtx<
+type Ctx = AutoFocus<
   { autofocus: { id: string; value: number } | null },
   number
 >;

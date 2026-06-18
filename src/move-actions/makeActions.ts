@@ -1,4 +1,4 @@
-import type { MoveActions } from "./MoveActions";
+import type { MoveActions } from "./MoveActions.t";
 
 export type MakeActions<T, Ctx> = {
   index: number;
