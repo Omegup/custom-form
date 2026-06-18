@@ -9,7 +9,6 @@ import type {
   TheVariants,
 } from "./form.model";
 import type {
-  GetChild,
   ViewerProps,
   Viewers,
   WithChildren,
