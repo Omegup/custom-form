@@ -46,6 +46,7 @@ const randomColor = (random: number | null) =>
         .toString(16)
         .padStart(6, "0")}`
     : "initial";
+const tClone = (name: string, n: string) => `${name} (clone${n})`;
 
 const ItemElement = ({
   items,
@@ -63,14 +64,14 @@ const ItemElement = ({
   const actions = makeActions<Item, {}, Ctx>(
     {
       clone: () => {
-        const t = (n: string) => `${item.name} (clone${n})`;
         const r = Math.random().toString(36).substring(2, 15);
-        const pattern = new RegExp(escapeRegExp(t(r)).replace(r, '( \\d+)?'), 'g');
+        const pattern = new RegExp(escapeRegExp(tClone(item.name, r)).replace(r, '( \\d+)?'), 'g');
 
         return [
           {
             del: false,
-            name: t(
+            name: tClone(
+              item.name,
               items
                 .flatMap((x) => [...x.name.matchAll(pattern)])
                 .map((x) => ` ${+(x[1] || 1) + 1}`)
