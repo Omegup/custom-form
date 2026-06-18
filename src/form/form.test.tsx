@@ -13,6 +13,7 @@ import type {
   Viewers,
   WithChildren,
 } from "./form-react";
+import { branded } from "./branded-cast";
 
 type TypeNames = "text" | "group";
 
@@ -44,8 +45,6 @@ type FormData = {
   values: Record<string, string>;
   items: SomeFormItem<TypeNames, Params>[];
 };
-
-const asExtra = <T extends object>(extra: T) => extra as T & ExtraDom;
 
 const DEFAULT_FORM: FormData = {
   variants: { text: "default", group: "bordered" },
@@ -176,7 +175,7 @@ const renderItem = (
         formItem,
         ctx,
         variant: variants[formItem.type],
-        extra: asExtra({
+        extra: branded({
           value: values[formItem.id] ?? "",
           onChange: (value) => onValueChange(formItem.id, value),
           getChild: (suffix) => {
