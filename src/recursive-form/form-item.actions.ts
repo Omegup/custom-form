@@ -1,5 +1,5 @@
-import type { ContextDom, ParamsDom, SectionDom } from "../form/form.model"
-import { makeActions } from "../move-actions/MakeActions"
+import type { ContextDom, ParamsDom, SectionDom } from "../form/form.t"
+import { makeActions } from "../move-actions/makeActions"
 import type { AutoFocusCtx, GetActionsArgs } from "./edit-form"
 import type { FlattenFormItem, FlattenFormItems, RecursiveTypedFormItem } from "./form-tree"
 import type { ActionsWithEdit, SetEditFormItem } from "./edit-form-tree"

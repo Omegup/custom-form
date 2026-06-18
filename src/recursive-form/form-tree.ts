@@ -1,5 +1,8 @@
 import type { Indexed, Recursive } from "../Recursive"
-import type { ParamsDom, SectionDom, SomeFormItem, TypedFormItem } from "../form/form.model"
+import type { ParamsDom, SomeFormItem, TypedFormItem } from "../form/form.t"
+
+
+export type SectionDom = { id: string; deleted: boolean }
 
 export type RecursiveFormItem<
   TypeNames extends string,

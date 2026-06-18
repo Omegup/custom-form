@@ -19,6 +19,5 @@ export type SomeFormItem<TypeNames extends string, Params extends ParamsDom<Type
   [K in TypeNames]: TypedFormItem<Params, K>
 }[TypeNames]
 
-export type SectionDom = { id: string; deleted: boolean }
 
 

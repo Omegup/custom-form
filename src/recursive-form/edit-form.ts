@@ -1,10 +1,5 @@
-import type { ContextDom, ParamsDom, SectionDom } from "../form/form.model"
+import type { ContextDom, ParamsDom, SectionDom } from "../form/form.t"
 import type { FlattenFormItem, FlattenFormItems } from "./form-tree"
-
-export type AutoFocusCtx<Ctx> = Ctx & {
-  setAutoFocus: (id?: string) => AutoFocusCtx<Ctx>
-  autoFocused: (id: string) => unknown
-}
 
 export type GetActionsArgs<
   TypeNames extends string,

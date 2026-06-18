@@ -1,6 +1,6 @@
 import { useImperativeHandle, useMemo, useRef, type Ref } from "react";
-import type { ViewerProps } from "../form/form-react";
-import type { ContextDom, ExtraDom, ParamsDom, TypedFormItem, VariantsDom, ViewExtraKeys } from "../form/form.model";
+import type { ViewerProps } from "../form/form-react.t";
+import type { ContextDom, ExtraDom, ParamsDom, TypedFormItem, VariantsDom, ViewExtraKeys } from "../form/form.t";
 import type { Response } from "./response";
 
 export type ViewerMethods = {

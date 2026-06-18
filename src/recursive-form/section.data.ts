@@ -1,4 +1,4 @@
-import type { ContextDom, ParamsDom, SectionDom, SomeFormItem } from "../form/form.model"
+import type { ContextDom, ParamsDom, SectionDom, SomeFormItem } from "../form/form.t"
 import type { Recursive } from "../Recursive"
 import type { AutoFocusCtx, Clone, GetActionsArgs } from "./edit-form"
 import type { RecursiveEditManager, SectionEditArgs } from "./edit-form-tree"

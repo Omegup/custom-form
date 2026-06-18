@@ -1,4 +1,4 @@
-import type { ParamsDom, SectionDom, SomeFormItem } from "../form/form.model"
+import type { ParamsDom, SectionDom, SomeFormItem } from "../form/form.t"
 import type { FlattenFormItems, RecursiveFormItem, SectionWithItems } from "./form-tree"
 import type { CompactRecursive, Header, Indexed } from "../Recursive"
 

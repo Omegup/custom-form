@@ -1,4 +1,6 @@
-export type AutoFocus<Ctx, T> = Ctx & {
-  setAutoFocus: (id?: string) => AutoFocus<Ctx, T>;
-  autoFocused: (id: string) => T | null;
+export type SetAutoFocus<Ctx> = Ctx & {
+  setAutoFocus: (id?: string) => SetAutoFocus<Ctx>;
 };
+export type AutoFocus<Ctx, T> = SetAutoFocus<Ctx & {
+  autoFocused: (id: string) => T | null;
+}>

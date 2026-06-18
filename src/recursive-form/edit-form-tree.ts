@@ -1,7 +1,7 @@
-import type { MoveActions } from "../move-actions/MoveActions"
-import type { ContextDom, ParamsDom, SectionDom } from "../form/form.model"
+import type { MoveActions } from "../move-actions/MoveActions.t"
+import type { ContextDom, ParamsDom, SectionDom } from "../form/form.t"
 import type { RecursiveFormItem, RecursiveTypedFormItem, SectionWithItems } from "./form-tree"
-import type { AutoFocusCtx, Clone, GetActionsArgs } from "./edit-form"
+import type { Clone, GetActionsArgs } from "./edit-form"
 import type { Recursive } from "../Recursive"
 
 export type RecursiveEditManager<T> = {
