@@ -2,8 +2,7 @@ import { useState } from "react";
 import { makeActions } from "./MakeActions";
 import type { MoveActions } from "./MoveActions";
 import type { AutoFocusCtx } from "./AutoFocus";
-import { escapeRegExp } from "lodash-es";
-
+import { cloneName } from "./clone.utils";
 
 const Button = ({
   onClick,
@@ -64,19 +63,11 @@ const ItemElement = ({
   const actions = makeActions<Item, {}, Ctx>(
     {
       clone: () => {
-        const r = Math.random().toString(36).substring(2, 15);
-        const pattern = new RegExp(escapeRegExp(tClone(item.name, r)).replace(r, '( \\d+)?'), 'g');
 
         return [
           {
             del: false,
-            name: tClone(
-              item.name,
-              items
-                .flatMap((x) => [...x.name.matchAll(pattern)])
-                .map((x) => ` ${+(x[1] || 1) + 1}`)
-                .reduce((a, b) => ((+b || 0) > (+a || 0) ? b : a), ""),
-            ),
+            name: cloneName(item.name, items.map((x) => x.name), tClone),
           },
         ];
       },
