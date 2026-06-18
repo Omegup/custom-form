@@ -67,7 +67,7 @@ const ItemElement = ({
         return [
           {
             del: false,
-            name: cloneName(item.name, items.map((x) => x.name), tClone),
+            name: cloneName(item, items, x => x.name, tClone),
           },
         ];
       },
