@@ -3,6 +3,7 @@ import { FormItemHOC } from "./FormItem";
 import type {
   ContextDom,
   ExtraDom,
+  SomeFormItem,
   TheParams,
   TypedFormItem,
   TheVariants,
@@ -18,7 +19,7 @@ type TypeNames = "text" | "group";
 
 type Params = TheParams<{
   text: { label: string };
-  group: { title: string };
+  group: { title: string; k: TypedFormItem<Params, "text">[] };
 }>;
 
 type Variants = TheVariants<{
@@ -28,86 +29,70 @@ type Variants = TheVariants<{
 
 type Context = ContextDom & { accent: string };
 
-type FieldData = {
-  id: string;
-  type: TypeNames;
-  variant: Variants[TypeNames];
-  deleted: boolean;
-  params: Params[TypeNames];
-  value: string;
-  childFields: FieldData[];
-};
-
 type ItemExtra = ExtraDom & {
   value: string;
   onChange: (value: string) => void;
-  childFields: FieldData[];
 };
 
 type FormExtra = WithChildren<ItemExtra>;
 type ViewExtra = FormExtra["view"];
 
+type FormData = {
+  variants: {
+    text: Variants["text"];
+    group: Variants["group"];
+  };
+  values: Record<string, string>;
+  items: SomeFormItem<TypeNames, Params>[];
+};
+
 const asExtra = <T extends object>(extra: T) => extra as T & ExtraDom;
 
-const DEFAULT_FIELDS: FieldData[] = [
-  {
-    id: "text-1",
-    type: "text",
-    variant: "default",
-    deleted: false,
-    params: { label: "Name" },
-    value: "Alice",
-    childFields: [],
+const DEFAULT_FORM: FormData = {
+  variants: { text: "default", group: "bordered" },
+  values: {
+    "text-1": "Alice",
+    "text-2": "alpha",
+    "text-3": "beta",
+    "text-4": "gamma",
   },
-  {
-    id: "group-1",
-    type: "group",
-    variant: "bordered",
-    deleted: false,
-    params: { title: "Tagged items" },
-    value: "",
-    childFields: [
-      {
-        id: "text-2",
-        type: "text",
-        variant: "default",
-        deleted: false,
-        params: { label: "Item 1" },
-        value: "alpha",
-        childFields: [],
+  items: [
+    {
+      id: "text-1",
+      type: "text",
+      deleted: false,
+      params: { label: "Name" },
+    },
+    {
+      id: "group-1",
+      type: "group",
+      deleted: false,
+      params: {
+        title: "Tagged items",
+        k: [
+          {
+            id: "text-2",
+            type: "text",
+            deleted: false,
+            params: { label: "Item 1" },
+          },
+          {
+            id: "text-3",
+            type: "text",
+            deleted: false,
+            params: { label: "Item 2" },
+          },
+          {
+            id: "text-4",
+            type: "text",
+            deleted: false,
+            params: { label: "Item 3" },
+          },
+        ],
       },
-      {
-        id: "text-3",
-        type: "text",
-        variant: "default",
-        deleted: false,
-        params: { label: "Item 2" },
-        value: "beta",
-        childFields: [],
-      },
-      {
-        id: "text-4",
-        type: "text",
-        variant: "default",
-        deleted: false,
-        params: { label: "Item 3" },
-        value: "gamma",
-        childFields: [],
-      },
-    ],
-  },
-];
-
-const updateFieldValue = (
-  fields: FieldData[],
-  id: string,
-  value: string,
-): FieldData[] =>
-  fields.map((field) => ({
-    ...field,
-    value: field.id === id ? value : field.value,
-    childFields: updateFieldValue(field.childFields, id, value),
-  }));
+    },
+  ],
+};
 
 const viewers: Viewers<
   TypeNames,
@@ -170,50 +155,37 @@ const viewers: Viewers<
         </div>
       </fieldset>
     ),
-    repeatChildren: (_formItem, extra) =>
-      extra.childFields.map((_, i) => String(i)),
+    repeatChildren: (formItem) => formItem.params.k.map((_, i) => String(i)),
   },
 };
 
 const FormItem = FormItemHOC(viewers, (x) => x);
 
-const toFormItem = (field: FieldData): TypedFormItem<Params, TypeNames> => ({
-  id: field.id,
-  type: field.type,
-  params: field.params,
-  deleted: field.deleted,
-});
-
-const toViewExtra = (
-  field: FieldData,
-  onValueChange: (id: string, value: string) => void,
-  renderFieldTree: (field: FieldData) => React.ReactNode,
-): ItemExtra & GetChild =>
-  asExtra({
-    value: field.value,
-    onChange: (value) => onValueChange(field.id, value),
-    childFields: field.childFields,
-    getChild: (suffix) => {
-      const child = field.childFields[Number(suffix)];
-      return child ? renderFieldTree(child) : null;
-    },
-  });
-
-const renderField = (
-  field: FieldData,
+const renderItem = (
+  formItem: SomeFormItem<TypeNames, Params>,
+  variants: Variants,
+  values: Record<string, string>,
   ctx: Context,
   onValueChange: (id: string, value: string) => void,
-  renderFieldTree: (field: FieldData) => React.ReactNode,
+  renderItemTree: (item: SomeFormItem<TypeNames, Params>) => React.ReactNode,
 ): React.ReactNode => {
-  if (field.deleted) return null;
+  if (formItem.deleted) return null;
 
   return (
     <FormItem
       viewProps={{
-        formItem: toFormItem(field),
+        formItem,
         ctx,
-        variant: field.variant,
-        extra: toViewExtra(field, onValueChange, renderFieldTree),
+        variant: variants[formItem.type],
+        extra: asExtra({
+          value: values[formItem.id] ?? "",
+          onChange: (value) => onValueChange(formItem.id, value),
+          getChild: (suffix) => {
+            if (formItem.type !== "group") return null;
+            const child = formItem.params.k[Number(suffix)];
+            return child ? renderItemTree(child) : null;
+          },
+        }),
       }}
       renderCard={(view) => (
         <div style={{ background: "#f5f5f5", borderRadius: 4 }}>{view}</div>
@@ -222,46 +194,56 @@ const renderField = (
   );
 };
 
-const parseFields = (
-  json: string,
-): { fields: FieldData[]; error: string | null } => {
+const parseForm = (json: string): { form: FormData; error: string | null } => {
   try {
-    return { fields: JSON.parse(json) as FieldData[], error: null };
+    return { form: JSON.parse(json) as FormData, error: null };
   } catch (e) {
     return {
-      fields: DEFAULT_FIELDS,
+      form: DEFAULT_FORM,
       error: e instanceof Error ? e.message : "Invalid JSON",
     };
   }
 };
 
 export const FormTest = () => {
-  const [fieldsJson, setFieldsJson] = useState(
-    () => JSON.stringify(DEFAULT_FIELDS, null, 2),
+  const [formJson, setFormJson] = useState(() =>
+    JSON.stringify(DEFAULT_FORM, null, 2),
   );
 
-  const { fields, error: parseError } = useMemo(
-    () => parseFields(fieldsJson),
-    [fieldsJson],
+  const { form, error: parseError } = useMemo(
+    () => parseForm(formJson),
+    [formJson],
   );
 
+  const variants = form.variants as Variants;
   const ctx = useMemo((): Context => ({ accent: "#4a90d9" }) as Context, []);
 
   const onValueChange = useCallback((id: string, value: string) => {
-    setFieldsJson((prev) => {
+    setFormJson((prev) => {
       try {
-        const parsed = JSON.parse(prev) as FieldData[];
-        return JSON.stringify(updateFieldValue(parsed, id, value), null, 2);
+        const parsed = JSON.parse(prev) as FormData;
+        return JSON.stringify(
+          { ...parsed, values: { ...parsed.values, [id]: value } },
+          null,
+          2,
+        );
       } catch {
         return prev;
       }
     });
   }, []);
 
-  const renderFieldTree = useCallback(
-    (field: FieldData) =>
-      renderField(field, ctx, onValueChange, renderFieldTree),
-    [ctx, onValueChange],
+  const renderItemTree = useCallback(
+    (item: SomeFormItem<TypeNames, Params>) =>
+      renderItem(
+        item,
+        variants,
+        form.values,
+        ctx,
+        onValueChange,
+        renderItemTree,
+      ),
+    [variants, form.values, ctx, onValueChange],
   );
 
   return (
@@ -270,15 +252,15 @@ export const FormTest = () => {
     >
       <h2 style={{ margin: 0 }}>Form test</h2>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {fields.map((field) => (
-          <div key={field.id}>{renderFieldTree(field)}</div>
+        {form.items.map((item) => (
+          <div key={item.id}>{renderItemTree(item)}</div>
         ))}
       </div>
       <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        <span style={{ fontSize: 12, opacity: 0.7 }}>Field list (JSON)</span>
+        <span style={{ fontSize: 12, opacity: 0.7 }}>Form (JSON)</span>
         <textarea
-          value={fieldsJson}
-          onChange={(e) => setFieldsJson(e.target.value)}
+          value={formJson}
+          onChange={(e) => setFormJson(e.target.value)}
           spellCheck={false}
           style={{
             minHeight: 280,
