@@ -1,14 +1,13 @@
 import type {
   ContextDom,
   ParamsDom,
-  SectionDom,
   SomeFormItem,
 } from "../form/form.t";
 import type { SetAutoFocus } from "../move-actions/autofocus.t";
 import { cloneName } from "../move-actions/cloneName";
 import type { MakeActions } from "../move-actions/makeActions";
 import type { Clone, GetActionsArgs } from "./edit-form";
-import type { FlattenFormItem, FlattenFormItems } from "./form-tree";
+import type { FlattenFormItem, FlattenFormItems, SectionDom } from "./form-tree";
 
 const cloneItemName = <T extends object>(
   items: T[],
