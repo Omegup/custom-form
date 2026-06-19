@@ -221,11 +221,9 @@ const viewers: Viewers<
       </fieldset>
     ),
     repeatChildren: ({ id }, { value: ids }) =>
-      [
-        ids
-          ?.split(",")
-          .map((i) => `:${[...id.split(":").slice(1), i].join(":")}`) ?? [],
-      ].map((x) => (console.log(id, ids, x), x))[0],
+      ids
+        ?.split(",")
+        .map((i) => `:${[...id.split(":").slice(1), i].join(":")}`) ?? [],
   },
 };
 
