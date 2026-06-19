@@ -4,7 +4,7 @@ import type {
   SomeFormItem,
   TheParams,
 } from "../form/form.t";
-import type { GetActionsArgs } from "./edit-form.t";
+import type { GetActionsArgs } from "./GetActionsArgs.t";
 import type { ActionsWithEdit } from "./edit-form-tree.t";
 import type { FlatFormItems } from "./flat-form.t";
 import type { MoveActions } from "../move-actions/MoveActions.t";
