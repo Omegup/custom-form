@@ -1,8 +1,12 @@
 import type { ParamsDom, SomeFormItem } from "../form/form.t";
-import type { CompactRecursive, Header, Indexed } from "../Recursive.t";
+import type { Header, Indexed } from "../Recursive.t";
 import type { FlatFormItems } from "./flat-form.t";
 import type { SectionDom, SectionWithItems } from "./section.t";
 
+
+type CompactRecursive<T> = T & {
+  children: CompactRecursive<T>[][]
+}
 
 type ToBeRecursive<TypeNames extends string, Params extends ParamsDom<TypeNames>, ItemHeader> = {
   header: SomeFormItem<TypeNames, Params>
