@@ -2,7 +2,7 @@ import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { FormTest } from "./form/form.test";
 import { MoveActionsTest } from "./move-actions/Actions.test";
-import { RecursiveFormTest } from "./recursive-form/recursive-form.test";
+import { RecursiveFormTest } from "./form-edit/recursive-form.test";
 
 type Tab = "form" | "move-actions" | "recursive-form";
 
