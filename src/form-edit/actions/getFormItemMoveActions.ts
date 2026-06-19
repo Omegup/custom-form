@@ -1,7 +1,8 @@
 import type { RecursiveTypedFormItem, ParamsDom, SectionDom } from "./_deps";
 import type { ActionsWithEdit, GetActionsArgs, FlatFormItem } from "./_deps";
-import type { FlatFormItems, SetAutoFocus, ContextDom } from "./_deps";
-import type { SetEditFormItem } from "./_deps";
+import type { SetAutoFocus, ContextDom, RecursiveFormItem } from "./_deps";
+import type { Clone } from "./Clone.t";
+
 import { makeActions } from "./_deps";
 import { getFlatItemsRawActions } from "./getFlatItemsRawActions";
 import { flatten } from "./flatten";
@@ -13,10 +14,8 @@ export const getFormItemMoveActions = <
   SectionConfig extends SectionDom,
 >(
   args: GetActionsArgs<TypeNames, Params, SetAutoFocus<Ctx>, SectionConfig>,
-  clone: (
-    items: FlatFormItems<TypeNames, Params, SectionConfig>,
-  ) => FlatFormItems<TypeNames, Params, SectionConfig>,
-  setEditFormItem: SetEditFormItem<TypeNames, Params>,
+  clone: Clone<TypeNames, Params, SetAutoFocus<Ctx>, SectionConfig>,
+  setEditFormItem: (x: RecursiveFormItem<TypeNames, Params> | null) => void,
 ) => {
   const { items, setItems, ctx } = args;
   const { actions, isDeleted } = getFlatItemsRawActions<

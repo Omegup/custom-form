@@ -1,6 +1,8 @@
-import type { Clone, ContextDom, FlatFormItem } from "./_deps";
+import type { ContextDom, FlatFormItem } from "./_deps";
 import type { GetActionsArgs, ParamsDom, SectionDom } from "./_deps";
 import type { SectionWithItems, MoveActions, SetAutoFocus } from "./_deps";
+import type { Clone } from "./Clone.t";
+
 import { makeActions } from "./_deps";
 import { getFlatItemsRawActions } from "./getFlatItemsRawActions";
 import { flatten } from "./flatten";
