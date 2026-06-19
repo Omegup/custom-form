@@ -1,15 +1,17 @@
 import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { FormTest } from "./form/form.test";
+import { FormTest } from "./form/Form.test";
 import { MoveActionsTest } from "./move-actions/Actions.test";
 import { EditFormTest } from "./form-edit/edit-form.test";
+import { RecursiveFormTest } from "./recursive-form/RecursiveForm.test";
 
-type Tab = "form" | "move-actions" | "edit-form";
+type Tab = "form" | "move-actions" | "edit-form" | "recursive-form";
 
 const TAB_LABELS: Record<Tab, string> = {
   "form": "Form",
   "move-actions": "Move actions",
   "edit-form": "Edit form",
+  "recursive-form": "Recursive form",
 };
 
 const App = () => {
@@ -31,6 +33,7 @@ const App = () => {
       {tab === "form" && <FormTest />}
       {tab === "move-actions" && <MoveActionsTest />}
       {tab === "edit-form" && <EditFormTest />}
+      {tab === "recursive-form" && <RecursiveFormTest />}
     </div>
   )
 }

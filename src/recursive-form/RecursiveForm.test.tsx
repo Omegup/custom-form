@@ -1,21 +1,31 @@
 import { useCallback, useMemo, useState } from "react";
-import { createFormItemByGetChild } from "./createFormItemByGetChild";
+import { branded } from "../form/branded";
+import { createFormItemByGetChild } from "../form/createFormItemByGetChild";
+import type { ViewerProps, Viewers, WithChildren } from "../form/form-react.t";
 import type {
   ContextDom,
   ExtraDom,
+  ParamsDom,
   SomeFormItem,
   TheParams,
-  TypedFormItem,
   TheVariants,
-} from "./form.t";
-import type { ViewerProps, Viewers, WithChildren } from "./form-react.t";
-import { branded } from "./branded";
+} from "../form/form.t";
+
+type Recursive<T> = {
+  header: T;
+  children: Recursive<T>[][];
+};
+
+type RecursiveFormItem<
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames>,
+> = Recursive<SomeFormItem<TypeNames, Params>>;
 
 type TypeNames = "text" | "group";
 
 type Params = TheParams<{
   text: { label: string };
-  group: { title: string; item: TypedFormItem<Params, "text"> };
+  group: { title: string };
 }>;
 
 type Variants = TheVariants<{
@@ -39,7 +49,7 @@ type FormData = {
     group: Variants["group"];
   };
   values: Record<string, string>;
-  items: SomeFormItem<TypeNames, Params>[];
+  items: RecursiveFormItem<TypeNames, Params>[];
 };
 
 const DEFAULT_FORM: FormData = {
@@ -50,34 +60,90 @@ const DEFAULT_FORM: FormData = {
   values: {
     t: "Alice",
     g: "1,2,3",
-    "g:1": "Apple",
-    "g:2": "Banana",
-    "g:3": "Carrot",
+    "ga:1": "Apple",
+    "ga:2": "Banana",
+    "ga:3": "Carrot",
+    "gb:1": "Red",
+    "gb:2": "Green",
+    "gb:3": "Blue",
+    "gga:1:": "Small",
+    "gga:2:": "Medium",
+    "gga:3:": "Large",
   },
   items: [
     {
-      id: "t",
-      type: "text",
-      deleted: false,
-      params: {
-        label: "Name",
-      },
-    },
-    {
-      id: "g",
-      type: "group",
-      deleted: false,
-      params: {
-        title: "Inventory",
-        item: {
-          id: "g",
-          type: "text",
-          deleted: false,
-          params: {
-            label: "Item",
-          },
+      header: {
+        id: "t",
+        type: "text",
+        deleted: false,
+        params: {
+          label: "Name",
         },
       },
+      children: [],
+    },
+    {
+      header: {
+        id: "g",
+        type: "group",
+        deleted: false,
+        params: {
+          title: "Inventory",
+        },
+      },
+      children: [
+        [
+          {
+            header: {
+              id: "ga",
+              type: "text",
+              deleted: false,
+              params: {
+                label: "Item",
+              },
+            },
+            children: [],
+          },
+          {
+            header: {
+              id: "gb",
+              type: "text",
+              deleted: false,
+              params: {
+                label: "Color",
+              },
+            },
+            children: [],
+          },
+        ],
+        [
+          {
+            header: {
+              id: "gg",
+              type: "group",
+              deleted: false,
+              params: {
+                title: "Attributes",
+              },
+            },
+            children: [
+              [
+                {
+                  header: {
+                    id: "gga",
+                    type: "text",
+                    deleted: false,
+                    params: {
+                      label: "Size",
+                    },
+                  },
+                  children: [],
+                },
+              ],
+            ],
+          },
+        ],
+      ],
     },
   ],
 };
@@ -138,45 +204,69 @@ const viewers: Viewers<
         <legend>{formItem.params.title}</legend>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {Object.entries(children).map(([suffix, child]) => (
-            <div key={suffix}>{child}</div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 8,
+                border: "1px solid #ccc",
+                padding: 8,
+              }}
+              key={suffix}
+            >
+              {child}
+            </div>
           ))}
         </div>
       </fieldset>
     ),
     repeatChildren: ({ id }, { value: ids }) =>
-      ids
-        ?.split(",")
-        .map((i) => `:${[...id.split(":").slice(1), i].join(":")}`) ?? [],
+      [
+        ids
+          ?.split(",")
+          .map((i) => `:${[...id.split(":").slice(1), i].join(":")}`) ?? [],
+      ].map((x) => (console.log(id, ids, x), x))[0],
   },
 };
 
 const FormItem = createFormItemByGetChild(viewers, (x) => x);
 
 const renderItem = (
-  formItem: SomeFormItem<TypeNames, Params>,
+  formItem: RecursiveFormItem<TypeNames, Params>,
   variants: Variants,
   values: Record<string, string>,
   ctx: Context,
   onValueChange: (id: string, value: string) => void,
 ): React.ReactNode => {
-  if (formItem.deleted) return null;
+  if (formItem.header.deleted) return null;
 
-  const render = (
-    formItem: SomeFormItem<TypeNames, Params>,
-    idSuffix: string,
-  ) => (
+  const render = (formItem: RecursiveFormItem<TypeNames, Params>) => (
     <FormItem
       viewProps={{
-        formItem,
+        formItem: formItem.header,
         ctx,
-        variant: variants[formItem.type],
+        variant: variants[formItem.header.type],
         extra: branded({
-          value: values[formItem.id + idSuffix] ?? "",
-          onChange: (value) => onValueChange(formItem.id + idSuffix, value),
+          value: values[formItem.header.id] ?? "",
+          onChange: (value) => onValueChange(formItem.header.id, value),
           getChild: (suffix) => {
-            if (formItem.type !== "group") return null;
-            const child = formItem.params.item;
-            return child ? render(child, suffix) : null;
+            return (
+              <div style={{ display: "flex", gap: 20 }}>
+                {formItem.children.map((slot, index) => (
+                  <div key={index} style={{ flex: 1 }}>
+                    {slot.map((child) =>
+                      render({
+                        ...child,
+                        header: {
+                          ...child.header,
+                          id: `${child.header.id}${suffix}`,
+                        },
+                      }),
+                    )}
+                  </div>
+                ))}
+              </div>
+            );
           },
         }),
       }}
@@ -185,8 +275,7 @@ const renderItem = (
       )}
     />
   );
-
-  return render(formItem, "");
+  return render(formItem);
 };
 
 const parseForm = (json: string): { form: FormData; error: string | null } => {
@@ -200,7 +289,7 @@ const parseForm = (json: string): { form: FormData; error: string | null } => {
   }
 };
 
-export const FormTest = () => {
+export const RecursiveFormTest = () => {
   const [formJson, setFormJson] = useState(() =>
     JSON.stringify(DEFAULT_FORM, null, 2),
   );
@@ -229,7 +318,7 @@ export const FormTest = () => {
   }, []);
 
   const renderItemTree = useCallback(
-    (item: SomeFormItem<TypeNames, Params>) =>
+    (item: RecursiveFormItem<TypeNames, Params>) =>
       renderItem(item, variants, form.values, ctx, onValueChange),
     [variants, form.values, ctx, onValueChange],
   );
@@ -241,7 +330,7 @@ export const FormTest = () => {
       <h2 style={{ margin: 0 }}>Form test</h2>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {form.items.map((item) => (
-          <div key={item.id}>{renderItemTree(item)}</div>
+          <div key={item.header.id}>{renderItemTree(item)}</div>
         ))}
       </div>
       <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>

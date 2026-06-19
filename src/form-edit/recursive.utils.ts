@@ -1,6 +1,6 @@
-import type { ParamsDom, SectionDom, SomeFormItem } from "../form/form.t"
-import type { FlattenFormItems, RecursiveFormItem, SectionWithItems } from "./form-tree"
-import type { CompactRecursive, Header, Indexed } from "../Recursive"
+import type { ParamsDom, SomeFormItem } from "../form/form.t"
+import type { FlattenFormItems, RecursiveFormItem, SectionDom, SectionWithItems } from "./form-tree"
+import type { CompactRecursive, Header, Indexed } from "../Recursive.t"
 
 export const customFlat = <
   TypeNames extends string,

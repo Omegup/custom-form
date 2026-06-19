@@ -1,6 +1,6 @@
 import type { ContextDom, ParamsDom, SomeFormItem } from "../form/form.t"
 import type { AutoFocus } from "../move-actions/autofocus.t";
-import type { Recursive } from "../Recursive"
+import type { Recursive } from "../Recursive.t"
 import type { RecursiveEditManager, SectionEditArgs } from "./edit-form-tree"
 import type { SectionDom, SectionWithItems } from "./form-tree"
 import { flatten } from "./recursive.utils"

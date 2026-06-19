@@ -2,7 +2,7 @@ import type { MoveActions } from "../move-actions/MoveActions.t"
 import type { ContextDom, ParamsDom } from "../form/form.t"
 import type { RecursiveFormItem, RecursiveTypedFormItem, SectionDom, SectionWithItems } from "./form-tree"
 import type { Clone, GetActionsArgs } from "./edit-form"
-import type { Recursive } from "../Recursive"
+import type { Recursive } from "../Recursive.t"
 
 export type RecursiveEditManager<T> = {
   resetAutofocus: () => void

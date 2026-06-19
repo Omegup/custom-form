@@ -1,19 +1,10 @@
-import type { Indexed, Recursive } from "../Recursive"
-import type { ParamsDom, SomeFormItem, TypedFormItem } from "../form/form.t"
+import type { Indexed } from "../Recursive.t";
+import type { ParamsDom, SomeFormItem } from "../form/form.t";
+import type { RecursiveFormItem } from "./recursive-form.t";
 
+export type { RecursiveFormItem, RecursiveTypedFormItem } from "./recursive-form.t";
 
 export type SectionDom = { id: string; deleted: boolean }
-
-export type RecursiveFormItem<
-  TypeNames extends string,
-  Params extends ParamsDom<TypeNames>,
-> = Recursive<SomeFormItem<TypeNames, Params>>
-
-export type RecursiveTypedFormItem<
-  TypeNames extends string,
-  Params extends ParamsDom<TypeNames>,
-  K extends TypeNames,
-> = Recursive<SomeFormItem<TypeNames, Params>, TypedFormItem<Params, K>>
 
 export type SectionWithItems<
   TypeNames extends string,
