@@ -1,56 +1,8 @@
-import type { ParamsDom, SomeFormItem } from "../form/form.t"
-import type { FlattenFormItems, RecursiveFormItem, SectionDom, SectionWithItems } from "./form-tree"
-import type { CompactRecursive, Header, Indexed } from "../Recursive.t"
+import type { ParamsDom, SomeFormItem } from "../form/form.t";
+import type { CompactRecursive, Header, Indexed } from "../Recursive.t";
+import type { FlatFormItems } from "./flat-form.t";
+import type { SectionDom, SectionWithItems } from "./section.t";
 
-export const customFlat = <
-  TypeNames extends string,
-  Params extends ParamsDom<TypeNames>,
-  FormItem,
-  SectionConfig extends SectionDom,
->(
-  mapItems: (items: () => FormItem[], q: RecursiveFormItem<TypeNames, Params>) => FormItem[],
-  mapSlot: (items: FormItem[]) => FormItem[],
-  mapSection: (items: () => FormItem[], s: SectionConfig) => FormItem[],
-) => {
-  const formItems = (slot: RecursiveFormItem<TypeNames, Params>[]) =>
-    mapSlot(slot.flatMap(formItem))
-  const formItem = (formItem: RecursiveFormItem<TypeNames, Params>): FormItem[] =>
-    mapItems(() => formItem.children.flatMap(formItems), formItem)
-  const section = (section: {
-    header: SectionConfig
-    items: RecursiveFormItem<TypeNames, Params>[][]
-  }): FormItem[] => mapSection(() => section.items.flatMap(formItems), section.header)
-  return { formItem, formItems, section }
-}
-
-export const flatten = <
-  TypeNames extends string,
-  Params extends ParamsDom<TypeNames>,
-  SectionConfig extends SectionDom,
->() =>
-  customFlat<
-    TypeNames,
-    Params,
-    FlattenFormItems<TypeNames, Params, SectionConfig>[0],
-    SectionConfig
-  >(
-    (items, q) => [{ item: q.header, n: q.children.length }, ...items()],
-    items => [...items, { end: null }],
-    (items, s) => [{ section: s }, ...items().slice(0, -1)],
-  )
-
-export const idFlat = <
-  TypeNames extends string,
-  Params extends ParamsDom<TypeNames>,
-  SectionConfig extends SectionDom,
->(
-  showDeleted: boolean,
-) =>
-  customFlat<TypeNames, Params, SomeFormItem<TypeNames, Params>, SectionConfig>(
-    (items, q) => (showDeleted || !q.header.deleted ? [q.header, ...items()] : []),
-    x => x,
-    (x, section) => (showDeleted || !section.deleted ? x() : []),
-  )
 
 type ToBeRecursive<TypeNames extends string, Params extends ParamsDom<TypeNames>, ItemHeader> = {
   header: SomeFormItem<TypeNames, Params>
@@ -68,7 +20,7 @@ export const customConsolidateSections = <
   ItemHeader,
   SectionHeader,
 >(
-  flattened: FlattenFormItems<TypeNames, Params, SectionConfig>,
+  flattened: FlatFormItems<TypeNames, Params, SectionConfig>,
   mapHeader: (item: Header<SomeFormItem<TypeNames, Params>>) => ItemHeader,
   mapSection: (section: Indexed & { header: SectionConfig }) => SectionHeader,
 ) => {
@@ -147,7 +99,7 @@ export const consolidateSections = <
   Params extends ParamsDom<TypeNames>,
   SectionConfig extends SectionDom,
 >(
-  flattened: FlattenFormItems<TypeNames, Params, SectionConfig>,
+  flattened: FlatFormItems<TypeNames, Params, SectionConfig>,
 ): SectionWithItems<TypeNames, Params, SectionConfig>[] =>
   customConsolidateSections(
     flattened,

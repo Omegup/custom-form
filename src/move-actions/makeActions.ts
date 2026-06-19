@@ -1,6 +1,6 @@
 import type { MoveActions } from "./MoveActions.t";
 
-export type MakeActions<T, Ctx> = {
+export type RawActions<T, Ctx> = {
   index: number;
   total: number;
   items: T[];
@@ -27,7 +27,7 @@ export const makeActions = <T, E, Ctx>(
     ctx,
     highlight = (x) => ({ ctx, item: x }),
     setToRemove = (x) => x,
-  }: MakeActions<T, Ctx>,
+  }: RawActions<T, Ctx>,
   extra: E,
   {
     next = (i) => i + 1,

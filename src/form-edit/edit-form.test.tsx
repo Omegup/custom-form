@@ -4,16 +4,17 @@ import type {
   SomeFormItem,
   TheParams,
 } from "../form/form.t";
-import type { GetActionsArgs } from "./edit-form";
-import type { ActionsWithEdit } from "./edit-form-tree";
-import type { FlattenFormItems, RecursiveTypedFormItem } from "./form-tree";
+import type { GetActionsArgs } from "./edit-form.t";
+import type { ActionsWithEdit } from "./edit-form-tree.t";
+import type { FlatFormItems } from "./flat-form.t";
 import type { MoveActions } from "../move-actions/MoveActions.t";
-import { clone as cloneItems } from "./common.actions";
+import { cloneFlatItems as cloneItems } from "./actions/cloneFlatItems";
 import { consolidateSections } from "./recursive.utils";
-import { getFormItemActions } from "./form-item.actions";
-import { getSectionActions } from "./section.actions";
+import { getFormItemMoveActions } from "./actions/getFormItemMoveActions";
+import { getSectionMoveActions } from "./actions/getSectionMoveActions";
 import type { AutoFocus } from "../move-actions/autofocus.t";
 import { branded } from "../form/branded";
+import type { RecursiveTypedFormItem } from "./recursive-form.t";
 
 // ── Domain types ──────────────────────────────────────────────────────────────
 
@@ -39,7 +40,7 @@ const makeCtx = (focusedId: string | null): Ctx =>
 // Each section is a { section } marker; each leaf item is { item, n: 0 }; items with
 // children would have n > 0 followed by n × (children + { end: null }) entries.
 
-const INITIAL: FlattenFormItems<TypeNames, Params, Section> = [
+const INITIAL: FlatFormItems<TypeNames, Params, Section> = [
   { section: { id: "s1", deleted: false, title: "Personal" } },
   {
     item: {
@@ -74,7 +75,7 @@ const INITIAL: FlattenFormItems<TypeNames, Params, Section> = [
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const buildSectionOfItem = (
-  items: FlattenFormItems<TypeNames, Params, Section>,
+  items: FlatFormItems<TypeNames, Params, Section>,
 ): Record<string, Section> => {
   const map: Record<string, Section> = {};
   let current: Section | undefined;
@@ -85,7 +86,7 @@ const buildSectionOfItem = (
   return map;
 };
 
-const cloneFn = (items: FlattenFormItems<"field", Params, Section>) =>
+const cloneFn = (items: FlatFormItems<"field", Params, Section>) =>
   cloneItems(
     items,
     () => "copy",
@@ -169,7 +170,7 @@ export const EditFormTest = () => {
     setToRemove: (x) => setPendingRemove(x ? x.rm : null),
   };
 
-  const itemActions = getFormItemActions(actionsArgs, cloneFn, (q) =>
+  const itemActions = getFormItemMoveActions(actionsArgs, cloneFn, (q) =>
     setEditingItem(q ? q.header : null),
   );
 
@@ -226,7 +227,7 @@ export const EditFormTest = () => {
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {sections.map((section) => {
-          const sActions = getSectionActions(actionsArgs, cloneFn, section);
+          const sActions = getSectionMoveActions(actionsArgs, cloneFn, section);
           return (
             <div
               key={section.header.id}

@@ -1,12 +1,10 @@
 import type { ContextDom, ParamsDom, SomeFormItem } from "../form/form.t"
 import type { AutoFocus } from "../move-actions/autofocus.t";
 import type { Recursive } from "../Recursive.t"
-import type { RecursiveEditManager, SectionEditArgs } from "./edit-form-tree"
-import type { SectionDom, SectionWithItems } from "./form-tree"
-import { flatten } from "./recursive.utils"
-import { getSectionActions } from "./section.actions"
-
-export type { SectionEditArgs } from "./edit-form-tree"
+import type { RecursiveEditManager, SectionEditArgs } from "./edit-form-tree.t"
+import type { SectionDom, SectionWithItems } from "./section.t"
+import { flatten } from "./actions/flatten"
+import { getSectionMoveActions } from "./actions/getSectionMoveActions"
 
 export const getSectionEdit = <
   TypeNames extends string,
@@ -37,7 +35,7 @@ export const getSectionEdit = <
   return {
     autofocus: autoFocused(section.header.id),
     resetAutofocus: () => setAutoFocus(),
-    actions: getSectionActions(actions, clone, section),
+    actions: getSectionMoveActions(actions, clone, section),
     nodes,
     setNodes,
     item: section.header,
