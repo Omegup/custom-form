@@ -108,6 +108,7 @@ export const customConsolidateSections = <
         lastItem.currentSlot = []
       }
     } else {
+      //@ts-expect-error: This is a never type
       const _: never = item
       throw new Error("Unknown item type in question config")
     }

@@ -1,10 +1,11 @@
-import type { ContextDom, ParamsDom, SectionDom } from "../form/form.t"
+import type { ContextDom, ParamsDom } from "../form/form.t"
 import { makeActions } from "../move-actions/makeActions"
-import type { AutoFocusCtx, GetActionsArgs } from "./edit-form"
-import type { FlattenFormItem, FlattenFormItems, RecursiveTypedFormItem } from "./form-tree"
+import type {  GetActionsArgs } from "./edit-form"
+import type { FlattenFormItem, FlattenFormItems, RecursiveTypedFormItem, SectionDom } from "./form-tree"
 import type { ActionsWithEdit, SetEditFormItem } from "./edit-form-tree"
 import { getCommonActions } from "./common.actions"
 import { flatten } from "./recursive.utils"
+import type { SetAutoFocus } from "../move-actions/autofocus.t";
 
 export type { ActionsWithEdit } from "./edit-form-tree"
 
@@ -14,7 +15,7 @@ export const getFormItemActions = <
   Ctx extends ContextDom,
   SectionConfig extends SectionDom,
 >(
-  args: GetActionsArgs<TypeNames, Params, AutoFocusCtx<Ctx>, SectionConfig>,
+  args: GetActionsArgs<TypeNames, Params, SetAutoFocus<Ctx>, SectionConfig>,
   clone: (
     items: FlattenFormItems<TypeNames, Params, SectionConfig>,
   ) => FlattenFormItems<TypeNames, Params, SectionConfig>,
