@@ -139,7 +139,7 @@ const FieldBar = ({ a }: { a: ActionsWithEdit }) => (
 
 // ── Main demo ─────────────────────────────────────────────────────────────────
 
-export const RecursiveFormTest = () => {
+export const EditFormTest = () => {
   const [flatItems, setFlatItems] = useState(INITIAL);
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const [editingItem, setEditingItem] = useState<SomeFormItem<
