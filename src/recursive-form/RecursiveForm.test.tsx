@@ -1,7 +1,14 @@
 import { useCallback, useMemo, useState } from "react";
 import { branded } from "../form/branded";
 import { createFormItemByGetChild } from "../form/createFormItemByGetChild";
-import type { ViewerProps, Viewers, WithChildren } from "../form/form-react.t";
+import type {
+  FormItemProps,
+  GetChild,
+  ViewerProps,
+  Viewers,
+  WithChildren,
+  WithGetChild,
+} from "../form/form-react.t";
 import type {
   ContextDom,
   ExtraDom,
@@ -39,9 +46,6 @@ type ItemExtra = ExtraDom & {
   value: string;
   onChange: (value: string) => void;
 };
-
-type FormExtra = WithChildren<ItemExtra>;
-type ViewExtra = FormExtra["view"];
 
 type FormData = {
   variants: {
@@ -148,62 +152,76 @@ const DEFAULT_FORM: FormData = {
   ],
 };
 
-const viewers: Viewers<
+const makeViewers = <ItemExtra extends ExtraDom>(
+  inner: Viewers<
+    TypeNames,
+    Params,
+    Variants,
+    WithChildren<ItemExtra>,
+    Context,
+    string
+  >,
+): Viewers<
   TypeNames,
   Params,
   Variants,
-  FormExtra,
+  WithChildren<ItemExtra>,
   Context,
   string
-> = {
+> => ({
   text: {
     viewer: ({
-      props: {
-        formItem,
-        ctx,
-        variant,
-        extra: { value, onChange },
-      },
+      props,
     }: {
-      props: ViewerProps<Params, Variants, "text", ViewExtra, Context>;
+      props: ViewerProps<
+        Params,
+        Variants,
+        "text",
+        WithChildren<ItemExtra>["view"],
+        Context
+      >;
     }) => (
       <label
         style={{
           display: "flex",
           flexDirection: "column",
           gap: 4,
-          padding: variant === "compact" ? 4 : 8,
-          borderLeft: `3px solid ${ctx.accent}`,
+          padding: props.variant === "compact" ? 4 : 8,
+          borderLeft: `3px solid ${props.ctx.accent}`,
         }}
       >
         <span style={{ fontSize: 12, opacity: 0.7 }}>
-          {formItem.params.label}
+          {props.formItem.params.label}
         </span>
-        <input value={value} onChange={(e) => onChange(e.target.value)} />
+        {inner.text.viewer({ props })}
       </label>
     ),
   },
   group: {
     viewer: ({
-      props: {
-        formItem,
-        ctx,
-        variant,
-        extra: { children },
-      },
+      props,
     }: {
-      props: ViewerProps<Params, Variants, "group", ViewExtra, Context>;
+      props: ViewerProps<
+        Params,
+        Variants,
+        "group",
+        WithChildren<ItemExtra>["view"],
+        Context
+      >;
     }) => (
       <fieldset
         style={{
-          border: variant === "bordered" ? `1px solid ${ctx.accent}` : "none",
+          border:
+            props.variant === "bordered"
+              ? `1px solid ${props.ctx.accent}`
+              : "none",
           borderRadius: 4,
           padding: 8,
         }}
       >
-        <legend>{formItem.params.title}</legend>
+        <legend>{props.formItem.params.title}</legend>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {Object.entries(children).map(([suffix, child]) => (
+          {Object.entries(props.extra.children).map(([suffix, child]) => (
             <div
               style={{
                 display: "flex",
@@ -220,53 +238,71 @@ const viewers: Viewers<
         </div>
       </fieldset>
     ),
+    repeatChildren: inner.group.repeatChildren,
+  },
+});
+
+const viewersValues = makeViewers<ItemExtra>({
+  text: {
+    viewer: ({ props }) => (
+      <input
+        value={props.extra.value}
+        onChange={(e) => props.extra.onChange(e.target.value)}
+      />
+    ),
+  },
+  group: {
+    viewer: () => null,
     repeatChildren: ({ id }, { value: ids }) =>
       ids
         ?.split(",")
         .map((i) => `:${[...id.split(":").slice(1), i].join(":")}`) ?? [],
   },
-};
+});
 
-const FormItem = createFormItemByGetChild(viewers, (x) => x);
+const viewersSkeleton = makeViewers<ExtraDom>({
+  text: {
+    viewer: ({ props }) => (
+      <input value={props.formItem.params.label} disabled />
+    ),
+  },
+  group: {
+    viewer: () => null,
+    repeatChildren: () => [""],
+  },
+});
 
-const renderItem = (
+const FormItemValues = createFormItemByGetChild(viewersValues, (x) => x);
+const FormItemSkeleton = createFormItemByGetChild(viewersSkeleton, (x) => x);
+
+const renderItem = <Extra extends ExtraDom>(
   formItem: RecursiveFormItem<TypeNames, Params>,
   variants: Variants,
-  values: Record<string, string>,
   ctx: Context,
-  onValueChange: (id: string, value: string) => void,
+  FormItem: (
+    props: FormItemProps<
+      Params,
+      Variants,
+      TypeNames,
+      WithGetChild<Extra>,
+      Context
+    >,
+  ) => React.ReactNode,
+  extra: (
+    formItem: RecursiveFormItem<TypeNames, Params>,
+    render: (formItem: RecursiveFormItem<TypeNames, Params>) => React.ReactNode,
+  ) => Extra & GetChild,
 ): React.ReactNode => {
   if (formItem.header.deleted) return null;
 
   const render = (formItem: RecursiveFormItem<TypeNames, Params>) => (
     <FormItem
+      key={formItem.header.id}
       viewProps={{
         formItem: formItem.header,
         ctx,
         variant: variants[formItem.header.type],
-        extra: branded({
-          value: values[formItem.header.id] ?? "",
-          onChange: (value) => onValueChange(formItem.header.id, value),
-          getChild: (suffix) => {
-            return (
-              <div style={{ display: "flex", gap: 20 }}>
-                {formItem.children.map((slot, index) => (
-                  <div key={index} style={{ flex: 1 }}>
-                    {slot.map((child) =>
-                      render({
-                        ...child,
-                        header: {
-                          ...child.header,
-                          id: `${child.header.id}${suffix}`,
-                        },
-                      }),
-                    )}
-                  </div>
-                ))}
-              </div>
-            );
-          },
-        }),
+        extra: extra(formItem, render),
       }}
       renderCard={(view) => (
         <div style={{ background: "#f5f5f5", borderRadius: 4 }}>{view}</div>
@@ -315,12 +351,59 @@ export const RecursiveFormTest = () => {
     });
   }, []);
 
-  const renderItemTree = useCallback(
+  const renderValues = useCallback(
     (item: RecursiveFormItem<TypeNames, Params>) =>
-      renderItem(item, variants, form.values, ctx, onValueChange),
+      renderItem<ItemExtra>(
+        item,
+        variants,
+        ctx,
+        FormItemValues,
+        (formItem, render) =>
+          branded({
+            value: form.values[formItem.header.id] ?? "",
+            onChange: (value) => onValueChange(formItem.header.id, value),
+            getChild: (suffix) => {
+              return (
+                <div style={{ display: "flex", gap: 20 }}>
+                  {formItem.children.map((slot, index) => (
+                    <div key={index} style={{ flex: 1 }}>
+                      {slot.map((child) =>
+                        render({
+                          ...child,
+                          header: {
+                            ...child.header,
+                            id: `${child.header.id}${suffix}`,
+                          },
+                        }),
+                      )}
+                    </div>
+                  ))}
+                </div>
+              );
+            },
+          }),
+      ),
     [variants, form.values, ctx, onValueChange],
   );
-
+  const renderSkeleton = useCallback(
+    (item: RecursiveFormItem<TypeNames, Params>) =>
+      renderItem<ExtraDom>(item, variants, ctx, FormItemSkeleton, (formItem, render) =>
+        branded({
+          getChild: () => {
+            return (
+              <div style={{ display: "flex", gap: 20 }}>
+                {formItem.children.map((slot, index) => (
+                  <div key={index} style={{ flex: 1 }}>
+                    {slot.map(render)}
+                  </div>
+                ))}
+              </div>
+            );
+          },
+        }),
+      ),
+    [variants, ctx],
+  );
   return (
     <div
       style={{ display: "flex", flexDirection: "column", gap: 16, padding: 16 }}
@@ -328,7 +411,12 @@ export const RecursiveFormTest = () => {
       <h2 style={{ margin: 0 }}>Form test</h2>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {form.items.map((item) => (
-          <div key={item.header.id}>{renderItemTree(item)}</div>
+          <div key={item.header.id}>{renderSkeleton(item)}</div>
+        ))}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {form.items.map((item) => (
+          <div key={item.header.id}>{renderValues(item)}</div>
         ))}
       </div>
       <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>

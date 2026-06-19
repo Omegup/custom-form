@@ -10,8 +10,8 @@ type Tab = "form" | "move-actions" | "edit-form" | "recursive-form";
 const TAB_LABELS: Record<Tab, string> = {
   "form": "Form",
   "move-actions": "Move actions",
-  "edit-form": "Edit form",
   "recursive-form": "Recursive form",
+  "edit-form": "Edit form",
 };
 
 const App = () => {
