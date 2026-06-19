@@ -107,4 +107,3 @@ export const consolidateSections = <
     section => section,
   )
 
-export const pickHeader = <T>({ header }: { header: T }) => ({ header })

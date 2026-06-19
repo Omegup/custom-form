@@ -1,3 +1,3 @@
 export * from "./section.t"
 export * from "./actions/Clone.t"
-export * from "./recursive.utils"
+export * from "./consolidateSections"

@@ -4,7 +4,7 @@ import type { GetActionsArgs } from "./GetActionsArgs.t";
 import type { FlatFormItems } from "./flat-form.t";
 import type { MoveActions } from "../move-actions/MoveActions.t";
 import { cloneFlatItems as cloneItems } from "./actions/cloneFlatItems";
-import { consolidateSections } from "./recursive.utils";
+import { consolidateSections } from "./consolidateSections";
 import { getFormItemMoveActions } from "./actions/getFormItemMoveActions";
 import { getSectionMoveActions } from "./actions/getSectionMoveActions";
 import type { AutoFocus } from "../move-actions/autofocus.t";
