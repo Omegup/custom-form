@@ -1,8 +1,8 @@
-import type { ContextDom, ParamsDom, SectionDom, SomeFormItem } from "../form/form.t"
+import type { ContextDom, ParamsDom, SomeFormItem } from "../form/form.t"
+import type { AutoFocus } from "../move-actions/autofocus.t";
 import type { Recursive } from "../Recursive"
-import type { AutoFocusCtx, Clone, GetActionsArgs } from "./edit-form"
 import type { RecursiveEditManager, SectionEditArgs } from "./edit-form-tree"
-import type { SectionWithItems } from "./form-tree"
+import type { SectionDom, SectionWithItems } from "./form-tree"
 import { flatten } from "./recursive.utils"
 import { getSectionActions } from "./section.actions"
 
@@ -14,8 +14,8 @@ export const getSectionEdit = <
   Ctx extends ContextDom,
   SectionConfig extends SectionDom,
 >(
-  args: SectionEditArgs<TypeNames, Params, AutoFocusCtx<Ctx>, SectionConfig>,
-  ctx: AutoFocusCtx<Ctx>,
+  args: SectionEditArgs<TypeNames, Params, AutoFocus<Ctx, unknown>, SectionConfig>,
+  ctx: AutoFocus<Ctx, unknown>,
 ): RecursiveEditManager<SomeFormItem<TypeNames, Params>> => {
   const { section, clone, actions, i, sections } = args
   const { autoFocused, setAutoFocus } = ctx

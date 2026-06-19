@@ -1,11 +1,10 @@
 import { useMemo, useState } from "react";
 import type {
   ContextDom,
-  SectionDom,
   SomeFormItem,
   TheParams,
 } from "../form/form.t";
-import type { Clone, GetActionsArgs } from "./edit-form";
+import type { GetActionsArgs } from "./edit-form";
 import type { ActionsWithEdit } from "./edit-form-tree";
 import type { FlattenFormItems, RecursiveTypedFormItem } from "./form-tree";
 import type { MoveActions } from "../move-actions/MoveActions.t";
@@ -20,7 +19,7 @@ import { branded } from "../form/branded";
 
 type TypeNames = "field";
 type Params = TheParams<{ field: { label: string; name: string } }>;
-type Section = SectionDom & { title: string };
+type Section = { id: string; deleted: boolean; title: string };
 
 type BaseCtx = { focusedId: string | null };
 type Ctx = AutoFocus<ContextDom & BaseCtx, unknown>;
@@ -86,7 +85,7 @@ const buildSectionOfItem = (
   return map;
 };
 
-const cloneFn: Clone<TypeNames, Params, Ctx, Section> = (items) =>
+const cloneFn = (items: FlattenFormItems<"field", Params, Section>) =>
   cloneItems(
     items,
     () => "copy",

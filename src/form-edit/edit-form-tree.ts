@@ -1,6 +1,6 @@
 import type { MoveActions } from "../move-actions/MoveActions.t"
-import type { ContextDom, ParamsDom, SectionDom } from "../form/form.t"
-import type { RecursiveFormItem, RecursiveTypedFormItem, SectionWithItems } from "./form-tree"
+import type { ContextDom, ParamsDom } from "../form/form.t"
+import type { RecursiveFormItem, RecursiveTypedFormItem, SectionDom, SectionWithItems } from "./form-tree"
 import type { Clone, GetActionsArgs } from "./edit-form"
 import type { Recursive } from "../Recursive"
 
@@ -45,8 +45,8 @@ export type SectionEditArgs<
   Ctx extends ContextDom,
   SectionConfig extends SectionDom,
 > = {
-  clone: Clone<TypeNames, Params, AutoFocusCtx<Ctx>, SectionConfig>
-  actions: GetActionsArgs<TypeNames, Params, AutoFocusCtx<Ctx>, SectionConfig>
+  clone: Clone<TypeNames, Params, Ctx, SectionConfig>
+  actions: GetActionsArgs<TypeNames, Params, Ctx, SectionConfig>
   sections: SectionWithItems<TypeNames, Params, SectionConfig>[]
   section: SectionWithItems<TypeNames, Params, SectionConfig>
   i: number
