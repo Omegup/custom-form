@@ -1,5 +1,4 @@
-import type { ParamsDom, SomeFormItem, TypedFormItem } from "../form/form.t";
-import type { Recursive } from "../Recursive.t";
+import type { ParamsDom, SomeFormItem, TypedFormItem, Recursive } from "./_deps";
 
 export type RecursiveFormItem<
   TypeNames extends string,
