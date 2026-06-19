@@ -3,7 +3,6 @@ export type { ContextDom, ParamsDom, SomeFormItem } from "../_deps";
 export { cloneName, makeActions } from "../_deps";
 export type { MoveActions, RawActions, SetAutoFocus } from "../_deps";
 
-export type { ActionsWithEdit } from "../edit-form-tree.t";
 export type { FlatFormItem, FlatFormItems } from "../flat-form.t";
 export type { GetActionsArgs } from "../GetActionsArgs.t";
 export type {

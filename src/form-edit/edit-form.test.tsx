@@ -1,11 +1,6 @@
 import { useMemo, useState } from "react";
-import type {
-  ContextDom,
-  SomeFormItem,
-  TheParams,
-} from "../form/form.t";
+import type { ContextDom, SomeFormItem, TheParams } from "../form/form.t";
 import type { GetActionsArgs } from "./GetActionsArgs.t";
-import type { ActionsWithEdit } from "./edit-form-tree.t";
 import type { FlatFormItems } from "./flat-form.t";
 import type { MoveActions } from "../move-actions/MoveActions.t";
 import { cloneFlatItems as cloneItems } from "./actions/cloneFlatItems";
@@ -14,7 +9,6 @@ import { getFormItemMoveActions } from "./actions/getFormItemMoveActions";
 import { getSectionMoveActions } from "./actions/getSectionMoveActions";
 import type { AutoFocus } from "../move-actions/autofocus.t";
 import { branded } from "../form/branded";
-import type { RecursiveTypedFormItem } from "./recursive-form.t";
 
 // ── Domain types ──────────────────────────────────────────────────────────────
 
@@ -124,7 +118,7 @@ const SectionBar = ({ a }: { a: MoveActions }) => (
   </span>
 );
 
-const FieldBar = ({ a }: { a: ActionsWithEdit }) => (
+const FieldBar = ({ a, edit }: { a: MoveActions; edit: () => void }) => (
   <span style={{ display: "inline-flex", gap: 3 }}>
     <Btn label="↑" onClick={a.up} />
     <Btn label="↓" onClick={a.down} />
@@ -134,7 +128,7 @@ const FieldBar = ({ a }: { a: ActionsWithEdit }) => (
     ) : (
       <Btn label="Remove" onClick={a.remove} />
     )}
-    <Btn label="Edit" onClick={a.edit} />
+    <Btn label="Edit" onClick={edit} />
   </span>
 );
 
@@ -170,9 +164,7 @@ export const EditFormTest = () => {
     setToRemove: (x) => setPendingRemove(x ? x.rm : null),
   };
 
-  const itemActions = getFormItemMoveActions(actionsArgs, cloneFn, (q) =>
-    setEditingItem(q ? q.header : null),
-  );
+  const itemActions = getFormItemMoveActions(actionsArgs, cloneFn);
 
   return (
     <div
@@ -260,12 +252,7 @@ export const EditFormTest = () => {
                 }}
               >
                 {section.items[0]?.map((item) => {
-                  const typed = item as unknown as RecursiveTypedFormItem<
-                    TypeNames,
-                    Params,
-                    "field"
-                  >;
-                  const actions = itemActions(typed);
+                  const actions = itemActions(item);
                   const focused = ctx.autoFocused(item.header.id);
                   return (
                     <div
@@ -295,7 +282,7 @@ export const EditFormTest = () => {
                       >
                         {item.header.params.label}
                       </span>
-                      <FieldBar a={actions} />
+                      <FieldBar a={actions} edit={() => setEditingItem(item.header)} />
                     </div>
                   );
                 })}

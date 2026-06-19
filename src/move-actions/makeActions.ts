@@ -14,7 +14,7 @@ export type RawActions<T, Ctx> = {
   setToRemove?: (remove: () => void) => () => void;
 };
 
-export const makeActions = <T, E, Ctx>(
+export const makeActions = <T, Ctx>(
   {
     clone,
     index,
@@ -28,15 +28,13 @@ export const makeActions = <T, E, Ctx>(
     highlight = (x) => ({ ctx, item: x }),
     setToRemove = (x) => x,
   }: RawActions<T, Ctx>,
-  extra: E,
   {
     next = (i) => i + 1,
     previous = (i) => i - 1,
   }: Partial<
     Record<"next" | "previous", (i: number, items: readonly T[]) => number>
   > = {},
-): MoveActions & E => ({
-  ...extra,
+): MoveActions => ({
   isDeleted: isDeleted(items[index]),
   clone: () => {
     const [first, ...more] = clone();

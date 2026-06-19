@@ -60,7 +60,7 @@ const ItemElement = ({
   setItems: (items: Item[], ctx: Ctx) => void;
   index: number;
 }) => {
-  const actions = makeActions<Item, {}, Ctx>(
+  const actions = makeActions<Item, Ctx>(
     {
       clone: () => [
         {

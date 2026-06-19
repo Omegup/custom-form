@@ -25,7 +25,6 @@ export const getSectionMoveActions = <
   >(args, clone);
   return makeActions<
     FlatFormItem<TypeNames, Params, SectionConfig>,
-    {},
     SetAutoFocus<Ctx>
   >(
     actions(
@@ -33,7 +32,6 @@ export const getSectionMoveActions = <
       section.index,
       1,
     ),
-    {},
     {
       next: (i, items) =>
         items.findIndex((_, idx) => idx > i && "section" in items[idx]),
