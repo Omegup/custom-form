@@ -23,6 +23,9 @@ RecursiveTypedFormItem<TypeNames, Params, K, Meta>
 
 **MetaDom** — `{ meta: T }` wrapper. Edit form uses `MetaDom<{ index, total, sIndex }>` on items and sections.
 
+**Column slots** — `children` on recursive items and `items` on sections are `RecursiveFormItem[][]`.
+Use `resizeColumns(cols, slots)` to grow or shrink that grid (see `resizeColumns.ts`).
+
 ## Relationship to flat format
 
 `consolidateSections` (in `form-edit/`) converts flat → recursive tree.

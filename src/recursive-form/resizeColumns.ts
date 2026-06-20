@@ -1,8 +1,9 @@
 import type { ParamsDom } from "../form";
-import type { MetaDom, RecursiveFormItem } from "../recursive-form";
+import type { MetaDom } from "./Recursive.t";
+import type { RecursiveFormItem } from "./RecursiveFormItem.t";
 
-/** Resize a section's column slots — add empty columns or merge trailing ones. */
-export const resizeSectionColumns = <
+/** Resize a column slot grid — append empty slots or merge trailing ones. */
+export const resizeColumns = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
   Meta extends MetaDom,

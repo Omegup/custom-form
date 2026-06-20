@@ -12,7 +12,6 @@ Migrated from `school/components/custom-form` → `react-packages/form-edit-reac
 | `types.ts` | `SectionEditForm`, `SectionEditDialogProps`, `UseSectionEditDialog` |
 | `validateSectionForm.ts` | Returns `Errors` when title or description is blank |
 | `useSectionEditDialog.ts` | Form state hook: `{ section, setValue, onSubmit, isValid }` |
-| `resizeSectionColumns.ts` | Resize column slot arrays (merge or append empty slots) |
 | `updateSectionInFlat.ts` | Re-flattens one section with new header + column count |
 | `SectionEdit.test.tsx` | Demo: `EditFormTest` + section edit dialog (`SectionEditDemo`) |
 
