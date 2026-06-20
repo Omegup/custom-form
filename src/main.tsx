@@ -4,7 +4,7 @@ import { FormTest } from "./form/Form.test";
 import { MoveActionsTest } from "./move-actions/Actions.test";
 import { BareEditFormTest } from "./form-edit/EditForm.test";
 import { FormItemEditorTest } from "./form-item-editor/FormItemEditor.test";
-import { SideMenuTest } from "./form-edit-react/SideMenu.test";
+import { SideMenuTest } from "./side-menu/SideMenu.test";
 import { RecursiveFormTest } from "./recursive-form/RecursiveForm.test";
 
 type Tab = "form" | "move-actions" | "edit-form" | "form-item-editor" | "add-item-side" | "recursive-form";
