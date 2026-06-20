@@ -12,7 +12,6 @@ import {
   EditFormTest,
   type EditFormCtx,
   type EditFormEditingItem,
-  type EditFormEditorArgs,
 } from "../form-edit/EditForm.test";
 import { createFormItemEditorWrapper } from "./createFormItemEditorWrapper";
 import type {
