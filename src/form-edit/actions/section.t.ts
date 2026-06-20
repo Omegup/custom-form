@@ -1,9 +1,7 @@
-import type { ParamsDom } from "../../form";
-import type { MetaDom } from "../../recursive-form/Recursive.t";
-import type { RecursiveFormItem } from "../../recursive-form/RecursiveFormItem.t";
+import type { MetaDom, ParamsDom, RecursiveFormItem } from "./_deps";
 
-export type SectionDom = { id: string; deleted: boolean }
-export type SectionMetaDom<T = unknown> = { section: T }
+export type SectionDom = { id: string; deleted: boolean };
+export type SectionMetaDom<T = unknown> = { section: T };
 
 export type SectionWithItems<
   TypeNames extends string,
@@ -12,8 +10,7 @@ export type SectionWithItems<
   SectionMeta extends SectionMetaDom,
   Meta extends MetaDom,
 > = {
-  meta: SectionMeta['section']
-  header: SectionConfig
-  items: RecursiveFormItem<TypeNames, Params, Meta>[][]
-}
-
+  meta: SectionMeta["section"];
+  header: SectionConfig;
+  items: RecursiveFormItem<TypeNames, Params, Meta>[][];
+};
