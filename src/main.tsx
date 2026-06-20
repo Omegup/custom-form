@@ -3,15 +3,17 @@ import { createRoot } from "react-dom/client";
 import { FormTest } from "./form/Form.test";
 import { MoveActionsTest } from "./move-actions/Actions.test";
 import { EditFormTest } from "./form-edit/edit-form.test";
+import { FormItemEditorTest } from "./form-edit/FormItemEditor/FormItemEditor.test";
 import { RecursiveFormTest } from "./recursive-form/RecursiveForm.test";
 
-type Tab = "form" | "move-actions" | "edit-form" | "recursive-form";
+type Tab = "form" | "move-actions" | "edit-form" | "form-item-editor" | "recursive-form";
 
 const TAB_LABELS: Record<Tab, string> = {
   "form": "Form",
   "move-actions": "Move actions",
   "recursive-form": "Recursive form",
   "edit-form": "Edit form",
+  "form-item-editor": "Form item editor",
 };
 
 const App = () => {
@@ -33,6 +35,7 @@ const App = () => {
       {tab === "form" && <FormTest />}
       {tab === "move-actions" && <MoveActionsTest />}
       {tab === "edit-form" && <EditFormTest />}
+      {tab === "form-item-editor" && <FormItemEditorTest />}
       {tab === "recursive-form" && <RecursiveFormTest />}
     </div>
   )
