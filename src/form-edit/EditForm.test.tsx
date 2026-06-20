@@ -1,5 +1,12 @@
-import { useMemo, useState } from "react";
-import type { ContextDom, SomeFormItem, TheParams } from "./_deps";
+import {
+  useCallback,
+  useMemo,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
+import type { ContextDom, TheParams } from "./_deps";
+import type { MetaDom, RecursiveTypedFormItem } from "./_deps";
 import type {
   GetActionsArgs,
   FlatFormItems,
@@ -21,11 +28,30 @@ type Params = TheParams<{ field: { name: string } }>;
 type Section = { id: string; deleted: boolean; title: string };
 
 type BaseCtx = { focusedId: string | null };
-type Ctx = AutoFocus<ContextDom & BaseCtx, unknown>;
+export type EditFormCtx = AutoFocus<ContextDom & BaseCtx, unknown>;
+
+type ItemMeta = MetaDom<{ index: number; total: number; sIndex: number }>;
+export type EditFormEditingItem = RecursiveTypedFormItem<
+  TypeNames,
+  Params,
+  "field",
+  ItemMeta
+>;
+
+export type EditFormEditorProps = {
+  draft: EditFormEditingItem;
+  setDraft: Dispatch<SetStateAction<EditFormEditingItem>>;
+  ctx: EditFormCtx;
+  onClose: () => void;
+};
+
+export type EditFormTestProps = {
+  Editor?: (props: EditFormEditorProps) => React.ReactNode;
+};
 
 // ── Context factory ───────────────────────────────────────────────────────────
 
-const makeCtx = (focusedId: string | null): Ctx =>
+const makeCtx = (focusedId: string | null): EditFormCtx =>
   branded({
     focusedId,
     setAutoFocus: (id) => makeCtx(id ?? null),
@@ -33,10 +59,6 @@ const makeCtx = (focusedId: string | null): Ctx =>
   });
 
 // ── Initial flat data ─────────────────────────────────────────────────────────
-//
-// The flat format is the canonical edit representation used throughout this module.
-// Each section is a { section } marker; each leaf item is { item, n: 0 }; items with
-// children would have n > 0 followed by n × (children + { end: null }) entries.
 
 const INITIAL: FlatFormItems<TypeNames, Params, Section> = [
   { section: { id: "s1", deleted: false, title: "Personal" } },
@@ -128,7 +150,15 @@ const SectionBar = ({ a }: { a: MoveActions }) => (
   </span>
 );
 
-const FieldBar = ({ a, edit }: { a: MoveActions; edit: () => void }) => (
+const FieldBar = ({
+  a,
+  edit,
+  showEdit,
+}: {
+  a: MoveActions;
+  edit: () => void;
+  showEdit: boolean;
+}) => (
   <span style={{ display: "inline-flex", gap: 3 }}>
     <Btn label="↑" onClick={a.up} />
     <Btn label="↓" onClick={a.down} />
@@ -138,19 +168,19 @@ const FieldBar = ({ a, edit }: { a: MoveActions; edit: () => void }) => (
     ) : (
       <Btn label="Remove" onClick={a.remove} />
     )}
-    <Btn label="Edit" onClick={edit} />
+    {showEdit && <Btn label="Edit" onClick={edit} />}
   </span>
 );
 
 // ── Main demo ─────────────────────────────────────────────────────────────────
 
-export const EditFormTest = () => {
+export const EditFormTest = ({ Editor }: EditFormTestProps) => {
   const [flatItems, setFlatItems] = useState(INITIAL);
   const [focusedId, setFocusedId] = useState<string | null>(null);
-  const [editingItem, setEditingItem] = useState<SomeFormItem<
-    TypeNames,
-    Params
-  > | null>(null);
+  const [editingItem, setEditingItem] = useState<EditFormEditingItem | null>(
+    null,
+  );
+  const [draft, setDraft] = useState<EditFormEditingItem | null>(null);
   const [toRemove, setToRemove] = useState<{
     rm: () => void;
     item: FlatFormItem<TypeNames, Params, Section>;
@@ -158,7 +188,7 @@ export const EditFormTest = () => {
 
   const ctx = useMemo(() => makeCtx(focusedId), [focusedId]);
 
-  const applyItems = (newItems: typeof flatItems, newCtx: Ctx) => {
+  const applyItems = (newItems: typeof flatItems, newCtx: EditFormCtx) => {
     setFlatItems(newItems);
     setFocusedId(newCtx.focusedId);
   };
@@ -169,7 +199,7 @@ export const EditFormTest = () => {
     [flatItems],
   );
 
-  const actionsArgs: GetActionsArgs<TypeNames, Params, Ctx, Section> = {
+  const actionsArgs: GetActionsArgs<TypeNames, Params, EditFormCtx, Section> = {
     items: flatItems,
     setItems: applyItems,
     ctx,
@@ -179,11 +209,30 @@ export const EditFormTest = () => {
 
   const itemActions = getFormItemMoveActions(actionsArgs, cloneFn);
 
+  const openEditor = (item: EditFormEditingItem) => {
+    setEditingItem(item);
+    setDraft(item);
+  };
+
+  const closeEditor = useCallback(() => {
+    if (draft) {
+      setFlatItems((prev) =>
+        prev.map((fi) =>
+          "item" in fi && fi.item.id === draft.header.id
+            ? { item: draft.header, n: fi.n }
+            : fi,
+        ),
+      );
+    }
+    setEditingItem(null);
+    setDraft(null);
+  }, [draft]);
+
   return (
     <div
       style={{ display: "flex", flexDirection: "column", gap: 16, padding: 16 }}
     >
-      <h2 style={{ margin: 0 }}>Recursive form</h2>
+      <h2 style={{ margin: 0 }}>Edit form</h2>
 
       {toRemove && (
         <div
@@ -221,24 +270,13 @@ export const EditFormTest = () => {
         </div>
       )}
 
-      {editingItem && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            background: "#e8f4fd",
-            padding: "8px 12px",
-            borderRadius: 4,
-            fontSize: 13,
-          }}
-        >
-          <span>
-            Editing <strong>{editingItem.params.name}</strong>{" "}
-            <span style={{ color: "#666" }}>(id: {editingItem.id})</span>
-          </span>
-          <button onClick={() => setEditingItem(null)}>✕</button>
-        </div>
+      {editingItem && draft && Editor && (
+        <Editor
+          draft={draft}
+          setDraft={setDraft as Dispatch<SetStateAction<EditFormEditingItem>>}
+          ctx={ctx}
+          onClose={closeEditor}
+        />
       )}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -308,7 +346,8 @@ export const EditFormTest = () => {
                       </span>
                       <FieldBar
                         a={actions}
-                        edit={() => setEditingItem(item.header)}
+                        edit={() => openEditor(item)}
+                        showEdit={!!Editor}
                       />
                     </div>
                   );

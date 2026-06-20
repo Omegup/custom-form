@@ -2,7 +2,7 @@ import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { FormTest } from "./form/Form.test";
 import { MoveActionsTest } from "./move-actions/Actions.test";
-import { EditFormTest } from "./form-edit/edit-form.test";
+import { EditFormTest } from "./form-edit/EditForm.test";
 import { FormItemEditorTest } from "./form-edit/FormItemEditor/FormItemEditor.test";
 import { RecursiveFormTest } from "./recursive-form/RecursiveForm.test";
 
