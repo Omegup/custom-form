@@ -27,8 +27,8 @@ type TypeNames = "field";
 type Params = TheParams<{ field: { name: string } }>;
 type Section = { id: string; deleted: boolean; title: string };
 
-type BaseCtx = { focusedId: string | null };
-export type EditFormCtx = AutoFocus<ContextDom & BaseCtx, unknown>;
+type BaseCtx = { focused: { id: string; focused: boolean } | null };
+export type EditFormCtx = AutoFocus<ContextDom & BaseCtx, boolean>;
 
 type ItemMeta = MetaDom<{ index: number; total: number; sIndex: number }>;
 export type EditFormEditingItem = RecursiveTypedFormItem<
@@ -51,11 +51,14 @@ export type EditFormTestProps = {
 
 // ── Context factory ───────────────────────────────────────────────────────────
 
-const makeCtx = (focusedId: string | null): EditFormCtx =>
+const makeCtx = (
+  focused: { id: string; focused: boolean } | null,
+): EditFormCtx =>
   branded({
-    focusedId,
-    setAutoFocus: (id) => makeCtx(id ?? null),
-    autoFocused: (id) => (id === focusedId ? true : null),
+    focused,
+    setAutoFocus: (id) =>
+      makeCtx(id ? { id, focused: !focused?.focused } : null),
+    autoFocused: (id) => (id === focused?.id ? focused.focused : null),
   });
 
 // ── Initial flat data ─────────────────────────────────────────────────────────
@@ -176,7 +179,10 @@ const FieldBar = ({
 
 export const EditFormTest = ({ Editor }: EditFormTestProps) => {
   const [flatItems, setFlatItems] = useState(INITIAL);
-  const [focusedId, setFocusedId] = useState<string | null>(null);
+  const [focused, setFocused] = useState<{
+    id: string;
+    focused: boolean;
+  } | null>(null);
   const [editingItem, setEditingItem] = useState<EditFormEditingItem | null>(
     null,
   );
@@ -186,11 +192,11 @@ export const EditFormTest = ({ Editor }: EditFormTestProps) => {
     item: FlatFormItem<TypeNames, Params, Section>;
   } | null>(null);
 
-  const ctx = useMemo(() => makeCtx(focusedId), [focusedId]);
+  const ctx = useMemo(() => makeCtx(focused), [focused]);
 
   const applyItems = (newItems: typeof flatItems, newCtx: EditFormCtx) => {
     setFlatItems(newItems);
-    setFocusedId(newCtx.focusedId);
+    setFocused(newCtx.focused);
   };
 
   const sections = useMemo(() => consolidateSections(flatItems), [flatItems]);
@@ -281,6 +287,7 @@ export const EditFormTest = ({ Editor }: EditFormTestProps) => {
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {sections.map((section) => {
+          const focused = ctx.autoFocused(section.header.id);
           const sActions = getSectionMoveActions(actionsArgs, cloneFn, section);
           return (
             <div
@@ -299,6 +306,10 @@ export const EditFormTest = ({ Editor }: EditFormTestProps) => {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
+                  animation:
+                    focused !== null
+                      ? `pulse${focused ? 1 : 2} .2s 2`
+                      : undefined,
                 }}
               >
                 <strong style={{ fontSize: 13 }}>{section.header.title}</strong>
@@ -326,11 +337,11 @@ export const EditFormTest = ({ Editor }: EditFormTestProps) => {
                         padding: "5px 8px",
                         borderRadius: 4,
                         border: "1px solid #eee",
-                        background: focused
-                          ? "#dbeafe"
-                          : item.header.deleted
-                            ? "#fafafa"
-                            : "white",
+                        animation:
+                          focused !== null
+                            ? `pulse${focused ? 1 : 2} .2s 2`
+                            : undefined,
+                        background: item.header.deleted ? "#fafafa" : "white",
                         opacity: item.header.deleted ? 0.55 : 1,
                       }}
                     >
