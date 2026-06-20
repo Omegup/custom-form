@@ -2,4 +2,5 @@
 export * from "./types";
 export * from "./validateSectionForm";
 export * from "./useSectionEditDialog";
+export * from "./changeSectionCols";
 export * from "./updateFlatSection";

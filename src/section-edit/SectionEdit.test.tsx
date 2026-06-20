@@ -154,16 +154,16 @@ const SectionEditDialog = ({
 export const SectionEditTest = () => {
   const [editing, setEditing] = useState<EditingSection | null>(null);
 
-  const openEditor = useCallback((section: Section) => {
-    setEditing({ header: section, cols: 1 });
+  const openEditor = useCallback((section: Section, cols: number) => {
+    setEditing({ header: section, cols });
   }, []);
 
   const closeEditor = useCallback(() => setEditing(null), []);
 
   return (
     <EditFormTest
-      sectionExtra={(section) => [
-        { label: "Edit", onClick: () => openEditor(section) },
+      sectionExtra={(section, { cols }) => [
+        { label: "Edit", onClick: () => openEditor(section, cols) },
       ]}
       renderLayout={({ sections, alert, details, ctx, setFlatItems }) => (
         <>
@@ -173,12 +173,12 @@ export const SectionEditTest = () => {
               editing={editing}
               ctx={ctx}
               onClose={closeEditor}
-              onSave={({ header }) => {
+              onSave={({ header, cols }) => {
                 setFlatItems((prev) =>
                   updateFlatSection(prev, header.id, {
                     title: header.title,
                     description: header.description,
-                  }),
+                  }, cols),
                 );
                 closeEditor();
               }}

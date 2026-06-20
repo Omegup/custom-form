@@ -71,6 +71,7 @@ export type EditFormTestProps = {
   ) => { label: string; onClick: () => void }[];
   sectionExtra?: (
     section: EditFormSection,
+    meta: { cols: number },
   ) => { label: string; onClick: () => void }[];
   renderLayout: (args: {
     sections: ReactNode;
@@ -331,7 +332,9 @@ export const EditFormTest = ({
                 <strong style={{ fontSize: 13 }}>{section.header.title}</strong>
                 <SectionBar
                   a={sActions}
-                  extra={sectionExtra?.(section.header) ?? []}
+                  extra={sectionExtra?.(section.header, {
+                    cols: section.items.length,
+                  }) ?? []}
                 />
               </div>
 

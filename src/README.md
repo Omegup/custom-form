@@ -59,7 +59,7 @@ side-menu, form-item-editor, and section-edit demos.
 | Prop | Purpose |
 |---|---|
 | `extra(item)` | Extra buttons on each field row (e.g. "Edit") |
-| `sectionExtra(section)` | Extra buttons on each section header (e.g. "Edit") |
+| `sectionExtra(section, { cols })` | Extra buttons on each section header (e.g. "Edit") |
 | `renderLayout({ sections, alert, details, ctx, setFlatItems, setFocused })` | Full page layout |
 
 **Exported helpers:** `container(title, children)`, `BareEditFormTest`, types `EditFormSection`, `EditFormCtx`, …
