@@ -1,6 +1,6 @@
-import type { ContextDom, ParamsDom } from "./_deps";
+import type { ContextDom, ParamsDom, SomeFormItem } from "./_deps";
 import type { SectionDom } from "./section.t";
-import type { FlatFormItems } from "./flat-form.t";
+import type { FlatFormItem, FlatFormItems } from "./flat-form.t";
 
 export type GetActionsArgs<
   TypeNames extends string,
@@ -10,7 +10,7 @@ export type GetActionsArgs<
 > = {
   sectionOfItem: Record<string, SectionConfig>;
   ctx: Ctx;
-  setToRemove: (x: { rm: () => void } | null) => void;
+  setToRemove: (x: { rm: () => void, item: FlatFormItem<TypeNames, Params, SectionConfig> } | null) => void;
   items: FlatFormItems<TypeNames, Params, SectionConfig>;
   setItems: (
     items: FlatFormItems<TypeNames, Params, SectionConfig>,

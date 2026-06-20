@@ -4,6 +4,7 @@ import type {
   GetActionsArgs,
   FlatFormItems,
   Clone,
+  FlatFormItem,
 } from "./flat-item-raw-actions";
 import type { MoveActions } from "../move-actions/MoveActions.t";
 import { cloneFlatItems } from "./cloneFlatItems";
@@ -150,7 +151,10 @@ export const EditFormTest = () => {
     TypeNames,
     Params
   > | null>(null);
-  const [pendingRemove, setPendingRemove] = useState<(() => void) | null>(null);
+  const [toRemove, setToRemove] = useState<{
+    rm: () => void;
+    item: FlatFormItem<TypeNames, Params, Section>;
+  } | null>(null);
 
   const ctx = useMemo(() => makeCtx(focusedId), [focusedId]);
 
@@ -170,7 +174,7 @@ export const EditFormTest = () => {
     setItems: applyItems,
     ctx,
     sectionOfItem,
-    setToRemove: (x) => setPendingRemove(x ? x.rm : null),
+    setToRemove: setToRemove,
   };
 
   const itemActions = getFormItemMoveActions(actionsArgs, cloneFn);
@@ -181,7 +185,7 @@ export const EditFormTest = () => {
     >
       <h2 style={{ margin: 0 }}>Recursive form</h2>
 
-      {pendingRemove && (
+      {toRemove && (
         <div
           style={{
             display: "flex",
@@ -193,16 +197,27 @@ export const EditFormTest = () => {
             fontSize: 13,
           }}
         >
-          <span>Item will be removed.</span>
+          <span>
+            {"item" in toRemove.item ? (
+              <>
+                Item <strong>{toRemove.item.item.params.name} </strong>
+              </>
+            ) : "section" in toRemove.item ? (
+              <>
+                Section <strong>{toRemove.item.section.title} </strong>
+              </>
+            ) : null}
+            will be removed.
+          </span>
           <button
             onClick={() => {
-              pendingRemove();
-              setPendingRemove(null);
+              toRemove.rm();
+              setToRemove(null);
             }}
           >
             Confirm
           </button>
-          <button onClick={() => setPendingRemove(null)}>Cancel</button>
+          <button onClick={() => setToRemove(null)}>Cancel</button>
         </div>
       )}
 

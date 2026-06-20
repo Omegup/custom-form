@@ -11,7 +11,7 @@ export type RawActions<T, Ctx> = {
   isDeleted: (x: T) => boolean;
   markAsDeleted: (x: T, deleted: boolean) => { item: T; ctx: Ctx };
   min?: number;
-  setToRemove?: (remove: () => void) => () => void;
+  setToRemove?: (remove: () => void, item: T) => () => void;
 };
 
 export const makeActions = <T, Ctx>(
@@ -47,7 +47,7 @@ export const makeActions = <T, Ctx>(
       : setToRemove(() => {
           const deleted = markAsDeleted(items[index], true);
           setItems(items.toSpliced(index, 1, deleted.item), deleted.ctx);
-        }),
+        }, items[index]),
   restore: () => {
     const x = markAsDeleted(items[index], false);
     setItems(items.toSpliced(index, 1, x.item), x.ctx);

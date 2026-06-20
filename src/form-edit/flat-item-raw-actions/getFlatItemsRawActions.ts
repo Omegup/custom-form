@@ -50,7 +50,7 @@ export const getFlatItemsRawActions = <
         else if ("item" in item) item.item = { ...item.item, deleted };
         return { ctx, item };
       },
-      setToRemove: (rm) => () => setToRemove({ rm }),
+      setToRemove: (rm, item) => () => setToRemove({ rm, item }),
     };
   };
   return { actions, isDeleted };
