@@ -1,5 +1,5 @@
 import type { ParamsDom } from "../../form/form.t";
-import type { FlatFormItems } from "../flat-form.t";
+import type { FlatFormItems } from "./flat-form.t";
 import type { SectionDom } from "../section.t";
 
 

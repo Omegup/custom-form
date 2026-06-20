@@ -1,6 +1,6 @@
 import type { ParamsDom, SomeFormItem } from "../form/form.t";
 import type { Header, Indexed } from "../Recursive.t";
-import type { FlatFormItems } from "./flat-form.t";
+import type { FlatFormItems } from "./actions/flat-form.t";
 import type { SectionDom, SectionWithItems } from "./section.t";
 
 

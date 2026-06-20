@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import type { ContextDom, SomeFormItem, TheParams } from "../form/form.t";
-import type { GetActionsArgs } from "./GetActionsArgs.t";
-import type { FlatFormItems } from "./flat-form.t";
+import type { GetActionsArgs } from "./actions/GetActionsArgs.t";
+import type { FlatFormItems } from "./actions/flat-form.t";
 import type { MoveActions } from "../move-actions/MoveActions.t";
 import { cloneFlatItems as cloneItems } from "./actions/cloneFlatItems";
 import { consolidateSections } from "./consolidateSections";

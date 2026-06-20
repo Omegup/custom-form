@@ -1,6 +1,5 @@
-import type { ContextDom, ParamsDom } from "./_deps";
+import type { ContextDom, ParamsDom, SectionDom } from "./_deps";
 import type { FlatFormItems } from "./flat-form.t";
-import type { SectionDom } from "./section.t";
 
 export type GetActionsArgs<
   TypeNames extends string,

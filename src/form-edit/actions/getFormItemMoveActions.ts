@@ -1,6 +1,7 @@
-import type { RecursiveTypedFormItem, ParamsDom } from "./_deps";
-import type { GetActionsArgs, FlatFormItem, MoveActions } from "./_deps";
-import type { SetAutoFocus, ContextDom, SectionDom } from "./_deps";
+import type { SetAutoFocus, ContextDom, MoveActions, ParamsDom } from "./_deps";
+import type { SectionDom, RecursiveTypedFormItem } from "./_deps";
+import type { GetActionsArgs } from "./GetActionsArgs.t";
+import type { FlatFormItem } from "./flat-form.t";
 import type { Clone } from "./Clone.t";
 
 import { makeActions } from "./_deps";

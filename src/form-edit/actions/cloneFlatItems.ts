@@ -1,4 +1,6 @@
-import type { FlatFormItem, FlatFormItems, ParamsDom, SectionDom } from "./_deps";
+import type { ParamsDom, SectionDom } from "./_deps";
+import type { FlatFormItem, FlatFormItems } from "./flat-form.t";
+
 import { cloneName } from "./_deps";
 
 const cloneItemName = <T extends object>(
