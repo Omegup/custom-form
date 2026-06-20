@@ -2,11 +2,12 @@ import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { FormTest } from "./form/Form.test";
 import { MoveActionsTest } from "./move-actions/Actions.test";
-import { EditFormTest } from "./form-edit/EditForm.test";
+import { BareEditFormTest } from "./form-edit/EditForm.test";
 import { FormItemEditorTest } from "./form-item-editor/FormItemEditor.test";
+import { SideMenuTest } from "./form-edit-react/SideMenu.test";
 import { RecursiveFormTest } from "./recursive-form/RecursiveForm.test";
 
-type Tab = "form" | "move-actions" | "edit-form" | "form-item-editor" | "recursive-form";
+type Tab = "form" | "move-actions" | "edit-form" | "form-item-editor" | "add-item-side" | "recursive-form";
 
 const TAB_LABELS: Record<Tab, string> = {
   "form": "Form",
@@ -14,6 +15,7 @@ const TAB_LABELS: Record<Tab, string> = {
   "recursive-form": "Recursive form",
   "edit-form": "Edit form",
   "form-item-editor": "Form item editor",
+  "add-item-side": "Add-item side",
 };
 
 const App = () => {
@@ -34,8 +36,9 @@ const App = () => {
       </div>
       {tab === "form" && <FormTest />}
       {tab === "move-actions" && <MoveActionsTest />}
-      {tab === "edit-form" && <EditFormTest />}
+      {tab === "edit-form" && <BareEditFormTest />}
       {tab === "form-item-editor" && <FormItemEditorTest />}
+      {tab === "add-item-side" && <SideMenuTest />}
       {tab === "recursive-form" && <RecursiveFormTest />}
     </div>
   )

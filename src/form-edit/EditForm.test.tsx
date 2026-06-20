@@ -1,8 +1,8 @@
 import {
-  useCallback,
   useMemo,
   useState,
   type Dispatch,
+  type ReactNode,
   type SetStateAction,
 } from "react";
 import type { ContextDom, TheParams } from "./_deps";
@@ -27,6 +27,13 @@ type TypeNames = "field";
 type Params = TheParams<{ field: { name: string } }>;
 type Section = { id: string; deleted: boolean; title: string };
 
+export type EditFormSection = Section;
+export type EditFormFlatItems = FlatFormItems<TypeNames, Params, Section>;
+export type EditFormSideArgs = {
+  setFlatItems: Dispatch<SetStateAction<EditFormFlatItems>>;
+  focus: (id: string) => void;
+};
+
 type BaseCtx = { focused: { id: string; focused: boolean } | null };
 export type EditFormCtx = AutoFocus<ContextDom & BaseCtx, boolean>;
 
@@ -47,7 +54,17 @@ export type EditFormEditorArgs = {
 };
 
 export type EditFormTestProps = {
-  renderEditor?: (props: EditFormEditorArgs) => React.ReactNode;
+  extra?: (
+    item: EditFormEditingItem,
+  ) => { label: string; onClick: () => void }[];
+  renderLayout: (args: {
+    sections: ReactNode;
+    alert: ReactNode;
+    details: ReactNode;
+    ctx: EditFormCtx;
+    setFocused: (focused: { id: string; focused: boolean }) => void;
+    setFlatItems: Dispatch<SetStateAction<FlatFormItems<TypeNames, Params, Section>>>;
+  }) => React.ReactNode;
 };
 
 // ── Context factory ───────────────────────────────────────────────────────────
@@ -156,12 +173,10 @@ const SectionBar = ({ a }: { a: MoveActions }) => (
 
 const FieldBar = ({
   a,
-  edit,
-  showEdit,
+  extra,
 }: {
   a: MoveActions;
-  edit: () => void;
-  showEdit: boolean;
+  extra: { label: string; onClick: () => void }[];
 }) => (
   <span style={{ display: "inline-flex", gap: 3 }}>
     <Btn label="↑" onClick={a.up} />
@@ -172,22 +187,20 @@ const FieldBar = ({
     ) : (
       <Btn label="Remove" onClick={a.remove} />
     )}
-    {showEdit && <Btn label="Edit" onClick={edit} />}
+    {extra.map(({ label, onClick }) => (
+      <Btn label={label} onClick={onClick} />
+    ))}
   </span>
 );
 
 // ── Main demo ─────────────────────────────────────────────────────────────────
 
-export const EditFormTest = ({ renderEditor }: EditFormTestProps) => {
+export const EditFormTest = ({ extra, renderLayout }: EditFormTestProps) => {
   const [flatItems, setFlatItems] = useState(INITIAL);
   const [focused, setFocused] = useState<{
     id: string;
     focused: boolean;
   } | null>(null);
-  const [editingItem, setEditingItem] = useState<EditFormEditingItem | null>(
-    null,
-  );
-  const [draft, setDraft] = useState<EditFormEditingItem | null>(null);
   const [toRemove, setToRemove] = useState<{
     rm: () => void;
     item: FlatFormItem<TypeNames, Params, Section>;
@@ -216,82 +229,44 @@ export const EditFormTest = ({ renderEditor }: EditFormTestProps) => {
 
   const itemActions = getFormItemMoveActions(actionsArgs, cloneFn);
 
-  const openEditor = (item: EditFormEditingItem) => {
-    setEditingItem(item);
-    setDraft(item);
-  };
-
-  const cancelEditor = useCallback(() => {
-    setEditingItem(null);
-    setDraft(null);
-  }, []);
-
-  const saveEditor = useCallback(() => {
-    if (draft) {
-      setFlatItems((prev) =>
-        prev.map((fi) =>
-          "item" in fi && fi.item.id === draft.header.id
-            ? { item: draft.header, n: fi.n }
-            : fi,
-        ),
-      );
-    }
-    setEditingItem(null);
-    setDraft(null);
-  }, [draft]);
-
-  return (
-    <div
-      style={{ display: "flex", flexDirection: "column", gap: 16, padding: 16 }}
-    >
-      <h2 style={{ margin: 0 }}>Edit form</h2>
-
-      {toRemove && (
-        <div
-          style={{
-            display: "flex",
-            gap: 8,
-            alignItems: "center",
-            background: "#fff3cd",
-            padding: "8px 12px",
-            borderRadius: 4,
-            fontSize: 13,
+  return renderLayout({
+    alert: toRemove && (
+      <div
+        style={{
+          display: "flex",
+          gap: 8,
+          alignItems: "center",
+          background: "#fff3cd",
+          padding: "8px 12px",
+          borderRadius: 4,
+          fontSize: 13,
+        }}
+      >
+        <span>
+          {"item" in toRemove.item ? (
+            <>
+              Item <strong>{toRemove.item.item.params.name} </strong>
+            </>
+          ) : "section" in toRemove.item ? (
+            <>
+              Section <strong>{toRemove.item.section.title} </strong>
+            </>
+          ) : null}
+          will be removed.
+        </span>
+        <button
+          onClick={() => {
+            toRemove.rm();
+            setToRemove(null);
           }}
         >
-          <span>
-            {"item" in toRemove.item ? (
-              <>
-                Item <strong>{toRemove.item.item.params.name} </strong>
-              </>
-            ) : "section" in toRemove.item ? (
-              <>
-                Section <strong>{toRemove.item.section.title} </strong>
-              </>
-            ) : null}
-            will be removed.
-          </span>
-          <button
-            onClick={() => {
-              toRemove.rm();
-              setToRemove(null);
-            }}
-          >
-            Confirm
-          </button>
-          <button onClick={() => setToRemove(null)}>Cancel</button>
-        </div>
-      )}
+          Confirm
+        </button>
+        <button onClick={() => setToRemove(null)}>Cancel</button>
+      </div>
+    ),
 
-      {editingItem &&
-        draft &&
-        renderEditor?.({
-          draft,
-          setDraft: setDraft as Dispatch<SetStateAction<EditFormEditingItem>>,
-          ctx,
-          onSave: saveEditor,
-          onCancel: cancelEditor,
-        })}
-
+    sections: (
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {sections.map((section) => {
           const focused = ctx.autoFocused(section.header.id);
@@ -362,11 +337,7 @@ export const EditFormTest = ({ renderEditor }: EditFormTestProps) => {
                       >
                         {item.header.params.name}
                       </span>
-                      <FieldBar
-                        a={actions}
-                        edit={() => openEditor(item)}
-                        showEdit={!!renderEditor}
-                      />
+                      <FieldBar a={actions} extra={extra?.(item) ?? []} />
                     </div>
                   );
                 })}
@@ -375,7 +346,9 @@ export const EditFormTest = ({ renderEditor }: EditFormTestProps) => {
           );
         })}
       </div>
+    ),
 
+    details: (
       <details>
         <summary
           style={{
@@ -401,6 +374,50 @@ export const EditFormTest = ({ renderEditor }: EditFormTestProps) => {
           {JSON.stringify(flatItems, null, 2)}
         </pre>
       </details>
-    </div>
+    ),
+    ctx,
+    setFlatItems,
+    setFocused,
+  });
+};
+
+export const container = (title: string, children: React.ReactNode) => (
+  <div
+    style={{ display: "flex", flexDirection: "column", gap: 16, padding: 16 }}
+  >
+    <h2 style={{ margin: 0 }}>{title}</h2>
+    {children}
+  </div>
+);
+
+export const BareEditFormTest = () => {
+  return container(
+    "Edit form",
+    <EditFormTest
+      renderLayout={({ sections, alert, details }) => (
+        <>
+          {alert}
+          {sections}
+          {details}
+        </>
+      )}
+    />,
   );
 };
+
+
+/*
+
+
+
+
+
+      <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+        {renderSide?.({ setFlatItems, focus })}
+
+        <div
+          style={{ flex: 1, display: "flex", flexDirection: "column", gap: 16 }}
+        >
+        </div>
+      </div>
+*/

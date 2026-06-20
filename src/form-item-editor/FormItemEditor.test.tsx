@@ -3,12 +3,15 @@ import {
   useImperativeHandle,
   useState,
   type Dispatch,
+  type ReactNode,
+  type RefObject,
   type SetStateAction,
 } from "react";
 import { branded } from "./_deps";
 import type { TheParams } from "./_deps";
 import type { MetaDom, RecursiveTypedFormItem } from "./_deps";
 import {
+    container,
   EditFormTest,
   type EditFormCtx,
   type EditFormEditingItem,
@@ -18,6 +21,8 @@ import type {
   DialogArgsDom,
   EditorProps,
   FormItemEditorProps,
+  FormItemEditorValidate,
+  FormItemEditorState,
   ItemEditExtraDom,
   ItemEditStateDom,
   UseFormItemEditor,
@@ -33,24 +38,64 @@ type DialogArgs = DialogArgsDom<{
   onCancel: () => void;
   title: string;
 }>;
-type FieldExtra = ItemEditExtraDom<{
-  draft: EditFormEditingItem;
-  setDraft: Dispatch<SetStateAction<EditFormEditingItem>>;
-}>;
+type EditorExtraMap = {
+  [K in TypeNames]: ItemEditExtraDom<{
+    draft: RecursiveTypedFormItem<TypeNames, Params, K, MetaDom>;
+    setDraft: Dispatch<
+      SetStateAction<RecursiveTypedFormItem<TypeNames, Params, K, MetaDom>>
+    >;
+  }>;
+};
+type FieldExtra = EditorExtraMap["field"];
 type FieldState = ItemEditStateDom;
+type EditorStateMap = { field: FieldState };
+type FieldEditorState = FieldState & {
+  impRef: RefObject<FormItemEditorValidate<Params, "field"> | null>;
+};
 
-type ItemMeta = MetaDom<{ index: number; total: number; sIndex: number }>;
+const emptyFieldState = (): FieldState => branded({});
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+const makeFieldExtra = (
+  draft: FieldExtra["draft"],
+  setDraft: Dispatch<SetStateAction<FieldExtra["draft"] | null>>,
+): FieldExtra =>
+  branded({
+    draft,
+    setDraft(updater) {
+      setDraft((prev) => {
+        const current = prev ?? draft;
+        return typeof updater === "function" ? updater(current) : updater;
+      });
+    },
+  });
 
 // ── useHook ───────────────────────────────────────────────────────────────────
 
-const useFieldEditor = <K extends TypeNames>(
-  props: FormItemEditorProps<Ctx, DialogArgs, FieldExtra>,
-) => {
+const useFieldEditor: UseFormItemEditor<
+  TypeNames,
+  Params,
+  Ctx,
+  DialogArgs,
+  EditorExtraMap,
+  EditorStateMap
+> = <K extends TypeNames>(
+  props: FormItemEditorProps<Ctx, DialogArgs, EditorExtraMap[K]>,
+  _args: FormItemEditorValidate<Params, K>,
+): FormItemEditorState<
+  TypeNames,
+  Params,
+  K,
+  EditorStateMap[K]
+> => {
   const { draft, setDraft } = props.extra;
 
   const setFormItemParam = useCallback(
-    <E extends keyof Params["field"]>(
-      item: (previous: EditFormEditingItem) => [E, Params["field"][E]],
+    <E extends keyof Params[K]>(
+      item: (
+        previous: RecursiveTypedFormItem<TypeNames, Params, K, MetaDom>,
+      ) => [E, Params[K][E]],
     ) => {
       setDraft((prev) => {
         const [key, value] = item(prev);
@@ -69,15 +114,10 @@ const useFieldEditor = <K extends TypeNames>(
   const setFormItemSection = useCallback((_sIndex: number) => {}, []);
 
   return {
-    recursiveFormItem: draft as RecursiveTypedFormItem<
-      TypeNames,
-      Params,
-      K,
-      ItemMeta
-    >,
+    recursiveFormItem: draft,
     setFormItemParam,
     setFormItemSection,
-    extra: branded({}) as FieldState,
+    extra: emptyFieldState(),
   };
 };
 
@@ -90,11 +130,7 @@ type FieldEditorProps = EditorProps<
   Ctx,
   DialogArgs,
   FieldExtra,
-  FieldState & {
-    impRef: import("react").RefObject<
-      import("./types").FormItemEditorValidate<Params, "field"> | null
-    >;
-  }
+  FieldEditorState
 >;
 
 const FieldEditorInner = ({
@@ -142,26 +178,27 @@ const FieldEditorInner = ({
 const FieldEditor = ({
   formItem,
   setFormItemParam,
-  render,
-}: FieldEditorProps) =>
-  render(({ state: renderState }) => (
-    <FieldEditorInner
-      formItem={formItem}
-      setFormItemParam={setFormItemParam}
-      impRef={renderState.extra.impRef}
-    />
-  ));
+  state,
+}: FieldEditorProps) => (
+  <FieldEditorInner
+    formItem={formItem}
+    setFormItemParam={setFormItemParam}
+    impRef={state.impRef}
+  />
+);
 
-const FormItemEditorWrapper = createFormItemEditorWrapper(
+const FormItemEditorWrapper: (
+  props: FormItemEditorProps<Ctx, DialogArgs, FieldExtra>,
+) => ReactNode = createFormItemEditorWrapper<
+  TypeNames,
+  Params,
+  Ctx,
+  DialogArgs,
+  EditorExtraMap,
+  EditorStateMap
+>(
   { field: { editor: FieldEditor } },
-  useFieldEditor as UseFormItemEditor<
-    TypeNames,
-    Params,
-    Ctx,
-    DialogArgs,
-    { field: FieldExtra },
-    { field: FieldState }
-  >,
+  useFieldEditor,
   (dialogArgs, _state, children) => (
     <div
       style={{
@@ -208,25 +245,46 @@ const FormItemEditorWrapper = createFormItemEditorWrapper(
   ),
 );
 
-type FormItemEditFieldProps = FormItemEditorProps<Ctx, DialogArgs, FieldExtra>;
-const FormItemEditField = FormItemEditorWrapper as (
-  props: FormItemEditFieldProps,
-) => React.ReactNode;
-
 // ── Test UI ───────────────────────────────────────────────────────────────────
 
-export const FormItemEditorTest = () => (
-  <EditFormTest
-    renderEditor={({ draft, setDraft, ctx, onSave, onCancel }) => (
-      <FormItemEditField
-        ctx={ctx}
-        dialogArgs={branded({
-          title: `Edit ${draft.header.params.name}`,
-          onSave,
-          onCancel,
-        })}
-        extra={branded({ draft, setDraft })}
-      />
-    )}
-  />
-);
+export const FormItemEditorTest = () => {
+  const [draft, setDraft] = useState<FieldExtra["draft"] | null>(null);
+
+  const openEditor = (item: EditFormEditingItem) => setDraft(item);
+
+  const cancelEditor = useCallback(() => setDraft(null), []);
+
+  return container(
+    "Form item editor",
+    <EditFormTest
+      extra={(item) => [{ label: "Edit", onClick: () => openEditor(item) }]}
+      renderLayout={({ sections, alert, details, ctx, setFlatItems }) => (
+        <>
+          {alert}
+          {draft && (
+            <FormItemEditorWrapper
+              ctx={ctx}
+              dialogArgs={branded({
+                title: `Edit ${draft.header.params.name}`,
+                onSave: () => {
+                  setFlatItems((prev) =>
+                    prev.map((fi) =>
+                      "item" in fi && fi.item.id === draft.header.id
+                        ? { item: draft.header, n: fi.n }
+                        : fi,
+                    ),
+                  );
+                  setDraft(null);
+                },
+                onCancel: cancelEditor,
+              })}
+              extra={makeFieldExtra(draft, setDraft)}
+            />
+          )}
+          {sections}
+          {details}
+        </>
+      )}
+    />
+  );
+};
