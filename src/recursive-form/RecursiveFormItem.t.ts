@@ -1,4 +1,4 @@
-import type { ParamsDom, SomeFormItem, TypedFormItem } from "../form-edit/_deps";
+import type { ParamsDom, SomeFormItem, TypedFormItem } from "../form";
 import type { MetaDom, Recursive, RecursiveT } from "./Recursive.t";
 
 export type RecursiveFormItem<

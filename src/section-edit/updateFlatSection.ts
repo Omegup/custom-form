@@ -2,10 +2,10 @@
  * Replace one section's flat slice — header fields and column layout.
  */
 import type { ParamsDom } from "../form";
-import { consolidateSections } from "../form-edit/consolidateSections";
-import type { FlatFormItems, SectionDom } from "../form-edit/flat-item-raw-actions";
-import { flatten } from "../form-edit/section-actions/flatten";
+import type { FlatFormItems, SectionDom } from "../form-edit";
 import type { MetaDom } from "../recursive-form";
+
+import { consolidateSections, flatten } from "../form-edit";
 import { changeSectionCols } from "./changeSectionCols";
 
 export const updateFlatSection = <
