@@ -29,7 +29,11 @@ import type {
 type TypeNames = "field";
 type Params = TheParams<{ field: { name: string } }>;
 type Ctx = EditFormCtx;
-type DialogArgs = DialogArgsDom<{ onClose: () => void; title: string }>;
+type DialogArgs = DialogArgsDom<{
+  onSave: () => void;
+  onCancel: () => void;
+  title: string;
+}>;
 type FieldExtra = ItemEditExtraDom<{
   draft: EditFormEditingItem;
   setDraft: Dispatch<SetStateAction<EditFormEditingItem>>;
@@ -171,23 +175,36 @@ const FormItemEdit = FormItemEditHOC(
     >
       <div
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
           padding: "8px 12px",
           background: "#d4e9f7",
           fontSize: 13,
         }}
       >
         <strong>{dialogArgs.title}</strong>
-        <button
-          onClick={dialogArgs.onClose}
-          style={{ border: "none", background: "none", cursor: "pointer" }}
-        >
-          ✕
-        </button>
       </div>
       <div style={{ padding: 12 }}>{children}</div>
+      <div
+        style={{
+          display: "flex",
+          gap: 8,
+          justifyContent: "flex-end",
+          padding: "8px 12px",
+          borderTop: "1px solid #b8d4f0",
+        }}
+      >
+        <button
+          onClick={dialogArgs.onCancel}
+          style={{ padding: "4px 12px", borderRadius: 4 }}
+        >
+          Cancel
+        </button>
+        <button
+          onClick={dialogArgs.onSave}
+          style={{ padding: "4px 12px", borderRadius: 4 }}
+        >
+          Save
+        </button>
+      </div>
     </div>
   ),
 );
@@ -201,13 +218,15 @@ const EditFormFieldEditor = ({
   draft,
   setDraft,
   ctx,
-  onClose,
+  onSave,
+  onCancel,
 }: EditFormEditorProps) => (
   <FormItemEditField
     ctx={ctx}
     dialogArgs={branded({
       title: `Edit ${draft.header.params.name}`,
-      onClose,
+      onSave,
+      onCancel,
     })}
     extra={branded({ draft, setDraft })}
   />

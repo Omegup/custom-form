@@ -42,7 +42,8 @@ export type EditFormEditorProps = {
   draft: EditFormEditingItem;
   setDraft: Dispatch<SetStateAction<EditFormEditingItem>>;
   ctx: EditFormCtx;
-  onClose: () => void;
+  onSave: () => void;
+  onCancel: () => void;
 };
 
 export type EditFormTestProps = {
@@ -220,7 +221,12 @@ export const EditFormTest = ({ Editor }: EditFormTestProps) => {
     setDraft(item);
   };
 
-  const closeEditor = useCallback(() => {
+  const cancelEditor = useCallback(() => {
+    setEditingItem(null);
+    setDraft(null);
+  }, []);
+
+  const saveEditor = useCallback(() => {
     if (draft) {
       setFlatItems((prev) =>
         prev.map((fi) =>
@@ -281,7 +287,8 @@ export const EditFormTest = ({ Editor }: EditFormTestProps) => {
           draft={draft}
           setDraft={setDraft as Dispatch<SetStateAction<EditFormEditingItem>>}
           ctx={ctx}
-          onClose={closeEditor}
+          onSave={saveEditor}
+          onCancel={cancelEditor}
         />
       )}
 
