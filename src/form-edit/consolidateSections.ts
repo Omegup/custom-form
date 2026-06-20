@@ -1,7 +1,7 @@
 import type { ParamsDom, SomeFormItem } from "../form/form.t";
 import type { Header, MetaDom } from "./_deps";
-import type { FlatFormItems } from "./actions/flat-form.t";
-import type { SectionDom, SectionMetaDom, SectionWithItems } from "./actions/section.t";
+import type { SectionDom, FlatFormItems } from "./flat-item-raw-actions";
+import type { SectionMetaDom, SectionWithItems } from "./section-actions";
 
 type CompactRecursive<T> = T & {
   children: CompactRecursive<T>[][];

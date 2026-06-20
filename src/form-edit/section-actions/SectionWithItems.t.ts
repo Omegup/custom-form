@@ -1,6 +1,5 @@
-import type { MetaDom, ParamsDom, RecursiveFormItem } from "./_deps";
+import type { MetaDom, ParamsDom, RecursiveFormItem, SectionDom } from "./_deps";
 
-export type SectionDom = { id: string; deleted: boolean };
 export type SectionMetaDom<T = unknown> = { section: T };
 
 export type SectionWithItems<

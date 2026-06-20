@@ -1,12 +1,11 @@
 import { useMemo, useState } from "react";
-import type { ContextDom, SomeFormItem, TheParams } from "../form/form.t";
-import type { GetActionsArgs } from "./actions/GetActionsArgs.t";
-import type { FlatFormItems } from "./actions/flat-form.t";
+import type { ContextDom, SomeFormItem, TheParams } from "./_deps";
+import type { GetActionsArgs, FlatFormItems } from "./flat-item-raw-actions";
 import type { MoveActions } from "../move-actions/MoveActions.t";
-import { cloneFlatItems as cloneItems } from "./actions/cloneFlatItems";
+import { cloneFlatItems as cloneItems } from "./section-actions";
 import { consolidateSections } from "./consolidateSections";
-import { getFormItemMoveActions } from "./actions/getFormItemMoveActions";
-import { getSectionMoveActions } from "./actions/getSectionMoveActions";
+import { getFormItemMoveActions } from "./section-actions";
+import { getSectionMoveActions } from "./section-actions";
 import type { AutoFocus } from "../move-actions/autofocus.t";
 import { branded } from "../form/branded";
 

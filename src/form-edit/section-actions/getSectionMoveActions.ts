@@ -1,13 +1,9 @@
-import type { ParamsDom, ContextDom, MetaDom } from "./_deps";
-import type { MoveActions, SetAutoFocus } from "./_deps";
-import type { Clone } from "./Clone.t";
-import type { FlatFormItem } from "./flat-form.t";
-import type { GetActionsArgs } from "./GetActionsArgs.t";
-import type { SectionDom, SectionWithItems } from "./section.t";
-import type { SectionMetaDom } from "./section.t";
+import type { ParamsDom, ContextDom, MetaDom, SectionDom } from "./_deps";
+import type { MoveActions, SetAutoFocus, Clone } from "./_deps";
+import type { FlatFormItem, GetActionsArgs } from "./_deps";
+import type { SectionWithItems, SectionMetaDom } from "./SectionWithItems.t";
 
-import { makeActions } from "./_deps";
-import { getFlatItemsRawActions } from "./getFlatItemsRawActions";
+import { makeActions, getFlatItemsRawActions } from "./_deps";
 import { flatten } from "./flatten";
 
 export const getSectionMoveActions = <

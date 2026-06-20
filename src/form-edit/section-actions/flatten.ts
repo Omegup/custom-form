@@ -1,6 +1,5 @@
 import type { MetaDom, ParamsDom, RecursiveFormItem } from "./_deps";
-import type { FlatFormItems } from "./flat-form.t";
-import type { SectionDom } from "./section.t";
+import type { FlatFormItems, SectionDom } from "./_deps";
 
 export const customFlat = <
   TypeNames extends string,
