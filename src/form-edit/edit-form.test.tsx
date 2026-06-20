@@ -1,8 +1,12 @@
 import { useMemo, useState } from "react";
 import type { ContextDom, SomeFormItem, TheParams } from "./_deps";
-import type { GetActionsArgs, FlatFormItems } from "./flat-item-raw-actions";
+import type {
+  GetActionsArgs,
+  FlatFormItems,
+  Clone,
+} from "./flat-item-raw-actions";
 import type { MoveActions } from "../move-actions/MoveActions.t";
-import { cloneFlatItems as cloneItems } from "./section-actions";
+import { cloneFlatItems } from "./cloneFlatItems";
 import { consolidateSections } from "./consolidateSections";
 import { getFormItemMoveActions } from "./section-actions";
 import { getSectionMoveActions } from "./section-actions";
@@ -12,7 +16,7 @@ import { branded } from "../form/branded";
 // ── Domain types ──────────────────────────────────────────────────────────────
 
 type TypeNames = "field";
-type Params = TheParams<{ field: { label: string; name: string } }>;
+type Params = TheParams<{ field: { name: string } }>;
 type Section = { id: string; deleted: boolean; title: string };
 
 type BaseCtx = { focusedId: string | null };
@@ -39,7 +43,7 @@ const INITIAL: FlatFormItems<TypeNames, Params, Section> = [
     item: {
       id: "f1",
       type: "field",
-      params: { label: "Name", name: "Name" },
+      params: { name: "Name" },
       deleted: false,
     },
     n: 0,
@@ -48,7 +52,7 @@ const INITIAL: FlatFormItems<TypeNames, Params, Section> = [
     item: {
       id: "f2",
       type: "field",
-      params: { label: "Email", name: "Email" },
+      params: { name: "Email" },
       deleted: false,
     },
     n: 0,
@@ -58,7 +62,7 @@ const INITIAL: FlatFormItems<TypeNames, Params, Section> = [
     item: {
       id: "f3",
       type: "field",
-      params: { label: "Notes", name: "Notes" },
+      params: { name: "Notes" },
       deleted: false,
     },
     n: 0,
@@ -79,11 +83,17 @@ const buildSectionOfItem = (
   return map;
 };
 
-const cloneFn = (items: FlatFormItems<"field", Params, Section>) =>
-  cloneItems(
-    items,
-    () => "copy",
+const cloneFn: Clone<TypeNames, Params, unknown, Section> = (
+  subItems,
+  _,
+  allItems,
+) =>
+  cloneFlatItems(
+    subItems,
+    allItems,
+    (name, n) => `${name} (copy${n})`,
     () => `id_${Math.random().toString(36).slice(2, 7)}`,
+    { rename: "first" },
   );
 
 // ── UI pieces ─────────────────────────────────────────────────────────────────
@@ -209,7 +219,7 @@ export const EditFormTest = () => {
           }}
         >
           <span>
-            Editing <strong>{editingItem.params.label}</strong>{" "}
+            Editing <strong>{editingItem.params.name}</strong>{" "}
             <span style={{ color: "#666" }}>(id: {editingItem.id})</span>
           </span>
           <button onClick={() => setEditingItem(null)}>✕</button>
@@ -279,9 +289,12 @@ export const EditFormTest = () => {
                             : undefined,
                         }}
                       >
-                        {item.header.params.label}
+                        {item.header.params.name}
                       </span>
-                      <FieldBar a={actions} edit={() => setEditingItem(item.header)} />
+                      <FieldBar
+                        a={actions}
+                        edit={() => setEditingItem(item.header)}
+                      />
                     </div>
                   );
                 })}

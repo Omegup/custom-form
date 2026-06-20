@@ -32,7 +32,7 @@ export const getFlatItemsRawActions = <
           "item" in x ? x.item.id : "section" in x ? x.section.id : undefined;
         return { ctx: ctx.setAutoFocus(id), item: x };
       },
-      clone: () => clone(subItems, ctx),
+      clone: () => clone(subItems, ctx, items),
       index,
       ctx,
       min,

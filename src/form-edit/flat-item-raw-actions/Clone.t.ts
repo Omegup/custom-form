@@ -9,6 +9,7 @@ export type Clone<
   Ctx,
   SectionConfig extends SectionDom,
 > = (
-  items: FlatFormItems<TypeNames, Params, SectionConfig>,
+  subItems: FlatFormItems<TypeNames, Params, SectionConfig>,
   ctx: Ctx,
+  allItems: FlatFormItems<TypeNames, Params, SectionConfig>,
 ) => FlatFormItems<TypeNames, Params, SectionConfig>
