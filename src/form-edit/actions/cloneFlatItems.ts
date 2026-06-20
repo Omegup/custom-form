@@ -1,5 +1,6 @@
-import type { ParamsDom, SectionDom } from "./_deps";
+import type { ParamsDom, } from "./_deps";
 import type { FlatFormItem, FlatFormItems } from "./flat-form.t";
+import type { SectionDom } from "./section.t";
 
 import { cloneName } from "./_deps";
 

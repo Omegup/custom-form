@@ -12,21 +12,10 @@ import type {
 import type {
   ContextDom,
   ExtraDom,
-  ParamsDom,
-  SomeFormItem,
   TheParams,
   TheVariants,
-} from "../form/form.t";
-
-type Recursive<T> = {
-  header: T;
-  children: Recursive<T>[][];
-};
-
-type RecursiveFormItem<
-  TypeNames extends string,
-  Params extends ParamsDom<TypeNames>,
-> = Recursive<SomeFormItem<TypeNames, Params>>;
+} from "../form";
+import type { RecursiveFormItem } from "./RecursiveFormItem.t";
 
 type TypeNames = "text" | "group";
 
@@ -53,7 +42,7 @@ type FormData = {
     group: Variants["group"];
   };
   values: Record<string, string>;
-  items: RecursiveFormItem<TypeNames, Params>[];
+  items: RecursiveFormItem<TypeNames, Params, never, 1>[];
 };
 
 const DEFAULT_FORM: FormData = {
@@ -276,7 +265,7 @@ const FormItemValues = createFormItemByGetChild(viewersValues, (x) => x);
 const FormItemSkeleton = createFormItemByGetChild(viewersSkeleton, (x) => x);
 
 const renderItem = <Extra extends ExtraDom>(
-  formItem: RecursiveFormItem<TypeNames, Params>,
+  formItem: RecursiveFormItem<TypeNames, Params, never, 1>,
   variants: Variants,
   ctx: Context,
   FormItem: (
@@ -289,13 +278,15 @@ const renderItem = <Extra extends ExtraDom>(
     >,
   ) => React.ReactNode,
   extra: (
-    formItem: RecursiveFormItem<TypeNames, Params>,
-    render: (formItem: RecursiveFormItem<TypeNames, Params>) => React.ReactNode,
+    formItem: RecursiveFormItem<TypeNames, Params, never, 1>,
+    render: (
+      formItem: RecursiveFormItem<TypeNames, Params, never, 1>,
+    ) => React.ReactNode,
   ) => Extra & GetChild,
 ): React.ReactNode => {
   if (formItem.header.deleted) return null;
 
-  const render = (formItem: RecursiveFormItem<TypeNames, Params>) => (
+  const render = (formItem: RecursiveFormItem<TypeNames, Params, never, 1>) => (
     <FormItem
       key={formItem.header.id}
       viewProps={{
@@ -352,7 +343,7 @@ export const RecursiveFormTest = () => {
   }, []);
 
   const renderValues = useCallback(
-    (item: RecursiveFormItem<TypeNames, Params>) =>
+    (item: RecursiveFormItem<TypeNames, Params, never, 1>) =>
       renderItem<ItemExtra>(
         item,
         variants,
@@ -386,21 +377,26 @@ export const RecursiveFormTest = () => {
     [variants, form.values, ctx, onValueChange],
   );
   const renderSkeleton = useCallback(
-    (item: RecursiveFormItem<TypeNames, Params>) =>
-      renderItem<ExtraDom>(item, variants, ctx, FormItemSkeleton, (formItem, render) =>
-        branded({
-          getChild: () => {
-            return (
-              <div style={{ display: "flex", gap: 20 }}>
-                {formItem.children.map((slot, index) => (
-                  <div key={index} style={{ flex: 1 }}>
-                    {slot.map(render)}
-                  </div>
-                ))}
-              </div>
-            );
-          },
-        }),
+    (item: RecursiveFormItem<TypeNames, Params, never, 1>) =>
+      renderItem<ExtraDom>(
+        item,
+        variants,
+        ctx,
+        FormItemSkeleton,
+        (formItem, render) =>
+          branded({
+            getChild: () => {
+              return (
+                <div style={{ display: "flex", gap: 20 }}>
+                  {formItem.children.map((slot, index) => (
+                    <div key={index} style={{ flex: 1 }}>
+                      {slot.map(render)}
+                    </div>
+                  ))}
+                </div>
+              );
+            },
+          }),
       ),
     [variants, ctx],
   );

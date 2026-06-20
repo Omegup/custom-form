@@ -1,8 +1,9 @@
-import type { SetAutoFocus, ContextDom, MoveActions, ParamsDom } from "./_deps";
-import type { SectionDom, RecursiveTypedFormItem } from "./_deps";
-import type { GetActionsArgs } from "./GetActionsArgs.t";
-import type { FlatFormItem } from "./flat-form.t";
+import type { SetAutoFocus, ContextDom, MoveActions, MetaDom } from "./_deps";
+import type { RecursiveTypedFormItem, ParamsDom } from "./_deps";
 import type { Clone } from "./Clone.t";
+import type { FlatFormItem } from "./flat-form.t";
+import type { GetActionsArgs } from "./GetActionsArgs.t";
+import type { SectionDom } from "./section.t";
 
 import { makeActions } from "./_deps";
 import { getFlatItemsRawActions } from "./getFlatItemsRawActions";
@@ -13,6 +14,7 @@ export const getFormItemMoveActions = <
   Params extends ParamsDom<TypeNames>,
   Ctx extends ContextDom,
   SectionConfig extends SectionDom,
+  Meta extends MetaDom<{ index: number }>,
 >(
   args: GetActionsArgs<TypeNames, Params, SetAutoFocus<Ctx>, SectionConfig>,
   clone: Clone<TypeNames, Params, SetAutoFocus<Ctx>, SectionConfig>,
@@ -25,10 +27,10 @@ export const getFormItemMoveActions = <
     SectionConfig
   >(args, clone);
   const formItemActions = <K extends TypeNames>(
-    q: RecursiveTypedFormItem<TypeNames, Params, K>,
+    q: RecursiveTypedFormItem<TypeNames, Params, K, Meta>,
   ): MoveActions => {
-    const { index } = q;
-    const flat = flatten<TypeNames, Params, SectionConfig>();
+    const { index } = q.meta;
+    const flat = flatten<TypeNames, Params, SectionConfig, Meta>();
     type Item = FlatFormItem<TypeNames, Params, SectionConfig>;
     return {
       ...makeActions(actions(flat.formItem(q), index)),

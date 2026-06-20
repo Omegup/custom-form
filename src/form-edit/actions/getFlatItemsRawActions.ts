@@ -1,8 +1,9 @@
-import type { FlatFormItem, FlatFormItems } from "./flat-form.t";
-import type { SectionDom, SetAutoFocus, SomeFormItem } from "./_deps";
 import type { ContextDom, ParamsDom, RawActions } from "./_deps";
-import type { GetActionsArgs } from "./GetActionsArgs.t";
+import type { SetAutoFocus, SomeFormItem } from "./_deps";
 import type { Clone } from "./Clone.t";
+import type { FlatFormItem, FlatFormItems } from "./flat-form.t";
+import type { GetActionsArgs } from "./GetActionsArgs.t";
+import type { SectionDom } from "./section.t";
 
 export const getFlatItemsRawActions = <
   TypeNames extends string,

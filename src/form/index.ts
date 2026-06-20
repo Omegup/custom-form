@@ -1,1 +1,2 @@
-export type { ContextDom, ParamsDom, SomeFormItem, TypedFormItem } from "./form.t";
+export type { ContextDom, TypedFormItem, SomeFormItem } from "./form.t";
+export type { ExtraDom, TheParams, ParamsDom, TheVariants } from "./form.t";

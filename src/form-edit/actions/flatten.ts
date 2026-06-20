@@ -1,28 +1,30 @@
-import type { ParamsDom, RecursiveFormItem, SectionDom } from "./_deps";
+import type { MetaDom, ParamsDom, RecursiveFormItem } from "./_deps";
 import type { FlatFormItems } from "./flat-form.t";
+import type { SectionDom } from "./section.t";
 
 export const customFlat = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
   FormItem,
   SectionConfig extends SectionDom,
+  Meta extends MetaDom,
 >(
   mapItems: (
     items: () => FormItem[],
-    q: RecursiveFormItem<TypeNames, Params>,
+    q: RecursiveFormItem<TypeNames, Params, Meta>,
   ) => FormItem[],
   mapSlot: (items: FormItem[]) => FormItem[],
   mapSection: (items: () => FormItem[], s: SectionConfig) => FormItem[],
 ) => {
-  const formItems = (slot: RecursiveFormItem<TypeNames, Params>[]) =>
+  const formItems = (slot: RecursiveFormItem<TypeNames, Params, Meta>[]) =>
     mapSlot(slot.flatMap(formItem));
   const formItem = (
-    formItem: RecursiveFormItem<TypeNames, Params>,
+    formItem: RecursiveFormItem<TypeNames, Params, Meta>,
   ): FormItem[] =>
     mapItems(() => formItem.children.flatMap(formItems), formItem);
   const section = (section: {
     header: SectionConfig;
-    items: RecursiveFormItem<TypeNames, Params>[][];
+    items: RecursiveFormItem<TypeNames, Params, Meta>[][];
   }): FormItem[] =>
     mapSection(() => section.items.flatMap(formItems), section.header);
   return { formItem, formItems, section };
@@ -32,12 +34,14 @@ export const flatten = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
   SectionConfig extends SectionDom,
+  Meta extends MetaDom,
 >() =>
   customFlat<
     TypeNames,
     Params,
     FlatFormItems<TypeNames, Params, SectionConfig>[0],
-    SectionConfig
+    SectionConfig,
+    Meta
   >(
     (items, q) => [{ item: q.header, n: q.children.length }, ...items()],
     (items) => [...items, { end: null }],

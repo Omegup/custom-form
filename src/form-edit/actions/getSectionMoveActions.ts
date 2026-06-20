@@ -1,8 +1,10 @@
-import type { SectionDom, ContextDom, SectionWithItems } from "./_deps";
-import type { ParamsDom, MoveActions, SetAutoFocus } from "./_deps";
-import type { GetActionsArgs } from "./GetActionsArgs.t";
-import type { FlatFormItem } from "./flat-form.t";
+import type { ParamsDom, ContextDom, MetaDom } from "./_deps";
+import type { MoveActions, SetAutoFocus } from "./_deps";
 import type { Clone } from "./Clone.t";
+import type { FlatFormItem } from "./flat-form.t";
+import type { GetActionsArgs } from "./GetActionsArgs.t";
+import type { SectionDom, SectionWithItems } from "./section.t";
+import type { SectionMetaDom } from "./section.t";
 
 import { makeActions } from "./_deps";
 import { getFlatItemsRawActions } from "./getFlatItemsRawActions";
@@ -13,10 +15,18 @@ export const getSectionMoveActions = <
   Params extends ParamsDom<TypeNames>,
   Ctx extends ContextDom,
   SectionConfig extends SectionDom,
+  SectionMeta extends SectionMetaDom<{ index: number }>,
+  Meta extends MetaDom<{ index: number }>,
 >(
   args: GetActionsArgs<TypeNames, Params, SetAutoFocus<Ctx>, SectionConfig>,
   clone: Clone<TypeNames, Params, SetAutoFocus<Ctx>, SectionConfig>,
-  section: SectionWithItems<TypeNames, Params, SectionConfig>,
+  section: SectionWithItems<
+    TypeNames,
+    Params,
+    SectionConfig,
+    SectionMeta,
+    Meta
+  >,
 ): MoveActions => {
   const { actions } = getFlatItemsRawActions<
     TypeNames,
@@ -29,8 +39,8 @@ export const getSectionMoveActions = <
     SetAutoFocus<Ctx>
   >(
     actions(
-      flatten<TypeNames, Params, SectionConfig>().section(section),
-      section.index,
+      flatten<TypeNames, Params, SectionConfig, Meta>().section(section),
+      section.meta.index,
       1,
     ),
     {

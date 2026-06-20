@@ -1,4 +1,5 @@
-import type { ParamsDom, SomeFormItem, SectionDom } from "./_deps";
+import type { ParamsDom, SomeFormItem, } from "./_deps";
+import type { SectionDom } from "./section.t";
 
 export type FlatFormItem<
   TypeNames extends string,
