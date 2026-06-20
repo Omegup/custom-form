@@ -1,3 +1,4 @@
+/** Form item editor types — see form-item-editor/README.md. */
 import type React from "react";
 import type { Branded, ContextDom, ParamsDom, TypedFormItem } from "./_deps";
 import type { Header, MetaDom, RecursiveTypedFormItem } from "./_deps";

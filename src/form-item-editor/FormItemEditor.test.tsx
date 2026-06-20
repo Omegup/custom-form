@@ -1,3 +1,7 @@
+/**
+ * Demo: EditFormTest + per-field edit dialog via createFormItemEditorWrapper.
+ * Wires extra → open editor → patch flatItems on save.
+ */
 import {
   useCallback,
   useImperativeHandle,

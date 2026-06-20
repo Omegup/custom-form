@@ -1,3 +1,10 @@
+/**
+ * Shared edit-form demo host.
+ *
+ * Owns flatItems state and move-action UI. Feature modules (side-menu, form-item-editor,
+ * section-edit) inject behavior via `extra`, `sectionExtra`, and `renderLayout` — they
+ * must NOT be imported here. See form-edit/README.md.
+ */
 import {
   useMemo,
   useState,
@@ -25,7 +32,12 @@ import { branded } from "../form/branded";
 
 type TypeNames = "field";
 type Params = TheParams<{ field: { name: string } }>;
-type Section = { id: string; deleted: boolean; title: string };
+type Section = {
+  id: string;
+  deleted: boolean;
+  title: string;
+  description: string;
+};
 
 export type EditFormSection = Section;
 export type EditFormFlatItems = FlatFormItems<TypeNames, Params, Section>;
@@ -57,13 +69,18 @@ export type EditFormTestProps = {
   extra?: (
     item: EditFormEditingItem,
   ) => { label: string; onClick: () => void }[];
+  sectionExtra?: (
+    section: EditFormSection,
+  ) => { label: string; onClick: () => void }[];
   renderLayout: (args: {
     sections: ReactNode;
     alert: ReactNode;
     details: ReactNode;
     ctx: EditFormCtx;
     setFocused: (focused: { id: string; focused: boolean }) => void;
-    setFlatItems: Dispatch<SetStateAction<FlatFormItems<TypeNames, Params, Section>>>;
+    setFlatItems: Dispatch<
+      SetStateAction<FlatFormItems<TypeNames, Params, Section>>
+    >;
   }) => React.ReactNode;
 };
 
@@ -82,7 +99,7 @@ const makeCtx = (
 // ── Initial flat data ─────────────────────────────────────────────────────────
 
 const INITIAL: FlatFormItems<TypeNames, Params, Section> = [
-  { section: { id: "s1", deleted: false, title: "Personal" } },
+  { section: { id: "s1", deleted: false, title: "Personal", description: "" } },
   {
     item: {
       id: "f1",
@@ -92,6 +109,7 @@ const INITIAL: FlatFormItems<TypeNames, Params, Section> = [
     },
     n: 0,
   },
+  { end: null },
   {
     item: {
       id: "f2",
@@ -101,7 +119,7 @@ const INITIAL: FlatFormItems<TypeNames, Params, Section> = [
     },
     n: 0,
   },
-  { section: { id: "s2", deleted: false, title: "Details" } },
+  { section: { id: "s2", deleted: false, title: "Details", description: "" } },
   {
     item: {
       id: "f3",
@@ -158,7 +176,13 @@ const Btn = ({
   </button>
 );
 
-const SectionBar = ({ a }: { a: MoveActions }) => (
+const SectionBar = ({
+  a,
+  extra,
+}: {
+  a: MoveActions;
+  extra: { label: string; onClick: () => void }[];
+}) => (
   <span style={{ display: "inline-flex", gap: 3 }}>
     <Btn label="↑" onClick={a.up} />
     <Btn label="↓" onClick={a.down} />
@@ -168,6 +192,9 @@ const SectionBar = ({ a }: { a: MoveActions }) => (
     ) : (
       <Btn label="Remove" onClick={a.remove} />
     )}
+    {extra.map(({ label, onClick }) => (
+      <Btn key={label} label={label} onClick={onClick} />
+    ))}
   </span>
 );
 
@@ -188,14 +215,18 @@ const FieldBar = ({
       <Btn label="Remove" onClick={a.remove} />
     )}
     {extra.map(({ label, onClick }) => (
-      <Btn label={label} onClick={onClick} />
+      <Btn key={label} label={label} onClick={onClick} />
     ))}
   </span>
 );
 
 // ── Main demo ─────────────────────────────────────────────────────────────────
 
-export const EditFormTest = ({ extra, renderLayout }: EditFormTestProps) => {
+export const EditFormTest = ({
+  extra,
+  sectionExtra,
+  renderLayout,
+}: EditFormTestProps) => {
   const [flatItems, setFlatItems] = useState(INITIAL);
   const [focused, setFocused] = useState<{
     id: string;
@@ -214,6 +245,9 @@ export const EditFormTest = ({ extra, renderLayout }: EditFormTestProps) => {
   };
 
   const sections = useMemo(() => consolidateSections(flatItems), [flatItems]);
+
+  console.log("sections", sections);
+
   const sectionOfItem = useMemo(
     () => buildSectionOfItem(flatItems),
     [flatItems],
@@ -295,52 +329,63 @@ export const EditFormTest = ({ extra, renderLayout }: EditFormTestProps) => {
                 }}
               >
                 <strong style={{ fontSize: 13 }}>{section.header.title}</strong>
-                <SectionBar a={sActions} />
+                <SectionBar
+                  a={sActions}
+                  extra={sectionExtra?.(section.header) ?? []}
+                />
               </div>
 
-              <div
-                style={{
-                  padding: "6px 10px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 4,
-                }}
-              >
-                {section.items[0]?.map((item) => {
-                  const actions = itemActions(item);
-                  const focused = ctx.autoFocused(item.header.id);
-                  return (
-                    <div
-                      key={item.header.id}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        padding: "5px 8px",
-                        borderRadius: 4,
-                        border: "1px solid #eee",
-                        animation:
-                          focused !== null
-                            ? `pulse${focused ? 1 : 2} .2s 2`
-                            : undefined,
-                        background: item.header.deleted ? "#fafafa" : "white",
-                        opacity: item.header.deleted ? 0.55 : 1,
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: 13,
-                          textDecoration: item.header.deleted
-                            ? "line-through"
-                            : undefined,
-                        }}
-                      >
-                        {item.header.params.name}
-                      </span>
-                      <FieldBar a={actions} extra={extra?.(item) ?? []} />
-                    </div>
-                  );
-                })}
+              <div style={{ display: "flex", flexDirection: "row", gap: 4 }}>
+                {section.items.map((item, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      padding: "6px 10px",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 4,
+                      flex: 1,
+                    }}
+                  >
+                    {item.map((item) => {
+                      const actions = itemActions(item);
+                      const focused = ctx.autoFocused(item.header.id);
+                      return (
+                        <div
+                          key={item.header.id}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            padding: "5px 8px",
+                            borderRadius: 4,
+                            border: "1px solid #eee",
+                            animation:
+                              focused !== null
+                                ? `pulse${focused ? 1 : 2} .2s 2`
+                                : undefined,
+                            background: item.header.deleted
+                              ? "#fafafa"
+                              : "white",
+                            opacity: item.header.deleted ? 0.55 : 1,
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: 13,
+                              textDecoration: item.header.deleted
+                                ? "line-through"
+                                : undefined,
+                            }}
+                          >
+                            {item.header.params.name}
+                          </span>
+                          <FieldBar a={actions} extra={extra?.(item) ?? []} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
               </div>
             </div>
           );
@@ -404,7 +449,6 @@ export const BareEditFormTest = () => {
     />,
   );
 };
-
 
 /*
 

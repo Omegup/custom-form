@@ -1,3 +1,4 @@
+/** Recursive item/section → flat markers. Inverse of consolidateSections for one subtree. */
 import type { MetaDom, ParamsDom, RecursiveFormItem } from "./_deps";
 import type { FlatFormItems, SectionDom } from "./_deps";
 

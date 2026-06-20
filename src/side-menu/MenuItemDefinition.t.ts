@@ -1,3 +1,4 @@
+/** Catalogue entry for the add-item library sidebar (icon, title, item template). */
 import type React from "react";
 import type { ParamsDom } from "./_deps";
 

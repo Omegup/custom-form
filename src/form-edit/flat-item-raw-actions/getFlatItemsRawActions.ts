@@ -1,3 +1,4 @@
+/** Raw up/down/clone/remove/restore fns for flat entries (before section guards). */
 import type { ContextDom, ParamsDom, RawActions } from "./_deps";
 import type { SetAutoFocus, SomeFormItem } from "./_deps";
 import type { Clone } from "./Clone.t";

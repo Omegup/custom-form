@@ -1,3 +1,4 @@
+/** Flat array → nested SectionWithItems[] for rendering. See form-edit/README.md. */
 import type { ParamsDom, SomeFormItem } from "../form/form.t";
 import type { Header, MetaDom } from "./_deps";
 import type { SectionDom, FlatFormItems } from "./flat-item-raw-actions";

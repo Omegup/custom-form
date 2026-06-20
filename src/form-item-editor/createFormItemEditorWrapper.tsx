@@ -1,3 +1,8 @@
+/**
+ * HOC factory for single-item edit dialogs.
+ * Ported from school form-item-edit-react/FormItemEditor.tsx.
+ * See form-item-editor/README.md for wiring guide.
+ */
 import { createRef, useRef } from "./_deps";
 import type { ContextDom, ParamsDom, ReactNode, RefObject } from "./_deps";
 import type {

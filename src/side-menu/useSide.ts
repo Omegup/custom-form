@@ -1,3 +1,7 @@
+/**
+ * Library sidebar hook — search/filter menu items, render catalogue, trigger add callbacks.
+ * See side-menu/README.md.
+ */
 import type {
   MetaDom,
   ParamsDom,

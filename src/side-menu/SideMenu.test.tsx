@@ -1,3 +1,7 @@
+/**
+ * Demo: EditFormTest + add-item library sidebar.
+ * Wires useSide → insertFlatFormItem / appendFlatSection.
+ */
 import type { TheParams } from "../form/form.t";
 import type { MetaDom } from "../recursive-form";
 import type { SectionMetaDom } from "../form-edit/section-actions";
@@ -60,7 +64,7 @@ const EditFormSidePanel = ({ setFlatItems, focus }: EditFormSideArgs) => {
     random: randomId,
     makeSection: (id) => ({
       meta: { index: -1, total: 1 },
-      header: { id, title: "New section", deleted: false },
+      header: { id, title: "New section", description: "", deleted: false },
       items: [[]],
     }),
   });
