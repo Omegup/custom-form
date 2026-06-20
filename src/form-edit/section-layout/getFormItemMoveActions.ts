@@ -2,7 +2,7 @@ import type { SetAutoFocus, ContextDom, MoveActions, MetaDom } from "./_deps";
 import type { RecursiveTypedFormItem, ParamsDom } from "./_deps";
 import type { Clone, FlatFormItem, GetActionsArgs, SectionDom } from "./_deps";
 
-import { getFlatItemsRawActions, makeActions } from "./_deps";
+import { getFlatRawActions, makeActions } from "./_deps";
 import { flatten } from "./flatten";
 
 export const getFormItemMoveActions = <
@@ -16,7 +16,7 @@ export const getFormItemMoveActions = <
   clone: Clone<TypeNames, Params, SetAutoFocus<Ctx>, SectionConfig>,
 ) => {
   const { items } = args;
-  const { actions, isDeleted } = getFlatItemsRawActions<
+  const { actions, isDeleted } = getFlatRawActions<
     TypeNames,
     Params,
     Ctx,

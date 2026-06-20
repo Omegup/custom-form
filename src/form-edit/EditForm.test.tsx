@@ -19,12 +19,12 @@ import type {
   FlatFormItems,
   Clone,
   FlatFormItem,
-} from "./flat-item-raw-actions";
+} from "./flat-raw-actions";
 import type { MoveActions } from "../move-actions/MoveActions.t";
 import { cloneFlatItems } from "./cloneFlatItems";
 import { consolidateSections } from "./consolidateSections";
-import { getFormItemMoveActions } from "./section-actions";
-import { getSectionMoveActions } from "./section-actions";
+import { getFormItemMoveActions } from "./section-layout";
+import { getSectionMoveActions } from "./section-layout";
 import type { AutoFocus } from "../move-actions/autofocus.t";
 import { branded } from "../form/branded";
 

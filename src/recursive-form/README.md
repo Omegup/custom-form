@@ -26,4 +26,4 @@ RecursiveTypedFormItem<TypeNames, Params, K, Meta>
 ## Relationship to flat format
 
 `consolidateSections` (in `form-edit/`) converts flat → recursive tree.
-`flatten()` (in `form-edit/section-actions/`) converts recursive → flat.
+`flatten()` (in `form-edit/section-layout/`) converts recursive → flat.

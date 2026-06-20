@@ -1,6 +1,6 @@
 /**
  * Demo: EditFormTest + section edit dialog.
- * Wires sectionExtra → open dialog → updateFlatSection on save.
+ * Wires sectionExtra → open dialog → updateSectionInFlat on save.
  */
 import { useCallback, useState } from "react";
 import {
@@ -12,7 +12,7 @@ import {
 import {
   useSectionEditDialog,
   validateSectionForm,
-  updateFlatSection,
+  updateSectionInFlat,
   type SectionEditDialogProps,
 } from "./index";
 
@@ -175,7 +175,7 @@ export const SectionEditTest = () => {
               onClose={closeEditor}
               onSave={({ header, cols }) => {
                 setFlatItems((prev) =>
-                  updateFlatSection(prev, header.id, {
+                  updateSectionInFlat(prev, header.id, {
                     title: header.title,
                     description: header.description,
                   }, cols),

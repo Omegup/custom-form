@@ -3,7 +3,7 @@ import type { MoveActions, SetAutoFocus, Clone } from "./_deps";
 import type { FlatFormItem, GetActionsArgs } from "./_deps";
 import type { SectionWithItems, SectionMetaDom } from "./SectionWithItems.t";
 
-import { makeActions, getFlatItemsRawActions } from "./_deps";
+import { makeActions, getFlatRawActions } from "./_deps";
 import { flatten } from "./flatten";
 
 export const getSectionMoveActions = <
@@ -24,7 +24,7 @@ export const getSectionMoveActions = <
     Meta
   >,
 ): MoveActions => {
-  const { actions } = getFlatItemsRawActions<
+  const { actions } = getFlatRawActions<
     TypeNames,
     Params,
     Ctx,

@@ -77,7 +77,7 @@ Use `branded({ ... })` to construct values; do not cast.
 - [form/README.md](./form/README.md)
 - [recursive-form/README.md](./recursive-form/README.md)
 - [move-actions/README.md](./move-actions/README.md)
-- [form-edit/README.md](./form-edit/README.md) — also [flat-item-raw-actions](./form-edit/flat-item-raw-actions/README.md), [section-actions](./form-edit/section-actions/README.md)
+- [form-edit/README.md](./form-edit/README.md) — also [flat-raw-actions](./form-edit/flat-raw-actions/README.md), [section-layout](./form-edit/section-layout/README.md)
 - [form-item-editor/README.md](./form-item-editor/README.md)
 - [side-menu/README.md](./side-menu/README.md)
 - [section-edit/README.md](./section-edit/README.md)

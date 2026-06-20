@@ -1,7 +1,7 @@
 import type { ParamsDom } from "./_deps";
 
-import type { FlatFormItem, FlatFormItems } from "./flat-item-raw-actions";
-import type { SectionDom } from "./flat-item-raw-actions";
+import type { FlatFormItem, FlatFormItems } from "./flat-raw-actions";
+import type { SectionDom } from "./flat-raw-actions";
 
 import { cloneName } from "./_deps";
 

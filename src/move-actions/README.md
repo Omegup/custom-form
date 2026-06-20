@@ -15,8 +15,10 @@ Generic **move / clone / remove / restore** action builders for editable lists.
 
 ## Usage in form-edit
 
-`getFlatItemsRawActions` produces raw `{ fn, newItems, ctx }` mutations;
-`makeActions` turns them into `MoveActions` for buttons.
+```
+getFlatRawActions  →  RawActions  →  makeActions  →  MoveActions
+```
 
-`getFormItemMoveActions` / `getSectionMoveActions` add edit-specific guards
-(e.g. hide `up` when item is first in its section).
+`getFlatRawActions` builds the `RawActions` object that `makeActions` consumes.
+`getFormItemMoveActions` / `getSectionMoveActions` add section-level guards
+(e.g. hide `up` when item is first in its section) before returning `MoveActions`.

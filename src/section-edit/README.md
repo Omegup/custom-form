@@ -12,8 +12,8 @@ Migrated from `school/components/custom-form` → `react-packages/form-edit-reac
 | `types.ts` | `SectionEditForm`, `SectionEditDialogProps`, `UseSectionEditDialog` |
 | `validateSectionForm.ts` | Returns `Errors` when title or description is blank |
 | `useSectionEditDialog.ts` | Form state hook: `{ section, setValue, onSubmit, isValid }` |
-| `changeSectionCols.ts` | Resize column slot arrays (merge or append empty slots) |
-| `updateFlatSection.ts` | Re-flattens one section with new header + column count |
+| `resizeSectionColumns.ts` | Resize column slot arrays (merge or append empty slots) |
+| `updateSectionInFlat.ts` | Re-flattens one section with new header + column count |
 | `SectionEdit.test.tsx` | Demo: `EditFormTest` + section edit dialog (`SectionEditDemo`) |
 
 ## Flow
@@ -23,7 +23,7 @@ User clicks "Edit" on section header (via sectionExtra)
   → open dialog with { header, cols }
   → useSectionEditDialog manages form state
   → validateSectionForm on submit
-  → onSave → updateFlatSection(flatItems, id, { title, description }, cols)
+  → onSave → updateSectionInFlat(flatItems, id, { title, description }, cols)
 ```
 
 ## Section shape

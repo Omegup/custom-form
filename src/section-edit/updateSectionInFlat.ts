@@ -6,9 +6,9 @@ import type { FlatFormItems, SectionDom } from "../form-edit";
 import type { MetaDom } from "../recursive-form";
 
 import { consolidateSections, flatten } from "../form-edit";
-import { changeSectionCols } from "./changeSectionCols";
+import { resizeSectionColumns } from "./resizeSectionColumns";
 
-export const updateFlatSection = <
+export const updateSectionInFlat = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
   SectionConfig extends SectionDom & { title: string; description: string },
@@ -24,7 +24,10 @@ export const updateFlatSection = <
   if (!section) return items;
 
   const flat = flatten<TypeNames, Params, SectionConfig, Meta>();
-  const nextItems = changeSectionCols<TypeNames, Params, Meta>(cols, section.items);
+  const nextItems = resizeSectionColumns<TypeNames, Params, Meta>(
+    cols,
+    section.items,
+  );
   const nextSection = flat.section({
     header: { ...section.header, ...header },
     items: nextItems,

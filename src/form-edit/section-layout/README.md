@@ -1,4 +1,4 @@
-# section-actions
+# section-layout
 
 Section-aware move actions and **tree ↔ flat** conversion.
 

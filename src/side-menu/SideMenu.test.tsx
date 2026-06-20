@@ -4,7 +4,7 @@
  */
 import type { TheParams } from "../form/form.t";
 import type { MetaDom } from "../recursive-form";
-import type { SectionMetaDom } from "../form-edit/section-actions";
+import type { SectionMetaDom } from "../form-edit";
 import { appendFlatSection, insertFlatFormItem } from "./insertFlatFormItem";
 import {
   container,

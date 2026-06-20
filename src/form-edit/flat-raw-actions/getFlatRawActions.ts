@@ -1,4 +1,9 @@
-/** Raw up/down/clone/remove/restore fns for flat entries (before section guards). */
+/**
+ * Builds `RawActions` for flat form entries — the input shape for `makeActions`.
+ *
+ * Not to be confused with `MoveActions` (nullable UI click handlers).
+ * Pipeline: getFlatRawActions → actions(slice, index) → RawActions → makeActions → MoveActions
+ */
 import type { ContextDom, ParamsDom, RawActions } from "./_deps";
 import type { SetAutoFocus, SomeFormItem } from "./_deps";
 import type { Clone } from "./Clone.t";
@@ -6,7 +11,7 @@ import type { FlatFormItem, FlatFormItems } from "./flat-form.t";
 import type { GetActionsArgs } from "./GetActionsArgs.t";
 import type { SectionDom } from "./section.t";
 
-export const getFlatItemsRawActions = <
+export const getFlatRawActions = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
   Ctx extends ContextDom,

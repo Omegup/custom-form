@@ -9,23 +9,23 @@ Migrated from `school/components/custom-form` → `ts-packages/form-edit`.
 
 ## Subfolders
 
-### `flat-item-raw-actions/`
+### `flat-raw-actions/`
 
-See [flat-item-raw-actions/README.md](./flat-item-raw-actions/README.md).
+See [flat-raw-actions/README.md](./flat-raw-actions/README.md).
 
-Low-level mutations on the flat item array.
+`RawActions` builders for the flat list (input to `makeActions`, not UI handlers).
 
 | File | Role |
 |---|---|
 | `flat-form.t.ts` | `FlatFormItem`, `FlatFormItems` union types |
 | `section.t.ts` | `SectionDom` base (`{ id, deleted }`) |
-| `getFlatItemsRawActions.ts` | Produces up/down/clone/remove/restore fns for flat entries |
+| `getFlatRawActions.ts` | Builds `RawActions` per flat entry for `makeActions` |
 | `GetActionsArgs.t.ts` | `{ items, setItems, ctx, sectionOfItem, setToRemove }` |
 | `Clone.t.ts` | Clone callback type for deep-copying item subtrees |
 
-### `section-actions/`
+### `section-layout/`
 
-See [section-actions/README.md](./section-actions/README.md).
+See [section-layout/README.md](./section-layout/README.md).
 
 Section-aware wrappers + tree ↔ flat conversion.
 
