@@ -4,6 +4,8 @@ import type { MoveActions } from "./MoveActions.t";
 import type { AutoFocus } from "./autofocus.t";
 import { cloneName } from "./cloneName";
 
+import "./animation.css";
+
 const Button = ({
   onClick,
   children,
@@ -39,12 +41,6 @@ const Actions = ({
 
 type Item = { del: boolean; name: string };
 
-const randomColor = (random: number | null) =>
-  random !== null
-    ? `#${Math.floor(random * 16777215)
-        .toString(16)
-        .padStart(6, "0")}`
-    : "initial";
 const tClone = (name: string, n: string) => `${name} (clone${n})`;
 
 const ItemElement = ({
@@ -85,38 +81,38 @@ const ItemElement = ({
     },
     {},
   );
+  const focused = ctx.autoFocused(item.name);
   return (
     <div
       style={{
         display: "flex",
         flexDirection: "row",
         gap: "10px",
-        backgroundColor: randomColor(ctx.autoFocused(item.name)),
+        animation:
+          focused === null ? undefined : `pulse${focused ? 1 : 2} .2s 2`,
       }}
     >
-      {item.del ? (
-        <span style={{ textDecoration: "line-through" }}>{item.name}</span>
-      ) : (
-        <span>{item.name}</span>
-      )}
+      <span style={{ textDecoration: item.del ? "line-through" : '', flex: 1 }}>
+        {item.name}
+      </span>
       <Actions actions={actions} />
     </div>
   );
 };
 
 type Ctx = AutoFocus<
-  { autofocus: { id: string; value: number } | null },
-  number
+  { autofocus: { id: string; value: boolean } | null },
+  boolean
 >;
 export const MoveActionsTest = () => {
   const [items, setItems] = useState<Item[]>([{ del: false, name: "Item 1" }]);
   const [autofocus, setAutofocus] = useState<{
     id: string;
-    value: number;
+    value: boolean;
   } | null>(null);
   const setAutoFocus = (id?: string): Ctx => ({
     ...ctx,
-    autofocus: id ? { id, value: Math.random() } : null,
+    autofocus: id ? { id, value: !autofocus?.value } : null,
   });
   const ctx: Ctx = {
     setAutoFocus,
