@@ -13,7 +13,7 @@ import type {
 
 export type { UseFormItemEditor } from "./types";
 
-export const FormItemEditHOC =
+export const createFormItemEditorWrapper =
   <
     TypeNames extends string,
     Params extends ParamsDom<TypeNames>,

@@ -5,16 +5,16 @@ import {
   type Dispatch,
   type SetStateAction,
 } from "react";
-import { branded } from "../../form/branded";
-import type { TheParams } from "../_deps";
-import type { MetaDom, RecursiveTypedFormItem } from "../../recursive-form";
+import { branded } from "./_deps";
+import type { TheParams } from "./_deps";
+import type { MetaDom, RecursiveTypedFormItem } from "./_deps";
 import {
   EditFormTest,
   type EditFormCtx,
   type EditFormEditingItem,
-  type EditFormEditorProps,
-} from "../EditForm.test";
-import { FormItemEditHOC } from "./FormItemEditor";
+  type EditFormEditorArgs,
+} from "../form-edit/EditForm.test";
+import { createFormItemEditorWrapper } from "./createFormItemEditorWrapper";
 import type {
   DialogArgsDom,
   EditorProps,
@@ -153,7 +153,7 @@ const FieldEditor = ({
     />
   ));
 
-const FormItemEdit = FormItemEditHOC(
+const FormItemEditorWrapper = createFormItemEditorWrapper(
   { field: { editor: FieldEditor } },
   useFieldEditor as UseFormItemEditor<
     TypeNames,
@@ -210,30 +210,24 @@ const FormItemEdit = FormItemEditHOC(
 );
 
 type FormItemEditFieldProps = FormItemEditorProps<Ctx, DialogArgs, FieldExtra>;
-const FormItemEditField = FormItemEdit as (
+const FormItemEditField = FormItemEditorWrapper as (
   props: FormItemEditFieldProps,
 ) => React.ReactNode;
-
-const EditFormFieldEditor = ({
-  draft,
-  setDraft,
-  ctx,
-  onSave,
-  onCancel,
-}: EditFormEditorProps) => (
-  <FormItemEditField
-    ctx={ctx}
-    dialogArgs={branded({
-      title: `Edit ${draft.header.params.name}`,
-      onSave,
-      onCancel,
-    })}
-    extra={branded({ draft, setDraft })}
-  />
-);
 
 // ── Test UI ───────────────────────────────────────────────────────────────────
 
 export const FormItemEditorTest = () => (
-  <EditFormTest Editor={EditFormFieldEditor} />
+  <EditFormTest
+    renderEditor={({ draft, setDraft, ctx, onSave, onCancel }) => (
+      <FormItemEditField
+        ctx={ctx}
+        dialogArgs={branded({
+          title: `Edit ${draft.header.params.name}`,
+          onSave,
+          onCancel,
+        })}
+        extra={branded({ draft, setDraft })}
+      />
+    )}
+  />
 );

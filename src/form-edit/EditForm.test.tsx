@@ -38,7 +38,7 @@ export type EditFormEditingItem = RecursiveTypedFormItem<
   ItemMeta
 >;
 
-export type EditFormEditorProps = {
+export type EditFormEditorArgs = {
   draft: EditFormEditingItem;
   setDraft: Dispatch<SetStateAction<EditFormEditingItem>>;
   ctx: EditFormCtx;
@@ -47,7 +47,7 @@ export type EditFormEditorProps = {
 };
 
 export type EditFormTestProps = {
-  Editor?: (props: EditFormEditorProps) => React.ReactNode;
+  renderEditor?: (props: EditFormEditorArgs) => React.ReactNode;
 };
 
 // ── Context factory ───────────────────────────────────────────────────────────
@@ -178,7 +178,7 @@ const FieldBar = ({
 
 // ── Main demo ─────────────────────────────────────────────────────────────────
 
-export const EditFormTest = ({ Editor }: EditFormTestProps) => {
+export const EditFormTest = ({ renderEditor }: EditFormTestProps) => {
   const [flatItems, setFlatItems] = useState(INITIAL);
   const [focused, setFocused] = useState<{
     id: string;
@@ -282,15 +282,15 @@ export const EditFormTest = ({ Editor }: EditFormTestProps) => {
         </div>
       )}
 
-      {editingItem && draft && Editor && (
-        <Editor
-          draft={draft}
-          setDraft={setDraft as Dispatch<SetStateAction<EditFormEditingItem>>}
-          ctx={ctx}
-          onSave={saveEditor}
-          onCancel={cancelEditor}
-        />
-      )}
+      {editingItem &&
+        draft &&
+        renderEditor?.({
+          draft,
+          setDraft: setDraft as Dispatch<SetStateAction<EditFormEditingItem>>,
+          ctx,
+          onSave: saveEditor,
+          onCancel: cancelEditor,
+        })}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {sections.map((section) => {
@@ -365,7 +365,7 @@ export const EditFormTest = ({ Editor }: EditFormTestProps) => {
                       <FieldBar
                         a={actions}
                         edit={() => openEditor(item)}
-                        showEdit={!!Editor}
+                        showEdit={!!renderEditor}
                       />
                     </div>
                   );
