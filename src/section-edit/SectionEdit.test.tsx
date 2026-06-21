@@ -1,8 +1,11 @@
 /**
  * Demo: EditFormTest + section edit dialog.
  * Wires sectionExtra → open dialog → updateSectionInFlat on save.
+ *
+ * `useSectionEditDialog` lives here (demo-only). The package exports the
+ * `UseSectionEditDialog` type + `validateSectionForm`; the host supplies the hook.
  */
-import { useCallback, useState } from "react";
+import { useCallback, useState, type FormEvent } from "react";
 import {
   container,
   EditFormTest,
@@ -10,10 +13,12 @@ import {
   type EditFormSection,
 } from "../form-edit/EditForm.test";
 import {
-  useSectionEditDialog,
   validateSectionForm,
   updateSectionInFlat,
+  type Errors,
   type SectionEditDialogProps,
+  type SectionEditForm,
+  type UseSectionEditDialog,
 } from "./index";
 
 // ── Domain types ──────────────────────────────────────────────────────────────
@@ -24,6 +29,53 @@ type Ctx = EditFormCtx;
 type EditingSection = {
   header: Section;
   cols: number;
+};
+
+// ── Demo hook (host-supplied in real apps) ────────────────────────────────────
+
+const useSectionEditDialog: UseSectionEditDialog<Section, SectionEditForm, Ctx> = (
+  props,
+  { validate },
+) => {
+  const {
+    section: { header, cols },
+    onSave,
+  } = props;
+
+  const [section, setSection] = useState<SectionEditForm>({
+    title: header.title,
+    description: header.description,
+    cols,
+  });
+  const [errors, setErrors] = useState<Errors<SectionEditForm>>({});
+
+  const setValue = <K extends keyof SectionEditForm>(
+    key: K,
+    value: SectionEditForm[K],
+  ) => {
+    setSection((prev) => ({ ...prev, [key]: value }));
+    setErrors((prev) => ({ ...prev, [key]: undefined }));
+  };
+
+  const isValid = (key: "title" | "description") => !errors[key];
+
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const nextErrors = validate(section);
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length === 0) {
+      onSave({
+        header: {
+          ...header,
+          title: section.title,
+          description: section.description,
+        },
+        cols: section.cols,
+      });
+    }
+  };
+
+  return { section, setValue, onSubmit, isValid };
 };
 
 // ── Dialog ────────────────────────────────────────────────────────────────────

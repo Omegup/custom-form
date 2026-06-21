@@ -44,8 +44,8 @@ section-edit                   ← section title/description edit dialog
 ### Conventions (every package)
 
 - `index.ts` — public API
-- `_deps.ts` — internal imports from sibling packages (keeps boundaries explicit)
-- `*.test.tsx` — interactive demo component exported for `main.tsx` (not unit tests)
+- `_deps.ts` — re-exports from sibling packages (see [src/README.md](./src/README.md#import-rules))
+- `*.test.tsx` — interactive demo component exported for `main.tsx` (may import anywhere)
 - `*.t.ts` — type-only files
 
 ### Migration source

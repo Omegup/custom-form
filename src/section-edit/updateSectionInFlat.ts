@@ -1,12 +1,9 @@
 /**
  * Replace one section's flat slice — header fields and column layout.
+ * Logic from school form-edit-react/useDialog section onSave.
  */
-import type { ParamsDom } from "../form";
-import type { FlatFormItems, SectionDom } from "../form-edit";
-import type { MetaDom } from "../recursive-form";
-
-import { consolidateSections, flatten } from "../form-edit";
-import { resizeColumns } from "../recursive-form";
+import type { FlatFormItems, MetaDom, ParamsDom, SectionDom } from "./_deps";
+import { consolidateSections, flatten, resizeColumns } from "./_deps";
 
 export const updateSectionInFlat = <
   TypeNames extends string,
@@ -23,13 +20,13 @@ export const updateSectionInFlat = <
   const section = sections.find((s) => s.header.id === sectionId);
   if (!section) return items;
 
-  const flat = flatten<TypeNames, Params, SectionConfig, Meta>();
+  const flattener = flatten<TypeNames, Params, SectionConfig, Meta>();
   const nextItems = resizeColumns<TypeNames, Params, Meta>(cols, section.items);
-  const nextSection = flat.section({
+  const nextSection = flattener.section({
     header: { ...section.header, ...header },
     items: nextItems,
   });
-  const prevSection = flat.section(section);
+  const prevSection = flattener.section(section);
 
   return items.toSpliced(
     section.meta.index,
