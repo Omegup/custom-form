@@ -31,8 +31,8 @@ const { search, setSearch, renderMenuItems, addSection } = useSide({
 ## Insert logic (`insertFlatFormItem.ts`)
 
 1. `flatten().formItem(recursive)` → flat markers for the new item
-2. Find target section (first non-deleted, or `sIndex`)
-3. Splice after last content in that section
+2. If `formItem.meta.index !== -1` → splice at that flat index (`meta.total` replaced, usually 0 for add)
+3. Else find target section (first non-deleted, or consolidated `sIndex`) and splice after last content
 
 `appendFlatSection` appends `{ section }` at end of flat list.
 

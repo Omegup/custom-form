@@ -8,20 +8,15 @@ import { flatten } from "./flatten";
 export const getFormItemMoveActions = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Ctx extends ContextDom,
+  Context extends SetAutoFocus<ContextDom>,
   SectionConfig extends SectionDom,
   Meta extends MetaDom<{ index: number }>,
 >(
-  args: GetActionsArgs<TypeNames, Params, SetAutoFocus<Ctx>, SectionConfig>,
-  clone: Clone<TypeNames, Params, SetAutoFocus<Ctx>, SectionConfig>,
+  args: GetActionsArgs<TypeNames, Params, Context, SectionConfig>,
+  clone: Clone<TypeNames, Params, Context, SectionConfig>,
 ) => {
   const { items } = args;
-  const { actions, isDeleted } = getFlatRawActions<
-    TypeNames,
-    Params,
-    Ctx,
-    SectionConfig
-  >(args, clone);
+  const { actions, isDeleted } = getFlatRawActions(args, clone);
   const formItemActions = <K extends TypeNames>(
     q: RecursiveTypedFormItem<TypeNames, Params, K, Meta>,
   ): MoveActions => {

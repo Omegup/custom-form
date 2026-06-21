@@ -14,11 +14,11 @@ import type { SectionDom } from "./section.t";
 export const getFlatRawActions = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Ctx extends ContextDom,
+  Context extends SetAutoFocus<ContextDom>,
   SectionConfig extends SectionDom,
 >(
-  args: GetActionsArgs<TypeNames, Params, SetAutoFocus<Ctx>, SectionConfig>,
-  clone: Clone<TypeNames, Params, SetAutoFocus<Ctx>, SectionConfig>,
+  args: GetActionsArgs<TypeNames, Params, Context, SectionConfig>,
+  clone: Clone<TypeNames, Params, Context, SectionConfig>,
 ) => {
   const { sectionOfItem, setItems, setToRemove, ctx, items } = args;
   const isDeleted = (item: SomeFormItem<TypeNames, Params>) =>
@@ -28,15 +28,12 @@ export const getFlatRawActions = <
     subItems: FlatFormItems<TypeNames, Params, SectionConfig>,
     index: number,
     min?: number,
-  ): RawActions<
-    FlatFormItem<TypeNames, Params, SectionConfig>,
-    SetAutoFocus<Ctx>
-  > => {
+  ): RawActions<FlatFormItem<TypeNames, Params, SectionConfig>, Context> => {
     return {
       highlight: (x) => {
         const id =
           "item" in x ? x.item.id : "section" in x ? x.section.id : undefined;
-        return { ctx: ctx.setAutoFocus(id), item: x };
+        return { ctx: ctx.setAutoFocus(id) as Context, item: x };
       },
       clone: () => clone(subItems, ctx, items),
       index,

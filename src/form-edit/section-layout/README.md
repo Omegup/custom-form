@@ -9,6 +9,9 @@ Section-aware move actions and **tree ↔ flat** conversion.
 | `flatten()` | Recursive item → flat markers (`{ item, n }`, `{ end }`) |
 | `getFormItemMoveActions` | `MoveActions` for one consolidated field |
 | `getSectionMoveActions` | `MoveActions` for one section header |
+| `getSectionEdit` | `RecursiveEditManager` for in-section tree editing |
+| `columnFlatInsertIndex` | Flat splice index for a section column add slot |
+| `SectionEditArgs` | Args bag passed to `SectionHOC` via `SectionProps.edit` |
 | `SectionWithItems` | `{ meta, header, items: RecursiveFormItem[][] }` |
 
 ## flatten vs consolidateSections

@@ -10,6 +10,7 @@ src/
 ├── form-item-editor/        Single-item edit dialog factory
 ├── side-menu/               Add-item library sidebar
 ├── section-edit/            Section edit types + validation + flat save
+├── edit-section/            SectionHOC + item viewers + add-item slots
 └── response/                Form response value helpers
 ```
 
@@ -24,6 +25,10 @@ move-actions ──────────────────────�
                               ┌───────────────┼───────────────┐
                               ▼               ▼               ▼
                       form-item-editor   side-menu      section-edit
+                              │               │               │
+                              └───────────────┴───────────────┘
+                                              │
+                                         edit-section
 ```
 
 **Rule:** upper layers import lower layers, never the reverse.
@@ -107,4 +112,5 @@ Use `branded({ ... })` to construct values; do not cast.
 - [form-item-editor/README.md](./form-item-editor/README.md)
 - [side-menu/README.md](./side-menu/README.md)
 - [section-edit/README.md](./section-edit/README.md)
+- [edit-section/README.md](./edit-section/README.md)
 - [response/README.md](./response/README.md)

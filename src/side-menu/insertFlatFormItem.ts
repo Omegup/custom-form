@@ -30,7 +30,7 @@ export const insertFlatFormItem = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
   SectionConfig extends SectionDom,
-  Meta extends MetaDom,
+  Meta extends MetaDom<{ index: number; total?: number; sIndex?: number }>,
 >(
   items: FlatFormItems<TypeNames, Params, SectionConfig>,
   formItem: RecursiveFormItem<TypeNames, Params, Meta>,
@@ -39,6 +39,11 @@ export const insertFlatFormItem = <
   const list = flatten<TypeNames, Params, SectionConfig, Meta>().formItem(
     formItem,
   );
+  const flatIndex = formItem.meta.index;
+  if (flatIndex !== -1) {
+    return items.toSpliced(flatIndex, formItem.meta.total ?? 0, ...list);
+  }
+
   const sectionIndex =
     sIndex === -1
       ? items.findIndex((q) => "section" in q && !q.section.deleted)

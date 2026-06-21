@@ -25,6 +25,7 @@ form-edit                      ← flat edit representation + move actions on se
 form-item-editor               ← single-item edit dialog (HOC factory)
 side-menu                      ← library sidebar (search + add item/section)
 section-edit                   ← section title/description edit dialog
+edit-section                   ← SectionHOC + viewers + column add-item slots
 ```
 
 **Canonical edit state** is the **flat list** (`FlatFormItems`): an array of `{ section }`, `{ item, n }`, and `{ end: null }` markers. The tree is rebuilt on demand via `consolidateSections`.
@@ -39,6 +40,7 @@ section-edit                   ← section title/description edit dialog
 | Form item editor | `form-item-editor/` | Edit form + per-field edit dialog |
 | Add-item side | `side-menu/` | Edit form + library sidebar to add items/sections |
 | Section edit | `section-edit/` | Edit form + section edit dialog |
+| Edit section | `edit-section/` | SectionFormItemHOC + viewers demo |
 | Recursive form | `recursive-form/` | Nested recursive item rendering |
 
 ### Conventions (every package)
@@ -59,5 +61,6 @@ Original packages live under `school/components/custom-form/src/`:
 | `form-item-editor/` | `react-packages/form-item-edit-react` |
 | `side-menu/` | `react-packages/form-edit-react` (`useSide`, `MenuItemDefinition`) |
 | `section-edit/` | `react-packages/form-edit-react` (`SectionEdit`, `validateSectionForm`) |
+| `edit-section/` | `react-packages/form-edit-react` (`SectionHOC`, `SectionFormItemHOC`, `createRenderEditFormItem`, `makeUseRenderAddItem`) |
 
-Still to migrate from `form-edit-react`: `makeUseDialogs`, `SectionHOC`, `createRenderEditFormItem`, `makeUseRenderAddItem`, …
+Still to migrate from `form-edit-react`: `makeUseDialogs`, `recursive-edit-ui` (RecursiveEdit + FlatDnd), …

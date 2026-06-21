@@ -64,3 +64,14 @@ export type FormItemProps<
   ) => React.ReactNode
   viewProps: ViewerProps<Params, Variants, K, Extra['view'], Context>
 }
+
+export type RenderCard<
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames>,
+  Variants extends VariantsDom<TypeNames>,
+  Extra extends ExtraDom,
+  Context extends ContextDom,
+> = <K extends TypeNames>(
+  view: React.ReactNode,
+  viewProps: ViewerProps<Params, Variants, K, Extra, Context>,
+) => React.ReactNode
