@@ -30,11 +30,9 @@ const { search, setSearch, renderMenuItems, addSection } = useSide({
 
 ## Insert logic (`insertFlatFormItem.ts`)
 
-Lives here (not in `form-edit`) — mirrors school `useDialog.setEditFormItemX` add flow:
-
 1. `flatten().formItem(recursive)` → flat markers for the new item
 2. Find target section (first non-deleted, or `sIndex`)
-3. Splice after last content in that section (`justAfter` index)
+3. Splice after last content in that section
 
 `appendFlatSection` appends `{ section }` at end of flat list.
 

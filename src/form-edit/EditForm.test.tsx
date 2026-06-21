@@ -23,8 +23,7 @@ import type {
 import type { MoveActions } from "../move-actions/MoveActions.t";
 import { cloneFlatItems } from "./cloneFlatItems";
 import { consolidateSections } from "./consolidateSections";
-import { getFormItemMoveActions } from "./section-layout";
-import { getSectionMoveActions } from "./section-layout";
+import { getFormItemMoveActions, getSectionMoveActions } from "./section-layout";
 import type { AutoFocus } from "../move-actions/autofocus.t";
 import { branded } from "../form/branded";
 
@@ -246,8 +245,6 @@ export const EditFormTest = ({
   };
 
   const sections = useMemo(() => consolidateSections(flatItems), [flatItems]);
-
-  console.log("sections", sections);
 
   const sectionOfItem = useMemo(
     () => buildSectionOfItem(flatItems),

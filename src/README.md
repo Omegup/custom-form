@@ -9,7 +9,7 @@ src/
 ├── form-edit/               Edit orchestration (flat state + section/item actions)
 ├── form-item-editor/        Single-item edit dialog factory
 ├── side-menu/               Add-item library sidebar
-├── section-edit/            Section edit dialog + validation
+├── section-edit/            Section edit types + validation + flat save
 └── response/                Form response value helpers
 ```
 

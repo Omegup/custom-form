@@ -11,3 +11,4 @@ export type {
 export type { MetaDom, RecursiveFormItem } from "../recursive-form";
 
 export { flatten } from "../form-edit";
+export { insertFlatFormItem, appendFlatSection } from "./insertFlatFormItem";

@@ -1,7 +1,6 @@
 /**
  * Insert a new item or section into a flat edit list.
- * Logic ported from school form-edit-react/useDialog (add-item flow).
- * See side-menu/README.md.
+ * Logic from school form-edit-react/useDialog (add-item flow).
  */
 import type { ParamsDom } from "./_deps";
 import type { MetaDom, RecursiveFormItem } from "./_deps";
@@ -26,7 +25,7 @@ const sectionFlatIndex = <
   return -1;
 };
 
-/** Insert a form item into the flat list (add flow, from useDialog in form-edit-react). */
+/** Insert a form item into the flat list (add flow). */
 export const insertFlatFormItem = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
