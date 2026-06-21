@@ -8,7 +8,7 @@ Tree-shaped form types built on top of `form`.
 |---|---|
 | `Recursive.t.ts` | `Header<H, Meta>`, `Recursive<T, H, Meta>`, `RecursiveT` |
 | `RecursiveFormItem.t.ts` | `RecursiveFormItem`, `RecursiveTypedFormItem` |
-| `RecursiveForm.test.tsx` | Demo: nested items with text/group types (`RecursiveFormTest`) |
+| `RecursiveForm.stories.tsx` | Storybook: nested items with text/group types |
 
 ## Types
 

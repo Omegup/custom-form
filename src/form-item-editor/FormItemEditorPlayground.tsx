@@ -19,7 +19,7 @@ import {
   EditFormTest,
   type EditFormCtx,
   type EditFormEditingItem,
-} from "../form-edit/EditForm.test";
+} from "../form-edit/EditFormHost";
 import { createFormItemEditorWrapper } from "./createFormItemEditorWrapper";
 import type {
   DialogArgsDom,
@@ -249,9 +249,13 @@ const FormItemEditorWrapper: (
   ),
 );
 
-// ── Test UI ───────────────────────────────────────────────────────────────────
+// ── Playground ────────────────────────────────────────────────────────────────
 
-export const FormItemEditorTest = () => {
+export type FormItemEditorPlaygroundProps = {
+  heading: string;
+};
+
+export const FormItemEditorPlayground = ({ heading }: FormItemEditorPlaygroundProps) => {
   const [draft, setDraft] = useState<FieldExtra["draft"] | null>(null);
 
   const openEditor = (item: EditFormEditingItem) => setDraft(item);
@@ -259,7 +263,7 @@ export const FormItemEditorTest = () => {
   const cancelEditor = useCallback(() => setDraft(null), []);
 
   return container(
-    "Form item editor",
+    heading,
     <EditFormTest
       extra={(item) => [{ label: "Edit", onClick: () => openEditor(item) }]}
       renderLayout={({ sections, alert, details, ctx, setFlatItems }) => (

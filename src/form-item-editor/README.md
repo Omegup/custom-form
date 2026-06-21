@@ -10,7 +10,7 @@ Migrated from `school/components/custom-form` → `react-packages/form-item-edit
 |---|---|
 | `types.ts` | `Editors`, `Editor`, `UseFormItemEditor`, `FormItemEditorProps`, validation types |
 | `createFormItemEditorWrapper.tsx` | **`createFormItemEditorWrapper`** — main HOC factory |
-| `FormItemEditor.test.tsx` | Demo: `EditFormTest` + field edit dialog (`FormItemEditorTest`) |
+| `FormItemEditor.stories.tsx` | Storybook: `EditFormTest` + field edit dialog |
 
 ## Architecture
 
@@ -31,7 +31,7 @@ createFormItemEditorWrapper(editors, useHook, renderDialog)
 
 ### Demo pattern
 
-`FormItemEditor.test.tsx` does **not** import edit logic into `form-edit`.
+`FormItemEditor.stories.tsx` does **not** import edit logic into `form-edit`.
 It passes `extra` + `renderLayout` to `EditFormTest` and handles save by patching `flatItems`.
 
 ## Types cheat sheet

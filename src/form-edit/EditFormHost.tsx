@@ -1,5 +1,5 @@
 /**
- * Shared edit-form demo host.
+ * Shared edit-form Storybook host.
  *
  * Owns flatItems state and move-action UI. Feature modules (side-menu, form-item-editor,
  * section-edit) inject behavior via `extra`, `sectionExtra`, and `renderLayout` — they
@@ -65,6 +65,7 @@ export type EditFormEditorArgs = {
 };
 
 export type EditFormTestProps = {
+  initialFlatItems?: EditFormFlatItems;
   extra?: (
     item: EditFormEditingItem,
   ) => { label: string; onClick: () => void }[];
@@ -223,11 +224,12 @@ const FieldBar = ({
 // ── Main demo ─────────────────────────────────────────────────────────────────
 
 export const EditFormTest = ({
+  initialFlatItems,
   extra,
   sectionExtra,
   renderLayout,
 }: EditFormTestProps) => {
-  const [flatItems, setFlatItems] = useState(INITIAL);
+  const [flatItems, setFlatItems] = useState(initialFlatItems ?? INITIAL);
   const [focused, setFocused] = useState<{
     id: string;
     focused: boolean;
@@ -434,34 +436,3 @@ export const container = (title: string, children: React.ReactNode) => (
     {children}
   </div>
 );
-
-export const BareEditFormTest = () => {
-  return container(
-    "Edit form",
-    <EditFormTest
-      renderLayout={({ sections, alert, details }) => (
-        <>
-          {alert}
-          {sections}
-          {details}
-        </>
-      )}
-    />,
-  );
-};
-
-/*
-
-
-
-
-
-      <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-        {renderSide?.({ setFlatItems, focus })}
-
-        <div
-          style={{ flex: 1, display: "flex", flexDirection: "column", gap: 16 }}
-        >
-        </div>
-      </div>
-*/

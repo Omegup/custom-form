@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { branded } from "../form/branded";
 import { createFormItemByGetChild } from "../form/createFormItemByGetChild";
 import type {
@@ -12,22 +12,14 @@ import type {
 import type {
   ContextDom,
   ExtraDom,
-  TheParams,
-  TheVariants,
 } from "../form";
 import type { RecursiveFormItem } from "./RecursiveFormItem.t";
-
-type TypeNames = "text" | "group";
-
-type Params = TheParams<{
-  text: { label: string };
-  group: { title: string };
-}>;
-
-type Variants = TheVariants<{
-  text: "default" | "compact";
-  group: "default" | "bordered";
-}>;
+import type {
+  RecursiveFormDemoData,
+  RecursiveFormDemoParams,
+  RecursiveFormDemoTypeNames,
+  RecursiveFormDemoVariants,
+} from "./recursiveFormDemoFixtures";
 
 type Context = ContextDom & { accent: string };
 
@@ -36,124 +28,23 @@ type ItemExtra = ExtraDom & {
   onChange: (value: string) => void;
 };
 
-type FormData = {
-  variants: {
-    text: Variants["text"];
-    group: Variants["group"];
-  };
-  values: Record<string, string>;
-  items: RecursiveFormItem<TypeNames, Params, never, 1>[];
-};
-
-const DEFAULT_FORM: FormData = {
-  variants: {
-    text: "default",
-    group: "bordered",
-  },
-  values: {
-    t: "Alice",
-    g: "1,2,3",
-    "ga:1": "Apple",
-    "ga:2": "Banana",
-    "ga:3": "Carrot",
-    "gb:1": "Red",
-    "gb:2": "Green",
-    "gb:3": "Blue",
-    "gga:1:": "Small",
-    "gga:2:": "Medium",
-    "gga:3:": "Large",
-  },
-  items: [
-    {
-      header: {
-        id: "t",
-        type: "text",
-        deleted: false,
-        params: {
-          label: "Name",
-        },
-      },
-      children: [],
-    },
-    {
-      header: {
-        id: "g",
-        type: "group",
-        deleted: false,
-        params: {
-          title: "Inventory",
-        },
-      },
-      children: [
-        [
-          {
-            header: {
-              id: "ga",
-              type: "text",
-              deleted: false,
-              params: {
-                label: "Item",
-              },
-            },
-            children: [],
-          },
-          {
-            header: {
-              id: "gb",
-              type: "text",
-              deleted: false,
-              params: {
-                label: "Color",
-              },
-            },
-            children: [],
-          },
-        ],
-        [
-          {
-            header: {
-              id: "gg",
-              type: "group",
-              deleted: false,
-              params: {
-                title: "Attributes",
-              },
-            },
-            children: [
-              [
-                {
-                  header: {
-                    id: "gga",
-                    type: "text",
-                    deleted: false,
-                    params: {
-                      label: "Size",
-                    },
-                  },
-                  children: [],
-                },
-              ],
-            ],
-          },
-        ],
-      ],
-    },
-  ],
+export type RecursiveFormPlaygroundProps = RecursiveFormDemoData & {
+  accent: string;
 };
 
 const makeViewers = <ItemExtra extends ExtraDom>(
   inner: Viewers<
-    TypeNames,
-    Params,
-    Variants,
+    RecursiveFormDemoTypeNames,
+    RecursiveFormDemoParams,
+    RecursiveFormDemoVariants,
     WithChildren<ItemExtra>,
     Context,
     string
   >,
 ): Viewers<
-  TypeNames,
-  Params,
-  Variants,
+  RecursiveFormDemoTypeNames,
+  RecursiveFormDemoParams,
+  RecursiveFormDemoVariants,
   WithChildren<ItemExtra>,
   Context,
   string
@@ -163,8 +54,8 @@ const makeViewers = <ItemExtra extends ExtraDom>(
       props,
     }: {
       props: ViewerProps<
-        Params,
-        Variants,
+        RecursiveFormDemoParams,
+        RecursiveFormDemoVariants,
         "text",
         WithChildren<ItemExtra>["view"],
         Context
@@ -191,8 +82,8 @@ const makeViewers = <ItemExtra extends ExtraDom>(
       props,
     }: {
       props: ViewerProps<
-        Params,
-        Variants,
+        RecursiveFormDemoParams,
+        RecursiveFormDemoVariants,
         "group",
         WithChildren<ItemExtra>["view"],
         Context
@@ -265,28 +156,28 @@ const FormItemValues = createFormItemByGetChild(viewersValues, (x) => x);
 const FormItemSkeleton = createFormItemByGetChild(viewersSkeleton, (x) => x);
 
 const renderItem = <Extra extends ExtraDom>(
-  formItem: RecursiveFormItem<TypeNames, Params, never, 1>,
-  variants: Variants,
+  formItem: RecursiveFormItem<RecursiveFormDemoTypeNames, RecursiveFormDemoParams, never, 1>,
+  variants: RecursiveFormDemoVariants,
   ctx: Context,
   FormItem: (
     props: FormItemProps<
-      Params,
-      Variants,
-      TypeNames,
+      RecursiveFormDemoParams,
+      RecursiveFormDemoVariants,
+      RecursiveFormDemoTypeNames,
       WithGetChild<Extra>,
       Context
     >,
   ) => React.ReactNode,
   extra: (
-    formItem: RecursiveFormItem<TypeNames, Params, never, 1>,
+    formItem: RecursiveFormItem<RecursiveFormDemoTypeNames, RecursiveFormDemoParams, never, 1>,
     render: (
-      formItem: RecursiveFormItem<TypeNames, Params, never, 1>,
+      formItem: RecursiveFormItem<RecursiveFormDemoTypeNames, RecursiveFormDemoParams, never, 1>,
     ) => React.ReactNode,
   ) => Extra & GetChild,
 ): React.ReactNode => {
   if (formItem.header.deleted) return null;
 
-  const render = (formItem: RecursiveFormItem<TypeNames, Params, never, 1>) => (
+  const render = (formItem: RecursiveFormItem<RecursiveFormDemoTypeNames, RecursiveFormDemoParams, never, 1>) => (
     <FormItem
       key={formItem.header.id}
       viewProps={{
@@ -303,47 +194,30 @@ const renderItem = <Extra extends ExtraDom>(
   return render(formItem);
 };
 
-const parseForm = (json: string): { form: FormData; error: string | null } => {
-  try {
-    return { form: JSON.parse(json) as FormData, error: null };
-  } catch (e) {
-    return {
-      form: DEFAULT_FORM,
-      error: e instanceof Error ? e.message : "Invalid JSON",
-    };
-  }
-};
+export const RecursiveFormPlayground = ({
+  accent,
+  variants: variantProps,
+  values: valuesProp,
+  items,
+}: RecursiveFormPlaygroundProps) => {
+  const [values, setValues] = useState(valuesProp);
 
-export const RecursiveFormTest = () => {
-  const [formJson, setFormJson] = useState(() =>
-    JSON.stringify(DEFAULT_FORM, null, 2),
+  useEffect(() => {
+    setValues(valuesProp);
+  }, [valuesProp]);
+
+  const variants = useMemo(
+    (): RecursiveFormDemoVariants => branded(variantProps),
+    [variantProps],
   );
-
-  const { form, error: parseError } = useMemo(
-    () => parseForm(formJson),
-    [formJson],
-  );
-
-  const variants = form.variants as Variants;
-  const ctx = useMemo((): Context => ({ accent: "#4a90d9" }) as Context, []);
+  const ctx = useMemo((): Context => branded({ accent }), [accent]);
 
   const onValueChange = useCallback((id: string, value: string) => {
-    setFormJson((prev) => {
-      try {
-        const parsed = JSON.parse(prev) as FormData;
-        return JSON.stringify(
-          { ...parsed, values: { ...parsed.values, [id]: value } },
-          null,
-          2,
-        );
-      } catch {
-        return prev;
-      }
-    });
+    setValues((prev) => ({ ...prev, [id]: value }));
   }, []);
 
   const renderValues = useCallback(
-    (item: RecursiveFormItem<TypeNames, Params, never, 1>) =>
+    (item: RecursiveFormItem<RecursiveFormDemoTypeNames, RecursiveFormDemoParams, never, 1>) =>
       renderItem<ItemExtra>(
         item,
         variants,
@@ -351,7 +225,7 @@ export const RecursiveFormTest = () => {
         FormItemValues,
         (formItem, render) =>
           branded({
-            value: form.values[formItem.header.id] ?? "",
+            value: values[formItem.header.id] ?? "",
             onChange: (value) => onValueChange(formItem.header.id, value),
             getChild: (suffix) => {
               return (
@@ -374,10 +248,10 @@ export const RecursiveFormTest = () => {
             },
           }),
       ),
-    [variants, form.values, ctx, onValueChange],
+    [variants, values, ctx, onValueChange],
   );
   const renderSkeleton = useCallback(
-    (item: RecursiveFormItem<TypeNames, Params, never, 1>) =>
+    (item: RecursiveFormItem<RecursiveFormDemoTypeNames, RecursiveFormDemoParams, never, 1>) =>
       renderItem<ExtraDom>(
         item,
         variants,
@@ -404,36 +278,17 @@ export const RecursiveFormTest = () => {
     <div
       style={{ display: "flex", flexDirection: "column", gap: 16, padding: 16 }}
     >
-      <h2 style={{ margin: 0 }}>Form test</h2>
+      <h2 style={{ margin: 0 }}>Recursive form</h2>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {form.items.map((item) => (
+        {items.map((item) => (
           <div key={item.header.id}>{renderSkeleton(item)}</div>
         ))}
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {form.items.map((item) => (
+        {items.map((item) => (
           <div key={item.header.id}>{renderValues(item)}</div>
         ))}
       </div>
-      <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        <span style={{ fontSize: 12, opacity: 0.7 }}>Form (JSON)</span>
-        <textarea
-          value={formJson}
-          onChange={(e) => setFormJson(e.target.value)}
-          spellCheck={false}
-          style={{
-            minHeight: 280,
-            fontFamily: "monospace",
-            fontSize: 12,
-            padding: 8,
-            borderRadius: 4,
-            border: parseError ? "1px solid #c00" : "1px solid #ccc",
-          }}
-        />
-        {parseError && (
-          <span style={{ color: "#c00", fontSize: 12 }}>{parseError}</span>
-        )}
-      </label>
     </div>
   );
 };

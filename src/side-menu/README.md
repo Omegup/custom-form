@@ -12,7 +12,7 @@ Migrated from `school/components/custom-form` → `react-packages/form-edit-reac
 | `MenuItemDefinition.t.ts` | Catalogue entry: `{ icon, title, n?, header: { type, params } }` |
 | `useSide.ts` | Hook: search state, filtered menu, `renderMenuItems`, `addSection` |
 | `insertFlatFormItem.ts` | **`insertFlatFormItem`**, **`appendFlatSection`** — flat-list mutations |
-| `SideMenu.test.tsx` | Demo: `EditFormTest` + side panel (`SideMenuTest`) |
+| `SideMenu.stories.tsx` | Storybook: `EditFormTest` + side panel |
 
 ## useSide
 

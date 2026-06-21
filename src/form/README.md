@@ -13,7 +13,7 @@ Migrated from `school/components/custom-form` → `form-react`, `form-model`.
 | `branded.ts` / `branded.t.ts` | `branded()` helper and `Branded<T, Tag>` nominal type |
 | `createFormItemByGetChild.tsx` | `FormItemHOC` — resolves lazy children via `getChild` |
 | `createFormItemByChildren.tsx` | Variant using pre-resolved `children` map |
-| `Form.test.tsx` | Demo: JSON textarea drives a live form (`FormTest`) |
+| `Form.stories.tsx` | Storybook: JSON textarea drives a live form |
 
 ## Key concepts
 

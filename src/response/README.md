@@ -11,5 +11,5 @@ Form **response value** helpers — reading/writing answer data keyed by item id
 
 Small utility module; no interactive demo tab yet.
 
-Used by the view layer when a form needs live editable values (see `form/Form.test.tsx`
+Used by the view layer when a form needs live editable values (see `form/Form.stories.tsx`
 for a simpler JSON-driven values map instead).

@@ -42,7 +42,9 @@ Section-aware wrappers + tree ↔ flat conversion.
 |---|---|
 | `consolidateSections.ts` | Flat array → `SectionWithItems[]` tree |
 | `cloneFlatItems.ts` | Deep clone of flat subtrees with new ids |
-| `EditForm.test.tsx` | **`EditFormTest`** — shared demo host (see below) |
+| `EditFormHost.tsx` | **`EditFormTest`** — shared Storybook host (see below) |
+| `EditFormPlayground.tsx` | Args-driven bare edit-form demo |
+| `EditForm.stories.tsx` | Storybook entry with controls |
 
 ## EditFormTest
 

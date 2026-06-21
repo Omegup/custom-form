@@ -11,7 +11,7 @@ import {
   EditFormTest,
   type EditFormCtx,
   type EditFormSection,
-} from "../form-edit/EditForm.test";
+} from "../form-edit/EditFormHost";
 import {
   validateSectionForm,
   updateSectionInFlat,
@@ -203,7 +203,7 @@ const SectionEditDialog = ({
 
 // ── Test UI ───────────────────────────────────────────────────────────────────
 
-export const SectionEditTest = () => {
+const SectionEditInner = () => {
   const [editing, setEditing] = useState<EditingSection | null>(null);
 
   const openEditor = useCallback((section: Section, cols: number) => {
@@ -244,5 +244,6 @@ export const SectionEditTest = () => {
   );
 };
 
-export const SectionEditDemo = () =>
-  container("Section edit", <SectionEditTest />);
+export type SectionEditPlaygroundProps = { heading: string };
+export const SectionEditPlayground = ({ heading }: SectionEditPlaygroundProps) =>
+  container(heading, <SectionEditInner />);

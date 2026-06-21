@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { makeActions } from "./makeActions";
 import type { MoveActions } from "./MoveActions.t";
 import type { AutoFocus } from "./autofocus.t";
@@ -40,6 +40,10 @@ const Actions = ({
 };
 
 type Item = { del: boolean; name: string };
+
+export type MoveActionsPlaygroundProps = {
+  initialItemNames: readonly string[];
+};
 
 const tClone = (name: string, n: string) => `${name} (clone${n})`;
 
@@ -104,12 +108,20 @@ type Ctx = AutoFocus<
   { autofocus: { id: string; value: boolean } | null },
   boolean
 >;
-export const MoveActionsTest = () => {
-  const [items, setItems] = useState<Item[]>([{ del: false, name: "Item 1" }]);
+export const MoveActionsPlayground = ({ initialItemNames }: MoveActionsPlaygroundProps) => {
+  const [items, setItems] = useState<Item[]>(() =>
+    initialItemNames.map((name) => ({ del: false, name })),
+  );
   const [autofocus, setAutofocus] = useState<{
     id: string;
     value: boolean;
   } | null>(null);
+
+  useEffect(() => {
+    setItems(initialItemNames.map((name) => ({ del: false, name })));
+    setAutofocus(null);
+  }, [initialItemNames]);
+
   const setAutoFocus = (id?: string): Ctx => ({
     ...ctx,
     autofocus: id ? { id, value: !autofocus?.value } : null,

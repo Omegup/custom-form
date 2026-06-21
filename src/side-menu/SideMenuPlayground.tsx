@@ -11,11 +11,11 @@ import {
   EditFormTest,
   type EditFormSection,
   type EditFormSideArgs,
-} from "../form-edit/EditForm.test";
+} from "../form-edit/EditFormHost";
 import { useSide } from "./useSide";
 import type { MenuItemDefinition } from "./MenuItemDefinition.t";
 
-// ── Domain types (aligned with EditForm.test) ─────────────────────────────────
+// ── Domain types (aligned with EditFormHost) ─────────────────────────────────
 
 type TypeNames = "field";
 type Params = TheParams<{ field: { name: string } }>;
@@ -43,9 +43,20 @@ const MENU_ITEMS: MenuItemDefinition<TypeNames, Params>[] = [
 
 const randomId = () => `id_${Math.random().toString(36).slice(2, 7)}`;
 
+export type SideMenuPlaygroundProps = {
+  heading: string;
+  sidebarWidth: number;
+  libraryTitle: string;
+};
+
 // ── Side panel ────────────────────────────────────────────────────────────────
 
-const EditFormSidePanel = ({ setFlatItems, focus }: EditFormSideArgs) => {
+const EditFormSidePanel = ({
+  setFlatItems,
+  focus,
+  libraryTitle,
+  sidebarWidth,
+}: EditFormSideArgs & Pick<SideMenuPlaygroundProps, "libraryTitle" | "sidebarWidth">) => {
   const {
     search,
     setSearch,
@@ -75,7 +86,7 @@ const EditFormSidePanel = ({ setFlatItems, focus }: EditFormSideArgs) => {
         display: "flex",
         flexDirection: "column",
         gap: 12,
-        width: 240,
+        width: sidebarWidth,
         flexShrink: 0,
         padding: 16,
         border: "1px solid #ddd",
@@ -83,7 +94,7 @@ const EditFormSidePanel = ({ setFlatItems, focus }: EditFormSideArgs) => {
         background: "#fafafa",
       }}
     >
-      <strong style={{ fontSize: 13 }}>Library</strong>
+      <strong style={{ fontSize: 13 }}>{libraryTitle}</strong>
       <input
         value={search}
         onChange={(e) => setSearch(e.target.value)}
@@ -135,10 +146,13 @@ const EditFormSidePanel = ({ setFlatItems, focus }: EditFormSideArgs) => {
 
 // ── Test UI ───────────────────────────────────────────────────────────────────
 
-export const SideMenuTest = () =>
+export const SideMenuPlayground = ({
+  heading,
+  sidebarWidth,
+  libraryTitle,
+}: SideMenuPlaygroundProps) =>
   container(
-    "Side Menu",
-
+    heading,
     <EditFormTest
       renderLayout={({
         sections,
@@ -151,6 +165,8 @@ export const SideMenuTest = () =>
           <EditFormSidePanel
             setFlatItems={setFlatItems}
             focus={(id) => setFocused({ id, focused: true })}
+            libraryTitle={libraryTitle}
+            sidebarWidth={sidebarWidth}
           />
 
           <div

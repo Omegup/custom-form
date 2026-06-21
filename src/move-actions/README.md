@@ -11,7 +11,7 @@ Generic **move / clone / remove / restore** action builders for editable lists.
 | `autofocus.t.ts` | `AutoFocus<Ctx, Focused>` — focus tracking mixin for context |
 | `cloneName.ts` | `"Name (copy1)"` style rename helper |
 | `animation.css` | Pulse animation used by edit-form focus highlight |
-| `Actions.test.tsx` | Demo: simple deletable item list (`MoveActionsTest`) |
+| `Actions.stories.tsx` | Storybook: simple deletable item list |
 
 ## Usage in form-edit
 

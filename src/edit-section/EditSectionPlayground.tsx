@@ -1,9 +1,9 @@
 /**
  * Demo: SectionFormItemHOC — editable section with viewers + per-column add-item slots.
  */
-import { useMemo, useState, type ComponentProps, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { branded } from "../form/branded";
-import type { ContextDom, ExtraDom, TheParams, TheVariants } from "../form";
+import type { Branded, ContextDom, ExtraDom, TheParams, TheVariants } from "../form";
 import type { MetaDom, RecursiveFormItem } from "../recursive-form";
 import type { MoveActions } from "../move-actions/MoveActions.t";
 import type { AutoFocus } from "../move-actions/autofocus.t";
@@ -14,7 +14,6 @@ import {
   type FlatFormItems,
   type GetActionsArgs,
 } from "../form-edit";
-import { container } from "../form-edit/EditForm.test";
 import { insertFlatFormItem } from "../side-menu/insertFlatFormItem";
 import type { MenuItemDefinition } from "../side-menu";
 import {
@@ -24,7 +23,7 @@ import {
 } from "../edit-section";
 import type { Clone } from "../form-edit/flat-raw-actions";
 
-// ── Domain types (aligned with EditForm.test) ─────────────────────────────────
+// ── Domain types (aligned with EditFormHost) ─────────────────────────────────
 
 type TypeNames = "field";
 type Params = TheParams<{ field: { name: string } }>;
@@ -78,14 +77,19 @@ const makeCtx = (
 ): Ctx =>
   branded({
     focused,
-    setAutoFocus: (id) =>
+    setAutoFocus: (id?: string) =>
       makeCtx(id ? { id, focused: !focused?.focused } : null),
-    autoFocused: (id) => (id === focused?.id ? focused.focused : null),
+    autoFocused: (id: string) => (id === focused?.id ? focused.focused : null),
   });
 
 type FieldExtra = ExtraDom;
 
-// ── Simple section shell (stand-in for school RecursiveEdit UI) ───────────────
+type DemoSectionExtra = Branded<
+  { items: (id: string) => FieldExtra },
+  "section-extra"
+>;
+
+const emptyFieldExtra = (): FieldExtra => branded({});
 
 const ActionBtn = ({
   label,
@@ -207,12 +211,10 @@ const clone: Clone<TypeNames, Params, Ctx, Section> = (
 
 // ── SectionFormItemHOC factory ────────────────────────────────────────────────
 
-const sectionExtra = branded<
-  { items: (id: string) => FieldExtra },
-  "section-extra"
->({
-  items: () => branded({}) as FieldExtra,
-});
+const sectionExtraFactory = (): DemoSectionExtra =>
+  branded({
+    items: () => emptyFieldExtra(),
+  });
 
 const Section = SectionFormItemHOC<
   TypeNames,
@@ -220,8 +222,8 @@ const Section = SectionFormItemHOC<
   Variants,
   Section,
   FieldExtra,
-  ContextDom & BaseCtx,
-  typeof sectionExtra,
+  Ctx,
+  DemoSectionExtra,
   ItemMeta
 >({
   viewers: {
@@ -235,11 +237,7 @@ const Section = SectionFormItemHOC<
   },
   useMenuItems: () => MENU_ITEMS,
   random: randomId,
-  renderEdit: (props) => (
-    <SimpleSectionEdit
-      {...(props as RecursiveEditProps<TypeNames, Params, Ctx, ItemMeta>)}
-    />
-  ),
+  renderEdit: SimpleSectionEdit,
   renderAddItem: ({ item, menuItems, random, setAddItem }) => (
     <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 8 }}>
       <span style={{ fontSize: 11, opacity: 0.6 }}>Add item</span>
@@ -291,7 +289,7 @@ const Section = SectionFormItemHOC<
 
 // ── Test UI ───────────────────────────────────────────────────────────────────
 
-export const EditSectionTest = () => {
+const EditSectionInner = () => {
   const [flatItems, setFlatItems] = useState(INITIAL);
   const [focused, setFocused] = useState<{
     id: string;
@@ -333,25 +331,21 @@ export const EditSectionTest = () => {
       {sections.map((section, i) => (
         <Section
           key={section.header.id}
-          {...({
-            ctx,
-            variants: VARIANTS,
-            extra: sectionExtra,
-            edit: {
-              clone: cloneFn,
-              actions: actionsArgs,
-              sections,
-              section,
-              i,
-            },
-            setAddItem: (item: RecursiveFormItem<TypeNames, Params, ItemMeta> | null) => {
-              if (!item) return;
-              setFlatItems((prev: FlatFormItems<TypeNames, Params, Section>) =>
-                insertFlatFormItem(prev, item),
-              );
-              setFocused({ id: item.header.id, focused: true });
-            },
-          } as ComponentProps<typeof Section>)}
+          ctx={ctx}
+          variants={VARIANTS}
+          extra={sectionExtraFactory()}
+          edit={{
+            clone: cloneFn,
+            actions: actionsArgs,
+            sections,
+            section,
+            i,
+          }}
+          setAddItem={(item) => {
+            if (!item) return;
+            setFlatItems((prev) => insertFlatFormItem(prev, item));
+            setFocused({ id: item.header.id, focused: true });
+          }}
         />
       ))}
       <details style={{ marginTop: 16 }}>
@@ -374,5 +368,8 @@ export const EditSectionTest = () => {
   );
 };
 
-export const EditSectionDemo = () =>
-  container("Edit section", <EditSectionTest />);
+export const EditSectionPlayground = () => (
+  <div style={{ padding: 16 }}>
+    <EditSectionInner />
+  </div>
+);

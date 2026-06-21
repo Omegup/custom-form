@@ -3,7 +3,7 @@
  * Ported from school form-item-edit-react/FormItemEditor.tsx.
  * See form-item-editor/README.md for wiring guide.
  */
-import { createRef, useRef } from "./_deps";
+import { useRef } from "./_deps";
 import type { ContextDom, ParamsDom, ReactNode, RefObject } from "./_deps";
 import type {
   DialogArgsDom,
@@ -49,16 +49,10 @@ export const createFormItemEditorWrapper =
     ) => ReactNode,
   ) =>
   <K extends TypeNames>(props: FormItemEditorProps<Context, DialogArgs, Extra[K]>) => {
-    const impRef = useRef<
-      Record<string, RefObject<FormItemEditorValidate<Params, K> | null>>
-    >({});
-    impRef.current.main = useRef(null);
+    const mainImpRef = useRef<FormItemEditorValidate<Params, K> | null>(null);
 
     const state = useHook(props, {
       validate: (value, setError: SetError<Params[K]>) => {
-        Object.values(impRef.current).forEach((ref) =>
-          ref.current?.validate(value, setError),
-        );
         mainImpRef.current?.validate(value, setError);
       },
     });
@@ -67,7 +61,6 @@ export const createFormItemEditorWrapper =
     const { ctx, dialogArgs } = props;
     const { header: formItem } = recursiveFormItem;
     const Editor = editors[formItem.type].editor;
-    const mainImpRef = createRef<FormItemEditorValidate<Params, K>>();
 
     const cast = <T extends Record<K, unknown>, V extends Record<K, unknown>, K extends string>(
       x: T[K] & V[K],
@@ -88,7 +81,7 @@ export const createFormItemEditorWrapper =
         formItem={formItem}
         setFormItemParam={(fn) => setFormItemParam((prev) => fn(prev.header))}
         render={(renderer) =>
-          renderer({ impRef, props, state: { ...state, extra: ns } })
+          renderer({ impRef: { current: { main: mainImpRef } }, props, state: { ...state, extra: ns } })
         }
       />,
     );

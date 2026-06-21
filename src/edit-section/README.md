@@ -16,7 +16,7 @@ Distinct from **`section-edit`** (section title/description dialog).
 | `SectionHOC.tsx` | Wires `getSectionEdit` + title + add slots + item renderers |
 | `SectionWithMenuItems.tsx` | `SectionHOC` + menu-driven add flow |
 | `SectionFormItem.tsx` | Full factory: viewers + menu + card chrome |
-| `EditSection.test.tsx` | Demo (`EditSectionDemo`) |
+| `EditSection.stories.tsx` | Storybook (`SectionFormItemHOC` demo) |
 
 ## Dependencies
 

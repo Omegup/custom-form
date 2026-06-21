@@ -1,26 +1,18 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createFormItemByGetChild } from "./createFormItemByGetChild";
 import type {
   ContextDom,
   ExtraDom,
   SomeFormItem,
-  TheParams,
-  TheVariants,
 } from "./form.t";
 import type { ViewerProps, Viewers, WithChildren } from "./form-react.t";
 import { branded } from "./branded";
-
-type TypeNames = "text" | "group";
-
-type Params = TheParams<{
-  text: { label: string };
-  group: { title: string; item: SomeFormItem<TypeNames, Params> };
-}>;
-
-type Variants = TheVariants<{
-  text: "default" | "compact";
-  group: "default" | "bordered";
-}>;
+import type {
+  FormDemoData,
+  FormDemoParams,
+  FormDemoTypeNames,
+  FormDemoVariants,
+} from "./formDemoFixtures";
 
 type Context = ContextDom & { accent: string };
 
@@ -32,59 +24,12 @@ type ItemExtra = ExtraDom & {
 type FormExtra = WithChildren<ItemExtra>;
 type ViewExtra = FormExtra["view"];
 
-type FormData = {
-  variants: {
-    text: Variants["text"];
-    group: Variants["group"];
-  };
-  values: Record<string, string>;
-  items: SomeFormItem<TypeNames, Params>[];
-};
-
-const DEFAULT_FORM: FormData = {
-  variants: {
-    text: "default",
-    group: "bordered",
-  },
-  values: {
-    t: "Alice",
-    g: "1,2,3",
-    "g:1": "Apple",
-    "g:2": "Banana",
-    "g:3": "Carrot",
-  },
-  items: [
-    {
-      id: "t",
-      type: "text",
-      deleted: false,
-      params: {
-        label: "Name",
-      },
-    },
-    {
-      id: "g",
-      type: "group",
-      deleted: false,
-      params: {
-        title: "Inventory",
-        item: {
-          id: "g",
-          type: "text",
-          deleted: false,
-          params: {
-            label: "Item",
-          },
-        },
-      },
-    },
-  ],
-};
+export type FormPlaygroundProps = FormDemoData & { accent: string };
 
 const viewers: Viewers<
-  TypeNames,
-  Params,
-  Variants,
+  FormDemoTypeNames,
+  FormDemoParams,
+  FormDemoVariants,
   FormExtra,
   Context,
   string
@@ -98,7 +43,7 @@ const viewers: Viewers<
         extra: { value, onChange },
       },
     }: {
-      props: ViewerProps<Params, Variants, "text", ViewExtra, Context>;
+      props: ViewerProps<FormDemoParams, FormDemoVariants, "text", ViewExtra, Context>;
     }) => (
       <label
         style={{
@@ -125,7 +70,7 @@ const viewers: Viewers<
         extra: { children },
       },
     }: {
-      props: ViewerProps<Params, Variants, "group", ViewExtra, Context>;
+      props: ViewerProps<FormDemoParams, FormDemoVariants, "group", ViewExtra, Context>;
     }) => (
       <fieldset
         style={{
@@ -152,8 +97,8 @@ const viewers: Viewers<
 const FormItem = createFormItemByGetChild(viewers, (x) => x);
 
 const renderItem = (
-  formItem: SomeFormItem<TypeNames, Params>,
-  variants: Variants,
+  formItem: SomeFormItem<FormDemoTypeNames, FormDemoParams>,
+  variants: FormDemoVariants,
   values: Record<string, string>,
   ctx: Context,
   onValueChange: (id: string, value: string) => void,
@@ -161,7 +106,7 @@ const renderItem = (
   if (formItem.deleted) return null;
 
   const render = (
-    formItem: SomeFormItem<TypeNames, Params>,
+    formItem: SomeFormItem<FormDemoTypeNames, FormDemoParams>,
     idSuffix: string,
   ) => (
     <FormItem
@@ -188,80 +133,44 @@ const renderItem = (
   return render(formItem, "");
 };
 
-const parseForm = (json: string): { form: FormData; error: string | null } => {
-  try {
-    return { form: JSON.parse(json) as FormData, error: null };
-  } catch (e) {
-    return {
-      form: DEFAULT_FORM,
-      error: e instanceof Error ? e.message : "Invalid JSON",
-    };
-  }
-};
+export const FormPlayground = ({
+  accent,
+  variants: variantProps,
+  values: valuesProp,
+  items,
+}: FormPlaygroundProps) => {
+  const [values, setValues] = useState(valuesProp);
 
-export const FormTest = () => {
-  const [formJson, setFormJson] = useState(() =>
-    JSON.stringify(DEFAULT_FORM, null, 2),
+  useEffect(() => {
+    setValues(valuesProp);
+  }, [valuesProp]);
+
+  const variants = useMemo(
+    (): FormDemoVariants => branded(variantProps),
+    [variantProps],
   );
-
-  const { form, error: parseError } = useMemo(
-    () => parseForm(formJson),
-    [formJson],
-  );
-
-  const variants = form.variants as Variants;
-  const ctx = useMemo((): Context => ({ accent: "#4a90d9" }) as Context, []);
+  const ctx = useMemo((): Context => branded({ accent }), [accent]);
 
   const onValueChange = useCallback((id: string, value: string) => {
-    setFormJson((prev) => {
-      try {
-        const parsed = JSON.parse(prev) as FormData;
-        return JSON.stringify(
-          { ...parsed, values: { ...parsed.values, [id]: value } },
-          null,
-          2,
-        );
-      } catch {
-        return prev;
-      }
-    });
+    setValues((prev) => ({ ...prev, [id]: value }));
   }, []);
 
   const renderItemTree = useCallback(
-    (item: SomeFormItem<TypeNames, Params>) =>
-      renderItem(item, variants, form.values, ctx, onValueChange),
-    [variants, form.values, ctx, onValueChange],
+    (item: SomeFormItem<FormDemoTypeNames, FormDemoParams>) =>
+      renderItem(item, variants, values, ctx, onValueChange),
+    [variants, values, ctx, onValueChange],
   );
 
   return (
     <div
       style={{ display: "flex", flexDirection: "column", gap: 16, padding: 16 }}
     >
-      <h2 style={{ margin: 0 }}>Form test</h2>
+      <h2 style={{ margin: 0 }}>Form</h2>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {form.items.map((item) => (
+        {items.map((item) => (
           <div key={item.id}>{renderItemTree(item)}</div>
         ))}
       </div>
-      <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        <span style={{ fontSize: 12, opacity: 0.7 }}>Form (JSON)</span>
-        <textarea
-          value={formJson}
-          onChange={(e) => setFormJson(e.target.value)}
-          spellCheck={false}
-          style={{
-            minHeight: 280,
-            fontFamily: "monospace",
-            fontSize: 12,
-            padding: 8,
-            borderRadius: 4,
-            border: parseError ? "1px solid #c00" : "1px solid #ccc",
-          }}
-        />
-        {parseError && (
-          <span style={{ color: "#c00", fontSize: 12 }}>{parseError}</span>
-        )}
-      </label>
     </div>
   );
 };
