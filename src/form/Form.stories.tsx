@@ -1,45 +1,44 @@
 import type { StoryObj } from "@storybook/react-vite";
-import { formatPlaygroundDocsSource } from "../../.storybook/playgroundDocsSource";
-import { FormPlayground, type FormPlaygroundProps } from "./FormPlayground";
-import { DEFAULT_FORM_DEMO } from "./formDemoFixtures";
-import type { FormDemoVariants } from "./formDemoFixtures";
+import { useArgs } from "storybook/preview-api";
+import { FormDemo } from "./FormDemo";
+import {
+  DEFAULT_FORM_DEMO,
+  FORM_DEMO_SOURCE,
+  storyArgsToDemoProps,
+  type FormStoryArgs,
+} from "./formDemoHelper";
 
-/** Story-only args: variant dropdowns map to `variants` on FormPlayground. */
-type FormStoryArgs = Omit<FormPlaygroundProps, "variants"> & {
-  textVariant: FormDemoVariants["text"];
-  groupVariant: FormDemoVariants["group"];
-};
+function FormDemoStory(args: FormStoryArgs) {
+  const [, updateArgs] = useArgs<FormStoryArgs>();
+  const demo = storyArgsToDemoProps(args);
 
-const toPlaygroundProps = ({
-  textVariant,
-  groupVariant,
-  ...rest
-}: FormStoryArgs): FormPlaygroundProps => ({
-  ...rest,
-  variants: { text: textVariant, group: groupVariant },
-});
+  return (
+    <FormDemo
+      {...demo}
+      onValueChange={(id, value) =>
+        updateArgs({ values: { ...demo.values, [id]: value } })
+      }
+    />
+  );
+}
 
 export default {
   title: "form/Form",
-  component: FormPlayground,
+  component: FormDemo,
   tags: ["autodocs"],
   parameters: {
     docs: {
       source: {
-        transform: (_code: string, context: { args: FormStoryArgs }) =>
-          formatPlaygroundDocsSource(
-            "import { FormPlayground } from './FormPlayground';",
-            "FormPlayground",
-            toPlaygroundProps(context.args),
-          ),
+        code: FORM_DEMO_SOURCE,
+        language: "tsx",
       },
       description: {
         component:
-          "Read-only form viewers with nested groups. Pass `variants`, `values`, and `items` — the form tree is fully dynamic. Storybook Controls split variants into dropdowns for convenience; usage below shows the real `FormPlayground` props.",
+          "JSON-driven form viewers with nested groups. Controls edit `values` and `items`; canvas input uses `useArgs` to sync back. The code panel is the live `FormDemo.tsx` source — the same component rendered here.",
       },
     },
   },
-  render: (args: FormStoryArgs) => <FormPlayground {...toPlaygroundProps(args)} />,
+  render: FormDemoStory,
   argTypes: {
     accent: { control: "color", table: { category: "Theme" } },
     textVariant: {
@@ -78,22 +77,4 @@ export const Default: Story = {};
 
 export const CompactVariants: Story = {
   args: { textVariant: "compact", groupVariant: "default" },
-};
-
-export const EmptyName: Story = {
-  args: {
-    values: { ...DEFAULT_FORM_DEMO.values, t: "" },
-  },
-};
-
-export const SingleInventoryRow: Story = {
-  args: {
-    values: {
-      ...DEFAULT_FORM_DEMO.values,
-      g: "1",
-      "g:1": "Only item",
-      "g:2": "",
-      "g:3": "",
-    },
-  },
 };
