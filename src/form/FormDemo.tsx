@@ -1,8 +1,9 @@
 import { useCallback } from "react";
 import * as demo from "./formDemoHelper";
+import * as types from "./formDemoTypes.t";
 import { branded, createFormItemByGetChild } from "./index";
 
-const viewers: demo.Viewers = {
+const viewers: types.Viewers = {
   text: {
     viewer: ({ props: { formItem, ctx, variant, extra } }) => {
       const { params, id } = formItem;
@@ -44,7 +45,7 @@ export const FormDemo = () => {
   );
 
   const renderItem = (
-    item: (typeof items)[number],
+    item: types.Item,
     suffix: string,
   ): React.ReactNode => {
     if (item.deleted) return null;

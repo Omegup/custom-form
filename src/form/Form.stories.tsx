@@ -19,7 +19,7 @@ export default {
       },
       description: {
         component:
-          "JSON-driven form viewers with nested groups. Controls edit `values` and `items`; canvas input uses `useArgs` to sync back. The code panel is the live `FormDemo.tsx` source — the same component rendered here.",
+          "JSON-driven form viewers with nested groups. Controls edit `values` and `items`; canvas input uses `useArgs` to sync back. The code panel shows `formDemoTypes.t.ts` (type definitions with `TheParams`, `TheVariants`, etc.) and `FormDemo.tsx` (viewers + integration) — the same files that run here.",
       },
     },
   },

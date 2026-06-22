@@ -1,67 +1,27 @@
-import { useCallback, useMemo, type ReactNode } from "react";
-import type {
-  ContextDom,
-  ExtraDom,
-  SomeFormItem,
-  TheParams,
-  TheVariants,
-  TypedFormItem,
-} from "./form.t";
-import type { GetChild, Viewers, WithChildren } from "./form-react.t";
+import { useMemo, type ReactNode } from "react";
+import { useArgs } from "storybook/preview-api";
 import { branded } from "./branded";
 import formDemoSource from "./FormDemo.tsx?raw";
-import { useArgs } from "storybook/preview-api";
+import type {
+  Context,
+  FormDemoData,
+  Props,
+  StoryArgs,
+  Variants,
+} from "./formDemoTypes.t";
+import formDemoTypesSource from "./formDemoTypes.t.ts?raw";
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-export type TypeNames = "text" | "group";
-
-type MyViewers = Viewers<TypeNames, Params, Variants, Extra, Context, string>;
-
-export type { MyViewers as Viewers };
-
-export type Params = TheParams<{
-  text: { label: string; showLabel: boolean; template?: boolean };
-  group: {
-    title: string;
-    item: SomeFormItem<TypeNames, Params>;
-    name?: TypedFormItem<Params, "text">;
-  };
-}>;
-
-export type Variants = TheVariants<{
-  text: "default" | "compact";
-  group: "default" | "bordered";
-}>;
-
-export type Context = ContextDom & { accent: string };
-
-export type FormDemoData = {
-  variants: {
-    text: Variants["text"];
-    group: Variants["group"];
-  };
-  values: Record<string, string>;
-  items: SomeFormItem<TypeNames, Params>[];
-};
-
-export type Props = FormDemoData & {
-  accent: string;
-  onValueChange: (id: string, value: string) => void;
-};
-
-/** Storybook Controls args — variant dropdowns map to `variants` on FormDemo. */
-export type StoryArgs = Omit<Props, "variants" | "onValueChange"> & {
-  textVariant: Variants["text"];
-  groupVariant: Variants["group"];
-};
-
-type ItemExtra = ExtraDom & {
-  value: string;
-  onChange: (value: string) => void;
-};
-
-export type Extra = WithChildren<ItemExtra>;
+export type {
+  Context,
+  Extra,
+  FormDemoData,
+  Params,
+  Props,
+  StoryArgs,
+  TypeNames,
+  Variants,
+  Viewers,
+} from "./formDemoTypes.t";
 
 // ── Fixture ───────────────────────────────────────────────────────────────────
 
@@ -132,9 +92,16 @@ export const DEFAULT_FORM_DEMO: FormDemoData = {
   ],
 };
 
-// ── Storybook docs (sole `?raw` import) ─────────────────────────────────────
+// ── Storybook docs (`?raw` of types + integration) ────────────────────────────
 
-export const FORM_DEMO_SOURCE = formDemoSource;
+const withFileHeader = (path: string, source: string) =>
+  `// ── ${path} ──\n${source.trimEnd()}`;
+
+export const FORM_DEMO_SOURCE = [
+  withFileHeader("formDemoTypes.t.ts", formDemoTypesSource),
+  "",
+  withFileHeader("FormDemo.tsx", formDemoSource),
+].join("\n");
 
 // ── Story arg mapping ─────────────────────────────────────────────────────────
 
@@ -148,10 +115,6 @@ export const storyArgsToDemoProps = ({
 });
 
 // ── Demo helpers (typing lives here, not in FormDemo.tsx) ─────────────────────
-
-export const defineFormDemoViewers = (
-  viewers: Viewers<TypeNames, Params, Variants, Extra, Context, string>,
-) => viewers;
 
 export const applyTemplate = (
   label: string,
