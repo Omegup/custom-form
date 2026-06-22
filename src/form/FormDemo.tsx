@@ -1,128 +1,83 @@
-import { useMemo } from "react";
-import { createFormItemByGetChild, branded } from "./index";
-import type { Viewers } from "./index";
+import { useCallback } from "react";
 import * as demo from "./formDemoHelper";
+import { branded, createFormItemByGetChild } from "./index";
 
-type FormDemoViewers = Viewers<
-  demo.TypeNames,
-  demo.Params,
-  demo.Variants,
-  demo.Extra,
-  demo.Context,
-  string
->;
-const viewers: FormDemoViewers = {
+const viewers: demo.Viewers = {
   text: {
-    viewer: ({
-      props: {
-        formItem,
-        ctx,
-        variant,
-        extra: { value, onChange },
-      },
-    }) =>
-      formItem.params.showLabel ? (
-        <label
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 4,
-            padding: variant === "compact" ? 4 : 8,
-            borderLeft: `3px solid ${ctx.accent}`,
-          }}
-        >
-          <span style={{ fontSize: 12, opacity: 0.7 }}>
-            {demo.formDemoLabel(formItem)}
-          </span>
+    viewer: ({ props: { formItem, ctx, variant, extra } }) => {
+      const { params, id } = formItem;
+      const { showLabel, label, template } = params;
+      const { value, onChange } = extra;
+      return (
+        <demo.Label variant={variant} border={ctx.accent}>
+          {showLabel ? demo.applyTemplate(label, template, id) : null}
           <input value={value} onChange={(e) => onChange(e.target.value)} />
-        </label>
-      ) : (
-        <input value={value} onChange={(e) => onChange(e.target.value)} />
-      ),
+        </demo.Label>
+      );
+    },
   },
   group: {
-    viewer: ({
-      props: {
-        formItem,
-        ctx,
-        variant,
-        extra: { children },
-      },
-    }) => (
-      <fieldset
-        style={{
-          border: variant === "bordered" ? `1px solid ${ctx.accent}` : "none",
-          borderRadius: 4,
-          padding: 8,
-        }}
-      >
-        <legend>{formItem.params.title}</legend>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {children}
-        </div>
-      </fieldset>
-    ),
-    repeatChildren: (g, { value: ids }) => [
-      ...(g.params.name ? [""] : []),
-      ...(ids?.split(",") ?? []),
-    ],
+    viewer: ({ props: { formItem, ctx, variant, extra } }) => {
+      const { params } = formItem;
+      const { title } = params;
+      return (
+        <demo.Group variant={variant} border={ctx.accent} title={title}>
+          {extra.children}
+        </demo.Group>
+      );
+    },
+    repeatChildren: (g, { value: ids }) =>
+      (g.params.name ? [""] : []).concat(ids?.split(",") ?? []),
   },
 };
 
 const FormItem = createFormItemByGetChild(viewers, (x) => x);
 
-export const FormDemo = ({
-  accent,
-  variants,
-  values,
-  items,
-  onValueChange,
-}: demo.Props) => {
-  const ctx = useMemo((): demo.Context => branded({ accent }), [accent]);
-  const brandedVariants = useMemo(
-    (): demo.Variants => branded(variants),
-    [variants],
+export const FormDemo = () => {
+  const { ctx, variants, values, items, updateArgs } = demo.useStoryArgs();
+
+  const onValueChange = useCallback(
+    (id: string, value: string) => {
+      updateArgs({ values: { ...values, [id]: value } });
+    },
+    [updateArgs, values],
   );
 
-  const rendered = useMemo(() => {
-    const renderItem = (
-      formItem: (typeof items)[number],
-      suffix: string,
-    ): React.ReactNode => {
-      if (formItem.deleted) return null;
+  const renderItem = (
+    item: (typeof items)[number],
+    suffix: string,
+  ): React.ReactNode => {
+    if (item.deleted) return null;
 
-      const render = (item: (typeof items)[number], itemSuffix: string) => (
-        <FormItem
-          viewProps={{
-            formItem: { ...item, id: item.id + itemSuffix },
-            ctx,
-            variant: brandedVariants[item.type],
-            extra: demo.bindFormDemoExtra(
-              item,
-              itemSuffix,
-              values,
-              onValueChange,
-              render,
-            ),
-          }}
-          renderCard={view => <demo.Card>{view}</demo.Card>}
-        />
-      );
+    return (
+      <FormItem
+        viewProps={{
+          formItem: { ...item, id: item.id + suffix },
+          ctx,
+          variant: variants[item.type],
+          extra: branded({
+            value: values[item.id + suffix] ?? "",
+            onChange: (value: string) =>
+              onValueChange(item.id + suffix, value),
+            getChild: (childSuffix: string, index: number) => {
+              if (item.type !== "group") return null;
+              if (index === 0 && item.params.name)
+                return renderItem(item.params.name, suffix);
+              return renderItem(item.params.item, `${suffix}:${childSuffix}`);
+            },
+          }),
+        }}
+        renderCard={(view) => <demo.Card>{view}</demo.Card>}
+      />
+    );
 
-      return render(formItem, suffix);
-    };
-
-    return items.map((item) => <div key={item.id}>{renderItem(item, "")}</div>);
-  }, [items, brandedVariants, values, ctx, onValueChange]);
+  };
 
   return (
-    <div
-      style={{ display: "flex", flexDirection: "column", gap: 16, padding: 16 }}
-    >
-      <h2 style={{ margin: 0 }}>Form</h2>
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {rendered}
-      </div>
-    </div>
+    <demo.FormContainer>
+      {items.map((item) => (
+        <div key={item.id}>{renderItem(item, "")}</div>
+      ))}
+    </demo.FormContainer>
   );
 };

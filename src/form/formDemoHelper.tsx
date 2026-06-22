@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useCallback, useMemo, type ReactNode } from "react";
 import type {
   ContextDom,
   ExtraDom,
@@ -10,10 +10,15 @@ import type {
 import type { GetChild, Viewers, WithChildren } from "./form-react.t";
 import { branded } from "./branded";
 import formDemoSource from "./FormDemo.tsx?raw";
+import { useArgs } from "storybook/preview-api";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export type TypeNames = "text" | "group";
+
+type MyViewers = Viewers<TypeNames, Params, Variants, Extra, Context, string>;
+
+export type { MyViewers as Viewers };
 
 export type Params = TheParams<{
   text: { label: string; showLabel: boolean; template?: boolean };
@@ -46,7 +51,7 @@ export type Props = FormDemoData & {
 };
 
 /** Storybook Controls args — variant dropdowns map to `variants` on FormDemo. */
-export type FormStoryArgs = Omit<Props, "variants" | "onValueChange"> & {
+export type StoryArgs = Omit<Props, "variants" | "onValueChange"> & {
   textVariant: Variants["text"];
   groupVariant: Variants["group"];
 };
@@ -137,7 +142,7 @@ export const storyArgsToDemoProps = ({
   textVariant,
   groupVariant,
   ...rest
-}: FormStoryArgs): Omit<Props, "onValueChange"> => ({
+}: StoryArgs): Omit<Props, "onValueChange"> => ({
   ...rest,
   variants: { text: textVariant, group: groupVariant },
 });
@@ -145,47 +150,90 @@ export const storyArgsToDemoProps = ({
 // ── Demo helpers (typing lives here, not in FormDemo.tsx) ─────────────────────
 
 export const defineFormDemoViewers = (
-  viewers: Viewers<
-    TypeNames,
-    Params,
-    Variants,
-    Extra,
-    Context,
-    string
-  >,
+  viewers: Viewers<TypeNames, Params, Variants, Extra, Context, string>,
 ) => viewers;
 
-export const formDemoLabel = (
-  formItem: SomeFormItem<TypeNames, Params>,
+export const applyTemplate = (
+  label: string,
+  template: boolean | undefined,
+  id: string,
 ) => {
-  if (formItem.type !== "text") return "";
-  const { label, template } = formItem.params;
-  return template
-    ? label.replace("{{id}}", formItem.id.split(":").pop() ?? "")
-    : label;
+  return template ? label.replace("{{id}}", id.split(":").pop() ?? "") : label;
 };
 
-export const Card = ({children}: {children: ReactNode}) => (
+export const Label = ({
+  variant,
+  border,
+  children: [label, ...children],
+}: {
+  variant: Variants["text"];
+  border: Context["accent"];
+  children: ReactNode[];
+}) =>
+  label === null ? (
+    children
+  ) : (
+    <label
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 4,
+        padding: variant === "compact" ? 4 : 8,
+        borderLeft: `3px solid ${border}`,
+      }}
+    >
+      <span style={{ fontSize: 12, opacity: 0.7 }}>{label}</span>
+      {children}
+    </label>
+  );
+
+export const Group = ({
+  variant,
+  border,
+  title,
+  children,
+}: {
+  variant: Variants["group"];
+  border: Context["accent"];
+  title: string;
+  children: ReactNode;
+}) => (
+  <fieldset
+    style={{
+      border: variant === "bordered" ? `1px solid ${border}` : "none",
+      borderRadius: 4,
+      padding: 8,
+    }}
+  >
+    <legend>{title}</legend>
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {children}
+    </div>
+  </fieldset>
+);
+
+export const useStoryArgs = () => {
+  const [{ accent, textVariant, groupVariant, values, items }, updateArgs] =
+    useArgs<StoryArgs>();
+  const ctx = useMemo((): Context => branded({ accent }), [accent]);
+  const variants = useMemo(
+    (): Variants => branded({ text: textVariant, group: groupVariant }),
+    [textVariant, groupVariant],
+  );
+  return { ctx, variants, values, items, updateArgs };
+};
+
+export const Card = ({ children }: { children: ReactNode }) => (
   <div style={{ background: "#f5f5f5", borderRadius: 4 }}>{children}</div>
 );
 
-export const bindFormDemoExtra = (
-  formItem: SomeFormItem<TypeNames, Params>,
-  suffix: string,
-  values: Record<string, string>,
-  onValueChange: (id: string, value: string) => void,
-  render: (
-    item: SomeFormItem<TypeNames, Params>,
-    suffix: string,
-  ) => ReactNode,
-) =>
-  branded<ItemExtra & GetChild, "viewer-extra">({
-    value: values[formItem.id + suffix] ?? "",
-    onChange: (value: string) => onValueChange(formItem.id + suffix, value),
-    getChild: (childSuffix: string, index: number) => {
-      if (formItem.type !== "group") return null;
-      if (index === 0 && formItem.params.name)
-        return render(formItem.params.name, suffix);
-      return render(formItem.params.item, `${suffix}:${childSuffix}`);
-    },
-  });
+export const FormContainer = ({ children }: { children: ReactNode }) => (
+  <div
+    style={{ display: "flex", flexDirection: "column", gap: 16, padding: 16 }}
+  >
+    <h2 style={{ margin: 0 }}>Form</h2>
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      {children}
+    </div>
+  </div>
+);

@@ -1,26 +1,11 @@
 import type { StoryObj } from "@storybook/react-vite";
-import { useArgs } from "storybook/preview-api";
 import { FormDemo } from "./FormDemo";
 import {
-  DEFAULT_FORM_DEMO,
-  FORM_DEMO_SOURCE,
-  storyArgsToDemoProps,
-  type FormStoryArgs,
+    DEFAULT_FORM_DEMO,
+    FORM_DEMO_SOURCE,
+    type StoryArgs
 } from "./formDemoHelper";
 
-function FormDemoStory(args: FormStoryArgs) {
-  const [, updateArgs] = useArgs<FormStoryArgs>();
-  const demo = storyArgsToDemoProps(args);
-
-  return (
-    <FormDemo
-      {...demo}
-      onValueChange={(id, value) =>
-        updateArgs({ values: { ...demo.values, [id]: value } })
-      }
-    />
-  );
-}
 
 export default {
   title: "form/Form",
@@ -38,7 +23,7 @@ export default {
       },
     },
   },
-  render: FormDemoStory,
+  render: FormDemo,
   argTypes: {
     accent: { control: "color", table: { category: "Theme" } },
     textVariant: {
@@ -71,7 +56,7 @@ export default {
   },
 };
 
-type Story = StoryObj<FormStoryArgs>;
+type Story = StoryObj<StoryArgs>;
 
 export const Default: Story = {};
 
