@@ -44,10 +44,7 @@ export const FormDemo = () => {
     [updateArgs, values],
   );
 
-  const renderItem = (
-    item: types.Item,
-    suffix: string,
-  ): React.ReactNode => {
+  const renderItem = (item: types.Item, suffix: string): React.ReactNode => {
     if (item.deleted) return null;
     const id = item.id + suffix;
 
@@ -59,9 +56,8 @@ export const FormDemo = () => {
           variant: variants[item.type],
           extra: branded({
             value: values[id] ?? "",
-            onChange: (value: string) =>
-              onValueChange(id, value),
-            getChild: (childSuffix: string, index: number) => {
+            onChange: (value) => onValueChange(id, value),
+            getChild: (childSuffix, index) => {
               if (item.type !== "group") return null;
               if (index === 0 && item.params.name)
                 return renderItem(item.params.name, suffix);
@@ -72,7 +68,6 @@ export const FormDemo = () => {
         renderCard={(view) => <demo.Card>{view}</demo.Card>}
       />
     );
-
   };
 
   return (
