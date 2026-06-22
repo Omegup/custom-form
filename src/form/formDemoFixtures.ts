@@ -28,10 +28,15 @@ export const DEFAULT_FORM_DEMO: FormDemoData = {
   },
   values: {
     t: "Alice",
-    g: "1,2,3",
-    "g:1": "Apple",
-    "g:2": "Banana",
-    "g:3": "Carrot",
+    g: "1,2",
+    "g:1": "1,2,3",
+    "g:1:1": "Apple",
+    "g:1:2": "Banana",
+    "g:1:3": "Carrot",
+    "g:2": "1,2,3",
+    "g:2:1": "Apple",
+    "g:2:2": "Banana",
+    "g:2:3": "Carrot",
   },
   items: [
     {
@@ -50,10 +55,18 @@ export const DEFAULT_FORM_DEMO: FormDemoData = {
         title: "Inventory",
         item: {
           id: "g",
-          type: "text",
+          type: "group",
           deleted: false,
           params: {
-            label: "Item",
+            title: "InventoryL2",
+            item: {
+              id: "g",
+              type: "text",
+              deleted: false,
+              params: {
+                label: "Item",
+              },
+            },
           },
         },
       },
@@ -61,10 +74,3 @@ export const DEFAULT_FORM_DEMO: FormDemoData = {
   ],
 };
 
-export const isFormDemoData = (value: unknown): value is FormDemoData =>
-  typeof value === "object" &&
-  value !== null &&
-  "variants" in value &&
-  "values" in value &&
-  "items" in value &&
-  Array.isArray(value.items);

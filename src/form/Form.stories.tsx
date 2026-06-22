@@ -1,9 +1,10 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { StoryObj } from "@storybook/react-vite";
+import { formatPlaygroundDocsSource } from "../../.storybook/playgroundDocsSource";
 import { FormPlayground, type FormPlaygroundProps } from "./FormPlayground";
 import { DEFAULT_FORM_DEMO } from "./formDemoFixtures";
 import type { FormDemoVariants } from "./formDemoFixtures";
 
-/** Story args: fixed variants as selects; dynamic `values` / `items` stay as JSON objects. */
+/** Story-only args: variant dropdowns map to `variants` on FormPlayground. */
 type FormStoryArgs = Omit<FormPlaygroundProps, "variants"> & {
   textVariant: FormDemoVariants["text"];
   groupVariant: FormDemoVariants["group"];
@@ -18,23 +19,27 @@ const toPlaygroundProps = ({
   variants: { text: textVariant, group: groupVariant },
 });
 
-const FormStory = (args: FormStoryArgs) => (
-  <FormPlayground {...toPlaygroundProps(args)} />
-);
-
-const meta = {
+export default {
   title: "form/Form",
-  component: FormStory,
+  component: FormPlayground,
   tags: ["autodocs"],
   parameters: {
     docs: {
+      source: {
+        transform: (_code: string, context: { args: FormStoryArgs }) =>
+          formatPlaygroundDocsSource(
+            "import { FormPlayground } from './FormPlayground';",
+            "FormPlayground",
+            toPlaygroundProps(context.args),
+          ),
+      },
       description: {
         component:
-          "Read-only form viewers with nested groups. Variants use fixed dropdowns; `values` and `items` are JSON objects for a fully dynamic form tree. Canvas inputs update locally until Controls change.",
+          "Read-only form viewers with nested groups. Pass `variants`, `values`, and `items` — the form tree is fully dynamic. Storybook Controls split variants into dropdowns for convenience; usage below shows the real `FormPlayground` props.",
       },
     },
   },
-  render: (args) => <FormStory {...args} />,
+  render: (args: FormStoryArgs) => <FormPlayground {...toPlaygroundProps(args)} />,
   argTypes: {
     accent: { control: "color", table: { category: "Theme" } },
     textVariant: {
@@ -65,10 +70,9 @@ const meta = {
     values: DEFAULT_FORM_DEMO.values,
     items: DEFAULT_FORM_DEMO.items,
   },
-} satisfies Meta<FormStoryArgs>;
+};
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<FormStoryArgs>;
 
 export const Default: Story = {};
 

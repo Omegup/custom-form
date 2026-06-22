@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createFormItemByGetChild } from "./createFormItemByGetChild";
-import type {
-  ContextDom,
-  ExtraDom,
-  SomeFormItem,
-} from "./form.t";
+import type { ContextDom, ExtraDom, SomeFormItem } from "./form.t";
 import type { ViewerProps, Viewers, WithChildren } from "./form-react.t";
 import { branded } from "./branded";
 import type {
@@ -43,7 +39,13 @@ const viewers: Viewers<
         extra: { value, onChange },
       },
     }: {
-      props: ViewerProps<FormDemoParams, FormDemoVariants, "text", ViewExtra, Context>;
+      props: ViewerProps<
+        FormDemoParams,
+        FormDemoVariants,
+        "text",
+        ViewExtra,
+        Context
+      >;
     }) => (
       <label
         style={{
@@ -70,7 +72,13 @@ const viewers: Viewers<
         extra: { children },
       },
     }: {
-      props: ViewerProps<FormDemoParams, FormDemoVariants, "group", ViewExtra, Context>;
+      props: ViewerProps<
+        FormDemoParams,
+        FormDemoVariants,
+        "group",
+        ViewExtra,
+        Context
+      >;
     }) => (
       <fieldset
         style={{
@@ -87,10 +95,7 @@ const viewers: Viewers<
         </div>
       </fieldset>
     ),
-    repeatChildren: ({ id }, { value: ids }) =>
-      ids
-        ?.split(",")
-        .map((i) => `:${[...id.split(":").slice(1), i].join(":")}`) ?? [],
+    repeatChildren: (_, { value: ids }) => ids?.split(",") ?? [],
   },
 };
 
@@ -107,7 +112,7 @@ const renderItem = (
 
   const render = (
     formItem: SomeFormItem<FormDemoTypeNames, FormDemoParams>,
-    idSuffix: string,
+    suffix: string,
   ) => (
     <FormItem
       viewProps={{
@@ -115,12 +120,12 @@ const renderItem = (
         ctx,
         variant: variants[formItem.type],
         extra: branded({
-          value: values[formItem.id + idSuffix] ?? "",
-          onChange: (value) => onValueChange(formItem.id + idSuffix, value),
-          getChild: (suffix) => {
+          value: values[formItem.id + suffix] ?? "",
+          onChange: (value) => onValueChange(formItem.id + suffix, value),
+          getChild: (childSuffix) => {
             if (formItem.type !== "group") return null;
             const child = formItem.params.item;
-            return child ? render(child, suffix) : null;
+            return child ? render(child, `${suffix}:${childSuffix}`) : null;
           },
         }),
       }}

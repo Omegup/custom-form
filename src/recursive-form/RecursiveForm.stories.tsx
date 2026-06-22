@@ -1,4 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { StoryObj } from "@storybook/react-vite";
+import { formatPlaygroundDocsSource } from "../../.storybook/playgroundDocsSource";
 import {
   RecursiveFormPlayground,
   type RecursiveFormPlaygroundProps,
@@ -8,7 +9,7 @@ import {
   type RecursiveFormDemoVariants,
 } from "./recursiveFormDemoFixtures";
 
-/** Story args: fixed variants as selects; dynamic `values` / `items` stay as JSON objects. */
+/** Story-only args: variant dropdowns map to `variants` on RecursiveFormPlayground. */
 type RecursiveFormStoryArgs = Omit<RecursiveFormPlaygroundProps, "variants"> & {
   textVariant: RecursiveFormDemoVariants["text"];
   groupVariant: RecursiveFormDemoVariants["group"];
@@ -23,23 +24,29 @@ const toPlaygroundProps = ({
   variants: { text: textVariant, group: groupVariant },
 });
 
-const RecursiveFormStory = (args: RecursiveFormStoryArgs) => (
-  <RecursiveFormPlayground {...toPlaygroundProps(args)} />
-);
-
-const meta = {
+export default {
   title: "recursive-form/Recursive form",
-  component: RecursiveFormStory,
+  component: RecursiveFormPlayground,
   tags: ["autodocs"],
   parameters: {
     docs: {
+      source: {
+        transform: (_code: string, context: { args: RecursiveFormStoryArgs }) =>
+          formatPlaygroundDocsSource(
+            "import { RecursiveFormPlayground } from './RecursiveFormPlayground';",
+            "RecursiveFormPlayground",
+            toPlaygroundProps(context.args),
+          ),
+      },
       description: {
         component:
-          "Nested recursive items shown twice: skeleton viewers (top) and value-bound inputs (bottom). Variants use fixed dropdowns; `values` and `items` are JSON for a fully dynamic tree.",
+          "Nested recursive items shown twice: skeleton viewers (top) and value-bound inputs (bottom). Pass `variants`, `values`, and `items` — the tree is fully dynamic. Storybook Controls split variants into dropdowns for convenience; usage below shows the real `RecursiveFormPlayground` props.",
       },
     },
   },
-  render: (args) => <RecursiveFormStory {...args} />,
+  render: (args: RecursiveFormStoryArgs) => (
+    <RecursiveFormPlayground {...toPlaygroundProps(args)} />
+  ),
   argTypes: {
     accent: { control: "color", table: { category: "Theme" } },
     textVariant: {
@@ -70,10 +77,9 @@ const meta = {
     values: DEFAULT_RECURSIVE_FORM_DEMO.values,
     items: DEFAULT_RECURSIVE_FORM_DEMO.items,
   },
-} satisfies Meta<RecursiveFormStoryArgs>;
+};
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<RecursiveFormStoryArgs>;
 
 export const Default: Story = {};
 
