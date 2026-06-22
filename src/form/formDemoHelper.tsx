@@ -4,28 +4,18 @@ import { branded } from "./branded";
 import formDemoSource from "./FormDemo.tsx?raw";
 import type {
   Context,
-  FormDemoData,
+  Data,
   Props,
   StoryArgs,
   Variants,
 } from "./formDemoTypes.t";
 import formDemoTypesSource from "./formDemoTypes.t.ts?raw";
 
-export type {
-  Context,
-  Extra,
-  FormDemoData,
-  Params,
-  Props,
-  StoryArgs,
-  TypeNames,
-  Variants,
-  Viewers,
-} from "./formDemoTypes.t";
+export type { StoryArgs } from "./formDemoTypes.t";
 
 // ── Fixture ───────────────────────────────────────────────────────────────────
 
-export const DEFAULT_FORM_DEMO: FormDemoData = {
+export const DEFAULT_FORM_DEMO: Data = {
   variants: {
     text: "default",
     group: "bordered",

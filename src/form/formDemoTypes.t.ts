@@ -28,7 +28,7 @@ export type Context = ContextDom & { accent: string };
 
 export type Item = SomeFormItem<TypeNames, Params>;
 
-export type FormDemoData = {
+export type Data = {
   variants: {
     text: Variants["text"];
     group: Variants["group"];
@@ -37,7 +37,7 @@ export type FormDemoData = {
   items: SomeFormItem<TypeNames, Params>[];
 };
 
-export type Props = FormDemoData & {
+export type Props = Data & {
   accent: string;
   onValueChange: (id: string, value: string) => void;
 };

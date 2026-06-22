@@ -1,11 +1,10 @@
 import type { StoryObj } from "@storybook/react-vite";
 import { FormDemo } from "./FormDemo";
 import {
-    DEFAULT_FORM_DEMO,
-    FORM_DEMO_SOURCE,
-    type StoryArgs
+  DEFAULT_FORM_DEMO,
+  FORM_DEMO_SOURCE,
+  type StoryArgs,
 } from "./formDemoHelper";
-
 
 export default {
   title: "form/Form",
@@ -38,12 +37,14 @@ export default {
     },
     values: {
       control: "object",
-      description: "Field values keyed by item id (group rows use `id:row` suffixes).",
+      description:
+        "Field values keyed by item id (group rows use `id:row` suffixes).",
       table: { category: "Form data" },
     },
     items: {
       control: "object",
-      description: "Top-level form item tree — add/remove fields and groups freely.",
+      description:
+        "Top-level form item tree — add/remove fields and groups freely.",
       table: { category: "Form data" },
     },
   },
