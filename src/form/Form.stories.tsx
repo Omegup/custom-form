@@ -1,10 +1,10 @@
 import type { StoryObj } from "@storybook/react-vite";
-import { FormDemo } from "./FormDemo";
+import { FormDemo } from "./demo/FormDemo";
 import {
   DEFAULT_FORM_DEMO,
   FORM_DEMO_SOURCE,
   type StoryArgs,
-} from "./formDemoHelper";
+} from "./demo/formDemoHelper";
 
 export default {
   title: "form/Form",

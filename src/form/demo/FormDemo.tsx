@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import * as demo from "./formDemoHelper";
 import * as types from "./formDemoTypes.t";
-import { branded, createFormItemByGetChild } from "./index";
+import { branded, createFormItemByGetChild } from "./library";
 
 const viewers: types.Viewers = {
   text: {

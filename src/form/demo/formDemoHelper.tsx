@@ -1,6 +1,6 @@
 import { useMemo, type ReactNode } from "react";
 import { useArgs } from "storybook/preview-api";
-import { branded } from "./branded";
+import { branded } from "../branded";
 import formDemoSource from "./FormDemo.tsx?raw";
 import type {
   Context,

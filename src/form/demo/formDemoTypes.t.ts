@@ -5,8 +5,8 @@ import type {
   TheParams,
   TheVariants,
   TypedFormItem,
-} from "./form.t";
-import type { Viewers as ViewersType, WithChildren } from "./form-react.t";
+} from "../form.t";
+import type { Viewers as ViewersType, WithChildren } from "../form-react.t";
 
 export type TypeNames = "text" | "group";
 
