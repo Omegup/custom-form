@@ -101,7 +101,7 @@ const makeViewers = <ItemExtra extends ExtraDom>(
       >
         <legend>{props.formItem.params.title}</legend>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {Object.entries(props.extra.children).map(([suffix, child]) => (
+          {props.extra.children.map((child) => (
             <div
               style={{
                 display: "flex",
@@ -110,7 +110,7 @@ const makeViewers = <ItemExtra extends ExtraDom>(
                 border: "1px solid #ccc",
                 padding: 8,
               }}
-              key={suffix}
+              key={child.key}
             >
               {child}
             </div>

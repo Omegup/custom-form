@@ -46,22 +46,30 @@ const viewers: Viewers<
         ViewExtra,
         Context
       >;
-    }) => (
-      <label
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 4,
-          padding: variant === "compact" ? 4 : 8,
-          borderLeft: `3px solid ${ctx.accent}`,
-        }}
-      >
-        <span style={{ fontSize: 12, opacity: 0.7 }}>
-          {formItem.params.label}
-        </span>
+    }) =>
+      formItem.params.showLabel ? (
+        <label
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+            padding: variant === "compact" ? 4 : 8,
+            borderLeft: `3px solid ${ctx.accent}`,
+          }}
+        >
+          <span style={{ fontSize: 12, opacity: 0.7 }}>
+            {formItem.params.template
+              ? formItem.params.label.replace(
+                  "{{id}}",
+                  formItem.id.split(":").pop() ?? "",
+                )
+              : formItem.params.label}
+          </span>
+          <input value={value} onChange={(e) => onChange(e.target.value)} />
+        </label>
+      ) : (
         <input value={value} onChange={(e) => onChange(e.target.value)} />
-      </label>
-    ),
+      ),
   },
   group: {
     viewer: ({
@@ -89,13 +97,14 @@ const viewers: Viewers<
       >
         <legend>{formItem.params.title}</legend>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {Object.entries(children).map(([suffix, child]) => (
-            <div key={suffix}>{child}</div>
-          ))}
+          {children}
         </div>
       </fieldset>
     ),
-    repeatChildren: (_, { value: ids }) => ids?.split(",") ?? [],
+    repeatChildren: (g, { value: ids }) => [
+      ...(g.params.name ? [""] : []),
+      ...(ids?.split(",") ?? []),
+    ],
   },
 };
 
@@ -116,16 +125,17 @@ const renderItem = (
   ) => (
     <FormItem
       viewProps={{
-        formItem,
+        formItem: { ...formItem, id: formItem.id + suffix },
         ctx,
         variant: variants[formItem.type],
         extra: branded({
           value: values[formItem.id + suffix] ?? "",
           onChange: (value) => onValueChange(formItem.id + suffix, value),
-          getChild: (childSuffix) => {
+          getChild: (childSuffix, index) => {
             if (formItem.type !== "group") return null;
-            const child = formItem.params.item;
-            return child ? render(child, `${suffix}:${childSuffix}`) : null;
+            if (index === 0 && formItem.params.name)
+              return render(formItem.params.name, `${suffix}`);
+            return render(formItem.params.item, `${suffix}:${childSuffix}`);
           },
         }),
       }}

@@ -1,9 +1,9 @@
 import type React from "react";
 import type { ContextDom, ExtraDom, ParamsDom, TypedFormItem, VariantsDom, ViewExtraKeys } from "./form.t";
 
-export type GetChild = { getChild: (suffix: string) => React.ReactNode }
+export type GetChild = { getChild: (suffix: string, index: number) => React.ReactNode }
 export type WithChildren<Extra, ExtraView = Extra> = {
-  view: Extra & { children: Record<string, React.ReactNode> }
+  view: Extra & { children: React.ReactElement[] }
   children: ExtraView
 }
 export type WithGetChild<Extra> = {
