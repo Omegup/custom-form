@@ -49,18 +49,17 @@ export const FormDemo = () => {
     suffix: string,
   ): React.ReactNode => {
     if (item.deleted) return null;
-    const id = item.id + suffix;
 
     return (
       <FormItem
         viewProps={{
-          formItem: { ...item, id },
+          formItem: { ...item, id: item.id + suffix },
           ctx,
           variant: variants[item.type],
           extra: branded({
-            value: values[id] ?? "",
+            value: values[item.id + suffix] ?? "",
             onChange: (value: string) =>
-              onValueChange(id, value),
+              onValueChange(item.id + suffix, value),
             getChild: (childSuffix: string, index: number) => {
               if (item.type !== "group") return null;
               if (index === 0 && item.params.name)
