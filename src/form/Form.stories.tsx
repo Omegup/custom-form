@@ -1,61 +1,71 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { FormPlayground } from "./FormPlayground";
+import { FormPlayground, type FormPlaygroundProps } from "./FormPlayground";
 import { DEFAULT_FORM_DEMO } from "./formDemoFixtures";
+import type { FormDemoVariants } from "./formDemoFixtures";
+
+/** Story args: fixed variants as selects; dynamic `values` / `items` stay as JSON objects. */
+type FormStoryArgs = Omit<FormPlaygroundProps, "variants"> & {
+  textVariant: FormDemoVariants["text"];
+  groupVariant: FormDemoVariants["group"];
+};
+
+const toPlaygroundProps = ({
+  textVariant,
+  groupVariant,
+  ...rest
+}: FormStoryArgs): FormPlaygroundProps => ({
+  ...rest,
+  variants: { text: textVariant, group: groupVariant },
+});
+
+const FormStory = (args: FormStoryArgs) => (
+  <FormPlayground {...toPlaygroundProps(args)} />
+);
 
 const meta = {
   title: "form/Form",
-  component: FormPlayground,
+  component: FormStory,
   tags: ["autodocs"],
   parameters: {
     docs: {
       description: {
         component:
-          "Read-only form viewers with nested groups. Use Controls to edit variants, values, and item labels; canvas inputs update locally until Controls change.",
+          "Read-only form viewers with nested groups. Variants use fixed dropdowns; `values` and `items` are JSON objects for a fully dynamic form tree. Canvas inputs update locally until Controls change.",
       },
     },
   },
+  render: (args) => <FormStory {...args} />,
   argTypes: {
     accent: { control: "color", table: { category: "Theme" } },
-    variants: { control: "object", table: { category: "Structure" } },
-    "variants.text": {
+    textVariant: {
       control: "select",
       options: ["default", "compact"],
-      name: "Text variant",
-      table: { category: "Structure" },
+      table: { category: "Variants" },
     },
-    "variants.group": {
+    groupVariant: {
       control: "select",
       options: ["default", "bordered"],
-      name: "Group variant",
-      table: { category: "Structure" },
+      table: { category: "Variants" },
     },
-    values: { control: "object", table: { category: "Values" } },
-    "values.t": { control: "text", name: "Name value", table: { category: "Values" } },
-    "values.g": {
-      control: "text",
-      name: "Inventory row ids",
-      table: { category: "Values" },
+    values: {
+      control: "object",
+      description: "Field values keyed by item id (group rows use `id:row` suffixes).",
+      table: { category: "Form data" },
     },
-    "values.g:1": { control: "text", name: "Item 1", table: { category: "Values" } },
-    "values.g:2": { control: "text", name: "Item 2", table: { category: "Values" } },
-    "values.g:3": { control: "text", name: "Item 3", table: { category: "Values" } },
-    items: { control: "object", table: { category: "Structure" } },
-    "items.0.params.label": {
-      control: "text",
-      name: "Name label",
-      table: { category: "Structure" },
+    items: {
+      control: "object",
+      description: "Top-level form item tree — add/remove fields and groups freely.",
+      table: { category: "Form data" },
     },
-    "items.1.params.title": {
-      control: "text",
-      name: "Group title",
-      table: { category: "Structure" },
-    },
-  } as Meta<typeof FormPlayground>["argTypes"],
+  },
   args: {
     accent: "#4a90d9",
-    ...DEFAULT_FORM_DEMO,
+    textVariant: DEFAULT_FORM_DEMO.variants.text,
+    groupVariant: DEFAULT_FORM_DEMO.variants.group,
+    values: DEFAULT_FORM_DEMO.values,
+    items: DEFAULT_FORM_DEMO.items,
   },
-} satisfies Meta<typeof FormPlayground>;
+} satisfies Meta<FormStoryArgs>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -63,9 +73,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 export const CompactVariants: Story = {
-  args: {
-    variants: { text: "compact", group: "default" },
-  },
+  args: { textVariant: "compact", groupVariant: "default" },
 };
 
 export const EmptyName: Story = {

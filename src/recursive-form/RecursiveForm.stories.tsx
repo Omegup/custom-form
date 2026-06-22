@@ -1,61 +1,76 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { RecursiveFormPlayground } from "./RecursiveFormPlayground";
-import { DEFAULT_RECURSIVE_FORM_DEMO } from "./recursiveFormDemoFixtures";
+import {
+  RecursiveFormPlayground,
+  type RecursiveFormPlaygroundProps,
+} from "./RecursiveFormPlayground";
+import {
+  DEFAULT_RECURSIVE_FORM_DEMO,
+  type RecursiveFormDemoVariants,
+} from "./recursiveFormDemoFixtures";
+
+/** Story args: fixed variants as selects; dynamic `values` / `items` stay as JSON objects. */
+type RecursiveFormStoryArgs = Omit<RecursiveFormPlaygroundProps, "variants"> & {
+  textVariant: RecursiveFormDemoVariants["text"];
+  groupVariant: RecursiveFormDemoVariants["group"];
+};
+
+const toPlaygroundProps = ({
+  textVariant,
+  groupVariant,
+  ...rest
+}: RecursiveFormStoryArgs): RecursiveFormPlaygroundProps => ({
+  ...rest,
+  variants: { text: textVariant, group: groupVariant },
+});
+
+const RecursiveFormStory = (args: RecursiveFormStoryArgs) => (
+  <RecursiveFormPlayground {...toPlaygroundProps(args)} />
+);
 
 const meta = {
   title: "recursive-form/Recursive form",
-  component: RecursiveFormPlayground,
+  component: RecursiveFormStory,
   tags: ["autodocs"],
   parameters: {
     docs: {
       description: {
         component:
-          "Nested recursive items shown twice: skeleton viewers (top) and value-bound inputs (bottom). Use Controls to edit variants, values, and item labels.",
+          "Nested recursive items shown twice: skeleton viewers (top) and value-bound inputs (bottom). Variants use fixed dropdowns; `values` and `items` are JSON for a fully dynamic tree.",
       },
     },
   },
+  render: (args) => <RecursiveFormStory {...args} />,
   argTypes: {
     accent: { control: "color", table: { category: "Theme" } },
-    variants: { control: "object", table: { category: "Structure" } },
-    "variants.text": {
+    textVariant: {
       control: "select",
       options: ["default", "compact"],
-      name: "Text variant",
-      table: { category: "Structure" },
+      table: { category: "Variants" },
     },
-    "variants.group": {
+    groupVariant: {
       control: "select",
       options: ["default", "bordered"],
-      name: "Group variant",
-      table: { category: "Structure" },
+      table: { category: "Variants" },
     },
-    values: { control: "object", table: { category: "Values" } },
-    "values.t": { control: "text", name: "Name value", table: { category: "Values" } },
-    "values.g": {
-      control: "text",
-      name: "Inventory row ids",
-      table: { category: "Values" },
+    values: {
+      control: "object",
+      description: "Field values keyed by item id (group rows use `id:row` suffixes).",
+      table: { category: "Form data" },
     },
-    "values.ga:1": { control: "text", name: "Item 1", table: { category: "Values" } },
-    "values.ga:2": { control: "text", name: "Item 2", table: { category: "Values" } },
-    "values.ga:3": { control: "text", name: "Item 3", table: { category: "Values" } },
-    items: { control: "object", table: { category: "Structure" } },
-    "items.0.header.params.label": {
-      control: "text",
-      name: "Name label",
-      table: { category: "Structure" },
+    items: {
+      control: "object",
+      description: "Recursive item tree (`header` + `children` slots) — add/remove nodes freely.",
+      table: { category: "Form data" },
     },
-    "items.1.header.params.title": {
-      control: "text",
-      name: "Group title",
-      table: { category: "Structure" },
-    },
-  } as Meta<typeof RecursiveFormPlayground>["argTypes"],
+  },
   args: {
     accent: "#4a90d9",
-    ...DEFAULT_RECURSIVE_FORM_DEMO,
+    textVariant: DEFAULT_RECURSIVE_FORM_DEMO.variants.text,
+    groupVariant: DEFAULT_RECURSIVE_FORM_DEMO.variants.group,
+    values: DEFAULT_RECURSIVE_FORM_DEMO.values,
+    items: DEFAULT_RECURSIVE_FORM_DEMO.items,
   },
-} satisfies Meta<typeof RecursiveFormPlayground>;
+} satisfies Meta<RecursiveFormStoryArgs>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -63,9 +78,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 export const CompactVariants: Story = {
-  args: {
-    variants: { text: "compact", group: "default" },
-  },
+  args: { textVariant: "compact", groupVariant: "default" },
 };
 
 export const EmptyName: Story = {
