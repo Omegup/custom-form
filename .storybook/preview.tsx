@@ -1,4 +1,11 @@
 import type { Preview } from "@storybook/react-vite";
+import {
+  Controls,
+  Description,
+  Primary,
+  Subtitle,
+  Title,
+} from "@storybook/addon-docs/blocks";
 
 const preview: Preview = {
   parameters: {
@@ -9,6 +16,15 @@ const preview: Preview = {
     },
     docs: {
       toc: true,
+      page: () => (
+        <>
+          <Title />
+          <Subtitle />
+          <Description />
+          <Primary />
+          <Controls />
+        </>
+      ),
     },
   },
 };
