@@ -58,6 +58,10 @@ export type Viewers<Extra extends ExtraDom = ExtraDom> = ViewersType<
   string
 >;
 
+export type ViewersDecorator = <Extra extends ExtraDom>(
+  inner: Viewers<Extra>,
+) => Viewers<Extra>;
+
 export type FormItemComponent<Extra extends ExtraDom = ExtraDom> = (
   props: FormItemProps<
     Params,

@@ -4,6 +4,7 @@ import type {
   Context,
   Item,
   ItemRender,
+  ViewersDecorator,
   RecursiveFormDemoProps,
   RenderItem,
   ValueExtra,
@@ -12,7 +13,35 @@ import type {
 } from "./recursiveFormDemoTypes.t";
 import { branded, createFormItemByGetChild } from "./library";
 
-const viewersValues: Viewers<ValueExtra> = demo.makeViewers({
+const decorateViewers: ViewersDecorator = (inner) => ({
+  text: {
+    viewer: ({ props }) => (
+      <demo.Label
+        variant={props.variant}
+        border={props.ctx.accent}
+        label={props.formItem.params.label}
+      >
+        {inner.text.viewer({ props })}
+      </demo.Label>
+    ),
+  },
+  group: {
+    viewer: ({ props }) => (
+      <demo.Group
+        variant={props.variant}
+        border={props.ctx.accent}
+        title={props.formItem.params.title}
+      >
+        {props.extra.children.map((child) => (
+          <demo.Frame key={child.key}>{child}</demo.Frame>
+        ))}
+      </demo.Group>
+    ),
+    repeatChildren: inner.group.repeatChildren,
+  },
+});
+
+const viewersValues: Viewers<ValueExtra> = decorateViewers({
   text: {
     viewer: ({ props: { extra } }) => (
       <input
@@ -27,7 +56,7 @@ const viewersValues: Viewers<ValueExtra> = demo.makeViewers({
   },
 });
 
-const viewersSkeleton: Viewers = demo.makeViewers({
+const viewersSkeleton: Viewers = decorateViewers({
   text: {
     viewer: ({ props: { formItem } }) => (
       <input value={formItem.params.label} disabled />
@@ -88,8 +117,8 @@ export const RecursiveFormDemo = ({
         value: values[formItem.header.id + suffix] ?? "",
         onChange: (value) => onValueChange(formItem.header.id, value),
         getChild: (childSuffix) => (
-          <demo.ChildSlots
-            slots={formItem.children.map((slot) =>
+          <demo.DisplayColumns
+            columns={formItem.children.map((slot) =>
               slot.map((child) => render(child, `${suffix}:${childSuffix}`)),
             )}
           />
@@ -102,8 +131,8 @@ export const RecursiveFormDemo = ({
       renderItem(item, variants, ctx, FormItemSkeleton, (formItem, render) =>
         branded({
           getChild: () => (
-            <demo.ChildSlots
-              slots={formItem.children.map((slot) =>
+            <demo.DisplayColumns
+              columns={formItem.children.map((slot) =>
                 slot.map((child) => render(child, "")),
               )}
             />
