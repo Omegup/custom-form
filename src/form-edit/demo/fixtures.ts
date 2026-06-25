@@ -2,20 +2,7 @@
  * Shared demo/test fixtures for the edit-form domain.
  * Used by module tests, Storybook all-in editor, and integration tests.
  */
-import type { MetaDom , TheParams, TheVariants } from "../_deps";
 import type { FlatItems } from "./editFormDemoTypes.t";
-
-export type EditFormFieldTypeNames = "field";
-export type EditFormFieldParams = TheParams<{ field: { name: string } }>;
-export type EditFormFieldVariants = TheVariants<{ field: "default" }>;
-export type EditFormItemMeta = MetaDom<{
-  index: number;
-  total: number;
-  sIndex: number;
-}>;
-export type EditFormBaseCtx = {
-  focused: { id: string; focused: boolean } | null;
-};
 
 export const EDIT_FORM_INITIAL: FlatItems = [
   {

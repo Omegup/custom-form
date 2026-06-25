@@ -2,13 +2,13 @@ import type { StoryObj } from "@storybook/react-vite";
 import { useArgs } from "storybook/preview-api";
 import { EditFormDemo } from "./demo/EditFormDemo";
 import {
-  DEFAULT_EDIT_FORM_DEMO,
   EDIT_FORM_DEMO_SOURCE,
-  type StoryArgs,
 } from "./demo/editFormDemoHelper";
+import * as types from "./demo/editFormDemoTypes.t";
+import { EDIT_FORM_INITIAL } from "./demo/fixtures";
 
 const EditFormStory = () => {
-  const [{ heading, flatItems }, updateArgs] = useArgs<StoryArgs>();
+  const [{ heading, flatItems }, updateArgs] = useArgs<types.StoryArgs>();
   return (
     <EditFormDemo
       heading={heading}
@@ -45,11 +45,11 @@ export default {
   },
   args: {
     heading: "Edit form",
-    flatItems: DEFAULT_EDIT_FORM_DEMO.flatItems,
+    flatItems: EDIT_FORM_INITIAL,
   },
 };
 
-type Story = StoryObj<StoryArgs>;
+type Story = StoryObj<types.StoryArgs>;
 
 export const Default: Story = {
   args: {

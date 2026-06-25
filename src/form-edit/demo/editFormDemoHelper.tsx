@@ -1,29 +1,9 @@
 import type { ReactNode } from "react";
-import type { MoveActions } from "../../move-actions/MoveActions.t";
-import { branded } from "../../form/branded";
-import { EDIT_FORM_INITIAL } from "./fixtures";
+import * as lib from "./library";
+import * as types from "./editFormDemoTypes.t";
 import editFormDemoSource from "./EditFormDemo.tsx?raw";
-import type {
-  EditFormCtx,
-  FlatItems,
-  ExtraAction,
-  PendingRemove,
-  Section,
-  TypeNames,
-  Params,
-} from "./editFormDemoTypes.t";
 import editFormDemoTypesSource from "./editFormDemoTypes.t.ts?raw";
-import type { FlatFormItems } from "../flat";
-
 import "./animation.css";
-
-export type { StoryArgs } from "./editFormDemoTypes.t";
-
-// ── Fixtures ──────────────────────────────────────────────────────────────────
-
-export const DEFAULT_EDIT_FORM_DEMO = {
-  flatItems: EDIT_FORM_INITIAL,
-};
 
 // ── Storybook docs (`?raw` of types + integration) ────────────────────────────
 
@@ -35,18 +15,6 @@ export const EDIT_FORM_DEMO_SOURCE = [
   "",
   withFileHeader("EditFormDemo.tsx", editFormDemoSource),
 ].join("\n");
-
-// ── Context ───────────────────────────────────────────────────────────────────
-
-export const makeCtx = (
-  focused: { id: string; focused: boolean } | null,
-): EditFormCtx =>
-  branded({
-    focused,
-    setAutoFocus: (id) =>
-      makeCtx(id ? { id, focused: !focused?.focused } : null),
-    autoFocused: (id) => (id === focused?.id ? focused.focused : null),
-  });
 
 
 // ── Layout chrome (not part of the form-edit API) ─────────────────────────────
@@ -71,8 +39,8 @@ export const MoveBar = ({
   actions,
   extra,
 }: {
-  actions: MoveActions;
-  extra: ExtraAction[];
+  actions: lib.MoveActions;
+  extra: types.ExtraAction[];
 }) => (
   <span style={{ display: "inline-flex", gap: 3 }}>
     <Btn label="↑" onClick={actions.up} />
@@ -94,7 +62,7 @@ export const RemoveAlert = ({
   onConfirm,
   onCancel,
 }: {
-  pending: PendingRemove;
+  pending: types.PendingRemove;
   onConfirm: () => void;
   onCancel: () => void;
 }) => (
@@ -134,8 +102,8 @@ export const FieldRow = ({
 }: {
   name: string;
   focused: boolean | null;
-  actions: MoveActions;
-  extra: ExtraAction[];
+  actions: lib.MoveActions;
+  extra: types.ExtraAction[];
 }) => (
   <div
     style={{
@@ -171,8 +139,8 @@ export const SectionPanel = ({
 }: {
   title: string;
   focused: boolean | null;
-  sectionActions: MoveActions;
-  sectionExtra: ExtraAction[];
+  sectionActions: lib.MoveActions;
+  sectionExtra: types.ExtraAction[];
   columns: ReactNode[];
 }) => (
   <div
