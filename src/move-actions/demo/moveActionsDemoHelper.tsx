@@ -1,18 +1,11 @@
-import { useCallback, useMemo, useState } from "react";
 import type { MoveActions } from "../MoveActions.t";
 import moveActionsDemoSource from "./MoveActionsDemo.tsx?raw";
-import type {
-  AutoFocusState,
-  Ctx,
-  Data,
-  Item,
-  StoryArgs,
-} from "./moveActionsDemoTypes.t";
+import type { Ctx, Data, Item } from "./moveActionsDemoTypes.t";
 import moveActionsDemoTypesSource from "./moveActionsDemoTypes.t.ts?raw";
 
-import "../animation.css";
+import "./animation.css";
+import { autofocusCtx, type AutoFocusState } from "./library";
 
-export type { StoryArgs } from "./moveActionsDemoTypes.t";
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
@@ -37,12 +30,10 @@ export const MOVE_ACTIONS_DEMO_SOURCE = [
 
 // ── Demo helpers ──────────────────────────────────────────────────────────────
 
-export const makeCtx = (autofocus: AutoFocusState): Ctx => ({
-  autofocus,
-  autoFocused: (id) => (autofocus?.id === id ? autofocus.value : null),
-  setAutoFocus: (id?: string) =>
-    makeCtx(id ? { id, value: !autofocus?.value } : null),
-});
+export const makeCtx = (
+  autofocus: AutoFocusState,
+  deleted: Ctx["deleted"],
+): Ctx => autofocusCtx<Pick<Ctx, "deleted">>({deleted}, autofocus);
 
 const Button = ({
   onClick,
@@ -57,7 +48,7 @@ const Button = ({
 );
 
 export const ActionButtons = ({
-  actions: { clone, down, remove, up, isDeleted, restore },
+  actions: { clone, down, remove, up, restore, isDeleted },
 }: {
   actions: MoveActions;
 }) =>
@@ -88,7 +79,8 @@ export const ItemRow = ({
         display: "flex",
         flexDirection: "row",
         gap: 10,
-        animation: focused === null ? undefined : `pulse${focused ? 1 : 2} .2s 2`,
+        animation:
+          focused === null ? undefined : `pulse${focused ? 1 : 2} .2s 2`,
       }}
     >
       <span style={{ textDecoration: item.del ? "line-through" : "", flex: 1 }}>
@@ -100,10 +92,32 @@ export const ItemRow = ({
 };
 
 export const ListContainer = ({ children }: { children: React.ReactNode }) => (
-  <div style={{ display: "flex", flexDirection: "column", gap: 16, padding: 16 }}>
+  <div
+    style={{ display: "flex", flexDirection: "column", gap: 16, padding: 16 }}
+  >
     <h2 style={{ margin: 0 }}>Move actions</h2>
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       {children}
     </div>
+  </div>
+);
+
+export const DeletedButtons = ({
+  deleted,
+  setDeleted,
+}: {
+  deleted: Ctx["deleted"];
+  setDeleted: (deleted: Ctx["deleted"]) => void;
+}) => (
+  <div style={{ display: "flex", flexDirection: "row", gap: 8 }}>
+    <button disabled={deleted === "show"} onClick={() => setDeleted("show")}>
+      Show
+    </button>
+    <button disabled={deleted === "jump"} onClick={() => setDeleted("jump")}>
+      Show but Jump
+    </button>
+    <button disabled={deleted === "hide"} onClick={() => setDeleted("hide")}>
+      Hide
+    </button>
   </div>
 );
