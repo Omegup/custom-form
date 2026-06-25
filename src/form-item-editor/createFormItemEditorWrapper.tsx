@@ -3,7 +3,7 @@
  * Ported from school form-item-edit-react/FormItemEditor.tsx.
  * See form-item-editor/README.md for wiring guide.
  */
-import { useRef, type ReactNode, type RefObject } from "react";
+import { createRef, useRef, type ReactNode, type RefObject } from "react";
 import type { ContextDom, ParamsDom } from "./_deps";
 import type {
   DialogArgsDom,
@@ -14,10 +14,9 @@ import type {
   ItemEditStateDom,
   SetError,
   UseFormItemEditor,
-  UseFormItemEditorHook,
 } from "./types";
 
-export type { UseFormItemEditor, UseFormItemEditorFor } from "./types";
+export type { UseFormItemEditor } from "./types";
 
 export const createFormItemEditorWrapper =
   <
@@ -42,7 +41,7 @@ export const createFormItemEditorWrapper =
         };
       }
     >,
-    useHook: UseFormItemEditorHook<
+    useHook: UseFormItemEditor<
       TypeNames,
       Params,
       Context,
@@ -55,30 +54,21 @@ export const createFormItemEditorWrapper =
       state: State[K],
       children: ReactNode,
     ) => ReactNode,
-  ): string extends TypeNames
-    ? <K extends TypeNames>(
-        props: FormItemEditorProps<Context, DialogArgs, Extra[K]>,
-      ) => ReactNode
-    : (
-        props: FormItemEditorProps<Context, DialogArgs, Extra[TypeNames]>,
-      ) => ReactNode =>
+  ) =>
   <K extends TypeNames>(
     props: FormItemEditorProps<Context, DialogArgs, Extra[K]>,
   ) => {
-    const mainImpRef = useRef<FormItemEditorValidate<Params, K> | null>(null);
+    const impRef = useRef<
+      Record<string, RefObject<FormItemEditorValidate<Params, K> | null>>
+    >({});
+    const mainImpRef = createRef<FormItemEditorValidate<Params, K>>();
+    impRef.current.main = mainImpRef;
 
-    const useGenericHook = useHook as UseFormItemEditor<
-      TypeNames,
-      Params,
-      Context,
-      DialogArgs,
-      Extra,
-      State
-    >;
-
-    const state = useGenericHook(props, {
+    const state = useHook(props, {
       validate: (value, setError: SetError<Params[K]>) => {
-        mainImpRef.current?.validate(value, setError);
+        Object.values(impRef.current).forEach((ref) =>
+          ref.current?.validate(value, setError),
+        );
       },
     });
     const { recursiveFormItem, setFormItemParam } = state;
@@ -99,7 +89,7 @@ export const createFormItemEditorWrapper =
         impRef: RefObject<FormItemEditorValidate<Params, K> | null>;
       };
     };
-    const newState = cast<State, AddedState, K>({
+    const editorState = cast<State, AddedState, K>({
       ...state.extra,
       impRef: mainImpRef,
     });
@@ -109,15 +99,11 @@ export const createFormItemEditorWrapper =
       state.extra,
       <Editor
         ctx={ctx}
-        state={newState}
+        state={editorState}
         formItem={formItem}
         setFormItemParam={(fn) => setFormItemParam((prev) => fn(prev.header))}
         render={(renderer) =>
-          renderer({
-            impRef: { current: { main: mainImpRef } },
-            props,
-            state: { ...state, extra: newState },
-          })
+          renderer({ impRef, props, state: { ...state, extra: editorState } })
         }
       />,
     );

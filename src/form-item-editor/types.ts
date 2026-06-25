@@ -177,37 +177,3 @@ export type UseFormItemEditor<
   args: FormItemEditorValidate<Params, K>,
   k?: K,
 ) => FormItemEditorState<TypeNames, Params, K, State[K]>;
-
-/** Non-generic hook signature — enough when the demo only edits one item type. */
-export type UseFormItemEditorFor<
-  TypeNames extends string,
-  Params extends ParamsDom<TypeNames>,
-  Context extends ContextDom,
-  DialogArgs extends DialogArgsDom,
-  Extra extends ItemEditExtraDom,
-  State extends ItemEditStateDom,
-  K extends TypeNames,
-> = (
-  props: FormItemEditorProps<Context, DialogArgs, Extra>,
-  args: FormItemEditorValidate<Params, K>,
-) => FormItemEditorState<TypeNames, Params, K, State>;
-
-/** Picks concrete vs generic hook signature based on whether `TypeNames` is a single literal. */
-export type UseFormItemEditorHook<
-  TypeNames extends string,
-  Params extends ParamsDom<TypeNames>,
-  Context extends ContextDom,
-  DialogArgs extends DialogArgsDom,
-  Extra extends Record<TypeNames, ItemEditExtraDom>,
-  State extends Record<TypeNames, ItemEditStateDom>,
-> = string extends TypeNames
-  ? UseFormItemEditor<TypeNames, Params, Context, DialogArgs, Extra, State>
-  : UseFormItemEditorFor<
-      TypeNames,
-      Params,
-      Context,
-      DialogArgs,
-      Extra[TypeNames],
-      State[TypeNames],
-      TypeNames
-    >;

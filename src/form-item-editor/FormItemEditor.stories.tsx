@@ -3,7 +3,7 @@ import { useArgs } from "storybook/preview-api";
 import { FormItemEditorDemo } from "./demo/FormItemEditorDemo";
 import { FORM_ITEM_EDITOR_DEMO_SOURCE } from "./demo/formItemEditorDemoHelper";
 import * as types from "./demo/formItemEditorDemoTypes.t";
-import { EDIT_FORM_INITIAL } from "./demo/library";
+import { FORM_ITEM_EDITOR_INITIAL } from "./demo/library";
 
 const FormItemEditorStory = () => {
   const [{ heading, flatItems }, updateArgs] = useArgs<types.StoryArgs>();
@@ -28,7 +28,7 @@ export default {
       },
       description: {
         component:
-          "Click **Edit** on a field row to open `createFormItemEditorWrapper`. **Save** calls `validate` from the wrapper: the editor registers rules on `impRef` (required name, max length); `useHook` adds a duplicate-name check before commit. The `render()` slot shows a live character counter. Try clearing the name, exceeding 30 characters, or reusing an existing name.",
+          "Click **Edit** on a **field** or **heading** row. Two item types share one `createFormItemEditorWrapper` — `useItemEditor` is generic over `K extends TypeNames`. Field: required name, max length, duplicate-name check. Heading: required text, min length. Both register `validate` on `impRef`.",
       },
     },
   },
@@ -43,7 +43,7 @@ export default {
   },
   args: {
     heading: "Form item editor",
-    flatItems: EDIT_FORM_INITIAL,
+    flatItems: FORM_ITEM_EDITOR_INITIAL,
   },
 };
 

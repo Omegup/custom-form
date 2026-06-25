@@ -51,8 +51,7 @@ Try clearing the name, typing more than 30 characters, or reusing another field'
 | `ItemEditExtraDom` | Branded bag passed via `props.extra` (holds draft + setDraft in demo) |
 | `DialogArgsDom` | Branded dialog config (`title`, `onSave`, `onCancel`) |
 | `FormItemEditorValidate` | `{ validate(value, setError) }` — passed to useHook, aggregated via refs |
-| `UseFormItemEditorFor` | Non-generic hook type for single-item-type apps (demo) |
-| `UseFormItemEditorHook` | Picks `UseFormItemEditor` vs `UseFormItemEditorFor` from `TypeNames` |
+| `UseFormItemEditor` | Generic `useHook` — `<K extends TypeNames>(props, { validate }) => …` |
 
 ## Dependency rule
 

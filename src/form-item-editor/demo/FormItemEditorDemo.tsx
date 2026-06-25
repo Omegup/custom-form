@@ -6,30 +6,34 @@
  * 2. `Editor` — `useImperativeHandle(state.impRef)` registers field rules
  * 3. `render()` — optional slot for companion UI (length hint below the input)
  */
-import { useCallback, useImperativeHandle, useState} from "react";
-import type { RefObject, ReactNode, SetStateAction } from "react";
+import { useCallback, useImperativeHandle, useState } from "react";
+import type { SetStateAction } from "react";
 import * as demo from "./formItemEditorDemoHelper";
 import * as types from "./formItemEditorDemoTypes.t";
 import * as lib from "./library";
 
 // ── useHook — draft edits + save gated by validate ────────────────────────────
 
-const useFieldEditor: lib.UseFormItemEditorFor<
-  "field",
+const useFieldEditor: types.UseFieldEditor = <K extends types.TypeNames>(
+  props: lib.FormItemEditorProps<
+    types.Ctx,
+    types.DialogArgs,
+    types.FieldExtraMap[K]
+  >,
+  { validate }: lib.FormItemEditorValidate<types.Params, K>,
+): lib.FormItemEditorState<
+  types.TypeNames,
   types.Params,
-  lib.ContextDom,
-  types.DialogArgs,
-  types.FieldExtra,
-  types.FieldState,
-  "field"
-> = (props, { validate }) => {
+  K,
+  types.FieldStateMap[K]
+> => {
   const { draft, setDraft, otherNames, onCommit } = props.extra;
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const setFormItemParam = useCallback(
-    <E extends keyof types.Params["field"]>(item: (
-      previous: types.EditingItem,
-    ) => [E, types.Params["field"][E]]) => {
+    <E extends keyof types.FieldParams>(
+      item: (previous: types.EditingItem) => [E, types.FieldParams[E]],
+    ) => {
       setDraft((prev) => {
         const [key, value] = item(prev);
         return {
@@ -85,14 +89,7 @@ const FieldEditor = ({
   setFormItemParam,
   state,
   render,
-}: {
-  formItem: { params: { name: string } };
-  setFormItemParam: (item: () => ["name", string]) => void;
-  state: types.FieldState & {
-    impRef: RefObject<lib.FormItemEditorValidate<types.Params, "field"> | null>;
-  };
-  render: (ui: () => ReactNode) => ReactNode;
-}) => {
+}: types.FieldEditorProps) => {
   const [nameError, setNameError] = useState<string | null>(null);
 
   useImperativeHandle(state.impRef, () => ({
@@ -119,18 +116,20 @@ const FieldEditor = ({
         error={nameError}
         onChange={(name) => setFormItemParam(() => ["name", name])}
       />
-      {render(() => <demo.NameLengthHint name={formItem.params.name} />)}
+      {render(() => (
+        <demo.NameLengthHint name={formItem.params.name} />
+      ))}
     </>
   );
 };
 
 const FormItemEditor = lib.createFormItemEditorWrapper<
-  "field",
+  types.TypeName,
   types.Params,
-  lib.ContextDom,
+  types.Ctx,
   types.DialogArgs,
-  { field: types.FieldExtra },
-  { field: types.FieldState }
+  types.FieldExtraMap,
+  types.FieldStateMap
 >(
   { field: { editor: FieldEditor } },
   useFieldEditor,
@@ -207,9 +206,7 @@ export const FormItemEditorDemo = ({
       <lib.EditFormTest
         flatItems={flatItems}
         updateArgs={updateArgs}
-        extra={(item) => [
-          { label: "Edit", onClick: () => setDraftOpen(item) },
-        ]}
+        extra={(item) => [{ label: "Edit", onClick: () => setDraftOpen(item) }]}
       />
     </lib.FormContainer>
   );
