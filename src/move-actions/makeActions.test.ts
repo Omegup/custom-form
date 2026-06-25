@@ -41,6 +41,7 @@ const setup = (
   const setItems = vi.fn();
   const actions = makeActions<Item, Ctx>(
     {
+      jump: true,
       items,
       index,
       total,

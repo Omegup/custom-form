@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { cloneName, makeActions } from "./library";
+import * as lib from "./library";
 import * as demo from "./moveActionsDemoHelper";
 import * as types from "./moveActionsDemoTypes.t";
 
@@ -17,12 +17,12 @@ const ItemRow = ({
   setItems: (items: types.Item[], ctx: types.Ctx) => void;
 }) => {
   const item = items[index];
-  const actions = makeActions<types.Item, types.Ctx>(
+  const actions = lib.makeActions<types.Item, types.Ctx>(
     {
       clone: () => [
         {
           del: false,
-          name: cloneName(item, items, (x) => x.name, formatCloneName),
+          name: lib.cloneName(item, items, (x) => x.name, formatCloneName),
         },
       ],
       index,
@@ -31,34 +31,37 @@ const ItemRow = ({
       ctx,
       setItems,
       isDeleted: (x) => x.del,
+      jump: ctx.deleted !== "show",
       markAsDeleted: (x, deleted) => ({ item: { ...x, del: deleted }, ctx }),
       highlight: (x, ctx) => ({ item: x, ctx: ctx.setAutoFocus(x.name) }),
     },
     {},
   );
 
-  return <demo.ItemRow item={item} actions={actions} ctx={ctx} />;
-};
-
-export type MoveActionsDemoProps = {
-  items: types.Item[];
-  updateArgs: (patch: Partial<types.StoryArgs>) => void;
+  return item.del && ctx.deleted === "hide" ? null : (
+    <demo.ItemRow item={item} actions={actions} ctx={ctx} />
+  );
 };
 
 export const MoveActionsDemo = ({
   items,
   updateArgs,
-}: MoveActionsDemoProps) => {
-  const [autofocus, setAutofocus] = useState<types.AutoFocusState>(null);
-  const ctx = useMemo(() => demo.makeCtx(autofocus), [autofocus]);
+}: types.DemoProps) => {
+  const [focused, setFocused] = useState<lib.AutoFocusState>(null);
+  const [deleted, setDeleted] = useState<"show" | "jump" | "hide">("show");
+  const ctx = useMemo(
+    () => demo.makeCtx(focused, deleted),
+    [focused, deleted],
+  );
 
   const setItems = (newItems: types.Item[], newCtx: types.Ctx) => {
     if (newItems !== items) updateArgs({ items: newItems });
-    if (newCtx.autofocus !== autofocus) setAutofocus(newCtx.autofocus);
+    if (newCtx.focused !== focused) setFocused(newCtx.focused);
   };
 
   return (
     <demo.ListContainer>
+      <demo.DeletedButtons deleted={deleted} setDeleted={setDeleted} />
       {items.map((_, index) => (
         <ItemRow
           key={index}
