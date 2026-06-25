@@ -20,6 +20,7 @@ export const getFormItemMoveActions = <
 ) => {
   const { items } = args;
   const { actions, isDeleted } = getFlatMoveActions(args, clone);
+  const isIgnored = jump ? isDeleted : () => false;
   const formItemActions = <K extends TypeNames>(
     q: RecursiveTypedFormItem<TypeNames, Params, K, Meta>,
   ): MoveActions => {
@@ -33,7 +34,7 @@ export const getFormItemMoveActions = <
         .filter((p: Item) => "section" in p && !p.section.deleted).length > 1 ||
       items
         .slice(0, index)
-        .find((p: Item) => ("item" in p && !isDeleted(p.item)) || "end" in p)
+        .find((p: Item) => ("item" in p && !isIgnored(p.item)) || "end" in p)
         ? {}
         : { up: undefined }),
     };

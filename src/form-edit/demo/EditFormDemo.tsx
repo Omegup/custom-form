@@ -33,6 +33,9 @@ export const EditFormTest = ({
     [flatItems],
   );
 
+  const [showDeleted, setShowDeleted] = useState(true);
+  const jump = !showDeleted;
+
   const sectionOfItem = useMemo(
     () => lib.buildItemSectionDict(flatItems),
     [flatItems],
@@ -46,7 +49,7 @@ export const EditFormTest = ({
     setToRemove,
   };
 
-  const itemActions = lib.getFormItemMoveActions(actionsArgs, cloneFn, true);
+  const itemActions = lib.getFormItemMoveActions(actionsArgs, cloneFn, jump);
 
   return (
     <>
@@ -60,6 +63,9 @@ export const EditFormTest = ({
           onCancel={() => setToRemove(null)}
         />
       )}
+      <button onClick={() => setShowDeleted(!showDeleted)}>
+        {showDeleted ? "Hide deleted" : "Show deleted"}
+      </button>
       <demo.SectionsList>
         {sections.map((section) => {
           const sectionFocused = ctx.autoFocused(section.header.id);
@@ -67,7 +73,7 @@ export const EditFormTest = ({
             actionsArgs,
             cloneFn,
             section,
-            true,
+            jump,
           );
           return (
             <demo.SectionPanel
@@ -82,6 +88,7 @@ export const EditFormTest = ({
               }
               columns={section.items.map((column) =>
                 column.map((item) => {
+                  if (item.header.deleted && !showDeleted) return null;
                   const actions = itemActions(item);
                   const fieldFocused = ctx.autoFocused(item.header.id);
                   return (

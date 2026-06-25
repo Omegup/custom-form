@@ -16,7 +16,6 @@ export const EDIT_FORM_DEMO_SOURCE = [
   withFileHeader("EditFormDemo.tsx", editFormDemoSource),
 ].join("\n");
 
-
 // ── Layout chrome (not part of the form-edit API) ─────────────────────────────
 
 const Btn = ({
@@ -43,17 +42,19 @@ export const MoveBar = ({
   extra: types.ExtraAction[];
 }) => (
   <span style={{ display: "inline-flex", gap: 3 }}>
-    <Btn label="↑" onClick={actions.up} />
-    <Btn label="↓" onClick={actions.down} />
-    <Btn label="Clone" onClick={actions.clone} />
     {actions.isDeleted ? (
       <Btn label="Restore" onClick={actions.restore} />
     ) : (
-      <Btn label="Remove" onClick={actions.remove} />
+      <>
+        <Btn label="↑" onClick={actions.up} />
+        <Btn label="↓" onClick={actions.down} />
+        <Btn label="Clone" onClick={actions.clone} />
+        <Btn label="Remove" onClick={actions.remove} />
+        {extra.map(({ label, onClick }) => (
+          <Btn key={label} label={label} onClick={onClick} />
+        ))}
+      </>
     )}
-    {extra.map(({ label, onClick }) => (
-      <Btn key={label} label={label} onClick={onClick} />
-    ))}
   </span>
 );
 
@@ -115,12 +116,12 @@ export const FieldRow = ({
       border: "1px solid #eee",
       animation: focused !== null ? `pulse${focused ? 1 : 2} .2s 2` : undefined,
       background: actions.isDeleted ? "#fafafa" : "white",
-      opacity: actions.isDeleted ? 0.55 : 1,
     }}
   >
     <span
       style={{
         fontSize: 13,
+        opacity: actions.isDeleted ? 0.55 : 1,
         textDecoration: actions.isDeleted ? "line-through" : undefined,
       }}
     >
