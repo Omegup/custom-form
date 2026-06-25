@@ -47,16 +47,16 @@ export const MoveActionsDemo = ({
   items,
   updateArgs,
 }: types.DemoProps) => {
-  const [autofocus, setAutofocus] = useState<lib.AutoFocusState>(null);
+  const [focused, setFocused] = useState<lib.AutoFocusState>(null);
   const [deleted, setDeleted] = useState<"show" | "jump" | "hide">("show");
   const ctx = useMemo(
-    () => demo.makeCtx(autofocus, deleted),
-    [autofocus, deleted],
+    () => demo.makeCtx(focused, deleted),
+    [focused, deleted],
   );
 
   const setItems = (newItems: types.Item[], newCtx: types.Ctx) => {
     if (newItems !== items) updateArgs({ items: newItems });
-    if (newCtx.focused !== autofocus) setAutofocus(newCtx.focused);
+    if (newCtx.focused !== focused) setFocused(newCtx.focused);
   };
 
   return (
