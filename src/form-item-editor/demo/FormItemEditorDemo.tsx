@@ -23,9 +23,7 @@ const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
   K,
   types.ItemState
 > => {
-  const { draft, setDraft, onCommit } = props.extra;
-  const otherNames =
-    "otherNames" in props.extra ? props.extra.otherNames : [];
+  const { draft, setDraft, onCommit, otherNames } = props.extra;
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const setFormItemParam = useCallback(
@@ -271,8 +269,8 @@ export const FormItemEditorDemo = ({
 
   return (
     <formDemo.FormContainer title={heading}>
-      {draft?.header.type === "field" && (
-        <FormItemEditor<"field">
+      {draft && (
+        <FormItemEditor<types.TypeNames>
           ctx={lib.branded({})}
           dialogArgs={lib.branded({
             title: dialogTitle(draft),
@@ -282,20 +280,6 @@ export const FormItemEditorDemo = ({
             draft,
             setDraft,
             otherNames,
-            onCommit: commitDraft,
-          })}
-        />
-      )}
-      {draft?.header.type === "heading" && (
-        <FormItemEditor<"heading">
-          ctx={lib.branded({})}
-          dialogArgs={lib.branded({
-            title: dialogTitle(draft),
-            onCancel: () => setDraftOpen(null),
-          })}
-          extra={lib.branded({
-            draft,
-            setDraft,
             onCommit: commitDraft,
           })}
         />

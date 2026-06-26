@@ -30,10 +30,9 @@ type ItemDraft = {
   onCommit: () => void;
 };
 
-export type FieldExtra = lib.ItemEditExtraDom<
+export type ItemExtra = lib.ItemEditExtraDom<
   ItemDraft & { otherNames: string[] }
 >;
-export type HeadingExtra = lib.ItemEditExtraDom<ItemDraft>;
 
 export type ItemState = lib.ItemEditStateDom<{
   save: () => void;
@@ -62,7 +61,7 @@ export type UseItemEditor = lib.UseFormItemEditor<
   ItemStateMap
 >;
 
-export type ItemExtraMap = { field: FieldExtra; heading: HeadingExtra };
+export type ItemExtraMap = { field: ItemExtra; heading: ItemExtra };
 export type ItemStateMap = { field: ItemState; heading: ItemState };
 
 export type EditorProps<K extends TypeNames> = lib.FormItemEditorProps<
