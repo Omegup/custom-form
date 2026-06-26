@@ -1,48 +1,59 @@
 /**
- * Demo: EditFormTest + `createFormItemEditorWrapper`.
+ * Demo: form list + `createFormItemEditorWrapper` with **field** and **heading** editors.
  *
- * Wiring shown here:
- * 1. `useHook` — draft state; `save` calls `validate` then `onCommit`
- * 2. `Editor` — `useImperativeHandle(state.impRef)` registers field rules
- * 3. `render()` — optional slot for companion UI (length hint below the input)
+ * - `useItemEditor` — generic `UseFormItemEditor` hook (`K extends TypeNames`)
+ * - per-type `Editor` components register `validate` on `state.impRef`
+ * - `render()` — optional companion UI below inputs
  */
 import { useCallback, useImperativeHandle, useState } from "react";
 import type { SetStateAction } from "react";
 import * as demo from "./formItemEditorDemoHelper";
+import * as formDemo from "./formDemo";
 import * as types from "./formItemEditorDemoTypes.t";
 import * as lib from "./library";
 
-// ── useHook — draft edits + save gated by validate ────────────────────────────
+// ── useHook — shared draft/save; field-only duplicate-name check ──────────────
 
-const useFieldEditor: types.UseFieldEditor = <K extends types.TypeNames>(
-  props: lib.FormItemEditorProps<
-    types.Ctx,
-    types.DialogArgs,
-    types.FieldExtraMap[K]
-  >,
+const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
+  props: types.EditorProps<K>,
   { validate }: lib.FormItemEditorValidate<types.Params, K>,
 ): lib.FormItemEditorState<
   types.TypeNames,
   types.Params,
   K,
-  types.FieldStateMap[K]
+  types.ItemState
 > => {
-  const { draft, setDraft, otherNames, onCommit } = props.extra;
+  const { draft, setDraft, onCommit } = props.extra;
+  const otherNames =
+    "otherNames" in props.extra ? props.extra.otherNames : [];
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const setFormItemParam = useCallback(
-    <E extends keyof types.FieldParams>(
-      item: (previous: types.EditingItem) => [E, types.FieldParams[E]],
+    <E extends keyof types.Params[K]>(
+      item: (
+        previous: lib.RecursiveTypedFormItem<
+          types.TypeNames,
+          types.Params,
+          K,
+          types.ItemMeta
+        >,
+      ) => [E, types.Params[K][E]],
     ) => {
-      setDraft((prev) => {
-        const [key, value] = item(prev);
+      setDraft((prev: types.EditingItem) => {
+        const typed = prev as lib.RecursiveTypedFormItem<
+          types.TypeNames,
+          types.Params,
+          K,
+          types.ItemMeta
+        >;
+        const [key, value] = item(typed);
         return {
           ...prev,
           header: {
             ...prev.header,
             params: { ...prev.header.params, [key]: value },
           },
-        };
+        } as types.EditingItem;
       });
       setSaveError(null);
     },
@@ -53,7 +64,10 @@ const useFieldEditor: types.UseFieldEditor = <K extends types.TypeNames>(
     setSaveError(null);
     let valid = true;
     validate(
-      { header: draft.header, meta: draft.meta },
+      {
+        header: draft.header as lib.TypedFormItem<types.Params, K>,
+        meta: draft.meta,
+      },
       {
         param: () => {
           valid = false;
@@ -65,24 +79,31 @@ const useFieldEditor: types.UseFieldEditor = <K extends types.TypeNames>(
     );
     if (!valid) return;
 
-    const name = draft.header.params.name.trim();
-    if (otherNames.includes(name)) {
-      setSaveError(`"${name}" is already used by another field`);
-      return;
+    if (draft.header.type === "field") {
+      const name = draft.header.params.name.trim();
+      if (otherNames.includes(name)) {
+        setSaveError(`"${name}" is already used by another field`);
+        return;
+      }
     }
 
     onCommit();
   }, [draft, onCommit, otherNames, validate]);
 
   return {
-    recursiveFormItem: draft,
+    recursiveFormItem: draft as lib.RecursiveTypedFormItem<
+      types.TypeNames,
+      types.Params,
+      K,
+      types.ItemMeta
+    >,
     setFormItemParam,
     setFormItemSection: () => {},
     extra: lib.branded({ save, saveError }),
   };
 };
 
-// ── Editor — register rules on impRef; companion UI via render() ──────────────
+// ── Editors — imperative validate via impRef ──────────────────────────────────
 
 const FieldEditor = ({
   formItem,
@@ -123,16 +144,59 @@ const FieldEditor = ({
   );
 };
 
+const HeadingEditor = ({
+  formItem,
+  setFormItemParam,
+  state,
+  render,
+}: types.HeadingEditorProps) => {
+  const [textError, setTextError] = useState<string | null>(null);
+
+  useImperativeHandle(state.impRef, () => ({
+    validate: (value, setError) => {
+      const text = value.header.params.text;
+      if (!text.trim()) {
+        setError.param("text", "Heading text is required");
+        setTextError("Heading text is required");
+        return;
+      }
+      if (text.trim().length < demo.MIN_HEADING_LEN) {
+        setError.param("text", `At least ${demo.MIN_HEADING_LEN} characters`);
+        setTextError(`At least ${demo.MIN_HEADING_LEN} characters`);
+        return;
+      }
+      setTextError(null);
+    },
+  }));
+
+  return (
+    <>
+      <demo.TextField
+        label="Heading"
+        value={formItem.params.text}
+        error={textError}
+        onChange={(text) => setFormItemParam(() => ["text", text])}
+      />
+      {render(() => (
+        <demo.HeadingLengthHint text={formItem.params.text} />
+      ))}
+    </>
+  );
+};
+
 const FormItemEditor = lib.createFormItemEditorWrapper<
-  types.TypeName,
+  types.TypeNames,
   types.Params,
   types.Ctx,
   types.DialogArgs,
-  types.FieldExtraMap,
-  types.FieldStateMap
+  types.ItemExtraMap,
+  types.ItemStateMap
 >(
-  { field: { editor: FieldEditor } },
-  useFieldEditor,
+  {
+    field: { editor: FieldEditor },
+    heading: { editor: HeadingEditor },
+  },
+  useItemEditor,
   (dialogArgs, state, children) => (
     <demo.EditorDialog
       title={dialogArgs.title}
@@ -144,6 +208,11 @@ const FormItemEditor = lib.createFormItemEditorWrapper<
     </demo.EditorDialog>
   ),
 );
+
+const dialogTitle = (item: types.EditingItem) =>
+  item.header.type === "field"
+    ? `Edit ${item.header.params.name}`
+    : `Edit heading`;
 
 // ── Storybook integration ─────────────────────────────────────────────────────
 
@@ -165,21 +234,35 @@ export const FormItemEditorDemo = ({
     draft === null
       ? []
       : flatItems.flatMap((fi) =>
-          "item" in fi && fi.item.id !== draft.header.id
+          "item" in fi &&
+          fi.item.type === "field" &&
+          fi.item.id !== draft.header.id
             ? [fi.item.params.name.trim()]
             : [],
         );
 
   const commitDraft = useCallback(() => {
     if (!draft) return;
-    const trimmed = {
-      ...draft.header,
-      params: { ...draft.header.params, name: draft.header.params.name.trim() },
-    };
+    const header =
+      draft.header.type === "field"
+        ? {
+            ...draft.header,
+            params: {
+              ...draft.header.params,
+              name: draft.header.params.name.trim(),
+            },
+          }
+        : {
+            ...draft.header,
+            params: {
+              ...draft.header.params,
+              text: draft.header.params.text.trim(),
+            },
+          };
     updateArgs({
       flatItems: flatItems.map((fi) =>
         "item" in fi && fi.item.id === draft.header.id
-          ? { item: trimmed, n: fi.n }
+          ? { item: header, n: fi.n }
           : fi,
       ),
     });
@@ -187,12 +270,12 @@ export const FormItemEditorDemo = ({
   }, [draft, flatItems, updateArgs]);
 
   return (
-    <lib.FormContainer title={heading}>
-      {draft && (
-        <FormItemEditor
+    <formDemo.FormContainer title={heading}>
+      {draft?.header.type === "field" && (
+        <FormItemEditor<"field">
           ctx={lib.branded({})}
           dialogArgs={lib.branded({
-            title: `Edit ${draft.header.params.name}`,
+            title: dialogTitle(draft),
             onCancel: () => setDraftOpen(null),
           })}
           extra={lib.branded({
@@ -203,11 +286,25 @@ export const FormItemEditorDemo = ({
           })}
         />
       )}
-      <lib.EditFormTest
+      {draft?.header.type === "heading" && (
+        <FormItemEditor<"heading">
+          ctx={lib.branded({})}
+          dialogArgs={lib.branded({
+            title: dialogTitle(draft),
+            onCancel: () => setDraftOpen(null),
+          })}
+          extra={lib.branded({
+            draft,
+            setDraft,
+            onCommit: commitDraft,
+          })}
+        />
+      )}
+      <formDemo.FormItemEditorFormTest
         flatItems={flatItems}
         updateArgs={updateArgs}
         extra={(item) => [{ label: "Edit", onClick: () => setDraftOpen(item) }]}
       />
-    </lib.FormContainer>
+    </formDemo.FormContainer>
   );
 };
