@@ -60,5 +60,5 @@ export type DemoProps = StoryArgs & {
 
 export type PendingRemove = {
   rm: () => void;
-  item: lib.FlatFormItem<TypeNames, Params, Section>;
+  item: lib.FlatNestedItem<TypeNames, Params, Section>;
 };

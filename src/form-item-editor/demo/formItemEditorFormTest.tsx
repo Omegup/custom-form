@@ -13,7 +13,7 @@ export type ExtraAction = { label: string; onClick: () => void };
 
 type PendingRemove = {
   rm: () => void;
-  item: lib.FlatFormItem<types.TypeNames, types.Params, types.Section>;
+  item: lib.FlatNestedItem<types.TypeNames, types.Params, types.Section>;
 };
 
 const randomId = () => `id_${Math.random().toString(36).slice(2, 7)}`;

@@ -2,6 +2,7 @@
 import type React from "react";
 import type { Branded, ContextDom, ParamsDom, TypedFormItem } from "./_deps";
 import type { Header, MetaDom, RecursiveTypedFormItem } from "./_deps";
+import type { FlatFormItem, FlatNestedItem } from "../form-edit";
 
 export type Errors<Params> = { [P in keyof Params]?: string };
 export type DialogArgsDom<T = {}> = Branded<T, "item-edit-dialog">;
@@ -12,26 +13,21 @@ export type FormItemEditorProps<
   Context extends ContextDom,
   DialogArgs extends DialogArgsDom,
   Extra extends ItemEditExtraDom,
-> = {
-  ctx: Context;
-  dialogArgs: DialogArgs;
-  extra: Extra;
-};
-
-export type FormItemEditorState<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
   K extends TypeNames,
-  Extra extends ItemEditStateDom,
 > = {
-  recursiveFormItem: RecursiveTypedFormItem<TypeNames, Params, K, MetaDom>;
-  setFormItemParam: <E extends keyof Params[K]>(
-    item: (
-      previous: RecursiveTypedFormItem<TypeNames, Params, K, MetaDom>,
-    ) => [E, Params[K][E]],
-  ) => void;
-  setFormItemSection: (sIndex: number) => void;
+  ctx: Context;
+  dialogArgs: DialogArgs;
+  formItem: FlatFormItem<K, Params>;
+  setFormItem: (formItem: React.SetStateAction<FlatFormItem<K, Params>>) => void
   extra: Extra;
+};
+
+export type EditorHookResult<
+  State extends ItemEditStateDom,
+> = {
+  state: State;
 };
 
 export type SetError<Param> = {
@@ -40,11 +36,12 @@ export type SetError<Param> = {
 };
 
 export type FormItemEditorValidate<
-  Params extends ParamsDom<K>,
-  K extends string,
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames>,
+  K extends TypeNames,
 > = {
   validate: (
-    value: Header<TypedFormItem<Params, K>, MetaDom>,
+    value: FlatFormItem<K, Params>,
     setError: SetError<Params[K]>,
   ) => void;
 };
@@ -58,10 +55,10 @@ export type RenderFunctionArgs<
   Extra extends ItemEditExtraDom,
   State extends ItemEditStateDom,
 > = {
-  props: FormItemEditorProps<Context, DialogArgs, Extra>;
-  state: FormItemEditorState<TypeNames, Params, K, State>;
+  props: FormItemEditorProps<Context, DialogArgs, Extra, TypeNames, Params, K>;
+  state: EditorHookResult<State>;
   impRef: React.MutableRefObject<
-    Record<string, React.RefObject<FormItemEditorValidate<Params, K> | null>>
+    Record<string, React.RefObject<FormItemEditorValidate<TypeNames, Params, K> | null>>
   >;
 };
 
@@ -114,23 +111,16 @@ export type EditorProps<
   out Extra extends ItemEditExtraDom,
   out State extends ItemEditStateDom,
 > = {
-  formItem: TypedFormItem<Params, K>;
+  flatFormItem: FlatFormItem<K, Params>;
   ctx: Context;
-  state: State;
+  props: FormItemEditorProps<Context, DialogArgs, Extra, TypeNames, Params, K>;
+  hookResult: EditorHookResult<State>;
+  impRef: React.MutableRefObject<
+    Record<string, React.RefObject<FormItemEditorValidate<TypeNames, Params, K> | null>>
+  >;
   setFormItemParam: <E extends keyof Params[K]>(
-    item: (previous: TypedFormItem<Params, K>) => [E, Params[K][E]],
+    item: (previous: FlatFormItem<K, Params>) => [E, Params[K][E]],
   ) => void;
-  render: (
-    fct: RenderFunction<
-      TypeNames,
-      Params,
-      K,
-      Context,
-      DialogArgs,
-      Extra,
-      State
-    >,
-  ) => React.ReactNode;
 };
 export type Editor<
   in TypeNames extends string,
@@ -173,7 +163,6 @@ export type UseFormItemEditor<
   Extra extends Record<TypeNames, ItemEditExtraDom>,
   State extends Record<TypeNames, ItemEditStateDom>,
 > = <K extends TypeNames>(
-  props: FormItemEditorProps<Context, DialogArgs, Extra[K]>,
-  args: FormItemEditorValidate<Params, K>,
-  k?: K,
-) => FormItemEditorState<TypeNames, Params, K, State[K]>;
+  props: FormItemEditorProps<Context, DialogArgs, Extra[K], TypeNames, Params, K>,
+  args: FormItemEditorValidate<TypeNames, Params, K>,
+) => EditorHookResult<State[K]>;

@@ -10,77 +10,49 @@ import * as demo from "./formItemEditorDemoHelper";
 import * as formDemo from "./formDemo";
 import * as types from "./formItemEditorDemoTypes.t";
 import * as lib from "./library";
+import { cleanPaths } from "storybook/internal/telemetry";
 
 // ── useHook — shared draft/save; field-only duplicate-name check ──────────────
 
 const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
-  props: types.EditorProps,
-  { validate }: types.ValidateFor<K>,
-): types.ItemStateFor<K> => {
-  const { draft, setDraft, onCommit, otherNames } = props.extra;
-  const typed = types.typedDraft<K>(draft);
+  props: types.EditorProps<K>,
+  { validate }: types.Validate<K>,
+): lib.EditorHookResult<types.ItemState> => {
+  const { onCommit, otherNames } = props.extra;
+  const { formItem: draft } = props;
   const [saveError, setSaveError] = useState<string | null>(null);
-
-  const setFormItemParam = useCallback(
-    <E extends types.ParamKey<K>>(item: (
-      previous: types.TypedItem<K>,
-    ) => [E, types.ParamValue<K, E>]) => {
-      const [key, value] = item(typed);
-      setDraft(types.patchItemParam(typed, key, value));
-      setSaveError(null);
-    },
-    [setDraft, typed],
-  );
 
   const save = useCallback(() => {
     setSaveError(null);
     let valid = true;
-    validate(
-      { header: typed.header, meta: typed.meta },
-      {
-        param: () => {
-          valid = false;
-        },
-        section: () => {
-          valid = false;
-        },
+    validate(draft, {
+      param: () => {
+        valid = false;
       },
-    );
+      section: () => {
+        valid = false;
+      },
+    });
     if (!valid) return;
 
-    if (types.isFieldItem(draft)) {
-      const name = draft.header.params.name.trim();
-      if (otherNames.includes(name)) {
-        setSaveError(`"${name}" is already used by another field`);
-        return;
-      }
-    }
-
     onCommit();
-  }, [draft, onCommit, otherNames, typed, validate]);
+  }, [draft, onCommit, otherNames, draft, validate]);
 
-  return {
-    recursiveFormItem: typed,
-    setFormItemParam,
-    setFormItemSection: () => {},
-    extra: lib.branded({ save, saveError }),
-  };
+  return { state: lib.branded({ save, saveError }) };
 };
 
 // ── Editors — imperative validate via impRef ──────────────────────────────────
 
 const FieldEditor = ({
-  formItem,
+  flatFormItem: formItem,
   setFormItemParam,
-  state,
-  render,
+  impRef,
 }: types.FieldEditorProps) => {
   const [nameError, setNameError] = useState<string | null>(null);
 
-  useImperativeHandle(state.impRef, () => ({
+  useImperativeHandle(impRef.current.main, () => ({
     validate: (value, setError) => {
-      if (value.header.type !== "field") return;
-      const name = value.header.params.name;
+      const name = value.item.params.name;
       if (!name.trim()) {
         setError.param("name", "Name is required");
         setNameError("Name is required");
@@ -98,29 +70,25 @@ const FieldEditor = ({
   return (
     <>
       <demo.NameField
-        value={formItem.params.name}
+        value={formItem.item.params.name}
         error={nameError}
         onChange={(name) => setFormItemParam(() => ["name", name])}
       />
-      {render(() => (
-        <demo.NameLengthHint name={formItem.params.name} />
-      ))}
+      <demo.NameLengthHint name={formItem.item.params.name} />
     </>
   );
 };
 
 const HeadingEditor = ({
-  formItem,
+  flatFormItem: formItem,
   setFormItemParam,
-  state,
-  render,
+  impRef,
 }: types.HeadingEditorProps) => {
   const [textError, setTextError] = useState<string | null>(null);
 
-  useImperativeHandle(state.impRef, () => ({
+  useImperativeHandle(impRef.current.main, () => ({
     validate: (value, setError) => {
-      if (value.header.type !== "heading") return;
-      const text = value.header.params.text;
+      const text = value.item.params.text;
       if (!text.trim()) {
         setError.param("text", "Heading text is required");
         setTextError("Heading text is required");
@@ -139,13 +107,11 @@ const HeadingEditor = ({
     <>
       <demo.TextField
         label="Heading"
-        value={formItem.params.text}
+        value={formItem.item.params.text}
         error={textError}
         onChange={(text) => setFormItemParam(() => ["text", text])}
       />
-      {render(() => (
-        <demo.HeadingLengthHint text={formItem.params.text} />
-      ))}
+      <demo.HeadingLengthHint text={formItem.item.params.text} />
     </>
   );
 };
@@ -155,8 +121,8 @@ const FormItemEditor = lib.createFormItemEditorWrapper<
   types.Params,
   types.Ctx,
   types.DialogArgs,
-  types.ItemExtraMap,
-  types.ItemStateMap
+  { [K in types.TypeNames]: types.ItemExtra },
+  { [K in types.TypeNames]: types.ItemState }
 >(
   {
     field: { editor: FieldEditor },
@@ -175,10 +141,8 @@ const FormItemEditor = lib.createFormItemEditorWrapper<
   ),
 );
 
-const dialogTitle = (item: types.EditingItem) =>
-  item.header.type === "field"
-    ? `Edit ${item.header.params.name}`
-    : `Edit heading`;
+const dialogTitle = (item: lib.SomeFormItem<types.TypeNames, types.Params>) =>
+  item.type === "field" ? `Edit ${item.params.name}` : `Edit heading`;
 
 // ── Storybook integration ─────────────────────────────────────────────────────
 
@@ -187,14 +151,10 @@ export const FormItemEditorDemo = ({
   flatItems,
   updateArgs,
 }: types.DemoProps) => {
-  const [draft, setDraftOpen] = useState<types.EditingItem | null>(null);
-
-  const setDraft: types.SetEditingItem = useCallback((update) => {
-    setDraftOpen((prev) => {
-      if (!prev) return prev;
-      return typeof update === "function" ? update(prev) : update;
-    });
-  }, []);
+  const [draft, setDraftOpen] = useState<{
+    item: lib.SomeFormItem<types.TypeNames, types.Params>;
+    n: number;
+  } | null>(null);
 
   const otherNames =
     draft === null
@@ -202,34 +162,36 @@ export const FormItemEditorDemo = ({
       : flatItems.flatMap((fi) =>
           "item" in fi &&
           fi.item.type === "field" &&
-          fi.item.id !== draft.header.id
+          fi.item.id !== draft.item.id
             ? [fi.item.params.name.trim()]
             : [],
         );
 
   const commitDraft = useCallback(() => {
     if (!draft) return;
-    const header =
-      draft.header.type === "field"
-        ? {
-            ...draft.header,
-            params: {
-              ...draft.header.params,
-              name: draft.header.params.name.trim(),
-            },
-          }
-        : {
-            ...draft.header,
-            params: {
-              ...draft.header.params,
-              text: draft.header.params.text.trim(),
-            },
-          };
+    const old = flatItems
+      .map((fi, i)=>({...fi, i}))
+      .filter((fi) => "item" in fi)
+      .find((fi) => fi.item.id === draft.item.id);
+    if (!old) return;
+    const diff = draft.n - old.n;
+    const copy = [...flatItems]
+    if(diff) {
+      let remaining = Math.min(draft.n, old.n)
+      for(var j = old.i + 1; remaining && j < flatItems.length; j++) {
+        const item = flatItems[j]
+        if('end' in item) {
+          remaining-- 
+        } 
+        if('item' in item) {
+          remaining += item.n
+        }
+      }
+      if(diff > 0) copy.splice(old.i + 1, diff)
+    }
     updateArgs({
-      flatItems: flatItems.map((fi) =>
-        "item" in fi && fi.item.id === draft.header.id
-          ? { item: header, n: fi.n }
-          : fi,
+      flatItems: flatItems.map((fi): types.FlatItems[0] =>
+        "item" in fi && fi.item.id === draft.item.id ? draft : fi,
       ),
     });
     setDraftOpen(null);
@@ -238,15 +200,19 @@ export const FormItemEditorDemo = ({
   return (
     <formDemo.FormContainer title={heading}>
       {draft && (
-        <FormItemEditor<types.TypeNames>
+        <FormItemEditor
           ctx={lib.branded({})}
           dialogArgs={lib.branded({
-            title: dialogTitle(draft),
+            title: dialogTitle(draft.item),
             onCancel: () => setDraftOpen(null),
           })}
-          extra={lib.branded({
-            draft,
-            setDraft,
+          formItem={draft}
+          setFormItem={(updater) =>
+            typeof updater === "function"
+              ? setDraftOpen((prev) => (prev ? updater(prev) : null))
+              : setDraftOpen(updater)
+          }
+          extra={lib.branded<types.ItemExtra, "item-edit-extra">({
             otherNames,
             onCommit: commitDraft,
           })}
@@ -255,7 +221,13 @@ export const FormItemEditorDemo = ({
       <formDemo.FormItemEditorFormTest
         flatItems={flatItems}
         updateArgs={updateArgs}
-        extra={(item) => [{ label: "Edit", onClick: () => setDraftOpen(types.asEditingItem(item)) }]}
+        extra={(item) => [
+          {
+            label: "Edit",
+            onClick: () =>
+              setDraftOpen({ item: item.header, n: item.children.length }),
+          },
+        ]}
       />
     </formDemo.FormContainer>
   );

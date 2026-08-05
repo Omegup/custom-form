@@ -4,7 +4,7 @@
  * See form-item-editor/README.md for wiring guide.
  */
 import { createRef, useRef, type ReactNode, type RefObject } from "react";
-import type { ContextDom, ParamsDom } from "./_deps";
+import type { ContextDom, ParamsDom, FlatFormItem } from "./_deps";
 import type {
   DialogArgsDom,
   Editors,
@@ -12,7 +12,6 @@ import type {
   FormItemEditorValidate,
   ItemEditExtraDom,
   ItemEditStateDom,
-  SetError,
   UseFormItemEditor,
 } from "./types";
 
@@ -24,23 +23,10 @@ export const createFormItemEditorWrapper =
     Params extends ParamsDom<TypeNames>,
     Context extends ContextDom,
     DialogArgs extends DialogArgsDom,
-    Extra extends {
-      [K in TypeNames]: ItemEditExtraDom;
-    },
+    Extra extends Record<TypeNames, ItemEditExtraDom>,
     State extends Record<TypeNames, ItemEditStateDom>,
   >(
-    editors: Editors<
-      TypeNames,
-      Params,
-      Context,
-      DialogArgs,
-      Extra,
-      State & {
-        [K in TypeNames]: {
-          impRef: RefObject<FormItemEditorValidate<Params, K> | null>;
-        };
-      }
-    >,
+    editors: Editors<TypeNames, Params, Context, DialogArgs, Extra, State>,
     useHook: UseFormItemEditor<
       TypeNames,
       Params,
@@ -56,55 +42,55 @@ export const createFormItemEditorWrapper =
     ) => ReactNode,
   ) =>
   <K extends TypeNames>(
-    props: FormItemEditorProps<Context, DialogArgs, Extra[K]>,
+    props: FormItemEditorProps<
+      Context,
+      DialogArgs,
+      Extra[K],
+      TypeNames,
+      Params,
+      K
+    >,
   ) => {
     const impRef = useRef<
-      Record<string, RefObject<FormItemEditorValidate<Params, K> | null>>
+      Record<
+        string,
+        RefObject<FormItemEditorValidate<TypeNames, Params, K> | null>
+      >
     >({});
-    const mainImpRef = createRef<FormItemEditorValidate<Params, K>>();
+    const mainImpRef =
+      createRef<FormItemEditorValidate<TypeNames, Params, K>>();
     impRef.current.main = mainImpRef;
 
-    const state = useHook(props, {
-      validate: (value, setError: SetError<Params[K]>) => {
+    const hookResult = useHook<K>(props, {
+      validate: (value, setError) => {
         Object.values(impRef.current).forEach((ref) =>
           ref.current?.validate(value, setError),
         );
       },
     });
-    const { recursiveFormItem, setFormItemParam } = state;
 
-    const { ctx, dialogArgs } = props;
-    const { header: formItem } = recursiveFormItem;
-    const Editor = editors[formItem.type].editor;
+    const { ctx, dialogArgs, formItem, setFormItem } = props;
+    const Editor = editors[formItem.item.type].editor;
 
-    const cast = <
-      T extends Record<K, unknown>,
-      V extends Record<K, unknown>,
-      K extends string,
-    >(
-      x: T[K] & V[K],
-    ) => x as (T & V)[K];
-    type AddedState = {
-      [K in TypeNames]: {
-        impRef: RefObject<FormItemEditorValidate<Params, K> | null>;
-      };
-    };
-    const editorState = cast<State, AddedState, K>({
-      ...state.extra,
-      impRef: mainImpRef,
-    });
+    const setFormItemParam = <E extends keyof Params[K]>(
+      item: (previous: FlatFormItem<K, Params>) => [E, Params[K][E]],
+    ) =>
+      setFormItem((i) => {
+        const [k, v] = item(i);
+        const params: Params[K] = { ...i.item.params, [k]: v };
+        return { ...i, item: { ...i.item, params } };
+      });
 
     return renderDialog(
       dialogArgs,
-      state.extra,
+      hookResult.state,
       <Editor
         ctx={ctx}
-        state={editorState}
-        formItem={formItem}
-        setFormItemParam={(fn) => setFormItemParam((prev) => fn(prev.header))}
-        render={(renderer) =>
-          renderer({ impRef, props, state: { ...state, extra: editorState } })
-        }
+        hookResult={hookResult}
+        impRef={impRef}
+        props={props}
+        flatFormItem={formItem}
+        setFormItemParam={setFormItemParam}
       />,
     );
   };

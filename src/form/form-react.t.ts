@@ -2,8 +2,12 @@ import type React from "react";
 import type { ContextDom, ExtraDom, ParamsDom, TypedFormItem, VariantsDom, ViewExtraKeys } from "./form.t";
 
 export type GetChild = { getChild: (suffix: string, index: number) => React.ReactNode }
+
+export type Children = { children: React.ReactElement[] }
+
+
 export type WithChildren<Extra, ExtraView = Extra> = {
-  view: Extra & { children: React.ReactElement[] }
+  view: Extra & Children
   children: ExtraView
 }
 export type WithGetChild<Extra> = {
@@ -38,31 +42,33 @@ export type Viewers<
   in TypeNames extends string,
   in Params extends ParamsDom<TypeNames>,
   in Variants extends VariantsDom<TypeNames>,
-  in Extra extends Record<'view' | 'children', ExtraDom>,
+  in ExtraView extends ExtraDom,
+  in ExtraChildren extends ExtraDom,
   in Context extends ContextDom,
   out ChildInstanceId,
 > = {
   [K in TypeNames]: {
-    viewer: Viewer<Params, Variants, K, Extra['view'], Context>
+    viewer: Viewer<Params, Variants, K, ExtraView, Context>
     repeatChildren?: (
       formItem: TypedFormItem<Params, K>,
-      extra: Extra['children'],
+      extra: ExtraChildren,
     ) => ChildInstanceId[]
   }
 }
 
 export type FormItemProps<
-  Params extends ParamsDom<K>,
-  Variants extends VariantsDom<K>,
-  K extends string,
-  Extra extends Record<ViewExtraKeys, ExtraDom>,
+  in out Params extends ParamsDom<K>,
+  in out Variants extends VariantsDom<K>,
+  in out K extends string,
+  out ExtraView extends ExtraDom,
+  in ExtraChildren extends ExtraDom,
   Context extends ContextDom,
 > = {
   renderCard: (
     view: React.ReactNode,
-    viewProps: ViewerProps<Params, Variants, K, Extra['children'], Context>,
+    viewProps: ViewerProps<Params, Variants, K, ExtraChildren, Context>,
   ) => React.ReactNode
-  viewProps: ViewerProps<Params, Variants, K, Extra['view'], Context>
+  viewProps: ViewerProps<Params, Variants, K, ExtraView, Context>
 }
 
 export type RenderCard<

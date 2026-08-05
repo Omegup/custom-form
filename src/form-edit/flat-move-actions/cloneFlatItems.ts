@@ -1,5 +1,5 @@
 import type { ParamsDom } from "../_deps";
-import type { FlatFormItem, FlatFormItems, SectionDom } from "../flat";
+import type { FlatNestedItem, FlatFormItems, SectionDom } from "../flat";
 
 import { cloneName } from "../_deps";
 
@@ -26,7 +26,7 @@ export const cloneFlatItems = <
   random: () => string,
   mode: { rename: "all" | "first" },
 ): FlatFormItems<TypeNames, Params, SectionConfig> => {
-  const clone = cloneItemName<FlatFormItem<TypeNames, Params, SectionConfig>>(
+  const clone = cloneItemName<FlatNestedItem<TypeNames, Params, SectionConfig>>(
     allItems,
     t,
   );

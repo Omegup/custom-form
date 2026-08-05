@@ -4,7 +4,7 @@ import { EDIT_FORM_INITIAL } from "../demo/fixtures";
 import type { MetaDom } from "../_deps";
 import { getFlatInsertionIndex } from "./getFlatInsertionIndex";
 import { consolidateSections, customConsolidateSections, type SIndexed } from "./consolidate";
-import type { FlatFormItem } from "./flat-form.t";
+import type { FlatNestedItem } from "./flat-form.t";
 import { flatten } from "./flatten";
 
 type TypeNames = "field";
@@ -19,7 +19,7 @@ type Section = {
 const section = (
   id: string,
   title: string,
-): FlatFormItem<TypeNames, Params, Section> => ({
+): FlatNestedItem<TypeNames, Params, Section> => ({
   section: { id, deleted: false, title, description: "" },
 });
 
@@ -27,14 +27,14 @@ const field = (
   id: string,
   name: string,
   n = 0,
-): FlatFormItem<TypeNames, Params, Section> => ({
+): FlatNestedItem<TypeNames, Params, Section> => ({
   item: { id, type: "field", params: { name }, deleted: false },
   n,
 });
 
-const end = (): FlatFormItem<TypeNames, Params, Section> => ({ end: null });
+const end = (): FlatNestedItem<TypeNames, Params, Section> => ({ end: null });
 
-const flat = (...entries: FlatFormItem<TypeNames, Params, Section>[]) =>
+const flat = (...entries: FlatNestedItem<TypeNames, Params, Section>[]) =>
   entries;
 
 const flattenTree = flatten<TypeNames, Params, Section, MetaDom<SIndexed>>();

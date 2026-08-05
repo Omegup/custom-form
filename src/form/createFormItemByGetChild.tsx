@@ -23,7 +23,8 @@ export const createFormItemByGetChild = <
     TypeNames,
     Params,
     Variants,
-    WithChildren<Extra, ExtraView>,
+    Extra & Children,
+    ExtraView,
     Context,
     string
   >,
