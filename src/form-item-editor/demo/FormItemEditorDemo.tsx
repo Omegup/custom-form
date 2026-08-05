@@ -170,24 +170,28 @@ export const FormItemEditorDemo = ({
   const commitDraft = useCallback(() => {
     if (!draft) return;
     const old = flatItems
-      .map((fi, i)=>({...fi, i}))
+      .map((fi, i) => ({ ...fi, i }))
       .filter((fi) => "item" in fi)
       .find((fi) => fi.item.id === draft.item.id);
     if (!old) return;
     const diff = draft.n - old.n;
-    const copy = [...flatItems]
-    if(diff) {
-      let remaining = Math.min(draft.n, old.n)
-      for(var j = old.i + 1; remaining && j < flatItems.length; j++) {
-        const item = flatItems[j]
-        if('end' in item) {
-          remaining-- 
-        } 
-        if('item' in item) {
-          remaining += item.n
-        }
+    const copy = [...flatItems];
+    if (diff) {
+      let remaining = Math.min(draft.n, old.n);
+      for (var j = old.i + 1; remaining && j < flatItems.length; j++) {
+        const item = flatItems[j];
+        remaining += "end" in item ? -1 : "item" in item ? item.n : 0;
       }
-      if(diff > 0) copy.splice(old.i + 1, diff)
+      if (diff > 0) {
+        const ends = Array.from({ length: diff }, () => ({ end: null }));
+        copy.splice(j, 0, ...ends);
+      } else {
+        if('end' in flatItems[j - 1]) j--
+        for(let k = j; k < flatItems.length; k++) {
+          
+        }
+        
+      }
     }
     updateArgs({
       flatItems: flatItems.map((fi): types.FlatItems[0] =>

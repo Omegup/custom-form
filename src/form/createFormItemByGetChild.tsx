@@ -1,15 +1,14 @@
 import { Fragment, useMemo, type ReactElement } from "react";
 import type {
+    Children,
   FormItemProps,
   GetChild,
   ViewerProps,
   Viewers,
-  WithChildren,
 } from "./form-react.t";
 import type { ContextDom, ExtraDom, ParamsDom, VariantsDom } from "./form.t";
 import { createFormItemByChildren } from "./createFormItemByChildren";
 
-type Children = { children: ReactElement[] };
 
 export const createFormItemByGetChild = <
   TypeNames extends string,
@@ -24,7 +23,7 @@ export const createFormItemByGetChild = <
     Params,
     Variants,
     Extra & Children,
-    ExtraView,
+    Extra,
     Context,
     string
   >,
@@ -36,8 +35,8 @@ export const createFormItemByGetChild = <
     TypeNames,
     Params,
     Variants,
-    WithChildren<Extra, ExtraView>,
-    ExtraView & Children,
+    Extra,
+    Extra & Children,
     Context,
     string
   >(viewers, useUpdatedViewProps);
