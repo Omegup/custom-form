@@ -3,7 +3,7 @@
  *
  * - `useItemEditor` — generic `UseFormItemEditor` hook (`K extends TypeNames`)
  * - per-type `Editor` components register `validate` on `state.impRef`
- * - `render()` — optional companion UI below inputs
+ * - companion length hints sit below inputs
  */
 import { useCallback, useImperativeHandle, useState } from "react";
 import * as demo from "./formItemEditorDemoHelper";
@@ -16,7 +16,7 @@ import * as lib from "./library";
 const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
   props: types.EditorProps<K>,
   { validate }: types.Validate<K>,
-): lib.EditorHookResult<types.ItemState> => {
+): types.ItemStateFor => {
   const { onCommit, otherNames } = props.extra;
   const { formItem: draft } = props;
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -33,6 +33,14 @@ const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
       },
     });
     if (!valid) return;
+
+    if (draft.item.type === "field" && "name" in draft.item.params) {
+      const name = draft.item.params.name.trim();
+      if (otherNames.includes(name)) {
+        setSaveError(`"${name}" is already used by another field`);
+        return;
+      }
+    }
 
     onCommit();
   }, [draft, onCommit, otherNames, validate]);
@@ -120,8 +128,8 @@ const FormItemEditor = lib.createFormItemEditorWrapper<
   types.Params,
   types.Ctx,
   types.DialogArgs,
-  { [K in types.TypeNames]: types.ItemExtra },
-  { [K in types.TypeNames]: types.ItemState }
+  types.ItemExtraMap,
+  types.ItemStateMap
 >(
   {
     field: { editor: FieldEditor },
@@ -140,8 +148,41 @@ const FormItemEditor = lib.createFormItemEditorWrapper<
   ),
 );
 
-const dialogTitle = (item: lib.SomeFormItem<types.TypeNames, types.Params>) =>
+const dialogTitle = (item: types.ItemHeader) =>
   item.type === "field" ? `Edit ${item.params.name}` : `Edit heading`;
+
+const trimmedDraft = (draft: types.EditingDraft): types.EditingDraft => {
+  if (types.isFieldDraft(draft)) {
+    return {
+      n: draft.n,
+      item: {
+        ...draft.item,
+        params: { name: draft.item.params.name.trim() },
+      },
+    };
+  }
+  if (types.isHeadingDraft(draft)) {
+    return {
+      n: draft.n,
+      item: {
+        ...draft.item,
+        params: { text: draft.item.params.text.trim() },
+      },
+    };
+  }
+  return draft;
+};
+
+/** Replace the matching flat entry. Param-only editors keep `n` (and child spans) unchanged. */
+const commitEditingDraft = (
+  flatItems: types.FlatItems,
+  draft: types.EditingDraft,
+): types.FlatItems => {
+  const next = trimmedDraft(draft);
+  return flatItems.map((fi) =>
+    "item" in fi && fi.item.id === next.item.id ? next : fi,
+  );
+};
 
 // ── Storybook integration ─────────────────────────────────────────────────────
 
@@ -150,10 +191,7 @@ export const FormItemEditorDemo = ({
   flatItems,
   updateArgs,
 }: types.DemoProps) => {
-  const [draft, setDraftOpen] = useState<{
-    item: lib.SomeFormItem<types.TypeNames, types.Params>;
-    n: number;
-  } | null>(null);
+  const [draft, setDraftOpen] = useState<types.EditingDraft | null>(null);
 
   const otherNames =
     draft === null
@@ -168,31 +206,7 @@ export const FormItemEditorDemo = ({
 
   const commitDraft = useCallback(() => {
     if (!draft) return;
-    const old = flatItems
-      .map((fi, i)=>({...fi, i}))
-      .filter((fi) => "item" in fi)
-      .find((fi) => fi.item.id === draft.item.id);
-    if (!old) return;
-    const diff = draft.n - old.n;
-    const copy = [...flatItems]
-    if(diff) {
-      let remaining = Math.min(draft.n, old.n)
-      for(var j = old.i + 1; remaining && j < flatItems.length; j++) {
-        const item = flatItems[j]
-        if('end' in item) {
-          remaining-- 
-        } 
-        if('item' in item) {
-          remaining += item.n
-        }
-      }
-      if(diff > 0) copy.splice(old.i + 1, diff)
-    }
-    updateArgs({
-      flatItems: flatItems.map((fi): types.FlatItems[0] =>
-        "item" in fi && fi.item.id === draft.item.id ? draft : fi,
-      ),
-    });
+    updateArgs({ flatItems: commitEditingDraft(flatItems, draft) });
     setDraftOpen(null);
   }, [draft, flatItems, updateArgs]);
 

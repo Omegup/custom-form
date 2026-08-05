@@ -37,11 +37,23 @@ export type ItemDraft = {
 };
 
 export type ItemExtra = lib.ItemEditExtraDom<ItemDraft>;
+export type ItemExtraMap = { [K in TypeNames]: ItemExtra };
 
 export type ItemState = lib.ItemEditStateDom<{
   save: () => void;
   saveError: string | null;
 }>;
+export type ItemStateMap = { [K in TypeNames]: ItemState };
+
+export type EditingDraft = lib.FlatFormItem<TypeNames, Params>;
+export type FieldDraft = { item: FieldHeader; n: number };
+export type HeadingDraft = { item: HeadingHeader; n: number };
+
+export const isFieldDraft = (draft: EditingDraft): draft is FieldDraft =>
+  draft.item.type === "field";
+
+export const isHeadingDraft = (draft: EditingDraft): draft is HeadingDraft =>
+  draft.item.type === "heading";
 
 export type DialogArgs = lib.DialogArgsDom<{
   title: string;
@@ -67,8 +79,8 @@ export type UseItemEditor = lib.UseFormItemEditor<
   Params,
   Ctx,
   DialogArgs,
-  { [K in TypeNames]: ItemExtra },
-  Record<TypeNames, ItemState>
+  ItemExtraMap,
+  ItemStateMap
 >;
 
 export type ParamKey<K extends TypeNames> = keyof Params[K];
@@ -102,9 +114,7 @@ type EditorPropsFor<K extends TypeNames> = lib.EditorProps<
 export type FieldEditorProps = EditorPropsFor<"field">;
 export type HeadingEditorProps = EditorPropsFor<"heading">;
 
-export type SetListItem = Dispatch<
-  SetStateAction<{ item: lib.SomeFormItem<TypeNames, Params>; n: number }>
->;
+export type SetEditingDraft = Dispatch<SetStateAction<EditingDraft>>;
 
 export type StoryArgs = {
   flatItems: FlatItems;
