@@ -1,8 +1,7 @@
 /** Form item editor types — see form-item-editor/README.md. */
 import type React from "react";
-import type { Branded, ContextDom, ParamsDom, TypedFormItem } from "./_deps";
-import type { Header, MetaDom, RecursiveTypedFormItem } from "./_deps";
-import type { FlatFormItem, FlatNestedItem } from "../form-edit";
+import type { Branded, ContextDom, ParamsDom } from "./_deps";
+import type { FlatFormItem } from "../form-edit";
 
 export type Errors<Params> = { [P in keyof Params]?: string };
 export type DialogArgsDom<T = {}> = Branded<T, "item-edit-dialog">;

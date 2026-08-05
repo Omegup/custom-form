@@ -9,6 +9,8 @@ export type Ctx = lib.AutoFocus<
 export type Data = {
   items: Item[];
 };
+
+export type StoryArgs = Data;
 export type DemoProps = {
   items: Item[];
   updateArgs: (patch: Partial<Data>) => void;

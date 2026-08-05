@@ -1,5 +1,6 @@
 import type React from "react";
 import type {
+  Children,
   ContextDom,
   ExtraDom,
   FormItemProps,
@@ -7,8 +8,6 @@ import type {
   TheParams,
   TheVariants,
   Viewers as ViewersType,
-  WithChildren,
-  WithGetChild,
 } from "../../form";
 import type { RecursiveFormItem } from "../RecursiveFormItem.t";
 
@@ -49,11 +48,16 @@ export type ValueExtra = ExtraDom & {
   onChange: (value: string) => void;
 };
 
+export type GetChildExtra<Extra extends ExtraDom = ExtraDom> = Extra & GetChild;
+
+export type ViewerExtra<Extra extends ExtraDom = ExtraDom> = Extra & Children;
+
 export type Viewers<Extra extends ExtraDom = ExtraDom> = ViewersType<
   TypeNames,
   Params,
   Variants,
-  WithChildren<Extra>,
+  ViewerExtra<Extra>,
+  Extra,
   Context,
   string
 >;
@@ -67,7 +71,8 @@ export type FormItemComponent<Extra extends ExtraDom = ExtraDom> = (
     Params,
     Variants,
     TypeNames,
-    WithGetChild<Extra>,
+    Extra & GetChild,
+    ViewerExtra<Extra>,
     Context
   >,
 ) => React.ReactNode;

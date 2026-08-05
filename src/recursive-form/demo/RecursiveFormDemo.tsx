@@ -1,7 +1,8 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, type ReactElement } from "react";
 import * as demo from "./recursiveFormDemoHelper";
 import type {
   Context,
+  GetChildExtra,
   Item,
   ItemRender,
   ViewersDecorator,
@@ -113,7 +114,7 @@ export const RecursiveFormDemo = ({
 
   const renderValues = (item: Item) =>
     renderItem<ValueExtra>(item, variants, ctx, FormItemValues, (formItem, render, suffix) =>
-      branded({
+      branded<GetChildExtra<ValueExtra>, "viewer-extra">({
         value: values[formItem.header.id + suffix] ?? "",
         onChange: (value) => onValueChange(formItem.header.id, value),
         getChild: (childSuffix) => (
@@ -129,7 +130,7 @@ export const RecursiveFormDemo = ({
   const renderSkeleton = useCallback(
     (item: Item) =>
       renderItem(item, variants, ctx, FormItemSkeleton, (formItem, render) =>
-        branded({
+        branded<GetChildExtra, "viewer-extra">({
           getChild: () => (
             <demo.DisplayColumns
               columns={formItem.children.map((slot) =>

@@ -1,4 +1,4 @@
-import type { Dispatch, RefObject, SetStateAction } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import type * as lib from "./library";
 
 export type TypeNames = "field" | "heading";

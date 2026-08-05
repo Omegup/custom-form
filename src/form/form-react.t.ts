@@ -1,5 +1,5 @@
 import type React from "react";
-import type { ContextDom, ExtraDom, ParamsDom, TypedFormItem, VariantsDom, ViewExtraKeys } from "./form.t";
+import type { ContextDom, ExtraDom, ParamsDom, TypedFormItem, VariantsDom } from "./form.t";
 
 export type GetChild = { getChild: (suffix: string, index: number) => React.ReactNode }
 
