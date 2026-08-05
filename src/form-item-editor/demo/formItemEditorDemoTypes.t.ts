@@ -1,4 +1,4 @@
-import type { Dispatch, RefObject, ReactNode, SetStateAction } from "react";
+import type { Dispatch, RefObject, SetStateAction } from "react";
 import type * as lib from "./library";
 
 export type TypeNames = "field" | "heading";
@@ -12,46 +12,56 @@ export type Section = {
   title: string;
   description: string;
 };
+
+export type Ctx = lib.ContextDom;
+export type ItemMeta = lib.MetaDom<{ index: number; total: number; sIndex: number }>;
+
+export type TypedItem<K extends TypeNames> =
+  lib.RecursiveTypedFormItem<TypeNames, Params, K, ItemMeta>;
+export type EditingItem = TypedItem<"field"> | TypedItem<"heading">;
+export type ListItem = lib.RecursiveFormItem<TypeNames, Params, ItemMeta>;
+
 export type ItemHeader = {
   [K in TypeNames]: lib.TypedFormItem<Params, K>;
 }[TypeNames];
-export type Ctx = lib.ContextDom;
-export type ItemMeta = lib.MetaDom<{ index: number; total: number; sIndex: number }>;
-export type EditingItem = lib.RecursiveFormItem<
-  TypeNames,
-  Params,
-  ItemMeta
->;
+export type FieldHeader = lib.TypedFormItem<Params, "field">;
+export type HeadingHeader = lib.TypedFormItem<Params, "heading">;
+
 export type FlatItems = lib.FlatFormItems<TypeNames, Params, Section>;
 
 type ItemDraft = {
   draft: EditingItem;
   setDraft: Dispatch<SetStateAction<EditingItem>>;
   onCommit: () => void;
+  otherNames: string[];
 };
 
-export type ItemExtra = lib.ItemEditExtraDom<
-  ItemDraft & { otherNames: string[] }
->;
+export type ItemExtra = lib.ItemEditExtraDom<ItemDraft>;
+export type ItemExtraMap = { field: ItemExtra; heading: ItemExtra };
 
 export type ItemState = lib.ItemEditStateDom<{
   save: () => void;
   saveError: string | null;
 }>;
+export type ItemStateMap = { field: ItemState; heading: ItemState };
 
 export type DialogArgs = lib.DialogArgsDom<{
   title: string;
   onCancel: () => void;
 }>;
 
-export type ItemValidate<K extends TypeNames = TypeNames> =
-  lib.FormItemEditorValidate<Params, K>;
-
-export type ItemEditorRuntimeState<K extends TypeNames = TypeNames> =
-  ItemState & {
-    impRef: RefObject<ItemValidate<K> | null>;
-  };
-
+export type ValidateFor<K extends TypeNames> = lib.FormItemEditorValidate<Params, K>;
+export type ItemStateFor<K extends TypeNames> = lib.FormItemEditorState<
+  TypeNames,
+  Params,
+  K,
+  ItemState
+>;
+export type EditorProps = lib.FormItemEditorProps<
+  Ctx,
+  DialogArgs,
+  ItemExtra
+>;
 export type UseItemEditor = lib.UseFormItemEditor<
   TypeNames,
   Params,
@@ -61,28 +71,59 @@ export type UseItemEditor = lib.UseFormItemEditor<
   ItemStateMap
 >;
 
-export type ItemExtraMap = { field: ItemExtra; heading: ItemExtra };
-export type ItemStateMap = { field: ItemState; heading: ItemState };
+export type ParamKey<K extends TypeNames> = keyof Params[K];
+export type ParamValue<
+  K extends TypeNames,
+  E extends ParamKey<K>,
+> = Params[K][E];
 
-export type EditorProps<K extends TypeNames> = lib.FormItemEditorProps<
-  Ctx,
-  DialogArgs,
-  ItemExtraMap[K]
->;
+/** `setFormItemParam` passed into per-type editors (previous = item header). */
+export type SetHeaderParam<K extends TypeNames> = <E extends ParamKey<K>>(
+  item: (previous: lib.TypedFormItem<Params, K>) => [E, ParamValue<K, E>],
+) => void;
 
-export type FieldEditorProps = {
-  formItem: lib.TypedFormItem<Params, "field">;
-  setFormItemParam: (item: () => ["name", string]) => void;
-  state: ItemEditorRuntimeState<"field">;
-  render: (ui: () => ReactNode) => ReactNode;
+/** `setFormItemParam` returned from `useItemEditor` (previous = recursive item). */
+export type SetItemParam<K extends TypeNames> = <E extends ParamKey<K>>(
+  item: (previous: TypedItem<K>) => [E, ParamValue<K, E>],
+) => void;
+
+export type ItemEditorRuntimeState<K extends TypeNames = TypeNames> = ItemState & {
+  impRef: RefObject<ValidateFor<K> | null>;
 };
 
-export type HeadingEditorProps = {
-  formItem: lib.TypedFormItem<Params, "heading">;
-  setFormItemParam: (item: () => ["text", string]) => void;
-  state: ItemEditorRuntimeState<"heading">;
-  render: (ui: () => ReactNode) => ReactNode;
-};
+type EditorPropsFor<K extends TypeNames> = Omit<
+  lib.EditorProps<TypeNames, Params, K, Ctx, DialogArgs, ItemExtra, ItemState>,
+  "state"
+> & { state: ItemEditorRuntimeState<K> };
+
+export type FieldEditorProps = EditorPropsFor<"field">;
+export type HeadingEditorProps = EditorPropsFor<"heading">;
+
+export type SetEditingItem = Dispatch<SetStateAction<EditingItem>>;
+
+/** Active editor kind `K` always matches `draft.header.type` at runtime. */
+export type TypedDraft<K extends TypeNames> = Extract<EditingItem, TypedItem<K>>;
+
+export const typedDraft = <K extends TypeNames>(
+  draft: EditingItem,
+): TypedDraft<K> => draft as TypedDraft<K>;
+
+export const patchItemParam = <K extends TypeNames, E extends ParamKey<K>>(
+  draft: TypedDraft<K>,
+  key: E,
+  value: ParamValue<K, E>,
+): EditingItem => ({
+  ...draft,
+  header: {
+    ...draft.header,
+    params: { ...draft.header.params, [key]: value },
+  },
+} as EditingItem);
+
+export const asEditingItem = (item: ListItem): EditingItem => item as EditingItem;
+
+export const isFieldItem = (item: EditingItem): item is TypedItem<"field"> =>
+  item.header.type === "field";
 
 export type StoryArgs = {
   flatItems: FlatItems;

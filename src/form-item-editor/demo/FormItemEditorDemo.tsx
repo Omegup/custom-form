@@ -6,7 +6,6 @@
  * - `render()` — optional companion UI below inputs
  */
 import { useCallback, useImperativeHandle, useState } from "react";
-import type { SetStateAction } from "react";
 import * as demo from "./formItemEditorDemoHelper";
 import * as formDemo from "./formDemo";
 import * as types from "./formItemEditorDemoTypes.t";
@@ -15,57 +14,29 @@ import * as lib from "./library";
 // ── useHook — shared draft/save; field-only duplicate-name check ──────────────
 
 const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
-  props: types.EditorProps<K>,
-  { validate }: lib.FormItemEditorValidate<types.Params, K>,
-): lib.FormItemEditorState<
-  types.TypeNames,
-  types.Params,
-  K,
-  types.ItemState
-> => {
+  props: types.EditorProps,
+  { validate }: types.ValidateFor<K>,
+): types.ItemStateFor<K> => {
   const { draft, setDraft, onCommit, otherNames } = props.extra;
+  const typed = types.typedDraft<K>(draft);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const setFormItemParam = useCallback(
-    <E extends keyof types.Params[K]>(
-      item: (
-        previous: lib.RecursiveTypedFormItem<
-          types.TypeNames,
-          types.Params,
-          K,
-          types.ItemMeta
-        >,
-      ) => [E, types.Params[K][E]],
-    ) => {
-      setDraft((prev: types.EditingItem) => {
-        const typed = prev as lib.RecursiveTypedFormItem<
-          types.TypeNames,
-          types.Params,
-          K,
-          types.ItemMeta
-        >;
-        const [key, value] = item(typed);
-        return {
-          ...prev,
-          header: {
-            ...prev.header,
-            params: { ...prev.header.params, [key]: value },
-          },
-        } as types.EditingItem;
-      });
+    <E extends types.ParamKey<K>>(item: (
+      previous: types.TypedItem<K>,
+    ) => [E, types.ParamValue<K, E>]) => {
+      const [key, value] = item(typed);
+      setDraft(types.patchItemParam(typed, key, value));
       setSaveError(null);
     },
-    [setDraft],
+    [setDraft, typed],
   );
 
   const save = useCallback(() => {
     setSaveError(null);
     let valid = true;
     validate(
-      {
-        header: draft.header as lib.TypedFormItem<types.Params, K>,
-        meta: draft.meta,
-      },
+      { header: typed.header, meta: typed.meta },
       {
         param: () => {
           valid = false;
@@ -77,7 +48,7 @@ const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
     );
     if (!valid) return;
 
-    if (draft.header.type === "field") {
+    if (types.isFieldItem(draft)) {
       const name = draft.header.params.name.trim();
       if (otherNames.includes(name)) {
         setSaveError(`"${name}" is already used by another field`);
@@ -86,15 +57,10 @@ const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
     }
 
     onCommit();
-  }, [draft, onCommit, otherNames, validate]);
+  }, [draft, onCommit, otherNames, typed, validate]);
 
   return {
-    recursiveFormItem: draft as lib.RecursiveTypedFormItem<
-      types.TypeNames,
-      types.Params,
-      K,
-      types.ItemMeta
-    >,
+    recursiveFormItem: typed,
     setFormItemParam,
     setFormItemSection: () => {},
     extra: lib.branded({ save, saveError }),
@@ -113,6 +79,7 @@ const FieldEditor = ({
 
   useImperativeHandle(state.impRef, () => ({
     validate: (value, setError) => {
+      if (value.header.type !== "field") return;
       const name = value.header.params.name;
       if (!name.trim()) {
         setError.param("name", "Name is required");
@@ -152,6 +119,7 @@ const HeadingEditor = ({
 
   useImperativeHandle(state.impRef, () => ({
     validate: (value, setError) => {
+      if (value.header.type !== "heading") return;
       const text = value.header.params.text;
       if (!text.trim()) {
         setError.param("text", "Heading text is required");
@@ -221,7 +189,7 @@ export const FormItemEditorDemo = ({
 }: types.DemoProps) => {
   const [draft, setDraftOpen] = useState<types.EditingItem | null>(null);
 
-  const setDraft = useCallback((update: SetStateAction<types.EditingItem>) => {
+  const setDraft: types.SetEditingItem = useCallback((update) => {
     setDraftOpen((prev) => {
       if (!prev) return prev;
       return typeof update === "function" ? update(prev) : update;
@@ -287,7 +255,7 @@ export const FormItemEditorDemo = ({
       <formDemo.FormItemEditorFormTest
         flatItems={flatItems}
         updateArgs={updateArgs}
-        extra={(item) => [{ label: "Edit", onClick: () => setDraftOpen(item) }]}
+        extra={(item) => [{ label: "Edit", onClick: () => setDraftOpen(types.asEditingItem(item)) }]}
       />
     </formDemo.FormContainer>
   );

@@ -77,7 +77,7 @@ export const FormItemEditorFormTest = ({
 }: {
   flatItems: types.FlatItems;
   updateArgs: (patch: Partial<types.StoryArgs>) => void;
-  extra?: (item: types.EditingItem) => ExtraAction[];
+  extra?: (item: types.ListItem) => ExtraAction[];
 }) => {
   const [focused, setFocused] = useState<lib.AutoFocusState>(null);
   const [toRemove, setToRemove] = useState<PendingRemove | null>(null);
