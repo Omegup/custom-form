@@ -1,9 +1,9 @@
 /**
- * Demo: form list + `createFormItemEditorWrapper` with **field** and **heading** editors.
+ * Demo: form list + `createFormItemEditorWrapper` with **field**, **heading**, and **panel**.
  *
  * - `useItemEditor` — generic `UseFormItemEditor` hook (`K extends TypeNames`)
  * - per-type `Editor` components register `validate` on `state.impRef`
- * - companion length hints sit below inputs
+ * - **panel** edits title + column count `n`; save re-flattens via `changeCols` + `flatten`
  */
 import { useCallback, useImperativeHandle, useState } from "react";
 import * as demo from "./formItemEditorDemoHelper";
@@ -123,6 +123,53 @@ const HeadingEditor = ({
   );
 };
 
+const PanelEditor = ({
+  flatFormItem: formItem,
+  setFormItemParam,
+  props: editorProps,
+  impRef,
+}: types.PanelEditorProps) => {
+  const [titleError, setTitleError] = useState<string | null>(null);
+
+  useImperativeHandle(impRef.current.main, () => ({
+    validate: (value, setError) => {
+      const title = value.item.params.title;
+      if (!title.trim()) {
+        setError.param("title", "Panel title is required");
+        setTitleError("Panel title is required");
+        return;
+      }
+      if (title.trim().length < demo.MIN_PANEL_TITLE_LEN) {
+        setError.param(
+          "title",
+          `At least ${demo.MIN_PANEL_TITLE_LEN} characters`,
+        );
+        setTitleError(`At least ${demo.MIN_PANEL_TITLE_LEN} characters`);
+        return;
+      }
+      setTitleError(null);
+    },
+  }));
+
+  return (
+    <>
+      <demo.TextField
+        label="Panel title"
+        value={formItem.item.params.title}
+        error={titleError}
+        onChange={(title) => setFormItemParam(() => ["title", title])}
+      />
+      <demo.PanelTitleHint title={formItem.item.params.title} />
+      <demo.SelectColumns
+        cols={formItem.n}
+        onChange={(n) =>
+          editorProps.setFormItem((prev) => ({ ...prev, n }))
+        }
+      />
+    </>
+  );
+};
+
 const FormItemEditor = lib.createFormItemEditorWrapper<
   types.TypeNames,
   types.Params,
@@ -134,6 +181,7 @@ const FormItemEditor = lib.createFormItemEditorWrapper<
   {
     field: { editor: FieldEditor },
     heading: { editor: HeadingEditor },
+    panel: { editor: PanelEditor },
   },
   useItemEditor,
   (dialogArgs, state, children) => (
@@ -148,8 +196,11 @@ const FormItemEditor = lib.createFormItemEditorWrapper<
   ),
 );
 
-const dialogTitle = (item: types.ItemHeader) =>
-  item.type === "field" ? `Edit ${item.params.name}` : `Edit heading`;
+const dialogTitle = (item: types.ItemHeader) => {
+  if (item.type === "field") return `Edit ${item.params.name}`;
+  if (item.type === "heading") return `Edit heading`;
+  return `Edit panel`;
+};
 
 const trimmedDraft = (draft: types.EditingDraft): types.EditingDraft => {
   if (types.isFieldDraft(draft)) {
@@ -170,19 +221,60 @@ const trimmedDraft = (draft: types.EditingDraft): types.EditingDraft => {
       },
     };
   }
+  if (types.isPanelDraft(draft)) {
+    return {
+      n: draft.n,
+      item: {
+        ...draft.item,
+        params: { title: draft.item.params.title.trim() },
+      },
+    };
+  }
   return draft;
 };
 
-/** Replace the matching flat entry. Param-only editors keep `n` (and child spans) unchanged. */
-const commitEditingDraft = (
-  flatItems: types.FlatItems,
-  draft: types.EditingDraft,
-): types.FlatItems => {
-  const next = trimmedDraft(draft);
-  return flatItems.map((fi) =>
-    "item" in fi && fi.item.id === next.item.id ? next : fi,
-  );
+/** School `changeCols` — grow/shrink child column slots before re-flattening. */
+const changeCols = <T,>(cols: number, source: T[][]): T[][] => {
+  const items = source.slice();
+  const diff = cols - items.length;
+  if (diff > 0) items.push(...Array.from({ length: diff }, () => [] as T[]));
+  if (diff < 0)
+    items.splice(cols - 1, 1 - diff, items.slice(cols - 1).flat());
+  return items;
 };
+
+const flattenItem = lib.flatten<
+  types.TypeNames,
+  types.Params,
+  types.Section,
+  types.ItemMeta
+>();
+
+/** Replace the item's flat span with a re-flattened subtree (handles `n` changes). */
+const commitEditingSession = (
+  flatItems: types.FlatItems,
+  session: types.EditingSession,
+): types.FlatItems => {
+  const next = trimmedDraft(session.draft);
+  const children = changeCols(next.n, session.children);
+  const list = flattenItem.formItem({
+    header: next.item,
+    children,
+    meta: {
+      index: session.index,
+      total: session.total,
+      sIndex: 0,
+    },
+  });
+  return flatItems.toSpliced(session.index, session.total, ...list);
+};
+
+const openSession = (item: types.ListItem): types.EditingSession => ({
+  draft: { item: item.header, n: item.children.length },
+  children: item.children,
+  index: item.meta.index,
+  total: item.meta.total,
+});
 
 // ── Storybook integration ─────────────────────────────────────────────────────
 
@@ -191,7 +283,8 @@ export const FormItemEditorDemo = ({
   flatItems,
   updateArgs,
 }: types.DemoProps) => {
-  const [draft, setDraftOpen] = useState<types.EditingDraft | null>(null);
+  const [session, setSession] = useState<types.EditingSession | null>(null);
+  const draft = session?.draft ?? null;
 
   const otherNames =
     draft === null
@@ -205,25 +298,28 @@ export const FormItemEditorDemo = ({
         );
 
   const commitDraft = useCallback(() => {
-    if (!draft) return;
-    updateArgs({ flatItems: commitEditingDraft(flatItems, draft) });
-    setDraftOpen(null);
-  }, [draft, flatItems, updateArgs]);
+    if (!session) return;
+    updateArgs({ flatItems: commitEditingSession(flatItems, session) });
+    setSession(null);
+  }, [session, flatItems, updateArgs]);
 
   return (
     <formDemo.FormContainer title={heading}>
-      {draft && (
+      {draft && session && (
         <FormItemEditor
           ctx={lib.branded({})}
           dialogArgs={lib.branded({
             title: dialogTitle(draft.item),
-            onCancel: () => setDraftOpen(null),
+            onCancel: () => setSession(null),
           })}
           formItem={draft}
           setFormItem={(updater) =>
-            typeof updater === "function"
-              ? setDraftOpen((prev) => (prev ? updater(prev) : null))
-              : setDraftOpen(updater)
+            setSession((prev) => {
+              if (!prev) return prev;
+              const nextDraft =
+                typeof updater === "function" ? updater(prev.draft) : updater;
+              return { ...prev, draft: nextDraft };
+            })
           }
           extra={lib.branded<types.ItemExtra, "item-edit-extra">({
             otherNames,
@@ -237,8 +333,7 @@ export const FormItemEditorDemo = ({
         extra={(item) => [
           {
             label: "Edit",
-            onClick: () =>
-              setDraftOpen({ item: item.header, n: item.children.length }),
+            onClick: () => setSession(openSession(item)),
           },
         ]}
       />

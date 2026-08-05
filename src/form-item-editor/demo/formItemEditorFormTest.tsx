@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import {
   FieldRow,
   SectionPanel,
@@ -30,6 +30,9 @@ const cloneFn: lib.Clone<
   const texts = allItems.flatMap((fi) =>
     "item" in fi && fi.item.type === "heading" ? [fi.item.params.text] : [],
   );
+  const titles = allItems.flatMap((fi) =>
+    "item" in fi && fi.item.type === "panel" ? [fi.item.params.title] : [],
+  );
   const uniq = (base: string, used: string[]) => {
     let n = 1;
     let next = `${base} (copy)`;
@@ -52,11 +55,21 @@ const cloneFn: lib.Clone<
           n: fi.n,
         };
       }
+      if (fi.item.type === "heading") {
+        return {
+          item: {
+            ...fi.item,
+            id: randomId(),
+            params: { text: uniq(fi.item.params.text, texts) },
+          },
+          n: fi.n,
+        };
+      }
       return {
         item: {
           ...fi.item,
           id: randomId(),
-          params: { text: uniq(fi.item.params.text, texts) },
+          params: { title: uniq(fi.item.params.title, titles) },
         },
         n: fi.n,
       };
@@ -109,6 +122,29 @@ export const FormItemEditorFormTest = ({
   };
   const itemActions = lib.getFormItemMoveActions(actionsArgs, cloneFn, jump);
 
+  const renderItem = (item: types.ListItem): ReactNode => {
+    if (item.header.deleted && !showDeleted) return null;
+    const actions = itemActions(item);
+    const fieldFocused = ctx.autoFocused(item.header.id);
+    return (
+      <div key={item.header.id}>
+        <FieldRow
+          name={itemLabel(item.header)}
+          focused={fieldFocused}
+          actions={actions}
+          extra={extra?.(item) ?? []}
+        />
+        {item.children.length > 0 && (
+          <demo.NestedColumns
+            columns={item.children.map((column) =>
+              column.map((child) => renderItem(child)),
+            )}
+          />
+        )}
+      </div>
+    );
+  };
+
   return (
     <>
       {toRemove && (
@@ -141,20 +177,7 @@ export const FormItemEditorFormTest = ({
               sectionActions={sActions}
               sectionExtra={[]}
               columns={section.items.map((column) =>
-                column.map((item) => {
-                  if (item.header.deleted && !showDeleted) return null;
-                  const actions = itemActions(item);
-                  const fieldFocused = ctx.autoFocused(item.header.id);
-                  return (
-                    <FieldRow
-                      key={item.header.id}
-                      name={itemLabel(item.header)}
-                      focused={fieldFocused}
-                      actions={actions}
-                      extra={extra?.(item) ?? []}
-                    />
-                  );
-                }),
+                column.map((item) => renderItem(item)),
               )}
             />
           );

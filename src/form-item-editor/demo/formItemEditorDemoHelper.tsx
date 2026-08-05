@@ -7,7 +7,8 @@ export type { StoryArgs } from "./formItemEditorDemoTypes.t";
 
 export const itemLabel = (header: types.ItemHeader) => {
   if (header.type === "field") return header.params.name;
-  return `§ ${header.params.text}`;
+  if (header.type === "heading") return `§ ${header.params.text}`;
+  return `▦ ${header.params.title}`;
 };
 
 // ── Storybook docs (`?raw` of types + integration) ────────────────────────────
@@ -204,3 +205,115 @@ export const HeadingLengthHint = ({ text }: { text: string }) => (
 );
 
 export { MIN_HEADING_LEN };
+
+export const PANEL_COL_OPTIONS = [1, 2] as const;
+
+/** Column count control for panel `n` — mirrors school SelectColumns (1 | 2). */
+export const SelectColumns = ({
+  cols,
+  onChange,
+}: {
+  cols: number;
+  onChange: (cols: number) => void;
+}) => (
+  <fieldset
+    style={{
+      margin: 0,
+      padding: "8px 10px",
+      border: "1px solid #ccc",
+      borderRadius: 4,
+      display: "flex",
+      flexDirection: "column",
+      gap: 6,
+    }}
+  >
+    <legend style={{ fontSize: 12, opacity: 0.7, padding: "0 4px" }}>
+      Columns (n)
+    </legend>
+    <div style={{ display: "flex", gap: 8 }}>
+      {PANEL_COL_OPTIONS.map((n) => (
+        <button
+          key={n}
+          type="button"
+          onClick={() => onChange(n)}
+          style={{
+            flex: 1,
+            padding: "8px 6px",
+            borderRadius: 4,
+            border: `2px solid ${cols === n ? "#3b82f6" : "#ccc"}`,
+            background: cols === n ? "#eff6ff" : "white",
+            cursor: "pointer",
+          }}
+        >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: `repeat(${n}, 1fr)`,
+              gap: 3,
+              height: 28,
+              marginBottom: 4,
+            }}
+          >
+            {Array.from({ length: n }, (_, i) => (
+              <div
+                key={i}
+                style={{ background: cols === n ? "#93c5fd" : "#e5e7eb", borderRadius: 2 }}
+              />
+            ))}
+          </div>
+          <span style={{ fontSize: 11 }}>{n} column{n > 1 ? "s" : ""}</span>
+        </button>
+      ))}
+    </div>
+    <p style={{ margin: 0, fontSize: 11, opacity: 0.6 }}>
+      Decreasing columns merges trailing slots into the last column.
+    </p>
+  </fieldset>
+);
+
+const MIN_PANEL_TITLE_LEN = 2;
+
+export const PanelTitleHint = ({ title }: { title: string }) => (
+  <p
+    style={{
+      margin: 0,
+      fontSize: 11,
+      opacity: title.trim().length < MIN_PANEL_TITLE_LEN ? 1 : 0.55,
+    }}
+  >
+    {title.trim().length}/{MIN_PANEL_TITLE_LEN} characters minimum
+    {title.trim().length < MIN_PANEL_TITLE_LEN ? " — too short" : ""}
+  </p>
+);
+
+export { MIN_PANEL_TITLE_LEN };
+
+/** Nested child columns under a panel row. */
+export const NestedColumns = ({ columns }: { columns: ReactNode[] }) => (
+  <div
+    style={{
+      display: "flex",
+      flexDirection: "row",
+      gap: 6,
+      marginLeft: 12,
+      marginTop: 4,
+      paddingLeft: 8,
+      borderLeft: "2px solid #b8d4f0",
+    }}
+  >
+    {columns.map((column, i) => (
+      <div
+        key={i}
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          gap: 4,
+          minWidth: 0,
+        }}
+      >
+        {column}
+      </div>
+    ))}
+  </div>
+);

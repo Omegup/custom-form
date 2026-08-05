@@ -14,6 +14,15 @@ export const FORM_ITEM_EDITOR_INITIAL: FlatItems = [
     n: 0,
   },
   {
+    item: {
+      id: "p1",
+      type: "panel",
+      params: { title: "Name & email" },
+      deleted: false,
+    },
+    n: 2,
+  },
+  {
     item: { id: "f1", type: "field", params: { name: "Name" }, deleted: false },
     n: 0,
   },
@@ -27,6 +36,7 @@ export const FORM_ITEM_EDITOR_INITIAL: FlatItems = [
     },
     n: 0,
   },
+  { end: null },
   {
     section: {
       id: "s2",

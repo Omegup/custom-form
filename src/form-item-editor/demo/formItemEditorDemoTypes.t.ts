@@ -1,10 +1,11 @@
 import type { Dispatch, SetStateAction } from "react";
 import type * as lib from "./library";
 
-export type TypeNames = "field" | "heading";
+export type TypeNames = "field" | "heading" | "panel";
 export type Params = lib.TheParams<{
   field: { name: string };
   heading: { text: string };
+  panel: { title: string };
 }>;
 export type Section = {
   id: string;
@@ -28,8 +29,10 @@ export type ItemHeader = {
 }[TypeNames];
 export type FieldHeader = lib.TypedFormItem<Params, "field">;
 export type HeadingHeader = lib.TypedFormItem<Params, "heading">;
+export type PanelHeader = lib.TypedFormItem<Params, "panel">;
 
 export type FlatItems = lib.FlatFormItems<TypeNames, Params, Section>;
+export type FlatEntry = FlatItems[number];
 
 export type ItemDraft = {
   onCommit: () => void;
@@ -48,12 +51,24 @@ export type ItemStateMap = { [K in TypeNames]: ItemState };
 export type EditingDraft = lib.FlatFormItem<TypeNames, Params>;
 export type FieldDraft = { item: FieldHeader; n: number };
 export type HeadingDraft = { item: HeadingHeader; n: number };
+export type PanelDraft = { item: PanelHeader; n: number };
+
+/** Open edit session — draft for the editor + subtree needed to re-flatten when `n` changes. */
+export type EditingSession = {
+  draft: EditingDraft;
+  children: ListItem[][];
+  index: number;
+  total: number;
+};
 
 export const isFieldDraft = (draft: EditingDraft): draft is FieldDraft =>
   draft.item.type === "field";
 
 export const isHeadingDraft = (draft: EditingDraft): draft is HeadingDraft =>
   draft.item.type === "heading";
+
+export const isPanelDraft = (draft: EditingDraft): draft is PanelDraft =>
+  draft.item.type === "panel";
 
 export type DialogArgs = lib.DialogArgsDom<{
   title: string;
@@ -89,18 +104,6 @@ export type ParamValue<
   E extends ParamKey<K>,
 > = Params[K][E];
 
-/** `setFormItemParam` passed into per-type editors (previous = item header). */
-export type SetHeaderParam<K extends TypeNames> = <E extends ParamKey<K>>(
-  item: (previous: lib.TypedFormItem<Params, K>) => [E, ParamValue<K, E>],
-) => void;
-
-/** `setFormItemParam` returned from `useItemEditor` (previous = recursive item). */
-export type SetItemParam<K extends TypeNames> = <E extends ParamKey<K>>(
-  item: (previous: TypedItem<K>) => [E, ParamValue<K, E>],
-) => void;
-
-export type ItemEditorRuntimeState = ItemState;
-
 type EditorPropsFor<K extends TypeNames> = lib.EditorProps<
   TypeNames,
   Params,
@@ -113,8 +116,9 @@ type EditorPropsFor<K extends TypeNames> = lib.EditorProps<
 
 export type FieldEditorProps = EditorPropsFor<"field">;
 export type HeadingEditorProps = EditorPropsFor<"heading">;
+export type PanelEditorProps = EditorPropsFor<"panel">;
 
-export type SetEditingDraft = Dispatch<SetStateAction<EditingDraft>>;
+export type SetEditingSession = Dispatch<SetStateAction<EditingSession | null>>;
 
 export type StoryArgs = {
   flatItems: FlatItems;
