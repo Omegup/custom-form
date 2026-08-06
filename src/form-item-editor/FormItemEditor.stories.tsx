@@ -28,7 +28,7 @@ export default {
       },
       description: {
         component:
-          "Click **Edit** on a **field**, **heading**, or **panel** row. Panel embeds child fields and lets you change column count `n` (1↔2); Save re-flattens via `changeCols` + `flatten`. Field: required name, max length, duplicate-name check. Heading: required text, min length. Both register `validate` on `impRef`.",
+          "Click **Edit** on a **field**, **heading**, or **panel** row. Panel embeds child fields and lets you change column count `n` (1↔2); Save re-flattens via `resizeColumns` + `flatten` (commit glue → future `form-edit-react`). Field: required name, max length, duplicate-name check. Heading: required text, min length. Editors register `validate` on `impRef`.",
       },
     },
   },

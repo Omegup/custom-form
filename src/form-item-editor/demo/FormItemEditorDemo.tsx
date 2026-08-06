@@ -1,9 +1,12 @@
 /**
  * Demo: form list + `createFormItemEditorWrapper` with **field**, **heading**, and **panel**.
  *
+ * Boundary map (what moves where): see form-item-editor/README.md § "Demo vs library".
+ *
  * - `useItemEditor` — generic `UseFormItemEditor` hook (`K extends TypeNames`)
  * - per-type `Editor` components register `validate` on `impRef` (void; errors via setError)
- * - **panel** edits title + column count `n`; save re-flattens via `changeCols` + `flatten`
+ * - **panel** edits title + column count `n`; save re-flattens via `resizeColumns` + `flatten`
+ * - `commitEditingSession` / session state → deferred to **form-edit-react** (`makeUseDialogs`)
  */
 import { useCallback, useImperativeHandle, useState } from "react";
 import * as demo from "./formItemEditorDemoHelper";
@@ -202,16 +205,6 @@ const dialogTitle = (item: types.ItemHeader) => {
   return `Edit panel`;
 };
 
-/** School `changeCols` — grow/shrink child column slots before re-flattening. */
-const changeCols = <T,>(cols: number, source: T[][]): T[][] => {
-  const items = source.slice();
-  const diff = cols - items.length;
-  if (diff > 0) items.push(...Array.from({ length: diff }, () => []));
-  if (diff < 0)
-    items.splice(cols - 1, 1 - diff, items.slice(cols - 1).flat());
-  return items;
-};
-
 const flattenItem = lib.flatten<
   types.TypeNames,
   types.Params,
@@ -225,7 +218,7 @@ const commitEditingSession = (
   session: types.EditingSession,
   draft: lib.FlatFormItem<types.TypeNames, types.Params>,
 ): types.FlatItems => {
-  const children = changeCols(draft.n, session.children);
+  const children = lib.resizeColumns(draft.n, session.children);
   const list = flattenItem.formItem({
     header: draft.item ,
     children,
