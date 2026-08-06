@@ -38,10 +38,10 @@ Logic in `demo/FormItemEditorDemo.tsx` and friends, and where it belongs:
 | Demo code | Reason |
 |---|---|
 | `FieldEditor`, `HeadingEditor`, `PanelEditor` (in `FormItemEditorDemo.tsx`) | Domain editors — school keeps these in `editors/`, not in `form-item-edit-react` |
-| `useItemEditor` + `save` + duplicate-name check | App `useFormItemEditor` pattern (school: `legacy-front/.../useFormItemEditor.ts` + formik) |
+| `useItemEditor` + `save` | App `useFormItemEditor` pattern (school: `legacy-front/.../useFormItemEditor.ts` + formik) |
 | `EditorDialog`, field UI chrome, `FormItemEditorFormTest` | Helper — school: `renderDefaultDialog`, design-system inputs, form-edit list |
 | Name `viewers` + `createFormItemByGetChild` | Same composition as `form` demo — per-type labels without a type switch |
-| `otherNames` collection | Demo business rule |
+| `ctx.flatItems` + `isFieldNameTaken` filter in `FieldEditor` | `ctx` carries raw data only (no field-specific API); `FieldEditor` decides what it means — no context/provider infra |
 
 ### Stays in demo until **`form-edit-react`** is migrated
 
@@ -78,7 +78,7 @@ School home: `react-packages/form-edit-react/useDialog.tsx` (`makeUseDialogs`).
 ```
 createFormItemEditorWrapper(editors, useHook, renderDialog)
   → React component (props: { ctx, dialogArgs, formItem, setFormItem, extra })
-      1. useHook(props, { validate }) → state (e.g. save, saveError)
+      1. useHook(props, { validate }) → state (e.g. save, isError)
       2. editors[item.type].editor → per-type Editor component
       3. renderDialog(dialogArgs, state, children) → shell (title, Save/Cancel)
 ```

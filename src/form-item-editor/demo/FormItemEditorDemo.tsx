@@ -12,24 +12,50 @@ import * as lib from "./library";
 
 // ── Editors (domain) ──────────────────────────────────────────────────────────
 
+/** Only `FieldEditor` interprets `ctx.flatItems` this way — plain filter, no shared API. */
+const isFieldNameTaken = (
+  flatItems: types.FlatItems,
+  name: string,
+  excludeId: string,
+): boolean =>
+  flatItems.some(
+    (fi) =>
+      "item" in fi &&
+      fi.item.type === "field" &&
+      fi.item.id !== excludeId &&
+      fi.item.params.name.trim() === name,
+  );
+
 const FieldEditor = ({
   flatFormItem: formItem,
   setFormItemParam,
   impRef,
   hookResult,
+  ctx,
 }: types.FieldEditorProps) => {
-  useImperativeHandle(impRef.current.main, () => ({
-    validate: (value, setError) => {
-      const name = value.item.params.name.trim();
-      if (!name) {
-        setError.param("name", "Name is required");
-        return;
-      }
-      if (name.length > demo.MAX_NAME_LEN) {
-        setError.param("name", `Max ${demo.MAX_NAME_LEN} characters`);
-      }
-    },
-  }));
+  useImperativeHandle(
+    impRef.current.main,
+    () => ({
+      validate: (value, setError) => {
+        const name = value.item.params.name.trim();
+        if (!name) {
+          setError.param("name", "Name is required");
+          return;
+        }
+        if (name.length > demo.MAX_NAME_LEN) {
+          setError.param("name", `Max ${demo.MAX_NAME_LEN} characters`);
+          return;
+        }
+        if (isFieldNameTaken(ctx.flatItems, name, value.item.id)) {
+          setError.param(
+            "name",
+            `"${name}" is already used by another field`,
+          );
+        }
+      },
+    }),
+    [ctx],
+  );
 
   return (
     <>
@@ -133,11 +159,11 @@ const nameViewers: types.NameViewers = {
 
 const ItemName = lib.createFormItemByGetChild(nameViewers, (x) => x);
 
-const itemName = (header: types.ItemHeader): ReactNode => (
+const itemName = (ctx: types.Ctx, header: types.ItemHeader): ReactNode => (
   <ItemName
     viewProps={{
       formItem: header,
-      ctx: lib.branded({}),
+      ctx,
       variant: "default",
       extra: lib.branded({
         getChild: () => null,
@@ -153,13 +179,11 @@ const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
   props: types.EditorProps<K>,
   { validate }: types.Validate<K>,
 ): types.ItemStateFor<K> => {
-  const { onCommit, otherNames } = props.extra;
+  const { onCommit } = props.extra;
   const { formItem: draft } = props;
-  const [saveError, setSaveError] = useState<string | null>(null);
   const [errors, setErrors] = useState<types.ItemValidateErrors<K>>({});
 
   const save = useCallback(() => {
-    setSaveError(null);
     const next: types.ItemValidateErrors<K> = {};
     validate(draft, {
       param: (name, message) => {
@@ -175,22 +199,12 @@ const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
     if (next.header?.params && Object.keys(next.header.params).length > 0) {
       return;
     }
-
-    if (draft.item.type === "field" && "name" in draft.item.params) {
-      const name = draft.item.params.name;
-      if (otherNames.includes(name.trim())) {
-        setSaveError(`"${name.trim()}" is already used by another field`);
-        return;
-      }
-    }
-
     onCommit(draft);
-  }, [draft, onCommit, otherNames, validate]);
+  }, [draft, onCommit, validate]);
 
   return {
     state: lib.branded<types.ItemState<K>, "item-edit-state">({
       save,
-      saveError,
       errors,
       isError: (param) => Boolean(errors.header?.params[param]),
       isSectionError: Boolean(errors.sIndex),
@@ -217,7 +231,7 @@ const FormItemEditor = lib.createFormItemEditorWrapper<
       title={dialogArgs.title}
       onCancel={dialogArgs.onCancel}
       onSave={state.save}
-      saveError={state.saveError ?? state.errors.sIndex ?? null}
+      saveError={state.errors.sIndex ?? null}
     >
       {children}
     </demo.EditorDialog>
@@ -265,17 +279,7 @@ export const FormItemEditorDemo = ({
 }: types.DemoProps) => {
   const [session, setSession] = useState<types.EditingSession | null>(null);
   const draft = session?.draft ?? null;
-
-  const otherNames =
-    draft === null
-      ? []
-      : flatItems.flatMap((fi) =>
-          "item" in fi &&
-          fi.item.type === "field" &&
-          fi.item.id !== draft.item.id
-            ? [fi.item.params.name.trim()]
-            : [],
-        );
+  const ctx: types.Ctx = lib.branded({ flatItems });
 
   const commitDraft = useCallback(
     (next: lib.FlatFormItem<types.TypeNames, types.Params>) => {
@@ -292,9 +296,9 @@ export const FormItemEditorDemo = ({
     <demo.FormContainer title={heading}>
       {draft && session && (
         <FormItemEditor
-          ctx={lib.branded({})}
+          ctx={ctx}
           dialogArgs={lib.branded({
-            title: <>Edit · {itemName(draft.item)}</>,
+            title: <>Edit · {itemName(ctx, draft.item)}</>,
             onCancel: () => setSession(null),
           })}
           formItem={draft}
@@ -307,7 +311,6 @@ export const FormItemEditorDemo = ({
             })
           }
           extra={lib.branded<types.ItemExtra, "item-edit-extra">({
-            otherNames,
             onCommit: commitDraft,
           })}
         />
@@ -315,7 +318,7 @@ export const FormItemEditorDemo = ({
       <demo.FormItemEditorFormTest
         flatItems={flatItems}
         updateArgs={updateArgs}
-        itemName={itemName}
+        itemName={(header) => itemName(ctx, header)}
         extra={(item) => [
           {
             label: "Edit",

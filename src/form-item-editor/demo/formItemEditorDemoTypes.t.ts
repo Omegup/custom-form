@@ -26,13 +26,6 @@ export type Section = {
   description: string;
 };
 
-export type Ctx = lib.ContextDom;
-export type ItemMeta = lib.MetaDom<{
-  index: number;
-  total: number;
-  sIndex: number;
-}>;
-
 export type TypedItem<K extends TypeNames> = lib.FlatFormItem<K, Params>;
 export type ListItem = lib.RecursiveFormItem<TypeNames, Params, ItemMeta>;
 
@@ -46,10 +39,22 @@ export type PanelHeader = lib.TypedFormItem<Params, "panel">;
 export type FlatItems = lib.FlatFormItems<TypeNames, Params, Section>;
 export type FlatEntry = FlatItems[number];
 
+/**
+ * Ambient context — raw form data every editor gets, no type-specific API.
+ * `FieldEditor` reads `flatItems` itself to check name uniqueness; other
+ * editors ignore it (same pattern as `accent` in the `form` demo ctx).
+ */
+export type Ctx = lib.ContextDom & { flatItems: FlatItems };
+
+export type ItemMeta = lib.MetaDom<{
+  index: number;
+  total: number;
+  sIndex: number;
+}>;
+
 export type ItemDraft = {
   /** Called after validate succeeds — commits the current draft as-is. */
   onCommit: <K extends TypeNames>(draft: lib.FlatFormItem<K, Params>) => void;
-  otherNames: string[];
 };
 
 export type ItemExtra = lib.ItemEditExtraDom<ItemDraft>;
@@ -67,8 +72,6 @@ export type ItemValidateErrors<K extends TypeNames> = {
 /** Per-type edit state — school `ItemEditStateApp` (`isError` / `isSectionError`). */
 export type ItemState<K extends TypeNames> = lib.ItemEditStateDom<{
   save: () => void;
-  /** App-level (e.g. duplicate name) — not from `validate`. */
-  saveError: string | null;
   isError: (param: keyof Params[K]) => boolean;
   isSectionError: boolean;
   errors: ItemValidateErrors<K>;
