@@ -35,7 +35,8 @@ export type FlatItems = lib.FlatFormItems<TypeNames, Params, Section>;
 export type FlatEntry = FlatItems[number];
 
 export type ItemDraft = {
-  onCommit: () => void;
+  /** Called after validate succeeds — commits the current draft as-is. */
+  onCommit: <K extends TypeNames>(draft: lib.FlatFormItem<K, Params>) => void;
   otherNames: string[];
 };
 
@@ -49,9 +50,6 @@ export type ItemState = lib.ItemEditStateDom<{
 export type ItemStateMap = { [K in TypeNames]: ItemState };
 
 export type EditingDraft = lib.FlatFormItem<TypeNames, Params>;
-export type FieldDraft = { item: FieldHeader; n: number };
-export type HeadingDraft = { item: HeadingHeader; n: number };
-export type PanelDraft = { item: PanelHeader; n: number };
 
 /** Open edit session — draft for the editor + subtree needed to re-flatten when `n` changes. */
 export type EditingSession = {
@@ -60,16 +58,6 @@ export type EditingSession = {
   index: number;
   total: number;
 };
-
-export const isFieldDraft = (draft: EditingDraft): draft is FieldDraft =>
-  draft.item.type === "field";
-
-export const isHeadingDraft = (draft: EditingDraft): draft is HeadingDraft =>
-  draft.item.type === "heading";
-
-export const isPanelDraft = (draft: EditingDraft): draft is PanelDraft =>
-  draft.item.type === "panel";
-
 export type DialogArgs = lib.DialogArgsDom<{
   title: string;
   onCancel: () => void;

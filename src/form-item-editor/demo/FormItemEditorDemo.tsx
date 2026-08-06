@@ -2,7 +2,7 @@
  * Demo: form list + `createFormItemEditorWrapper` with **field**, **heading**, and **panel**.
  *
  * - `useItemEditor` — generic `UseFormItemEditor` hook (`K extends TypeNames`)
- * - per-type `Editor` components register `validate` on `state.impRef`
+ * - per-type `Editor` components register `validate` on `impRef` (void; errors via setError)
  * - **panel** edits title + column count `n`; save re-flattens via `changeCols` + `flatten`
  */
 import { useCallback, useImperativeHandle, useState } from "react";
@@ -11,7 +11,7 @@ import * as formDemo from "./formDemo";
 import * as types from "./formItemEditorDemoTypes.t";
 import * as lib from "./library";
 
-// ── useHook — shared draft/save; field-only duplicate-name check ──────────────
+// ── useHook — school pattern: validate for errors, then commit draft as-is ────
 
 const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
   props: types.EditorProps<K>,
@@ -35,20 +35,20 @@ const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
     if (!valid) return;
 
     if (draft.item.type === "field" && "name" in draft.item.params) {
-      const name = draft.item.params.name.trim();
-      if (otherNames.includes(name)) {
-        setSaveError(`"${name}" is already used by another field`);
+      const name = draft.item.params.name;
+      if (otherNames.includes(name.trim())) {
+        setSaveError(`"${name.trim()}" is already used by another field`);
         return;
       }
     }
 
-    onCommit();
+    onCommit(draft);
   }, [draft, onCommit, otherNames, validate]);
 
   return { state: lib.branded({ save, saveError }) };
 };
 
-// ── Editors — imperative validate via impRef ──────────────────────────────────
+// ── Editors — school-style: trim only for checks; validate returns void ───────
 
 const FieldEditor = ({
   flatFormItem: formItem,
@@ -59,8 +59,8 @@ const FieldEditor = ({
 
   useImperativeHandle(impRef.current.main, () => ({
     validate: (value, setError) => {
-      const name = value.item.params.name;
-      if (!name.trim()) {
+      const name = value.item.params.name.trim();
+      if (!name) {
         setError.param("name", "Name is required");
         setNameError("Name is required");
         return;
@@ -95,13 +95,13 @@ const HeadingEditor = ({
 
   useImperativeHandle(impRef.current.main, () => ({
     validate: (value, setError) => {
-      const text = value.item.params.text;
-      if (!text.trim()) {
+      const text = value.item.params.text.trim();
+      if (!text) {
         setError.param("text", "Heading text is required");
         setTextError("Heading text is required");
         return;
       }
-      if (text.trim().length < demo.MIN_HEADING_LEN) {
+      if (text.length < demo.MIN_HEADING_LEN) {
         setError.param("text", `At least ${demo.MIN_HEADING_LEN} characters`);
         setTextError(`At least ${demo.MIN_HEADING_LEN} characters`);
         return;
@@ -133,13 +133,13 @@ const PanelEditor = ({
 
   useImperativeHandle(impRef.current.main, () => ({
     validate: (value, setError) => {
-      const title = value.item.params.title;
-      if (!title.trim()) {
+      const title = value.item.params.title.trim();
+      if (!title) {
         setError.param("title", "Panel title is required");
         setTitleError("Panel title is required");
         return;
       }
-      if (title.trim().length < demo.MIN_PANEL_TITLE_LEN) {
+      if (title.length < demo.MIN_PANEL_TITLE_LEN) {
         setError.param(
           "title",
           `At least ${demo.MIN_PANEL_TITLE_LEN} characters`,
@@ -202,42 +202,11 @@ const dialogTitle = (item: types.ItemHeader) => {
   return `Edit panel`;
 };
 
-const trimmedDraft = (draft: types.EditingDraft): types.EditingDraft => {
-  if (types.isFieldDraft(draft)) {
-    return {
-      n: draft.n,
-      item: {
-        ...draft.item,
-        params: { name: draft.item.params.name.trim() },
-      },
-    };
-  }
-  if (types.isHeadingDraft(draft)) {
-    return {
-      n: draft.n,
-      item: {
-        ...draft.item,
-        params: { text: draft.item.params.text.trim() },
-      },
-    };
-  }
-  if (types.isPanelDraft(draft)) {
-    return {
-      n: draft.n,
-      item: {
-        ...draft.item,
-        params: { title: draft.item.params.title.trim() },
-      },
-    };
-  }
-  return draft;
-};
-
 /** School `changeCols` — grow/shrink child column slots before re-flattening. */
 const changeCols = <T,>(cols: number, source: T[][]): T[][] => {
   const items = source.slice();
   const diff = cols - items.length;
-  if (diff > 0) items.push(...Array.from({ length: diff }, () => [] as T[]));
+  if (diff > 0) items.push(...Array.from({ length: diff }, () => []));
   if (diff < 0)
     items.splice(cols - 1, 1 - diff, items.slice(cols - 1).flat());
   return items;
@@ -254,11 +223,11 @@ const flattenItem = lib.flatten<
 const commitEditingSession = (
   flatItems: types.FlatItems,
   session: types.EditingSession,
+  draft: lib.FlatFormItem<types.TypeNames, types.Params>,
 ): types.FlatItems => {
-  const next = trimmedDraft(session.draft);
-  const children = changeCols(next.n, session.children);
+  const children = changeCols(draft.n, session.children);
   const list = flattenItem.formItem({
-    header: next.item,
+    header: draft.item ,
     children,
     meta: {
       index: session.index,
@@ -297,11 +266,16 @@ export const FormItemEditorDemo = ({
             : [],
         );
 
-  const commitDraft = useCallback(() => {
-    if (!session) return;
-    updateArgs({ flatItems: commitEditingSession(flatItems, session) });
-    setSession(null);
-  }, [session, flatItems, updateArgs]);
+  const commitDraft = useCallback(
+    (next: lib.FlatFormItem<types.TypeNames, types.Params>) => {
+      if (!session) return;
+      updateArgs({
+        flatItems: commitEditingSession(flatItems, session, next),
+      });
+      setSession(null);
+    },
+    [session, flatItems, updateArgs],
+  );
 
   return (
     <formDemo.FormContainer title={heading}>
