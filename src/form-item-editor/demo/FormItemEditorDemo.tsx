@@ -35,7 +35,7 @@ const FieldEditor = ({
     <>
       <demo.NameField
         value={formItem.item.params.name}
-        error={hookResult.state.errors.name ?? null}
+        error={hookResult.state.errors.header?.params.name ?? null}
         onChange={(name) => setFormItemParam(() => ["name", name])}
       />
       <demo.NameLengthHint name={formItem.item.params.name} />
@@ -67,7 +67,7 @@ const HeadingEditor = ({
       <demo.TextField
         label="Heading"
         value={formItem.item.params.name}
-        error={hookResult.state.errors.name ?? null}
+        error={hookResult.state.errors.header?.params.name ?? null}
         onChange={(name) => setFormItemParam(() => ["name", name])}
       />
       <demo.HeadingLengthHint text={formItem.item.params.name} />
@@ -103,7 +103,7 @@ const PanelEditor = ({
       <demo.TextField
         label="Panel title"
         value={formItem.item.params.name}
-        error={hookResult.state.errors.name ?? null}
+        error={hookResult.state.errors.header?.params.name ?? null}
         onChange={(name) => setFormItemParam(() => ["name", name])}
       />
       <demo.PanelTitleHint title={formItem.item.params.name} />
@@ -152,23 +152,29 @@ const itemName = (header: types.ItemHeader): ReactNode => (
 const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
   props: types.EditorProps<K>,
   { validate }: types.Validate<K>,
-): types.ItemStateFor => {
+): types.ItemStateFor<K> => {
   const { onCommit, otherNames } = props.extra;
   const { formItem: draft } = props;
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [errors, setErrors] = useState<{ name?: string }>({});
+  const [errors, setErrors] = useState<types.ItemValidateErrors<K>>({});
 
   const save = useCallback(() => {
     setSaveError(null);
-    const next: { name?: string } = {};
+    const next: types.ItemValidateErrors<K> = {};
     validate(draft, {
       param: (name, message) => {
-        if (name === "name") next.name = message;
+        next.header ??= { params: {} };
+        next.header.params[name] = message;
       },
-      section: () => {},
+      section: (message) => {
+        next.sIndex ??= message;
+      },
     });
     setErrors(next);
-    if (next.name) return;
+    if (next.sIndex) return;
+    if (next.header?.params && Object.keys(next.header.params).length > 0) {
+      return;
+    }
 
     if (draft.item.type === "field" && "name" in draft.item.params) {
       const name = draft.item.params.name;
@@ -181,7 +187,15 @@ const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
     onCommit(draft);
   }, [draft, onCommit, otherNames, validate]);
 
-  return { state: lib.branded({ save, saveError, errors }) };
+  return {
+    state: lib.branded<types.ItemState<K>, "item-edit-state">({
+      save,
+      saveError,
+      errors,
+      isError: (param) => Boolean(errors.header?.params[param]),
+      isSectionError: Boolean(errors.sIndex),
+    }),
+  };
 };
 
 const FormItemEditor = lib.createFormItemEditorWrapper<
@@ -203,7 +217,7 @@ const FormItemEditor = lib.createFormItemEditorWrapper<
       title={dialogArgs.title}
       onCancel={dialogArgs.onCancel}
       onSave={state.save}
-      saveError={state.saveError}
+      saveError={state.saveError ?? state.errors.sIndex ?? null}
     >
       {children}
     </demo.EditorDialog>

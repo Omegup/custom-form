@@ -55,13 +55,26 @@ export type ItemDraft = {
 export type ItemExtra = lib.ItemEditExtraDom<ItemDraft>;
 export type ItemExtraMap = { [K in TypeNames]: ItemExtra };
 
-export type ItemState = lib.ItemEditStateDom<{
+/**
+ * Validate error bag — same shape as school formik validate
+ * (`useFormItemEditor.ts`: `{ header?: { params: Errors<Params[K]> }; sIndex?: string }`).
+ */
+export type ItemValidateErrors<K extends TypeNames> = {
+  header?: { params: lib.Errors<Params[K]> };
+  sIndex?: string;
+};
+
+/** Per-type edit state — school `ItemEditStateApp` (`isError` / `isSectionError`). */
+export type ItemState<K extends TypeNames> = lib.ItemEditStateDom<{
   save: () => void;
+  /** App-level (e.g. duplicate name) — not from `validate`. */
   saveError: string | null;
-  /** Param errors from last `validate` — school `extra.isError` / formik equivalent. */
-  errors: { name?: string };
+  isError: (param: keyof Params[K]) => boolean;
+  isSectionError: boolean;
+  errors: ItemValidateErrors<K>;
 }>;
-export type ItemStateMap = { [K in TypeNames]: ItemState };
+
+export type ItemStateMap = { [K in TypeNames]: ItemState<K> };
 
 export type EditingDraft = lib.FlatFormItem<TypeNames, Params>;
 
@@ -94,7 +107,7 @@ export type Validate<K extends TypeNames> = lib.FormItemEditorValidate<
   Params,
   K
 >;
-export type ItemStateFor = lib.EditorHookResult<ItemState>;
+export type ItemStateFor<K extends TypeNames> = lib.EditorHookResult<ItemState<K>>;
 export type EditorProps<K extends TypeNames> = lib.FormItemEditorProps<
   Ctx,
   DialogArgs,
@@ -125,7 +138,7 @@ type EditorPropsFor<K extends TypeNames> = lib.EditorProps<
   Ctx,
   DialogArgs,
   ItemExtra,
-  ItemState
+  ItemState<K>
 >;
 
 export type FieldEditorProps = EditorPropsFor<"field">;
