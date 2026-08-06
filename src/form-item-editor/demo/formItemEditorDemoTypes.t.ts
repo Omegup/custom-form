@@ -1,12 +1,24 @@
-import type { Dispatch, SetStateAction } from "react";
+import type { Dispatch, SetStateAction, ReactNode } from "react";
 import type * as lib from "./library";
 
 export type TypeNames = "field" | "heading" | "panel";
+
+/**
+ * Shared `name` on every type — school `ParamsDom<…, { name: string }>` /
+ * `cloneFlatItems` rename without a type switch. Extra display belongs in viewers.
+ */
 export type Params = lib.TheParams<{
   field: { name: string };
-  heading: { text: string };
-  panel: { title: string };
+  heading: { name: string };
+  panel: { name: string };
 }>;
+
+export type Variants = lib.TheVariants<{
+  field: "default";
+  heading: "default";
+  panel: "default";
+}>;
+
 export type Section = {
   id: string;
   deleted: boolean;
@@ -46,6 +58,8 @@ export type ItemExtraMap = { [K in TypeNames]: ItemExtra };
 export type ItemState = lib.ItemEditStateDom<{
   save: () => void;
   saveError: string | null;
+  /** Param errors from last `validate` — school `extra.isError` / formik equivalent. */
+  errors: { name?: string };
 }>;
 export type ItemStateMap = { [K in TypeNames]: ItemState };
 
@@ -59,9 +73,21 @@ export type EditingSession = {
   total: number;
 };
 export type DialogArgs = lib.DialogArgsDom<{
-  title: string;
+  title: ReactNode;
   onCancel: () => void;
 }>;
+
+export type NameExtra = lib.ExtraDom;
+
+export type NameViewers = lib.Viewers<
+  TypeNames,
+  Params,
+  Variants,
+  NameExtra & lib.Children,
+  NameExtra,
+  Ctx,
+  string
+>;
 
 export type Validate<K extends TypeNames> = lib.FormItemEditorValidate<
   TypeNames,

@@ -1,15 +1,18 @@
 import type { ReactNode } from "react";
+import { useMemo, useState } from "react";
+import {
+  FieldRow,
+  FormContainer,
+  SectionPanel,
+  SectionsList,
+} from "../../form-edit/demo/editFormDemoHelper";
 import type * as types from "./formItemEditorDemoTypes.t";
 import formItemEditorDemoSource from "./FormItemEditorDemo.tsx?raw";
 import formItemEditorDemoTypesSource from "./formItemEditorDemoTypes.t.ts?raw";
+import * as lib from "./library";
 
 export type { StoryArgs } from "./formItemEditorDemoTypes.t";
-
-export const itemLabel = (header: types.ItemHeader) => {
-  if (header.type === "field") return header.params.name;
-  if (header.type === "heading") return `§ ${header.params.text}`;
-  return `▦ ${header.params.title}`;
-};
+export { FormContainer };
 
 // ── Storybook docs (`?raw` of types + integration) ────────────────────────────
 
@@ -22,6 +25,8 @@ export const FORM_ITEM_EDITOR_DEMO_SOURCE = [
   withFileHeader("FormItemEditorDemo.tsx", formItemEditorDemoSource),
 ].join("\n");
 
+// ── Edit dialog + field chrome (orthogonal to the HOC showcase) ─────────────
+
 export const EditorDialog = ({
   title,
   onCancel,
@@ -29,7 +34,7 @@ export const EditorDialog = ({
   saveError,
   children,
 }: {
-  title: string;
+  title: ReactNode;
   onCancel: () => void;
   onSave: () => void;
   saveError: string | null;
@@ -90,6 +95,7 @@ export const RemoveAlert = ({
       | { item: types.ItemHeader; n: number }
       | { section: types.Section }
       | { end: null };
+    label?: ReactNode;
   };
   onConfirm: () => void;
   onCancel: () => void;
@@ -108,7 +114,7 @@ export const RemoveAlert = ({
     <span>
       {"item" in pending.item ? (
         <>
-          Item <strong>{itemLabel(pending.item.item)}</strong>
+          Item <strong>{pending.label}</strong>
         </>
       ) : "section" in pending.item ? (
         <>
@@ -152,9 +158,14 @@ export const NameField = ({
 
 const MAX_NAME_LEN = 10;
 
-/** Companion UI rendered through the editor `render()` slot. */
 export const NameLengthHint = ({ name }: { name: string }) => (
-  <p style={{ margin: 0, fontSize: 11, opacity: name.length > MAX_NAME_LEN ? 1 : 0.55 }}>
+  <p
+    style={{
+      margin: 0,
+      fontSize: 11,
+      opacity: name.length > MAX_NAME_LEN ? 1 : 0.55,
+    }}
+  >
     {name.length}/{MAX_NAME_LEN} characters
     {name.length > MAX_NAME_LEN ? " — too long" : ""}
   </p>
@@ -190,7 +201,6 @@ export const TextField = ({
   </label>
 );
 
-/** Companion UI rendered through the editor `render()` slot. */
 export const HeadingLengthHint = ({ text }: { text: string }) => (
   <p
     style={{
@@ -208,7 +218,6 @@ export { MIN_HEADING_LEN };
 
 export const PANEL_COL_OPTIONS = [1, 2] as const;
 
-/** Column count control for panel `n` — mirrors school SelectColumns (1 | 2). */
 export const SelectColumns = ({
   cols,
   onChange,
@@ -257,11 +266,16 @@ export const SelectColumns = ({
             {Array.from({ length: n }, (_, i) => (
               <div
                 key={i}
-                style={{ background: cols === n ? "#93c5fd" : "#e5e7eb", borderRadius: 2 }}
+                style={{
+                  background: cols === n ? "#93c5fd" : "#e5e7eb",
+                  borderRadius: 2,
+                }}
               />
             ))}
           </div>
-          <span style={{ fontSize: 11 }}>{n} column{n > 1 ? "s" : ""}</span>
+          <span style={{ fontSize: 11 }}>
+            {n} column{n > 1 ? "s" : ""}
+          </span>
         </button>
       ))}
     </div>
@@ -288,7 +302,6 @@ export const PanelTitleHint = ({ title }: { title: string }) => (
 
 export { MIN_PANEL_TITLE_LEN };
 
-/** Nested child columns under a panel row. */
 export const NestedColumns = ({ columns }: { columns: ReactNode[] }) => (
   <div
     style={{
@@ -317,3 +330,143 @@ export const NestedColumns = ({ columns }: { columns: ReactNode[] }) => (
     ))}
   </div>
 );
+
+// ── Form-edit list shell (orthogonal — move/clone/sections) ───────────────────
+
+export type ExtraAction = { label: string; onClick: () => void };
+
+type PendingRemove = {
+  rm: () => void;
+  item: lib.FlatNestedItem<types.TypeNames, types.Params, types.Section>;
+};
+
+const randomId = () => `id_${Math.random().toString(36).slice(2, 7)}`;
+
+const cloneFn: lib.Clone<
+  types.TypeNames,
+  types.Params,
+  lib.ContextDom,
+  types.Section
+> = (subItems, _, allItems) =>
+  lib.cloneFlatItems(
+    subItems,
+    allItems,
+    (name, n) => `${name} (copy${n})`,
+    randomId,
+    { rename: "first" },
+  );
+
+export const FormItemEditorFormTest = ({
+  flatItems,
+  updateArgs,
+  itemName,
+  extra,
+}: {
+  flatItems: types.FlatItems;
+  updateArgs: (patch: Partial<types.StoryArgs>) => void;
+  itemName: (header: types.ItemHeader) => ReactNode;
+  extra?: (item: types.ListItem) => ExtraAction[];
+}) => {
+  const [focused, setFocused] = useState<lib.AutoFocusState>(null);
+  const [toRemove, setToRemove] = useState<PendingRemove | null>(null);
+
+  const ctx = useMemo(
+    () => lib.autofocusCtx<lib.ContextDom>(lib.branded({}), focused),
+    [focused],
+  );
+
+  const applyItems = (newItems: types.FlatItems, newCtx: typeof ctx) => {
+    if (newItems !== flatItems) updateArgs({ flatItems: newItems });
+    setFocused(newCtx.focused);
+  };
+
+  const sections = useMemo(
+    () => lib.consolidateSections(flatItems),
+    [flatItems],
+  );
+  const [showDeleted, setShowDeleted] = useState(true);
+  const jump = !showDeleted;
+  const sectionOfItem = useMemo(
+    () => lib.buildItemSectionDict(flatItems),
+    [flatItems],
+  );
+
+  const actionsArgs = {
+    items: flatItems,
+    setItems: applyItems,
+    ctx,
+    sectionOfItem,
+    setToRemove,
+  };
+  const itemActions = lib.getFormItemMoveActions(actionsArgs, cloneFn, jump);
+
+  const renderItem = (item: types.ListItem): ReactNode => {
+    if (item.header.deleted && !showDeleted) return null;
+    const actions = itemActions(item);
+    const fieldFocused = ctx.autoFocused(item.header.id);
+    return (
+      <div key={item.header.id}>
+        <FieldRow
+          name={itemName(item.header)}
+          focused={fieldFocused}
+          actions={actions}
+          extra={extra?.(item) ?? []}
+        />
+        {item.children.length > 0 && (
+          <NestedColumns
+            columns={item.children.map((column) =>
+              column.map((child) => renderItem(child)),
+            )}
+          />
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <>
+      {toRemove && (
+        <RemoveAlert
+          pending={{
+            ...toRemove,
+            label:
+              "item" in toRemove.item
+                ? itemName(toRemove.item.item)
+                : undefined,
+          }}
+          onConfirm={() => {
+            toRemove.rm();
+            setToRemove(null);
+          }}
+          onCancel={() => setToRemove(null)}
+        />
+      )}
+      <button type="button" onClick={() => setShowDeleted(!showDeleted)}>
+        {showDeleted ? "Hide deleted" : "Show deleted"}
+      </button>
+      <SectionsList>
+        {sections.map((section) => {
+          const sectionFocused = ctx.autoFocused(section.header.id);
+          const sActions = lib.getSectionMoveActions(
+            actionsArgs,
+            cloneFn,
+            section,
+            jump,
+          );
+          return (
+            <SectionPanel
+              key={section.header.id}
+              title={section.header.title}
+              focused={sectionFocused}
+              sectionActions={sActions}
+              sectionExtra={[]}
+              columns={section.items.map((column) =>
+                column.map((item) => renderItem(item)),
+              )}
+            />
+          );
+        })}
+      </SectionsList>
+    </>
+  );
+};

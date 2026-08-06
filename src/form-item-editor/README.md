@@ -37,9 +37,10 @@ Logic in `demo/FormItemEditorDemo.tsx` and friends, and where it belongs:
 
 | Demo code | Reason |
 |---|---|
-| `FieldEditor`, `HeadingEditor`, `PanelEditor` | Domain editors — school keeps these in `editors/`, not in `form-item-edit-react` |
+| `FieldEditor`, `HeadingEditor`, `PanelEditor` (in `FormItemEditorDemo.tsx`) | Domain editors — school keeps these in `editors/`, not in `form-item-edit-react` |
 | `useItemEditor` + `save` + duplicate-name check | App `useFormItemEditor` pattern (school: `legacy-front/.../useFormItemEditor.ts` + formik) |
-| `dialogTitle`, `EditorDialog`, field UI chrome | UI shell — school: `renderDefaultDialog`, design-system inputs |
+| `EditorDialog`, field UI chrome, `FormItemEditorFormTest` | Helper — school: `renderDefaultDialog`, design-system inputs, form-edit list |
+| Name `viewers` + `createFormItemByGetChild` | Same composition as `form` demo — per-type labels without a type switch |
 | `otherNames` collection | Demo business rule |
 
 ### Stays in demo until **`form-edit-react`** is migrated
@@ -59,8 +60,8 @@ School home: `react-packages/form-edit-react/useDialog.tsx` (`makeUseDialogs`).
 
 | Demo code | Package | Notes |
 |---|---|---|
-| `FormItemEditorFormTest` | `form-edit` demo | consolidate, move actions, nested panel render, clone |
-| `cloneFn` with `(copy)` names | `form-edit` / `cloneFlatItems` | demo-specific rename rules |
+| `FormItemEditorFormTest` (helper) | `form-edit` demo | consolidate, move actions, nested panel render, clone |
+| `cloneFn` via `cloneFlatItems` | `form-edit` — shared `params.name` rename, no type switch |
 | `extra={(item) => [{ label: "Edit", … }]}` | `form-edit` `form-item.actions` | `edit: () => setEditFormItem(q)` |
 
 ### Stays in demo / not started — other packages
