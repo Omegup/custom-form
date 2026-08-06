@@ -81,13 +81,8 @@ export type ItemStateMap = { [K in TypeNames]: ItemState<K> };
 
 export type EditingDraft = lib.FlatFormItem<TypeNames, Params>;
 
-/** Open edit session — draft for the editor + subtree needed to re-flatten when `n` changes. */
-export type EditingSession = {
-  draft: EditingDraft;
-  children: ListItem[][];
-  index: number;
-  total: number;
-};
+/** Open edit session — `form-edit` shape: draft + subtree + flat span. */
+export type EditingSession = lib.FlatFormItemEditSession<TypeNames, Params>;
 export type DialogArgs = lib.DialogArgsDom<{
   title: ReactNode;
   onCancel: () => void;

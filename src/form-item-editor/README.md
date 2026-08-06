@@ -43,18 +43,27 @@ Logic in `demo/FormItemEditorDemo.tsx` and friends, and where it belongs:
 | Name `viewers` + `createFormItemByGetChild` | Same composition as `form` demo — per-type labels without a type switch |
 | `ctx.flatItems` + `isFieldNameTaken` filter in `FieldEditor` | `ctx` carries raw data only (no field-specific API); `FieldEditor` decides what it means — no context/provider infra |
 
-### Stays in demo until **`form-edit-react`** is migrated
+### Now in **`form-edit`** (pure flat mutations, migrated)
 
-School home: `react-packages/form-edit-react/useDialog.tsx` (`makeUseDialogs`).
+The pure part of school `react-packages/form-edit-react/useDialog.tsx` lives in
+`form-edit/flat/` — the demo imports it instead of reimplementing:
+
+| Demo used to own | Library home | School equivalent |
+|---|---|---|
+| `openSession` (+ `EditingSession` shape) | `form-edit` `openFormItemEditSession` / `FlatFormItemEditSession` | `editFormItem: EditFormItem \| null` |
+| `commitEditingSession` | `form-edit` `applyFlatFormItem` (edit span replace **and** `index === -1` insert) | `setEditFormItemX` in `useDialog` |
+
+`resizeColumns` already lives in **`recursive-form`** (school’s `changeCols`); `applyFlatFormItem` calls it internally.
+
+### Stays in demo until the React dialog orchestrator (**`editor/`**) is migrated
+
+School home: `react-packages/form-edit-react/useDialog.tsx` (`makeUseDialogs`) —
+needs `form-item-editor` + `section-edit`, so it lands with `editor/`.
 
 | Demo code | School equivalent | Notes |
 |---|---|---|
-| `EditingSession` + `openSession` | `editFormItem: EditFormItem \| null` | open/close edit target + subtree snapshot |
-| `commitEditingSession` | `setEditFormItemX` in `useDialog` | `resizeColumns` + `flatten().formItem` + `flatItems.toSpliced(index, total, …)` |
-| `commitDraft` / session `setFormItem` wiring | `setEditFormItem(item, cols)` passed via `extra` | glue between editor save and flat list |
+| `session` state + `commitDraft` / `setFormItem` wiring | `makeUseDialogs` React state, `setEditFormItem(item, cols)` via `extra` | glue between editor save and flat list |
 | `FormItemEditorDemo` shell | `DialogUi` + `CustomFormEditor` | compose list + dialog |
-
-`resizeColumns` already lives in **`recursive-form`** (school’s `changeCols`); the demo should import it, not reimplement it.
 
 ### Stays in demo until **`form-edit`** story integration (or `editor/` all-in)
 
@@ -94,9 +103,9 @@ createFormItemEditorWrapper(editors, useHook, renderDialog)
 
 `FormItemEditorDemo` composes `FormItemEditorFormTest` (form-edit demo) + the editor dialog:
 
-1. **Edit** opens a session (`openSession`) with draft + children + flat span meta
+1. **Edit** opens a session (`form-edit` `openFormItemEditSession`) with draft + children + flat span
 2. **`FormItemEditor`** edits the draft via `setFormItem`
-3. **`save`** validates, then `onCommit` → `commitEditingSession` (→ **`form-edit-react`** when migrated)
+3. **`save`** validates, then `onCommit` → `form-edit` `applyFlatFormItem` (React orchestrator itself → **`editor/`** when migrated)
 
 ## Types cheat sheet
 

@@ -3,3 +3,5 @@ export * from "./flat-form.t";
 export * from "./SectionWithItems.t";
 export * from "./consolidate";
 export * from "./buildItemSectionDict";
+export * from "./applyFlatFormItem";
+export * from "./openFormItemEditSession";

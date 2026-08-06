@@ -238,38 +238,6 @@ const FormItemEditor = lib.createFormItemEditorWrapper<
   ),
 );
 
-const flattenItem = lib.flatten<
-  types.TypeNames,
-  types.Params,
-  types.Section,
-  types.ItemMeta
->();
-
-const commitEditingSession = (
-  flatItems: types.FlatItems,
-  session: types.EditingSession,
-  draft: lib.FlatFormItem<types.TypeNames, types.Params>,
-): types.FlatItems => {
-  const children = lib.resizeColumns(draft.n, session.children);
-  const list = flattenItem.formItem({
-    header: draft.item,
-    children,
-    meta: {
-      index: session.index,
-      total: session.total,
-      sIndex: 0,
-    },
-  });
-  return flatItems.toSpliced(session.index, session.total, ...list);
-};
-
-const openSession = (item: types.ListItem): types.EditingSession => ({
-  draft: { item: item.header, n: item.children.length },
-  children: item.children,
-  index: item.meta.index,
-  total: item.meta.total,
-});
-
 // ── Story integration ─────────────────────────────────────────────────────────
 
 export const FormItemEditorDemo = ({
@@ -285,7 +253,12 @@ export const FormItemEditorDemo = ({
     (next: lib.FlatFormItem<types.TypeNames, types.Params>) => {
       if (!session) return;
       updateArgs({
-        flatItems: commitEditingSession(flatItems, session, next),
+        flatItems: lib.applyFlatFormItem(
+          flatItems,
+          session,
+          { header: next.item, children: session.children },
+          next.n,
+        ),
       });
       setSession(null);
     },
@@ -322,7 +295,7 @@ export const FormItemEditorDemo = ({
         extra={(item) => [
           {
             label: "Edit",
-            onClick: () => setSession(openSession(item)),
+            onClick: () => setSession(lib.openFormItemEditSession(item)),
           },
         ]}
       />

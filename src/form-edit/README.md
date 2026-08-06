@@ -9,40 +9,39 @@ Migrated from `school/components/custom-form` → `ts-packages/form-edit`.
 
 ## Subfolders
 
-### `flat-raw-actions/`
+### `flat/`
 
-See [flat-raw-actions/README.md](./flat-raw-actions/README.md).
-
-`RawActions` builders for the flat list (input to `makeActions`, not UI handlers).
+Flat markers ↔ consolidated tree, plus pure flat mutations.
 
 | File | Role |
 |---|---|
-| `flat-form.t.ts` | `FlatFormItem`, `FlatFormItems` union types |
-| `section.t.ts` | `SectionDom` base (`{ id, deleted }`) |
-| `getFlatRawActions.ts` | Builds `RawActions` per flat entry for `makeActions` |
-| `GetActionsArgs.t.ts` | `{ items, setItems, ctx, sectionOfItem, setToRemove }` |
-| `Clone.t.ts` | Clone callback type for deep-copying item subtrees |
+| `flat-form.t.ts` | `FlatFormItem` (`{ item, n }`), `FlatNestedItem` union, `FlatFormItems`, `SectionDom` |
+| `consolidate.ts` | `consolidateSections()` / `customConsolidateSections()` — flat array → `SectionWithItems[]` tree |
+| `flatten.ts` | `flatten()` / `customFlat()` — recursive item/section → flat markers |
+| `SectionWithItems.t.ts` | Hydrated section: `{ meta, header, items[][] }` |
+| `getFlatInsertionIndex.ts` | Column slot → flat insertion index |
+| `buildItemSectionDict.ts` | Item id → owning section dictionary |
+| `applyFlatFormItem.ts` | **`applyFlatFormItem(items, editing, item, cols)`** — save an edited item span (`resizeColumns` + `flatten().formItem` + `toSpliced`); `editing.index === -1` inserts into section `sIndex` instead. Port of school `useDialog.tsx` `setEditFormItemX` |
+| `openFormItemEditSession.ts` | **`openFormItemEditSession(item)`** — snapshot a consolidated item into `{ draft, children, index, total, sIndex }` (`FlatFormItemEditSession`) for a single-item edit dialog |
 
-### `section-layout/`
+### `flat-move-actions/`
 
-See [section-layout/README.md](./section-layout/README.md).
+See [flat-move-actions/README.md](./flat-move-actions/README.md).
 
-Section-aware wrappers + tree ↔ flat conversion.
+Move/clone action builders for the flat list.
 
 | File | Role |
 |---|---|
-| `flatten.ts` | `flatten()` / `customFlat()` — recursive item → flat markers |
+| `getFlatMoveActions.ts` | Builds raw move actions per flat entry |
 | `getFormItemMoveActions.ts` | Move actions for one consolidated item |
 | `getSectionMoveActions.ts` | Move actions for one section |
-| `SectionWithItems.t.ts` | Hydrated section: `{ meta, header, items[][] }` |
+| `cloneFlatItems.ts` | Deep clone of flat subtrees with new ids |
+| `GetActionsArgs.t.ts` / `Clone.t.ts` | Action-builder argument + clone callback types |
 
 ### Root files
 
 | File | Role |
 |---|---|
-| `consolidateSections.ts` | Flat array → `SectionWithItems[]` tree |
-| `cloneFlatItems.ts` | Deep clone of flat subtrees with new ids |
-| `EditFormHost.tsx` | Re-exports **`EditFormTest`** from `demo/` (see below) |
 | `demo/EditFormDemo.tsx` | **`EditFormTest`** + Storybook `EditFormDemo` integration |
 | `demo/editFormDemoHelper.tsx` | Fixtures, layout chrome, docs `?raw` source |
 | `demo/editFormDemoTypes.t.ts` | Demo types (`EditFormTestProps`, `StoryArgs`, …) |
