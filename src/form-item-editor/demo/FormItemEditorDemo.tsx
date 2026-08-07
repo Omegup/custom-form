@@ -159,7 +159,8 @@ const nameViewers: types.NameViewers = {
 
 const ItemName = lib.createFormItemByGetChild(nameViewers, (x) => x);
 
-const itemName = (ctx: types.Ctx, header: types.ItemHeader): ReactNode => (
+/** Exported for the side-menu / edit-section demos (same editor stack). */
+export const itemName = (ctx: types.Ctx, header: types.ItemHeader): ReactNode => (
   <ItemName
     viewProps={{
       formItem: header,
@@ -212,7 +213,8 @@ const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
   };
 };
 
-const FormItemEditor = lib.createFormItemEditorWrapper<
+/** Exported for the side-menu / edit-section demos (same editor stack). */
+export const FormItemEditor = lib.createFormItemEditorWrapper<
   types.TypeNames,
   types.Params,
   types.Ctx,

@@ -33,8 +33,9 @@ re-exports only; dialog chrome stays with the consumer (demo / app UI).
 | Concern | Target package | School reference |
 |---|---|---|
 | React dialog orchestrator (`makeUseDialogs` `sectionDialog`) | `editor/` | `form-edit-react/useDialog.tsx` |
-| Section HOC / viewers / add-item slots | `edit-section` | `SectionHOC`, `SectionFormItemHOC`, `section-edit-ui` |
-| "Add section" sidebar entry (`index === -1` open path) | `side-menu` | `useSide.addSection` |
+| Section HOC / viewers | `edit-section` | `SectionHOC`, `SectionFormItemHOC`, `section-edit-ui` |
+| Add-item column slots | **done** — `edit-section` (MVP) | `AddFormItem`, `makeUseRenderAddItem` |
+| "Add section" sidebar entry (`index === -1` open path) | **done** — `side-menu` (`useSide.addSection` → this package's dialog + `updateSectionInFlat`) | `useSide.addSection` |
 | Moving items between sections (`setFormItemSection`) | `edit-section` + editor extras | `editors/selectSection.tsx` |
 
 `updateSectionInFlat` already supports the `index === -1` insert path those

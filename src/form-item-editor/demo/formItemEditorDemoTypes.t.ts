@@ -145,6 +145,34 @@ export type PanelEditorProps = EditorPropsFor<"panel">;
 
 export type SetEditingSession = Dispatch<SetStateAction<EditingSession | null>>;
 
+/** Consolidated section as rendered by the list shell — meta carries the flat span. */
+export type ListSection = lib.SectionWithItems<
+  TypeNames,
+  Params,
+  Section,
+  lib.SectionMetaDom<lib.Indexed>,
+  ItemMeta
+>;
+
+/** Column "+ add" slot handed to `renderAddItem` (see form-edit `EditFormTest`). */
+export type AddItemSlot = {
+  section: ListSection;
+  /** Section ordinal — `sIndex` for insert sessions. */
+  sIndex: number;
+  colIndex: number;
+  /** Flat index where a new item lands at the end of this column. */
+  insertionIndex: number;
+};
+
+/** Rendered blocks handed to `renderLayout` so demos can add a sidebar. */
+export type ListLayoutArgs = {
+  alert: ReactNode;
+  details: ReactNode;
+  sections: ReactNode;
+  setFlatItems: Dispatch<SetStateAction<FlatItems>>;
+  focus: (id: string) => void;
+};
+
 export type StoryArgs = {
   flatItems: FlatItems;
   heading: string;

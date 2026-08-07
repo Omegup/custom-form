@@ -5,7 +5,7 @@
  * `sectionExtra` opens a session (`openSectionEditSession`), the dialog
  * validates with `validateSectionForm`, save commits via `updateSectionInFlat`.
  */
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { EditFormTest } from "../../form-edit/demo/EditFormDemo";
 import * as demo from "./sectionEditDemoHelper";
 import * as types from "./sectionEditDemoTypes.t";
@@ -16,19 +16,22 @@ const validate = lib.validateSectionForm({
   description: "Description is required",
 });
 
-const SectionDialog = ({
-  session,
+/** Exported for the side-menu demo ("+ Add section" — `index: -1` session). */
+export const SectionDialog = ({
+  draft,
+  title,
   onSave,
   onCancel,
 }: {
-  session: types.EditingSession;
+  draft: { header: types.Section; cols: number };
+  title?: ReactNode;
   onSave: (form: lib.SectionEditForm) => void;
   onCancel: () => void;
 }) => {
   const [form, setForm] = useState<lib.SectionEditForm>({
-    title: session.draft.header.title,
-    description: session.draft.header.description,
-    cols: session.draft.cols,
+    title: draft.header.title,
+    description: draft.header.description,
+    cols: draft.cols,
   });
   const [errors, setErrors] = useState<lib.Errors<lib.SectionEditForm>>({});
 
@@ -41,7 +44,7 @@ const SectionDialog = ({
 
   return (
     <demo.EditorDialog
-      title={<>Edit section · {session.draft.header.title}</>}
+      title={title ?? <>Edit section · {draft.header.title}</>}
       onCancel={onCancel}
       onSave={save}
     >
@@ -77,7 +80,7 @@ export const SectionEditDemo = ({
     <demo.FormContainer title={heading}>
       {session && (
         <SectionDialog
-          session={session}
+          draft={session.draft}
           onCancel={() => setSession(null)}
           onSave={(form) => {
             updateArgs({

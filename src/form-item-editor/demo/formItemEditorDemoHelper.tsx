@@ -361,11 +361,15 @@ export const FormItemEditorFormTest = ({
   updateArgs,
   itemName,
   extra,
+  renderAddItem,
+  renderLayout,
 }: {
   flatItems: types.FlatItems;
   updateArgs: (patch: Partial<types.StoryArgs>) => void;
   itemName: (header: types.ItemHeader) => ReactNode;
   extra?: (item: types.ListItem) => ExtraAction[];
+  renderAddItem?: (slot: types.AddItemSlot) => ReactNode;
+  renderLayout?: (args: types.ListLayoutArgs) => ReactNode;
 }) => {
   const [focused, setFocused] = useState<lib.AutoFocusState>(null);
   const [toRemove, setToRemove] = useState<PendingRemove | null>(null);
@@ -423,50 +427,79 @@ export const FormItemEditorFormTest = ({
     );
   };
 
-  return (
-    <>
-      {toRemove && (
-        <RemoveAlert
-          pending={{
-            ...toRemove,
-            label:
-              "item" in toRemove.item
-                ? itemName(toRemove.item.item)
-                : undefined,
-          }}
-          onConfirm={() => {
-            toRemove.rm();
-            setToRemove(null);
-          }}
-          onCancel={() => setToRemove(null)}
-        />
-      )}
-      <button type="button" onClick={() => setShowDeleted(!showDeleted)}>
-        {showDeleted ? "Hide deleted" : "Show deleted"}
-      </button>
-      <SectionsList>
-        {sections.map((section) => {
-          const sectionFocused = ctx.autoFocused(section.header.id);
-          const sActions = lib.getSectionMoveActions(
-            actionsArgs,
-            cloneFn,
-            section,
-            jump,
-          );
-          return (
-            <SectionPanel
-              key={section.header.id}
-              title={section.header.title}
-              focused={sectionFocused}
-              sectionActions={sActions}
-              sectionExtra={[]}
-              columns={section.items.map((column) =>
-                column.map((item) => renderItem(item)),
-              )}
-            />
-          );
-        })}
-      </SectionsList>
-    </>
+  const alert = toRemove && (
+    <RemoveAlert
+      pending={{
+        ...toRemove,
+        label:
+          "item" in toRemove.item ? itemName(toRemove.item.item) : undefined,
+      }}
+      onConfirm={() => {
+        toRemove.rm();
+        setToRemove(null);
+      }}
+      onCancel={() => setToRemove(null)}
+    />
   );
+  const details = (
+    <button type="button" onClick={() => setShowDeleted(!showDeleted)}>
+      {showDeleted ? "Hide deleted" : "Show deleted"}
+    </button>
+  );
+  const sectionsNode = (
+    <SectionsList>
+      {sections.map((section, sIndex) => {
+        const sectionFocused = ctx.autoFocused(section.header.id);
+        const sActions = lib.getSectionMoveActions(
+          actionsArgs,
+          cloneFn,
+          section,
+          jump,
+        );
+        return (
+          <SectionPanel
+            key={section.header.id}
+            title={section.header.title}
+            focused={sectionFocused}
+            sectionActions={sActions}
+            sectionExtra={[]}
+            columns={section.items.map((column, colIndex) => (
+              <>
+                {column.map((item) => renderItem(item))}
+                {renderAddItem?.({
+                  section,
+                  sIndex,
+                  colIndex,
+                  insertionIndex: lib.getFlatInsertionIndex(
+                    section.meta.index,
+                    section.items,
+                    colIndex,
+                  ),
+                })}
+              </>
+            ))}
+          />
+        );
+      })}
+    </SectionsList>
+  );
+
+  if (!renderLayout)
+    return (
+      <>
+        {alert}
+        {details}
+        {sectionsNode}
+      </>
+    );
+  return renderLayout({
+    alert,
+    details,
+    sections: sectionsNode,
+    setFlatItems: (update) =>
+      updateArgs({
+        flatItems: typeof update === "function" ? update(flatItems) : update,
+      }),
+    focus: (id) => setFocused({ id, value: true }),
+  });
 };

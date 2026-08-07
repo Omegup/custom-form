@@ -3,7 +3,11 @@ import type { TheParams } from "../_deps";
 import { applyFlatFormItem } from "./applyFlatFormItem";
 import { consolidateSections } from "./consolidate";
 import type { FlatNestedItem } from "./flat-form.t";
-import { openFormItemEditSession } from "./openFormItemEditSession";
+import { getFlatInsertionIndex } from "./getFlatInsertionIndex";
+import {
+  openFormItemEditSession,
+  openFormItemInsertSession,
+} from "./openFormItemEditSession";
 
 type TypeNames = "field";
 type Params = TheParams<{ field: { name: string } }>;
@@ -143,6 +147,34 @@ describe("applyFlatFormItem", () => {
         section("s2", "Details"),
         field("f2", "Notes"),
         field("new", "Phone"),
+      ),
+    );
+  });
+
+  it("inserts at a column slot (getFlatInsertionIndex + insert session)", () => {
+    const items = flat(
+      section("s1", "Main"),
+      field("f1", "Name"),
+      end(),
+      field("f2", "Email"),
+    );
+    const main = consolidateSections(items)[0]!;
+    const newItem = { header: header("new", "Phone"), children: [] };
+
+    const session = openFormItemInsertSession(newItem, {
+      index: getFlatInsertionIndex(main.meta.index, main.items, 0),
+      sIndex: 0,
+    });
+    expect(session).toMatchObject({ index: 2, total: 0, sIndex: 0 });
+
+    const next = applyFlatFormItem(items, session, newItem, session.draft.n);
+    expect(next).toEqual(
+      flat(
+        section("s1", "Main"),
+        field("f1", "Name"),
+        field("new", "Phone"),
+        end(),
+        field("f2", "Email"),
       ),
     );
   });

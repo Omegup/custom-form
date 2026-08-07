@@ -17,6 +17,8 @@ export const EditFormTest = ({
   updateArgs,
   extra,
   sectionExtra,
+  renderAddItem,
+  renderLayout,
 }: types.EditFormTestProps) => {
   const [focused, setFocused] = useState<lib.AutoFocusState>(null);
   const [toRemove, setToRemove] = useState<types.PendingRemove | null>(null);
@@ -51,39 +53,41 @@ export const EditFormTest = ({
 
   const itemActions = lib.getFormItemMoveActions(actionsArgs, cloneFn, jump);
 
-  return (
-    <>
-      {toRemove && (
-        <demo.RemoveAlert
-          pending={toRemove}
-          onConfirm={() => {
-            toRemove.rm();
-            setToRemove(null);
-          }}
-          onCancel={() => setToRemove(null)}
-        />
-      )}
-      <button onClick={() => setShowDeleted(!showDeleted)}>
-        {showDeleted ? "Hide deleted" : "Show deleted"}
-      </button>
-      <demo.SectionsList>
-        {sections.map((section) => {
-          const sectionFocused = ctx.autoFocused(section.header.id);
-          const sActions = lib.getSectionMoveActions(
-            actionsArgs,
-            cloneFn,
-            section,
-            jump,
-          );
-          return (
-            <demo.SectionPanel
-              key={section.header.id}
-              title={section.header.title}
-              focused={sectionFocused}
-              sectionActions={sActions}
-              sectionExtra={sectionExtra?.(section) ?? []}
-              columns={section.items.map((column) =>
-                column.map((item) => {
+  const alert = toRemove && (
+    <demo.RemoveAlert
+      pending={toRemove}
+      onConfirm={() => {
+        toRemove.rm();
+        setToRemove(null);
+      }}
+      onCancel={() => setToRemove(null)}
+    />
+  );
+  const details = (
+    <button onClick={() => setShowDeleted(!showDeleted)}>
+      {showDeleted ? "Hide deleted" : "Show deleted"}
+    </button>
+  );
+  const sectionsNode = (
+    <demo.SectionsList>
+      {sections.map((section, sIndex) => {
+        const sectionFocused = ctx.autoFocused(section.header.id);
+        const sActions = lib.getSectionMoveActions(
+          actionsArgs,
+          cloneFn,
+          section,
+          jump,
+        );
+        return (
+          <demo.SectionPanel
+            key={section.header.id}
+            title={section.header.title}
+            focused={sectionFocused}
+            sectionActions={sActions}
+            sectionExtra={sectionExtra?.(section) ?? []}
+            columns={section.items.map((column, colIndex) => (
+              <>
+                {column.map((item) => {
                   if (item.header.deleted && !showDeleted) return null;
                   const actions = itemActions(item);
                   const fieldFocused = ctx.autoFocused(item.header.id);
@@ -96,14 +100,43 @@ export const EditFormTest = ({
                       extra={extra?.(item) ?? []}
                     />
                   );
-                }),
-              )}
-            />
-          );
-        })}
-      </demo.SectionsList>
-    </>
+                })}
+                {renderAddItem?.({
+                  section,
+                  sIndex,
+                  colIndex,
+                  insertionIndex: lib.getFlatInsertionIndex(
+                    section.meta.index,
+                    section.items,
+                    colIndex,
+                  ),
+                })}
+              </>
+            ))}
+          />
+        );
+      })}
+    </demo.SectionsList>
   );
+
+  if (!renderLayout)
+    return (
+      <>
+        {alert}
+        {details}
+        {sectionsNode}
+      </>
+    );
+  return renderLayout({
+    alert,
+    details,
+    sections: sectionsNode,
+    setFlatItems: (update) =>
+      updateArgs({
+        flatItems: typeof update === "function" ? update(flatItems) : update,
+      }),
+    focus: (id) => setFocused({ id, value: true }),
+  });
 };
 
 export const EditFormDemo = ({

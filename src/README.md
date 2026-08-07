@@ -96,8 +96,9 @@ side-menu, form-item-editor, and section-edit demos.
 | Prop | Purpose |
 |---|---|
 | `extra(item)` | Extra buttons on each field row (e.g. "Edit") |
-| `sectionExtra(section, { cols })` | Extra buttons on each section header (e.g. "Edit") |
-| `renderLayout({ sections, alert, details, ctx, setFlatItems, setFocused })` | Full page layout |
+| `sectionExtra(section)` | Extra buttons on each section header (e.g. "Edit") |
+| `renderAddItem({ section, sIndex, colIndex, insertionIndex })` | "+ Add" control at the end of each column slot |
+| `renderLayout({ sections, alert, details, setFlatItems, focus })` | Full page layout (e.g. place a sidebar) |
 
 **Exported helpers:** `container(title, children)`, `EditFormTest`, types `EditFormSection`, `EditFormCtx`, …
 

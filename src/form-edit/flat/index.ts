@@ -5,3 +5,4 @@ export * from "./consolidate";
 export * from "./buildItemSectionDict";
 export * from "./applyFlatFormItem";
 export * from "./openFormItemEditSession";
+export * from "./getFlatInsertionIndex";
