@@ -35,8 +35,10 @@ export const EditFormTest = ({
     [flatItems],
   );
 
+  // Visibility only — school always jumps deleted neighbors when moving
+  // (action.utils `isDeleted`), so active items never land in a deleted section.
   const [showDeleted, setShowDeleted] = useState(true);
-  const jump = !showDeleted;
+  const jump = true;
 
   const sectionOfItem = useMemo(
     () => lib.buildItemSectionDict(flatItems),

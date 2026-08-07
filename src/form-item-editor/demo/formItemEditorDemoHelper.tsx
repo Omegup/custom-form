@@ -424,8 +424,10 @@ export const FormItemEditorFormTest = ({
     () => lib.consolidateSections(flatItems),
     [flatItems],
   );
+  // Visibility only — school always jumps deleted neighbors when moving
+  // (action.utils `isDeleted`), so active items never land in a deleted section.
   const [showDeleted, setShowDeleted] = useState(true);
-  const jump = !showDeleted;
+  const jump = true;
   const sectionOfItem = useMemo(
     () => lib.buildItemSectionDict(flatItems),
     [flatItems],
@@ -485,6 +487,7 @@ export const FormItemEditorFormTest = ({
   const sectionsNode = (
     <SectionsList>
       {sections.map((section, sIndex) => {
+        if (section.header.deleted && !showDeleted) return null;
         const sectionFocused = ctx.autoFocused(section.header.id);
         const sActions = lib.getSectionMoveActions(
           actionsArgs,
