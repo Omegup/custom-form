@@ -29,6 +29,15 @@ export type DemoRecursiveItem = lib.RecursiveTypedFormItem<
   ItemMeta
 >;
 
+/** Consolidated section as rendered by EditFormTest — meta carries the flat span. */
+export type DemoSection = lib.SectionWithItems<
+  TypeNames,
+  Params,
+  Section,
+  lib.SectionMetaDom<lib.Indexed>,
+  ItemMeta
+>;
+
 export type EditorArgs = {
   draft: DemoRecursiveItem;
   setDraft: Dispatch<SetStateAction<DemoRecursiveItem>>;
@@ -43,7 +52,7 @@ export type EditFormTestProps = {
   flatItems: FlatItems;
   updateArgs: (patch: Partial<Data>) => void;
   extra?: (item: DemoRecursiveItem) => ExtraAction[];
-  sectionExtra?: (section: Section, meta: { cols: number }) => ExtraAction[];
+  sectionExtra?: (section: DemoSection) => ExtraAction[];
 };
 
 export type Data = {

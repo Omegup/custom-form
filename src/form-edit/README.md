@@ -73,6 +73,11 @@ Central interactive demo. Owns:
 />
 ```
 
+Both callbacks receive the full consolidated node: `extra(item)` gets the
+recursive item with `meta` (`index` / `total` / `sIndex`), `sectionExtra(section)`
+gets the `SectionWithItems` (`meta` + `header` + `items[][]`) — enough to open
+`form-item-editor` / `section-edit` sessions without re-deriving spans.
+
 Exported types: `EditFormSection`, `EditFormFlatItems`, `EditFormCtx`, `EditFormEditingItem`, …
 
 ## Flat → UI pipeline
