@@ -49,8 +49,9 @@ section: commit(header, cols)  → updateSectionInFlat(flatItems, session, heade
 
 ## Demo
 
-`form-dialogs/All-in` story (`demo/AllInEditor.tsx`): the multi-type list shell
-(`FormItemEditorFormTest`) with every flow wired through one `useDialogs`:
+`form-dialogs/All-in` story (`demo/AllInEditor.tsx`): **`SectionFormItemHOC`**
+(`section-view`) as the list shell, with every dialog flow wired through one
+`useDialogs`:
 
 - row **Edit** → `openItemEdit`
 - **Side** sidebar catalog → `openItemInsert` (section picker when >1 live section)
@@ -58,11 +59,14 @@ section: commit(header, cols)  → updateSectionInFlat(flatItems, session, heade
 - section header **Edit** → `openSectionEdit`; **+ Add section** → `openSectionAdd`
 
 Editors, dialog chrome, and fixtures are reused from the `form-item-editor`,
-`section-edit`, and `side-menu` demos (Storybook-only composition).
+`section-edit`, and `side-menu` demos (Storybook-only composition). List
+viewers are display-only; edits go through dialogs (not inline).
 
 ## Dependency rule
 
 Imports from: `form`, `recursive-form`, `form-edit`, `section-edit` (via `_deps`).
 
-Does **not** import: `form-item-editor`, `side-menu`. The demo composes those
-packages for Storybook only.
+Does **not** import: `form-item-editor`, `side-menu`, `section-view`. The demo
+composes those packages for Storybook only (`section-view` for the list shell,
+`side-menu` for catalog / add slots, `form-item-editor` / `section-edit` for
+dialog chrome).

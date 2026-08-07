@@ -35,6 +35,8 @@ Move/clone action builders for the flat list.
 | `getFlatMoveActions.ts` | Builds raw move actions per flat entry |
 | `getFormItemMoveActions.ts` | Move actions for one consolidated item |
 | `getSectionMoveActions.ts` | Move actions for one section |
+| `getSectionEdit.ts` | **`getSectionEdit(args, clone, section, sIndex, jump)`** — bundles a section's move actions, autofocus, and item grid (`RecursiveEditManager`) for `section-view`'s `renderEdit` (e.g. `ColumnsEdit`). Port of school `section.data.ts` |
+| `RecursiveEditManager.t.ts` | `RecursiveEditManager` / `SectionNodes` — school `types/edit-tree` |
 | `cloneFlatItems.ts` | Deep clone of flat subtrees with new ids |
 | `GetActionsArgs.t.ts` / `Clone.t.ts` | Action-builder argument + clone callback types |
 

@@ -28,7 +28,7 @@ export default {
       },
       description: {
         component:
-          "School `CustomFormEditor` + `DialogsHOC` composition on **`makeUseDialogs`**: row **Edit** (item dialog), sidebar catalog (ambiguous insert + section picker), in-slot **+ Add** on every column, section header **Edit** and **+ Add section** (section dialog). All commits flow through `applyFlatFormItem` / `updateSectionInFlat`.",
+          "School `CustomFormEditor` + `DialogsHOC` on **`makeUseDialogs`** + **`SectionFormItemHOC`** (`section-view` list shell): row **Edit** (item dialog), sidebar catalog (ambiguous insert + section picker), in-slot **+ Add** on every column, section header **Edit** and **+ Add section** (section dialog). All commits flow through `applyFlatFormItem` / `updateSectionInFlat`.",
       },
     },
   },

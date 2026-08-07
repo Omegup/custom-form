@@ -10,6 +10,7 @@ src/
 ├── form-item-editor/        Single-item edit dialog factory
 ├── side-menu/               Library catalog (Side + AddFormItem slots)
 ├── section-edit/            Section edit types + flat save
+├── section-view/            SectionHOC + ColumnsEdit (section list rendering, no DnD)
 └── form-dialogs/            Dialog orchestrator (makeUseDialogs) + All-in demo
 ```
 
@@ -25,19 +26,20 @@ recursive-form ─────────────────────�
 move-actions ─────────────────────────────────┤
                                               ▼
                                          form-edit
-                              ┌───────────────┼───────────────┐
-                              ▼               ▼               ▼
-                      form-item-editor   side-menu      section-edit
-                              │               │               │
-                              └───────────────┴───────────────┘
-                                              │
-                                        form-dialogs
+                        ┌───────────────┬──────┴────────┬───────────────┐
+                        ▼               ▼               ▼               ▼
+                form-item-editor   side-menu      section-edit    section-view
+                        │               │               │
+                        └───────────────┴───────────────┘
+                                        │
+                                  form-dialogs
 ```
 
 **Rule:** upper layers import lower layers, never the reverse.
-`form-edit` does not import `form-item-editor`, `side-menu`, or `section-edit`.
-Module demos compose features via props or, for the all-in editor, in `form-dialogs/demo/AllInEditor.tsx`.
-`SectionHOC` / section viewers are not a package yet (deferred).
+`form-edit` does not import `form-item-editor`, `side-menu`, `section-edit`, or `section-view`.
+Module demos compose features via props or, for the all-in editor, in `form-dialogs/demo/AllInEditor.tsx`
+(`SectionFormItemHOC` + `makeUseDialogs`). The demo injects `side-menu`'s
+`makeUseRenderAddItem` into `section-view`, same as school.
 
 ## Import rules
 
@@ -118,4 +120,5 @@ Use `branded({ ... })` to construct values; do not cast.
 - [form-item-editor/README.md](./form-item-editor/README.md)
 - [side-menu/README.md](./side-menu/README.md)
 - [section-edit/README.md](./section-edit/README.md)
+- [section-view/README.md](./section-view/README.md)
 - [form-dialogs/README.md](./form-dialogs/README.md)
