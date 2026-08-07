@@ -52,9 +52,26 @@ export type ItemMeta = lib.MetaDom<{
   sIndex: number;
 }>;
 
+/** One choice in the section picker — school `sections.map(p => ({ value: p.index, label: p.header.title }))`. */
+export type SectionOption = { index: number; title: string };
+
+/**
+ * Present only on **insert** sessions (`index === -1` — side-menu "add",
+ * school `add: editFormItem.index === -1`); undefined for edits and for
+ * slot inserts (`edit-section`, which already has a concrete `index`).
+ * `withSectionPicker` (below) reads this to render/validate the section
+ * `<select>` when there is more than one non-deleted section to choose from.
+ */
+export type SectionPicker = {
+  sIndex: number;
+  setSIndex: (sIndex: number) => void;
+  sections: SectionOption[];
+};
+
 export type ItemDraft = {
   /** Called after validate succeeds — commits the current draft as-is. */
   onCommit: <K extends TypeNames>(draft: lib.FlatFormItem<K, Params>) => void;
+  sectionPicker?: SectionPicker;
 };
 
 export type ItemExtra = lib.ItemEditExtraDom<ItemDraft>;
@@ -129,7 +146,8 @@ export type ParamValue<
   E extends ParamKey<K>,
 > = Params[K][E];
 
-type EditorPropsFor<K extends TypeNames> = lib.EditorProps<
+/** Per-type `Editor` component props — school `EditorProps` (props/state/impRef bag). */
+export type EditorPropsFor<K extends TypeNames> = lib.EditorProps<
   TypeNames,
   Params,
   K,

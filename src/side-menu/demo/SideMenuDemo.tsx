@@ -3,13 +3,16 @@
  *
  * Catalog click → `createBlankFormItem` → `openFormItemInsertSession`
  * (`index/sIndex: -1` → end of first non-deleted section) → same editor
- * stack as the form-item-editor demo → Save commits via `applyFlatFormItem`.
- * "+ Add section" opens the section-edit dialog with an `index: -1` session;
- * save appends via `updateSectionInFlat`.
+ * stack as the form-item-editor demo, decorated with `withSectionPicker` so
+ * a form with more than one section asks which one to add into (school
+ * `editors/selectSection.tsx`, shown only when `add && sections.length > 1`)
+ * → Save commits via `applyFlatFormItem`. "+ Add section" opens the
+ * section-edit dialog with an `index: -1` session; save appends via
+ * `updateSectionInFlat`.
  */
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
-  FormItemEditor,
+  FormItemEditorWithSectionPicker,
   itemName,
 } from "../../form-item-editor/demo/FormItemEditorDemo";
 import { FormItemEditorFormTest } from "../../form-item-editor/demo/formItemEditorDemoHelper";
@@ -36,6 +39,17 @@ export const SideMenuDemo = ({
     useState<types.SectionSession | null>(null);
   const ctx: types.Ctx = lib.branded({ flatItems });
 
+  /** School `sections.filter(d => !d.header.deleted).map(p => ({ value: p.index, label: p.header.title }))`. */
+  const sectionOptions = useMemo(
+    () =>
+      lib
+        .consolidateSections(flatItems)
+        .map((section, index) => ({ index, section }))
+        .filter(({ section }) => !section.header.deleted)
+        .map(({ index, section }) => ({ index, title: section.header.title })),
+    [flatItems],
+  );
+
   const commitDraft = useCallback(
     (next: lib.FlatFormItem<types.TypeNames, types.Params>) => {
       if (!session) return;
@@ -55,7 +69,7 @@ export const SideMenuDemo = ({
   return (
     <demo.FormContainer title={heading}>
       {session && (
-        <FormItemEditor
+        <FormItemEditorWithSectionPicker
           ctx={ctx}
           dialogArgs={lib.branded({
             title: <>Add · {itemName(ctx, session.draft.item)}</>,
@@ -72,6 +86,13 @@ export const SideMenuDemo = ({
           }
           extra={lib.branded<types.ItemExtra, "item-edit-extra">({
             onCommit: commitDraft,
+            /** Every side-menu session is an insert (`index === -1`) — always offer the picker. */
+            sectionPicker: {
+              sIndex: session.sIndex,
+              sections: sectionOptions,
+              setSIndex: (sIndex) =>
+                setSession((prev) => prev && { ...prev, sIndex }),
+            },
           })}
         />
       )}
