@@ -31,12 +31,14 @@ FormMenuItem click
 
 **Which section?** — school `editors/selectSection.tsx`: whenever there's more
 than one non-deleted section, the dialog also asks. The demo passes
-`extra.sectionPicker = { sIndex, setSIndex, sections }` (built from
-`consolidateSections(flatItems)`) into `FormItemEditor`; picking an option
-calls `setSIndex`, which updates `session.sIndex` before Save. With exactly
-one section, `sIndex` stays `-1` and resolves to that section automatically
-(no picker shown) — same as `edit-section`'s slot inserts, which always have
-a concrete index/section and never show the picker.
+`extra.sectionPicker = { sIndex, setSIndex, sections }` where each option's
+`index` is the section marker's **flat** index (`section.meta.index`, school
+`p.index`). Picking an option updates `session.sIndex` before Save;
+`applyFlatFormItem` then appends after the last *non-deleted* item in that
+section (school `justAfter` — never after trailing soft-deleted items). With
+exactly one section, `sIndex` stays `-1` and resolves to that section
+automatically (no picker shown) — same as `edit-section`'s slot inserts, which
+always have a concrete index/section and never show the picker.
 
 "+ Add section" emits `NewSection`
 (`{ header: blankSection(random()), index: -1, items: [[]], total: 0 }`); the

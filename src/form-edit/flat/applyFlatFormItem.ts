@@ -5,7 +5,7 @@
  */
 import type { MetaDom, ParamsDom, RecursiveFormItem, SomeFormItem } from "./_deps";
 import { resizeColumns } from "./_deps";
-import type { SIndexed } from "./consolidate";
+import { consolidateSections, type SIndexed } from "./consolidate";
 import type { FlatFormItems, SectionDom } from "./flat-form.t";
 import { flatten } from "./flatten";
 
@@ -13,27 +13,12 @@ import { flatten } from "./flatten";
  * Flat span being edited. `index === -1` switches to the insert path:
  * the item is appended to section `sIndex` (`sIndex === -1` → first
  * non-deleted section).
+ *
+ * When set (side-menu section picker), `sIndex` is the section marker's
+ * **flat** index — school `SectionWithItems.index` / `selectSection`
+ * `value: p.index` — not the section ordinal.
  */
 export type FlatEditSpan = SIndexed;
-
-/** Flat index of the `sIndex`-th section marker (`-1` → first non-deleted). */
-const sectionFlatIndex = <
-  TypeNames extends string,
-  Params extends ParamsDom<TypeNames>,
-  SectionConfig extends SectionDom,
->(
-  items: FlatFormItems<TypeNames, Params, SectionConfig>,
-  sIndex: number,
-): number => {
-  if (sIndex === -1)
-    return items.findIndex((fi) => "section" in fi && !fi.section.deleted);
-  let count = -1;
-  for (let i = 0; i < items.length; i++) {
-    const fi = items[i]!;
-    if ("section" in fi && ++count === sIndex) return i;
-  }
-  return -1;
-};
 
 export const applyFlatFormItem = <
   TypeNames extends string,
@@ -59,16 +44,27 @@ export const applyFlatFormItem = <
   if (editing.index !== -1)
     return items.toSpliced(editing.index, editing.total, ...list);
 
-  const sectionIndex = sectionFlatIndex(items, editing.sIndex);
-  const nextSectionOrMinus1 = items.findIndex(
-    (fi, i) => i > sectionIndex && "section" in fi,
+  // School useDialog `setEditFormItemX` insert path:
+  // sIndex is already a flat section index; -1 → first non-deleted section.
+  const sectionIndex =
+    editing.sIndex === -1
+      ? items.findIndex((fi) => "section" in fi && !fi.section.deleted)
+      : editing.sIndex;
+
+  // Append after the last *top-level* live item's full span — not after the
+  // last non-deleted flat entry. School's `justAfter` only checks
+  // `!item.deleted`, so live children nested under a soft-deleted panel still
+  // match and the insert lands *inside* that panel (before its closing `end`).
+  // Using consolidate meta.total skips the whole deleted panel subtree.
+  const section = consolidateSections(items).find(
+    (s) => s.meta.index === sectionIndex,
   );
-  const nextSection =
-    nextSectionOrMinus1 === -1 ? items.length : nextSectionOrMinus1;
-  const justAfter = items.findLastIndex(
-    (fi, i) =>
-      i < nextSection &&
-      ("section" in fi || ("item" in fi && !fi.item.deleted)),
-  );
-  return items.toSpliced(justAfter + 1, 0, ...list);
+  const lastLive = section?.items
+    .flatMap((col) => col)
+    .filter((i) => !i.header.deleted)
+    .at(-1);
+  const insertAt = lastLive
+    ? lastLive.meta.index + lastLive.meta.total
+    : sectionIndex + 1;
+  return items.toSpliced(insertAt, 0, ...list);
 };

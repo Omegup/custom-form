@@ -39,14 +39,16 @@ export const SideMenuDemo = ({
     useState<types.SectionSession | null>(null);
   const ctx: types.Ctx = lib.branded({ flatItems });
 
-  /** School `sections.filter(d => !d.header.deleted).map(p => ({ value: p.index, label: p.header.title }))`. */
+  /** School `sections.filter(d => !d.header.deleted).map(p => ({ value: p.index, label: p.header.title }))` — `index` is the section marker's flat index. */
   const sectionOptions = useMemo(
     () =>
       lib
         .consolidateSections(flatItems)
-        .map((section, index) => ({ index, section }))
-        .filter(({ section }) => !section.header.deleted)
-        .map(({ index, section }) => ({ index, title: section.header.title })),
+        .filter((section) => !section.header.deleted)
+        .map((section) => ({
+          index: section.meta.index,
+          title: section.header.title,
+        })),
     [flatItems],
   );
 

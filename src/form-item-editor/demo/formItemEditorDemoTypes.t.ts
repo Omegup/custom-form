@@ -52,7 +52,7 @@ export type ItemMeta = lib.MetaDom<{
   sIndex: number;
 }>;
 
-/** One choice in the section picker — school `sections.map(p => ({ value: p.index, label: p.header.title }))`. */
+/** One choice in the section picker — school `value: p.index` (section marker's flat index). */
 export type SectionOption = { index: number; title: string };
 
 /**

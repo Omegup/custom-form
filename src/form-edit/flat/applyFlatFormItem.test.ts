@@ -21,24 +21,25 @@ type Section = {
 const section = (
   id: string,
   title: string,
+  deleted = false,
 ): FlatNestedItem<TypeNames, Params, Section> => ({
-  section: { id, deleted: false, title, description: "" },
+  section: { id, deleted, title, description: "" },
 });
 
-const header = (id: string, name: string) => ({
+const header = (id: string, name: string, deleted = false) => ({
   id,
   type: "field" as const,
   params: { name },
-  deleted: false,
+  deleted,
 });
 
 const field = (
   id: string,
   name: string,
-  n = 0,
+  opts: { n?: number; deleted?: boolean } = {},
 ): FlatNestedItem<TypeNames, Params, Section> => ({
-  item: header(id, name),
-  n,
+  item: header(id, name, opts.deleted ?? false),
+  n: opts.n ?? 0,
 });
 
 const end = (): FlatNestedItem<TypeNames, Params, Section> => ({ end: null });
@@ -81,7 +82,7 @@ describe("applyFlatFormItem", () => {
   it("merges child columns when cols shrink from 2 to 1", () => {
     const items = flat(
       section("s1", "Main"),
-      field("p1", "Panel", 2),
+      field("p1", "Panel", { n: 2 }),
       field("c1", "A"),
       end(),
       field("c2", "B"),
@@ -102,7 +103,7 @@ describe("applyFlatFormItem", () => {
     expect(next).toEqual(
       flat(
         section("s1", "Main"),
-        field("p1", "Panel", 1),
+        field("p1", "Panel", { n: 1 }),
         field("c1", "A"),
         field("c2", "B"),
         end(),
@@ -134,9 +135,10 @@ describe("applyFlatFormItem", () => {
       ),
     );
 
+    // School selectSection: sIndex is the section marker's flat index (here 2), not ordinal.
     const intoLast = applyFlatFormItem(
       items,
-      { index: -1, total: 0, sIndex: 1 },
+      { index: -1, total: 0, sIndex: 2 },
       { header: header("new", "Phone"), children: [] },
       0,
     );
@@ -147,6 +149,156 @@ describe("applyFlatFormItem", () => {
         section("s2", "Details"),
         field("f2", "Notes"),
         field("new", "Phone"),
+      ),
+    );
+  });
+
+  it("inserts before trailing soft-deleted items in the section (school justAfter)", () => {
+    const items = flat(
+      section("s1", "Main"),
+      field("f1", "Name"),
+      field("f2", "Gone", { deleted: true }),
+      section("s2", "Details"),
+      field("f3", "Notes"),
+    );
+
+    const next = applyFlatFormItem(
+      items,
+      { index: -1, total: 0, sIndex: 0 },
+      { header: header("new", "Phone"), children: [] },
+      0,
+    );
+    expect(next).toEqual(
+      flat(
+        section("s1", "Main"),
+        field("f1", "Name"),
+        field("new", "Phone"),
+        field("f2", "Gone", { deleted: true }),
+        section("s2", "Details"),
+        field("f3", "Notes"),
+      ),
+    );
+  });
+
+  it("inserts into a live section after a deleted section via flat sIndex", () => {
+    const items = flat(
+      section("s1", "Main"),
+      field("f1", "Name"),
+      section("s2", "Gone", true),
+      field("f2", "Old"),
+      section("s3", "Details"),
+      field("f3", "Notes"),
+    );
+    // Details marker is at flat index 4
+    const next = applyFlatFormItem(
+      items,
+      { index: -1, total: 0, sIndex: 4 },
+      { header: header("new", "Phone"), children: [] },
+      0,
+    );
+    expect(next).toEqual(
+      flat(
+        section("s1", "Main"),
+        field("f1", "Name"),
+        section("s2", "Gone", true),
+        field("f2", "Old"),
+        section("s3", "Details"),
+        field("f3", "Notes"),
+        field("new", "Phone"),
+      ),
+    );
+  });
+
+  it("inserts before a trailing soft-deleted panel (not inside its children)", () => {
+    // Flat: section, Name, Panel*(n=2), c1, end, c2, end
+    // School justAfter would match c2 (!deleted) and splice before the last
+    // end → nest the new field inside the deleted panel. We skip the panel's
+    // whole span via consolidate meta.total.
+    const items = flat(
+      section("s1", "Main"),
+      field("f1", "Name"),
+      field("p1", "Panel", { n: 2, deleted: true }),
+      field("c1", "A"),
+      end(),
+      field("c2", "B"),
+      end(),
+    );
+
+    const next = applyFlatFormItem(
+      items,
+      { index: -1, total: 0, sIndex: 0 },
+      { header: header("new", "Phone"), children: [] },
+      0,
+    );
+    expect(next).toEqual(
+      flat(
+        section("s1", "Main"),
+        field("f1", "Name"),
+        field("new", "Phone"),
+        field("p1", "Panel", { n: 2, deleted: true }),
+        field("c1", "A"),
+        end(),
+        field("c2", "B"),
+        end(),
+      ),
+    );
+  });
+
+  it("inserts at a column slot before a trailing soft-deleted panel", () => {
+    const items = flat(
+      section("s1", "Main"),
+      field("f1", "Name"),
+      field("p1", "Panel", { n: 2, deleted: true }),
+      field("c1", "A"),
+      end(),
+      field("c2", "B"),
+      end(),
+    );
+    const main = consolidateSections(items)[0]!;
+    const newItem = { header: header("new", "Phone"), children: [] };
+    const session = openFormItemInsertSession(newItem, {
+      index: getFlatInsertionIndex(main.meta.index, main.items, 0),
+      sIndex: main.meta.index,
+    });
+    expect(session.index).toBe(2);
+
+    const next = applyFlatFormItem(items, session, newItem, session.draft.n);
+    expect(next).toEqual(
+      flat(
+        section("s1", "Main"),
+        field("f1", "Name"),
+        field("new", "Phone"),
+        field("p1", "Panel", { n: 2, deleted: true }),
+        field("c1", "A"),
+        end(),
+        field("c2", "B"),
+        end(),
+      ),
+    );
+  });
+
+  it("inserts at a column slot before trailing deleted items", () => {
+    const items = flat(
+      section("s1", "Main"),
+      field("f1", "Name"),
+      field("f2", "Gone", { deleted: true }),
+    );
+    const main = consolidateSections(items)[0]!;
+    const newItem = { header: header("new", "Phone"), children: [] };
+
+    const session = openFormItemInsertSession(newItem, {
+      index: getFlatInsertionIndex(main.meta.index, main.items, 0),
+      sIndex: main.meta.index,
+    });
+    expect(session).toMatchObject({ index: 2, total: 0 });
+
+    const next = applyFlatFormItem(items, session, newItem, session.draft.n);
+    expect(next).toEqual(
+      flat(
+        section("s1", "Main"),
+        field("f1", "Name"),
+        field("new", "Phone"),
+        field("f2", "Gone", { deleted: true }),
       ),
     );
   });
