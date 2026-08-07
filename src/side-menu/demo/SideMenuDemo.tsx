@@ -3,16 +3,16 @@
  *
  * Catalog click → `createBlankFormItem` → `openFormItemInsertSession`
  * (`index/sIndex: -1` → end of first non-deleted section) → same editor
- * stack as the form-item-editor demo, decorated with `withSectionPicker` so
- * a form with more than one section asks which one to add into (school
- * `editors/selectSection.tsx`, shown only when `add && sections.length > 1`)
- * → Save commits via `applyFlatFormItem`. "+ Add section" opens the
- * section-edit dialog with an `index: -1` session; save appends via
- * `updateSectionInFlat`.
+ * stack as the form-item-editor demo, this time passing `sectionPicker` on
+ * `extra` so a form with more than one section asks which one to add into
+ * (school `editors/selectSection.tsx`, shown only when
+ * `add && sections.length > 1`) → Save commits via `applyFlatFormItem`.
+ * "+ Add section" opens the section-edit dialog with an `index: -1` session;
+ * save appends via `updateSectionInFlat`.
  */
 import { useCallback, useMemo, useState } from "react";
 import {
-  FormItemEditorWithSectionPicker,
+  FormItemEditor,
   itemName,
 } from "../../form-item-editor/demo/FormItemEditorDemo";
 import { FormItemEditorFormTest } from "../../form-item-editor/demo/formItemEditorDemoHelper";
@@ -69,7 +69,7 @@ export const SideMenuDemo = ({
   return (
     <demo.FormContainer title={heading}>
       {session && (
-        <FormItemEditorWithSectionPicker
+        <FormItemEditor
           ctx={ctx}
           dialogArgs={lib.branded({
             title: <>Add · {itemName(ctx, session.draft.item)}</>,

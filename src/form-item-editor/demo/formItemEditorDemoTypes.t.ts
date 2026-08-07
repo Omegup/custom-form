@@ -59,7 +59,7 @@ export type SectionOption = { index: number; title: string };
  * Present only on **insert** sessions (`index === -1` — side-menu "add",
  * school `add: editFormItem.index === -1`); undefined for edits and for
  * slot inserts (`edit-section`, which already has a concrete `index`).
- * `withSectionPicker` (below) reads this to render/validate the section
+ * `useItemEditor` / `renderDialog` read this to render/validate the section
  * `<select>` when there is more than one non-deleted section to choose from.
  */
 export type SectionPicker = {
@@ -92,6 +92,8 @@ export type ItemState<K extends TypeNames> = lib.ItemEditStateDom<{
   isError: (param: keyof Params[K]) => boolean;
   isSectionError: boolean;
   errors: ItemValidateErrors<K>;
+  /** Passed through from `extra.sectionPicker` so `renderDialog` can render it once, for any type. */
+  sectionPicker?: SectionPicker;
 }>;
 
 export type ItemStateMap = { [K in TypeNames]: ItemState<K> };
@@ -146,8 +148,7 @@ export type ParamValue<
   E extends ParamKey<K>,
 > = Params[K][E];
 
-/** Per-type `Editor` component props — school `EditorProps` (props/state/impRef bag). */
-export type EditorPropsFor<K extends TypeNames> = lib.EditorProps<
+type EditorPropsFor<K extends TypeNames> = lib.EditorProps<
   TypeNames,
   Params,
   K,

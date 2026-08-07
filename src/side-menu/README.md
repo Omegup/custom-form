@@ -26,8 +26,17 @@ FormMenuItem click
   → createBlankFormItem(definition, random)     NewFormItem { header, children }
   → openFormItemInsertSession(newItem)          index/sIndex: -1, total: 0   (form-edit)
   → form-item-editor dialog (validate)
-  → applyFlatFormItem(items, session, item, n)  appends to first non-deleted section
+  → applyFlatFormItem(items, session, item, n)  appends to session.sIndex's section
 ```
+
+**Which section?** — school `editors/selectSection.tsx`: whenever there's more
+than one non-deleted section, the dialog also asks. The demo passes
+`extra.sectionPicker = { sIndex, setSIndex, sections }` (built from
+`consolidateSections(flatItems)`) into `FormItemEditor`; picking an option
+calls `setSIndex`, which updates `session.sIndex` before Save. With exactly
+one section, `sIndex` stays `-1` and resolves to that section automatically
+(no picker shown) — same as `edit-section`'s slot inserts, which always have
+a concrete index/section and never show the picker.
 
 "+ Add section" emits `NewSection`
 (`{ header: blankSection(random()), index: -1, items: [[]], total: 0 }`); the
@@ -47,8 +56,10 @@ consumer opens the section-edit dialog and saves via `updateSectionInFlat`
 `side-menu/Side menu` story: the multi-type list shell
 (`FormItemEditorFormTest`, form-item-editor demo) with `renderLayout` placing
 `Side` beside the list. Adds reuse the form-item-editor demo editor stack
-(`FormItemEditor`, `itemName`); "Add section" reuses the section-edit demo
-`SectionDialog`.
+(`FormItemEditor`, `itemName`) plus its `extra.sectionPicker` for the
+multi-section case; "Add section" reuses the section-edit demo
+`SectionDialog`. Try it with the default fixture (two sections, "Personal" /
+"Details") to see the picker.
 
 ## Dependency rule
 

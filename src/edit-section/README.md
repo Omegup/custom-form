@@ -35,9 +35,13 @@ dropdown is migrated here.
 | Concern | School reference |
 |---|---|
 | `SectionHOC` / `SectionFormItemHOC` viewers | `form-edit-react`, `section-edit-ui` |
-| Drag & drop between slots | `recursive-edit-ui/FlatDnd` |
+| Drag & drop between slots, or another explicit "move to section" action for an **existing** item | `recursive-edit-ui/FlatDnd` |
 | Nested panel add-item (beyond section columns) | `createRenderEditFormItem` |
-| Section picker / `setFormItemSection` | `editors/selectSection.tsx` |
+
+Slot inserts here never show a section picker (school `add: editFormItem.index === -1`
+is false — the slot already has a concrete index/section); the picker for
+the *ambiguous* insert case (side-menu "add") is done — see
+`form-item-editor/README.md` and `side-menu/README.md`.
 
 ## Demo
 

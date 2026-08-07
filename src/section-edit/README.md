@@ -36,7 +36,8 @@ re-exports only; dialog chrome stays with the consumer (demo / app UI).
 | Section HOC / viewers | `edit-section` | `SectionHOC`, `SectionFormItemHOC`, `section-edit-ui` |
 | Add-item column slots | **done** — `edit-section` (MVP) | `AddFormItem`, `makeUseRenderAddItem` |
 | "Add section" sidebar entry (`index === -1` open path) | **done** — `side-menu` (`useSide.addSection` → this package's dialog + `updateSectionInFlat`) | `useSide.addSection` |
-| Moving items between sections (`setFormItemSection`) | `edit-section` + editor extras | `editors/selectSection.tsx` |
+| Which-section picker on **insert** with >1 section (`add && sections.length !== 1`) | **done** — `form-item-editor` demo `extra.sectionPicker`, wired in `side-menu` | `editors/selectSection.tsx` |
+| Moving an **existing** item to another section (drag & drop / explicit action; `selectSection.tsx`'s picker never shows once `add` is false) | `edit-section` | `recursive-edit-ui/FlatDnd` |
 
 `updateSectionInFlat` already supports the `index === -1` insert path those
 features will call.

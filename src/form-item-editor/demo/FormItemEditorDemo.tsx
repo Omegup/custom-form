@@ -176,12 +176,21 @@ export const itemName = (ctx: types.Ctx, header: types.ItemHeader): ReactNode =>
 
 // ── useHook + wrapper ─────────────────────────────────────────────────────────
 
-/** Exported for `FormItemEditorWithSectionPicker` (side-menu demo shares this hook). */
-export const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
+/**
+ * Shared hook for every type (unlike school's per-type Formik `useFormItemEditor`),
+ * so a cross-cutting concern like "which section?" (school's `renderSection`
+ * companion sub-editor, composed into each domain editor via `question()`)
+ * is added **once here** instead of decorated onto each `Editor` — no
+ * `impRef` composition needed. Only active for insert sessions with more
+ * than one candidate section (`extra.sectionPicker` set by side-menu);
+ * a no-op for edits and for `edit-section` slot inserts, which already have
+ * a concrete `index`/section.
+ */
+const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
   props: types.EditorProps<K>,
   { validate }: types.Validate<K>,
 ): types.ItemStateFor<K> => {
-  const { onCommit } = props.extra;
+  const { onCommit, sectionPicker } = props.extra;
   const { formItem: draft } = props;
   const [errors, setErrors] = useState<types.ItemValidateErrors<K>>({});
 
@@ -196,13 +205,16 @@ export const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
         next.sIndex ??= message;
       },
     });
+    if (sectionPicker && sectionPicker.sections.length > 1 && sectionPicker.sIndex === -1) {
+      next.sIndex ??= "Pick a section";
+    }
     setErrors(next);
     if (next.sIndex) return;
     if (next.header?.params && Object.keys(next.header.params).length > 0) {
       return;
     }
     onCommit(draft);
-  }, [draft, onCommit, validate]);
+  }, [draft, onCommit, validate, sectionPicker]);
 
   return {
     state: lib.branded<types.ItemState<K>, "item-edit-state">({
@@ -210,6 +222,7 @@ export const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
       errors,
       isError: (param) => Boolean(errors.header?.params[param]),
       isSectionError: Boolean(errors.sIndex),
+      sectionPicker,
     }),
   };
 };
@@ -218,18 +231,35 @@ const renderDialog = <K extends types.TypeNames>(
   dialogArgs: types.DialogArgs,
   state: types.ItemState<K>,
   children: ReactNode,
-) => (
-  <demo.EditorDialog
-    title={dialogArgs.title}
-    onCancel={dialogArgs.onCancel}
-    onSave={state.save}
-    saveError={state.errors.sIndex ?? null}
-  >
-    {children}
-  </demo.EditorDialog>
-);
+) => {
+  const picker = state.sectionPicker;
+  const showPicker = Boolean(picker && picker.sections.length > 1);
+  return (
+    <demo.EditorDialog
+      title={dialogArgs.title}
+      onCancel={dialogArgs.onCancel}
+      onSave={state.save}
+      saveError={showPicker ? null : state.errors.sIndex ?? null}
+    >
+      {children}
+      {picker && showPicker && (
+        <demo.SelectSection
+          sections={picker.sections}
+          value={picker.sIndex}
+          error={state.errors.sIndex ?? null}
+          onChange={picker.setSIndex}
+        />
+      )}
+    </demo.EditorDialog>
+  );
+};
 
-/** Exported for the side-menu / edit-section demos (same editor stack). */
+/**
+ * Exported for the side-menu / edit-section demos (same editor stack).
+ * Pass `sectionPicker` on `extra` (side-menu "add") to ask which section a
+ * new item belongs to; omit it (edits, `edit-section` slot inserts) and the
+ * form behaves exactly as before.
+ */
 export const FormItemEditor = lib.createFormItemEditorWrapper<
   types.TypeNames,
   types.Params,
@@ -242,75 +272,6 @@ export const FormItemEditor = lib.createFormItemEditorWrapper<
     field: { editor: FieldEditor },
     heading: { editor: HeadingEditor },
     panel: { editor: PanelEditor },
-  },
-  useItemEditor,
-  renderDialog,
-);
-
-/**
- * Companion sub-editor — school `editors/selectSection.tsx` `renderSection`,
- * composed the same way school's `question()` decorator composes shared
- * concerns into every domain editor. Needs no change to the HOC itself:
- * `impRef` is already a named-ref map (`impRef.current.main`, here
- * `.section`), so any `Editor` can register extra validators and render
- * extra fields alongside the type-specific ones.
- *
- * Only relevant to **insert** sessions with more than one candidate section
- * (`extra.sectionPicker` set — side-menu "add"); a no-op otherwise (edits,
- * and `edit-section` slot inserts, which already have a concrete `index`).
- */
-export const withSectionPicker = <K extends types.TypeNames>(
-  Editor: (props: types.EditorPropsFor<K>) => ReactNode,
-) => {
-  const WithSectionPicker = (editorProps: types.EditorPropsFor<K>) => {
-    const sectionRef = useRef<
-      lib.FormItemEditorValidate<types.TypeNames, types.Params, K> | null
-    >(null);
-    editorProps.impRef.current.section = sectionRef;
-    const picker = editorProps.props.extra.sectionPicker;
-
-    useImperativeHandle(
-      sectionRef,
-      () => ({
-        validate: (_value, setError) => {
-          if (picker && picker.sections.length > 1 && picker.sIndex === -1) {
-            setError.section("Pick a section");
-          }
-        },
-      }),
-      [picker],
-    );
-
-    return (
-      <>
-        <Editor {...editorProps} />
-        {picker && picker.sections.length > 1 && (
-          <demo.SelectSection
-            sections={picker.sections}
-            value={picker.sIndex}
-            error={editorProps.hookResult.state.errors.sIndex ?? null}
-            onChange={picker.setSIndex}
-          />
-        )}
-      </>
-    );
-  };
-  return WithSectionPicker;
-};
-
-/** Ready-made wrapper for insert flows that may need to ask "which section?" (side-menu). */
-export const FormItemEditorWithSectionPicker = lib.createFormItemEditorWrapper<
-  types.TypeNames,
-  types.Params,
-  types.Ctx,
-  types.DialogArgs,
-  types.ItemExtraMap,
-  types.ItemStateMap
->(
-  {
-    field: { editor: withSectionPicker(FieldEditor) },
-    heading: { editor: withSectionPicker(HeadingEditor) },
-    panel: { editor: withSectionPicker(PanelEditor) },
   },
   useItemEditor,
   renderDialog,
