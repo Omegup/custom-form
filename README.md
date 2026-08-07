@@ -74,7 +74,7 @@ Original packages live under `school/components/custom-form/src/`:
 | `form-edit/` | `ts-packages/form-edit` |
 | `form-item-editor/` | `react-packages/form-item-edit-react` |
 | `side-menu/` | `react-packages/form-edit-react` (`useSide`, `MenuItemDefinition`) |
-| `section-edit/` | `react-packages/form-edit-react` (`SectionEdit`, `validateSectionForm`) |
+| `section-edit/` | `react-packages/form-edit-react` (`SectionEdit`; `validateSectionForm` not ported — see section-edit/README.md) |
 | `edit-section/` | `react-packages/form-edit-react` (`SectionHOC`, `SectionFormItemHOC`, `createRenderEditFormItem`, `makeUseRenderAddItem`) |
 | `editor/` | `form-edit-react` (`makeUseDialogs`, `applyFlatFormItem`, `setEditFormItemX`) |
 

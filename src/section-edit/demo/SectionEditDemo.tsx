@@ -2,8 +2,11 @@
  * Demo: section title / description / columns edit dialog.
  *
  * Composes `EditFormTest` (form-edit demo) with the `section-edit` library:
- * `sectionExtra` opens a session (`openSectionEditSession`), the dialog
- * validates with `validateSectionForm`, save commits via `updateSectionInFlat`.
+ * `sectionExtra` opens a session (`openSectionEditSession`), save commits via
+ * `updateSectionInFlat`. Validation is plain, demo-owned logic — checking that
+ * *this* dialog's `title`/`description` are non-empty needs no reusable
+ * abstraction, since a host with different header fields would write its own
+ * anyway (see section-edit/README.md).
  */
 import { useState, type ReactNode } from "react";
 import { EditFormTest } from "../../form-edit/demo/EditFormDemo";
@@ -11,10 +14,12 @@ import * as demo from "./sectionEditDemoHelper";
 import * as types from "./sectionEditDemoTypes.t";
 import * as lib from "./library";
 
-const validate = lib.validateSectionForm({
-  title: "Title is required",
-  description: "Description is required",
-});
+const validate = (form: types.SectionForm): lib.Errors<types.SectionForm> => {
+  const errors: lib.Errors<types.SectionForm> = {};
+  if (!form.title.trim()) errors.title = "Title is required";
+  if (!form.description.trim()) errors.description = "Description is required";
+  return errors;
+};
 
 /** Exported for the side-menu demo ("+ Add section" — `index: -1` session). */
 export const SectionDialog = ({
@@ -25,15 +30,15 @@ export const SectionDialog = ({
 }: {
   draft: { header: types.Section; cols: number };
   title?: ReactNode;
-  onSave: (form: lib.SectionEditForm) => void;
+  onSave: (form: types.SectionForm) => void;
   onCancel: () => void;
 }) => {
-  const [form, setForm] = useState<lib.SectionEditForm>({
+  const [form, setForm] = useState<types.SectionForm>({
     title: draft.header.title,
     description: draft.header.description,
     cols: draft.cols,
   });
-  const [errors, setErrors] = useState<lib.Errors<lib.SectionEditForm>>({});
+  const [errors, setErrors] = useState<lib.Errors<types.SectionForm>>({});
 
   const save = () => {
     const next = validate(form);

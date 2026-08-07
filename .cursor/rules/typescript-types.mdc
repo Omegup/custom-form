@@ -46,3 +46,34 @@ Guidelines:
 - Prefer generic parameters matching the module's existing generics
   (`TypeNames`, `Params`, `Meta`, `SectionConfig`, …) over hardcoding concrete
   field lists.
+
+## Don't "genericize" a hardcoded assumption into a floating one
+
+If a function hardcodes concrete field names that the domain type doesn't
+actually guarantee (e.g. assuming a `Section` has `title`/`description` when
+the real type only requires `id`/`deleted`), making it generic over those
+field names is **not** a fix if the generic has no real link back to the
+domain type. That just moves the same untyped assumption one level down —
+often introducing a genuine cast (`Object.keys(x) as (keyof T)[]`) along the
+way, which this rule already flags as a smell.
+
+Ask: once genericized, does this function still need to know anything about
+the real domain type (`SectionConfig`, `SectionDom`, …)? If **no** — it only
+operates on whatever shape you hand it — it isn't domain-specific logic and
+doesn't belong as typed "library" API for that domain. Either:
+
+- tie the generic to the real shared type (e.g. `Fields extends
+  Pick<SectionConfig, ...>`, constrained by an actual type used elsewhere in
+  the module), so mismatches are real compile errors, or
+- if it truly needs no domain knowledge, don't dress it up as reusable
+  library code — inline the few lines where the concrete shape is already
+  known (usually the demo/host), and delete the "generic" version.
+
+Example: `validateSectionForm({ title, description })` hardcoded to school's
+field names → "genericized" to `Fields extends Record<string, string>` with
+`Fields` inferred only from the `errorMessages` argument. Nothing tied the
+validated keys back to any real `SectionConfig`, so a host could pass field
+names that don't exist on its actual header with no type error — and a field
+named `cols` silently collided with the fixed `cols` slot, producing `never`.
+The fix was to delete it and let the one caller that actually knows its
+concrete `Section` shape (the demo) write the four-line check inline.
