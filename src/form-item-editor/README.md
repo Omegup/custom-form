@@ -55,17 +55,19 @@ The pure part of school `react-packages/form-edit-react/useDialog.tsx` lives in
 
 `resizeColumns` already lives in **`recursive-form`** (school’s `changeCols`); `applyFlatFormItem` calls it internally.
 
-### Stays in demo until the React dialog orchestrator (**`editor/`**) is migrated
+### Orchestrator now in **`form-dialogs`** (`makeUseDialogs`)
 
 School home: `react-packages/form-edit-react/useDialog.tsx` (`makeUseDialogs`) —
-needs `form-item-editor` + `section-edit`, so it lands with `editor/`.
+ported as `form-dialogs/makeUseDialogs`. The composed `form-dialogs/All-in`
+story runs this demo's editors through it; this demo keeps its own minimal
+hand-wiring so the focused story stays a one-package showcase.
 
-| Demo code | School equivalent | Notes |
+| Demo code | School equivalent | Library home |
 |---|---|---|
-| `session` state + `commitDraft` / `setFormItem` wiring | `makeUseDialogs` React state, `setEditFormItem(item, cols)` via `extra` | glue between editor save and flat list |
-| `FormItemEditorDemo` shell | `DialogUi` + `CustomFormEditor` | compose list + dialog |
+| `session` state + `commitDraft` / `setFormItem` wiring | `makeUseDialogs` React state, `setEditFormItem(item, cols)` via `extra` | `form-dialogs` (`useDialogs` sessions + `commit`) |
+| `FormItemEditorDemo` shell | `DialogUi` + `CustomFormEditor` | `form-dialogs/demo/AllInEditor.tsx` (Storybook composition) |
 
-### Stays in demo until **`form-edit`** story integration (or `editor/` all-in)
+### Stays in demo until **`form-edit`** story integration (or `form-dialogs` All-in)
 
 | Demo code | Package | Notes |
 |---|---|---|
@@ -78,7 +80,7 @@ needs `form-item-editor` + `section-edit`, so it lands with `editor/`.
 | Concern | Target package | School reference |
 |---|---|---|
 | Formik `useFormItemEditor` (`handleSubmit`, `isError`, `setColumns`) | app UI layer | `legacy-front/.../useFormItemEditor.ts` |
-| Real modal chrome | app / `editor/` | `form-edit-ui/renderDefaultDialog.tsx` |
+| Real modal chrome | app / `form-dialogs` | `form-edit-ui/renderDefaultDialog.tsx` |
 | `update` + `validate` on responses | `response/` + `form-react` | `getUseImpRefViewProps`, `CustomFormResponder` |
 
 ## Architecture
@@ -104,7 +106,7 @@ createFormItemEditorWrapper(editors, useHook, renderDialog)
 
 1. **Edit** opens a session (`form-edit` `openFormItemEditSession`) with draft + children + flat span
 2. **`FormItemEditor`** edits the draft via `setFormItem`
-3. **`save`** validates, then `onCommit` → `form-edit` `applyFlatFormItem` (React orchestrator itself → **`editor/`** when migrated)
+3. **`save`** validates, then `onCommit` → `form-edit` `applyFlatFormItem` (the React orchestrator is **`form-dialogs`** `makeUseDialogs`)
 
 ### Cross-cutting rule example: "which section?" (`side-menu`)
 

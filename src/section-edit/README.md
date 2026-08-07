@@ -53,7 +53,7 @@ few lines against its own type; there's nothing to reuse.
 
 | Concern | Target package | School reference |
 |---|---|---|
-| React dialog orchestrator (`makeUseDialogs` `sectionDialog`) | `editor/` | `form-edit-react/useDialog.tsx` |
+| React dialog orchestrator (`makeUseDialogs` `sectionDialog`) | **done** — `form-dialogs` | `form-edit-react/useDialog.tsx` |
 | Section HOC / viewers | *(deferred)* | `SectionHOC`, `SectionFormItemHOC`, `section-edit-ui` |
 | Add-item column slots | **done** — `side-menu` | `AddFormItem`, `makeUseRenderAddItem` |
 | "Add section" sidebar entry (`index === -1` open path) | **done** — `side-menu` (`useSide.addSection` → this package's dialog + `updateSectionInFlat`) | `useSide.addSection` |

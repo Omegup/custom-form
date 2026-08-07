@@ -18,11 +18,11 @@ Run tests: `pnpm test`.
 
 ## Demos (Storybook)
 
-Each module has a colocated `*.stories.tsx`. Story titles match folder names, e.g. `form-edit/Edit form`, `editor/All-in`.
+Each module has a colocated `*.stories.tsx`. Story titles match folder names, e.g. `form-edit/Edit form`, `form-dialogs/All-in`.
 
 | Story | Module | What it shows |
 |---|---|---|
-| **editor/All-in** | `editor/` | Full composed editor |
+| **form-dialogs/All-in** | `form-dialogs/` | Full composed editor (every dialog flow) |
 | form/Form | `form/` | Viewers rendering a JSON-driven form |
 | move-actions/Move actions | `move-actions/` | Item list with up/down/clone/remove |
 | form-edit/Edit form | `form-edit/` | Section/field list with move actions only |
@@ -31,7 +31,7 @@ Each module has a colocated `*.stories.tsx`. Story titles match folder names, e.
 | section-edit/Section edit | `section-edit/` | Edit form + section edit dialog |
 | recursive-form/Recursive form | `recursive-form/` | Nested recursive item rendering |
 
-Shared edit-form fixtures for tests and the all-in demo: `form-edit/fixtures.ts`.
+Shared edit-form fixtures: `form-edit/demo/fixtures.ts` (single-type list) and `form-item-editor/demo/fixtures.ts` (multi-type list, reused by the side-menu and All-in stories).
 
 > Storybook requires **Node 20+**. Use `nvm use 22` if `pnpm storybook` fails on Node 18.
 
@@ -48,7 +48,7 @@ form-edit                      ← flat edit representation + move actions on se
 form-item-editor               ← single-item edit dialog (HOC factory)
 side-menu                      ← library catalog: Side sidebar + AddFormItem slots
 section-edit                   ← section title/description edit dialog
-editor                         ← Composed shell + all-in Storybook demo
+form-dialogs                   ← dialog orchestration (makeUseDialogs) + All-in demo
 ```
 
 `SectionHOC` / section viewers are still deferred (not a package here yet).
@@ -60,7 +60,7 @@ editor                         ← Composed shell + all-in Storybook demo
 - `_deps.ts` — re-exports from sibling packages (see [src/README.md](./src/README.md#import-rules))
 - `*.stories.tsx` — Storybook entry (args, controls, docs)
 - `*Playground.tsx` — interactive demo component wired to story args
-- `*.test.ts` / `*.test.tsx` — Vitest tests only (`editor/AllInEditor.test.tsx` is integration)
+- `*.test.ts` / `*.test.tsx` — Vitest tests only
 - `*.t.ts` — type-only files
 
 ### Migration source
@@ -74,6 +74,6 @@ Original packages live under `school/components/custom-form/src/`:
 | `form-item-editor/` | `react-packages/form-item-edit-react` |
 | `side-menu/` | `react-packages/form-edit-react` (`useSide`, `MenuItemDefinition`, `makeUseRenderAddItem`) + `section-edit-ui` (`FormMenuItem`, `AddFormItem`) |
 | `section-edit/` | `react-packages/form-edit-react` (`SectionEdit`; `validateSectionForm` not ported — see section-edit/README.md) |
-| `editor/` | `form-edit-react` (`makeUseDialogs`, `applyFlatFormItem`, `setEditFormItemX`) |
+| `form-dialogs/` | `form-edit-react` (`makeUseDialogs`; the pure `setEditFormItemX` part lives in `form-edit/applyFlatFormItem`) |
 
 Still to migrate from `form-edit-react`: `SectionHOC` / `SectionFormItemHOC`, `recursive-edit-ui` (RecursiveEdit + FlatDnd), …
