@@ -1,10 +1,12 @@
 /**
  * All-in list chrome — viewers + `renderCard` for `SectionFormItemHOC`.
  * Display-only rows (no inline edit); Edit opens a dialog via `ListExtra.onEdit`.
+ *
+ * Panel nested columns are rendered **below** the row chrome (same as
+ * `FormItemEditorFormTest`), not inside `FieldRow`'s horizontal `name` slot.
  */
 import type { ReactNode } from "react";
 import { FieldRow } from "../../form-edit/demo/editFormDemoHelper";
-import { NestedColumns } from "../../form-item-editor/demo/formItemEditorDemoHelper";
 import allInEditorSource from "./AllInEditor.tsx?raw";
 import allInDemoTypesSource from "./allInDemoTypes.t.ts?raw";
 import type * as types from "./allInDemoTypes.t";
@@ -19,12 +21,14 @@ export const ALL_IN_DEMO_SOURCE = [
   withFileHeader("AllInEditor.tsx", allInEditorSource),
 ].join("\n");
 
-/** List viewers — labels only; nested panel columns come from `ColumnsEdit`. */
+type CardExtra = types.ListExtra & lib.EditExtra & lib.Children;
+
+/** List viewers — labels only; nested columns are placed by `renderCard`. */
 export const viewers: lib.Viewers<
   types.TypeNames,
   types.Params,
   types.Variants,
-  types.ListExtra & lib.EditExtra & lib.Children,
+  CardExtra,
   types.ListExtra & lib.EditExtra,
   types.ListCtx,
   string
@@ -38,16 +42,30 @@ export const viewers: lib.Viewers<
     ),
   },
   panel: {
-    viewer: ({ props: { formItem, extra } }) => (
-      <div>
-        <span style={{ fontWeight: 600 }}>{formItem.params.name}</span>
-        <NestedColumns columns={extra.children} />
-        <span style={{ fontSize: 11, opacity: 0.5 }}>{formItem.type}</span>
-      </div>
+    viewer: ({ props: { formItem } }) => (
+      <span style={{ fontWeight: 600 }}>{formItem.params.name}</span>
     ),
+    /** One slot — `ColumnsEdit` already built the full column flex into `getChild`. */
     repeatChildren: () => [""],
   },
 };
+
+const NestedSlot = ({ children }: { children: ReactNode }) => (
+  <div
+    style={{
+      display: "flex",
+      flexDirection: "row",
+      gap: 6,
+      marginLeft: 12,
+      marginTop: 4,
+      paddingLeft: 8,
+      borderLeft: "2px solid #b8d4f0",
+      minWidth: 0,
+    }}
+  >
+    {children}
+  </div>
+);
 
 export const renderCard = (
   view: ReactNode,
@@ -55,22 +73,24 @@ export const renderCard = (
     types.Params,
     types.Variants,
     types.TypeNames,
-    types.ListExtra & lib.EditExtra,
+    CardExtra,
     types.ListCtx
   >,
-) => (
-  <FieldRow
-    name={view}
-    focused={viewProps.ctx.autoFocused(viewProps.formItem.id)}
-    actions={viewProps.extra.actions}
-    extra={
-      viewProps.extra.parentDeleted
-        ? []
-        : [{ label: "Edit", onClick: viewProps.extra.onEdit }]
-    }
-    parentDeleted={viewProps.extra.parentDeleted}
-  />
-);
+) => {
+  const { extra, ctx, formItem } = viewProps;
+  return (
+    <div>
+      <FieldRow
+        name={view}
+        focused={ctx.autoFocused(formItem.id)}
+        actions={extra.actions}
+        extra={extra.parentDeleted ? [] : [{ label: "Edit", onClick: extra.onEdit }]}
+        parentDeleted={extra.parentDeleted}
+      />
+      {extra.children.length > 0 && <NestedSlot>{extra.children}</NestedSlot>}
+    </div>
+  );
+};
 
 export const buildListExtraMap = (
   sections: types.ListSection[],

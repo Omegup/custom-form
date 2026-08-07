@@ -72,30 +72,38 @@ const renderColumns = <
   </>
 );
 
-const MoveActionsBar = ({ actions }: { actions: MoveActions }) => (
-  <div style={{ display: "flex", gap: 6 }}>
-    {actions.isDeleted ? (
-      <button type="button" onClick={() => actions.restore?.()} disabled={!actions.restore}>
-        Restore
-      </button>
-    ) : (
-      <>
-        <button type="button" onClick={() => actions.up?.()} disabled={!actions.up}>
-          ↑
-        </button>
-        <button type="button" onClick={() => actions.down?.()} disabled={!actions.down}>
-          ↓
-        </button>
-        <button type="button" onClick={() => actions.clone?.()} disabled={!actions.clone}>
-          Clone
-        </button>
-        <button type="button" onClick={() => actions.remove?.()} disabled={!actions.remove}>
-          Remove
-        </button>
-      </>
-    )}
-  </div>
-);
+const MoveActionsBar = ({ actions }: { actions: MoveActions }) => {
+  const Btn = ({
+    label,
+    onClick,
+  }: {
+    label: string;
+    onClick: null | undefined | (() => void);
+  }) => (
+    <button
+      type="button"
+      disabled={!onClick}
+      onClick={onClick ?? undefined}
+      style={{ padding: "2px 7px", fontSize: 11, opacity: onClick ? 1 : 0.3 }}
+    >
+      {label}
+    </button>
+  );
+  return (
+    <span style={{ display: "inline-flex", gap: 3, flexShrink: 0 }}>
+      {actions.isDeleted ? (
+        <Btn label="Restore" onClick={actions.restore} />
+      ) : (
+        <>
+          <Btn label="↑" onClick={actions.up} />
+          <Btn label="↓" onClick={actions.down} />
+          <Btn label="Clone" onClick={actions.clone} />
+          <Btn label="Remove" onClick={actions.remove} />
+        </>
+      )}
+    </span>
+  );
+};
 
 export const ColumnsEdit = <
   TypeNames extends string,

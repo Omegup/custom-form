@@ -2,6 +2,7 @@
 import type { ReactNode } from "react";
 import type {
   AutoFocus,
+  Children,
   Clone,
   ContextDom,
   ExtraDom,
@@ -81,11 +82,17 @@ export type SectionProps<
   variants: Variants;
   /** Per-item viewer extra (domain data) — combined with `EditExtra` + `getChild` by `createRenderEditFormItem`. */
   itemExtra: (id: string) => Extra;
+  /**
+   * Item chrome — receives viewer output plus `EditExtra` and `children`
+   * (`createFormItemByGetChild` always materializes `extra.children`, even when
+   * empty). Hosts should place nested columns **below** the row header, not
+   * inside a horizontal name slot.
+   */
   renderCard: RenderCard<
     TypeNames,
     Params,
     Variants,
-    Extra & EditExtra,
+    Extra & EditExtra & Children,
     AutoFocus<Context, boolean>
   >;
   args: GetActionsArgs<TypeNames, Params, AutoFocus<Context, boolean>, SectionConfig>;

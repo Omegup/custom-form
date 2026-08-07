@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { FieldRow, FormContainer } from "../../form-edit/demo/editFormDemoHelper";
-import { NestedColumns } from "../../form-item-editor/demo/formItemEditorDemoHelper";
 import sectionViewDemoSource from "./SectionViewDemo.tsx?raw";
 import sectionViewDemoTypesSource from "./sectionViewDemoTypes.t.ts?raw";
 import * as types from "./sectionViewDemoTypes.t";
@@ -28,13 +27,15 @@ export const MENU_ITEMS: lib.MenuItemDefinition<types.TypeNames, types.Params>[]
   { title: "Panel", header: { type: "panel", params: { name: "New panel" } }, n: 2 },
 ];
 
-// ── Viewers (name `viewers` + `createFormItemByGetChild`, same pattern as `form` demo) ──
+type CardExtra = types.ItemExtra & lib.EditExtra & lib.Children;
+
+// ── Viewers — labels/inputs only; nested columns are placed by `renderCard` ──
 
 export const viewers: lib.Viewers<
   types.TypeNames,
   types.Params,
   types.Variants,
-  types.ItemExtra & lib.EditExtra & lib.Children,
+  CardExtra,
   types.ItemExtra & lib.EditExtra,
   types.Ctx,
   string
@@ -49,38 +50,64 @@ export const viewers: lib.Viewers<
     ),
   },
   panel: {
-    viewer: ({ props: { formItem, extra } }) => (
-      <div>
-        <input
-          value={extra.value}
-          onChange={(e) => extra.onChange(e.target.value)}
-          style={{
-            padding: "4px 6px",
-            border: "1px solid #ccc",
-            borderRadius: 4,
-            fontWeight: 600,
-          }}
-        />
-        <NestedColumns columns={extra.children} />
-        <span style={{ fontSize: 11, opacity: 0.5 }}>{formItem.type}</span>
-      </div>
+    viewer: ({ props: { extra } }) => (
+      <input
+        value={extra.value}
+        onChange={(e) => extra.onChange(e.target.value)}
+        style={{
+          padding: "4px 6px",
+          border: "1px solid #ccc",
+          borderRadius: 4,
+          fontWeight: 600,
+        }}
+      />
     ),
+    /** One slot — `ColumnsEdit` already built the full column flex into `getChild`. */
     repeatChildren: () => [""],
   },
 };
 
+const NestedSlot = ({ children }: { children: ReactNode }) => (
+  <div
+    style={{
+      display: "flex",
+      flexDirection: "row",
+      gap: 6,
+      marginLeft: 12,
+      marginTop: 4,
+      paddingLeft: 8,
+      borderLeft: "2px solid #b8d4f0",
+      minWidth: 0,
+    }}
+  >
+    {children}
+  </div>
+);
+
 // ── Item chrome (`renderCard` — school `HandledCard`) ─────────────────────────
 
-export const renderCard = (view: ReactNode, viewProps: {
-  extra: types.ItemExtra & lib.EditExtra;
-}) => (
-  <FieldRow
-    name={view}
-    focused={null}
-    actions={viewProps.extra.actions}
-    extra={[]}
-    parentDeleted={viewProps.extra.parentDeleted}
-  />
+export const renderCard = (
+  view: ReactNode,
+  viewProps: lib.ViewerProps<
+    types.Params,
+    types.Variants,
+    types.TypeNames,
+    CardExtra,
+    types.Ctx
+  >,
+) => (
+  <div>
+    <FieldRow
+      name={view}
+      focused={null}
+      actions={viewProps.extra.actions}
+      extra={[]}
+      parentDeleted={viewProps.extra.parentDeleted}
+    />
+    {viewProps.extra.children.length > 0 && (
+      <NestedSlot>{viewProps.extra.children}</NestedSlot>
+    )}
+  </div>
 );
 
 // ── Per-item extra: live name binding + move actions, keyed by id ─────────────
