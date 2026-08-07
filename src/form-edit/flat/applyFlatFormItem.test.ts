@@ -153,7 +153,7 @@ describe("applyFlatFormItem", () => {
     );
   });
 
-  it("inserts before trailing soft-deleted items in the section (school justAfter)", () => {
+  it("inserts after trailing soft-deleted items (FlatDnd end, not school justAfter)", () => {
     const items = flat(
       section("s1", "Main"),
       field("f1", "Name"),
@@ -172,8 +172,8 @@ describe("applyFlatFormItem", () => {
       flat(
         section("s1", "Main"),
         field("f1", "Name"),
-        field("new", "Phone"),
         field("f2", "Gone", { deleted: true }),
+        field("new", "Phone"),
         section("s2", "Details"),
         field("f3", "Notes"),
       ),
@@ -209,11 +209,10 @@ describe("applyFlatFormItem", () => {
     );
   });
 
-  it("inserts before a trailing soft-deleted panel (not inside its children)", () => {
+  it("inserts after a trailing soft-deleted panel (FlatDnd end, not inside)", () => {
     // Flat: section, Name, Panel*(n=2), c1, end, c2, end
-    // School justAfter would match c2 (!deleted) and splice before the last
-    // end → nest the new field inside the deleted panel. We skip the panel's
-    // whole span via consolidate meta.total.
+    // FlatDnd list index = panel.index + panel.total → after the whole span.
+    // School justAfter (`!item.deleted`) would match c2 and nest before last end.
     const items = flat(
       section("s1", "Main"),
       field("f1", "Name"),
@@ -234,17 +233,17 @@ describe("applyFlatFormItem", () => {
       flat(
         section("s1", "Main"),
         field("f1", "Name"),
-        field("new", "Phone"),
         field("p1", "Panel", { n: 2, deleted: true }),
         field("c1", "A"),
         end(),
         field("c2", "B"),
         end(),
+        field("new", "Phone"),
       ),
     );
   });
 
-  it("inserts at a column slot before a trailing soft-deleted panel", () => {
+  it("inserts at a column slot after a trailing soft-deleted panel", () => {
     const items = flat(
       section("s1", "Main"),
       field("f1", "Name"),
@@ -260,24 +259,25 @@ describe("applyFlatFormItem", () => {
       index: getFlatInsertionIndex(main.meta.index, main.items, 0),
       sIndex: main.meta.index,
     });
-    expect(session.index).toBe(2);
+    // panel at 2 with total 5 → slot at 7
+    expect(session.index).toBe(7);
 
     const next = applyFlatFormItem(items, session, newItem, session.draft.n);
     expect(next).toEqual(
       flat(
         section("s1", "Main"),
         field("f1", "Name"),
-        field("new", "Phone"),
         field("p1", "Panel", { n: 2, deleted: true }),
         field("c1", "A"),
         end(),
         field("c2", "B"),
         end(),
+        field("new", "Phone"),
       ),
     );
   });
 
-  it("inserts at a column slot before trailing deleted items", () => {
+  it("inserts at a column slot after trailing deleted items", () => {
     const items = flat(
       section("s1", "Main"),
       field("f1", "Name"),
@@ -290,15 +290,15 @@ describe("applyFlatFormItem", () => {
       index: getFlatInsertionIndex(main.meta.index, main.items, 0),
       sIndex: main.meta.index,
     });
-    expect(session).toMatchObject({ index: 2, total: 0 });
+    expect(session).toMatchObject({ index: 3, total: 0 });
 
     const next = applyFlatFormItem(items, session, newItem, session.draft.n);
     expect(next).toEqual(
       flat(
         section("s1", "Main"),
         field("f1", "Name"),
-        field("new", "Phone"),
         field("f2", "Gone", { deleted: true }),
+        field("new", "Phone"),
       ),
     );
   });

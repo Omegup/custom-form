@@ -51,20 +51,17 @@ export const applyFlatFormItem = <
       ? items.findIndex((fi) => "section" in fi && !fi.section.deleted)
       : editing.sIndex;
 
-  // Append after the last *top-level* live item's full span — not after the
-  // last non-deleted flat entry. School's `justAfter` only checks
-  // `!item.deleted`, so live children nested under a soft-deleted panel still
-  // match and the insert lands *inside* that panel (before its closing `end`).
-  // Using consolidate meta.total skips the whole deleted panel subtree.
+  // Append after the last *top-level* item's full span (including soft-deleted
+  // panels). Same end index as FlatDnd list nodes (`index + total`).
+  // School's flat `justAfter` (`!item.deleted`) can nest inside a deleted
+  // panel because its children stay live; column-add never does that because
+  // the slot index already skips the whole subtree via meta.total.
   const section = consolidateSections(items).find(
     (s) => s.meta.index === sectionIndex,
   );
-  const lastLive = section?.items
-    .flatMap((col) => col)
-    .filter((i) => !i.header.deleted)
-    .at(-1);
-  const insertAt = lastLive
-    ? lastLive.meta.index + lastLive.meta.total
+  const lastTop = section?.items.flatMap((col) => col).at(-1);
+  const insertAt = lastTop
+    ? lastTop.meta.index + lastTop.meta.total
     : sectionIndex + 1;
   return items.toSpliced(insertAt, 0, ...list);
 };
