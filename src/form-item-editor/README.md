@@ -112,7 +112,7 @@ School's `editors/selectSection.tsx` is a companion sub-editor — composed
 into *every* domain editor via the `question()` decorator — that shows a
 section `<select>` and blocks Save until one is picked, but only for an
 **insert** with more than one candidate section (`add && sections.length !== 1`,
-`add = editFormItem.index === -1`). Slot inserts (`edit-section`) already
+`add = editFormItem.index === -1`). Slot inserts (`AddFormItem`) already
 have a concrete index/section, so `add` is false there and nothing shows.
 
 Slot-tree needs no `Editor`-level composition to get the same behavior,

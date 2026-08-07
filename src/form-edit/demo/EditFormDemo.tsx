@@ -108,14 +108,12 @@ export const EditFormTest = ({
                 })}
                 {!sectionDeleted &&
                   renderAddItem?.({
-                    section,
-                    sIndex,
-                    colIndex,
-                    insertionIndex: lib.getFlatInsertionIndex(
+                    index: lib.getFlatInsertionIndex(
                       section.meta.index,
                       section.items,
                       colIndex,
                     ),
+                    sIndex,
                   })}
               </>
             ))}

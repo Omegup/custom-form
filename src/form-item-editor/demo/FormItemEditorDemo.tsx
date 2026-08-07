@@ -159,7 +159,7 @@ const nameViewers: types.NameViewers = {
 
 const ItemName = lib.createFormItemByGetChild(nameViewers, (x) => x);
 
-/** Exported for the side-menu / edit-section demos (same editor stack). */
+/** Exported for the side-menu demo (same editor stack). */
 export const itemName = (ctx: types.Ctx, header: types.ItemHeader): ReactNode => (
   <ItemName
     viewProps={{
@@ -183,7 +183,7 @@ export const itemName = (ctx: types.Ctx, header: types.ItemHeader): ReactNode =>
  * is added **once here** instead of decorated onto each `Editor` — no
  * `impRef` composition needed. Only active for insert sessions with more
  * than one candidate section (`extra.sectionPicker` set by side-menu);
- * a no-op for edits and for `edit-section` slot inserts, which already have
+ * a no-op for edits and for `AddFormItem` slot inserts, which already have
  * a concrete `index`/section.
  */
 const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
@@ -255,9 +255,9 @@ const renderDialog = <K extends types.TypeNames>(
 };
 
 /**
- * Exported for the side-menu / edit-section demos (same editor stack).
+ * Exported for the side-menu demo (same editor stack).
  * Pass `sectionPicker` on `extra` (side-menu "add") to ask which section a
- * new item belongs to; omit it (edits, `edit-section` slot inserts) and the
+ * new item belongs to; omit it (edits, `AddFormItem` slot inserts) and the
  * form behaves exactly as before.
  */
 export const FormItemEditor = lib.createFormItemEditorWrapper<

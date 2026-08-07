@@ -1,6 +1,6 @@
 import type * as types from "./sideMenuDemoTypes.t";
 
-/** Shared catalog — also imported by the edit-section demo. */
+/** Shared catalog for the side-menu demo (and any host that composes `AddFormItem`). */
 export const MENU_ITEMS: types.DemoMenuItem[] = [
   { title: "Field", icon: "✎", header: { type: "field", params: { name: "" } } },
   {

@@ -54,11 +54,11 @@ few lines against its own type; there's nothing to reuse.
 | Concern | Target package | School reference |
 |---|---|---|
 | React dialog orchestrator (`makeUseDialogs` `sectionDialog`) | `editor/` | `form-edit-react/useDialog.tsx` |
-| Section HOC / viewers | `edit-section` | `SectionHOC`, `SectionFormItemHOC`, `section-edit-ui` |
-| Add-item column slots | **done** — `edit-section` (MVP) | `AddFormItem`, `makeUseRenderAddItem` |
+| Section HOC / viewers | *(deferred)* | `SectionHOC`, `SectionFormItemHOC`, `section-edit-ui` |
+| Add-item column slots | **done** — `side-menu` | `AddFormItem`, `makeUseRenderAddItem` |
 | "Add section" sidebar entry (`index === -1` open path) | **done** — `side-menu` (`useSide.addSection` → this package's dialog + `updateSectionInFlat`) | `useSide.addSection` |
 | Which-section picker on **insert** with >1 section (`add && sections.length !== 1`) | **done** — `form-item-editor` demo `extra.sectionPicker`, wired in `side-menu` | `editors/selectSection.tsx` |
-| Moving an **existing** item to another section (drag & drop / explicit action; `selectSection.tsx`'s picker never shows once `add` is false) | `edit-section` | `recursive-edit-ui/FlatDnd` |
+| Moving an **existing** item to another section (drag & drop / explicit action; `selectSection.tsx`'s picker never shows once `add` is false) | *(deferred)* | `recursive-edit-ui/FlatDnd` |
 
 `updateSectionInFlat` already supports the `index === -1` insert path those
 features will call.

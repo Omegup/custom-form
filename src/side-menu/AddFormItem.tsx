@@ -1,12 +1,14 @@
 /**
  * Column-slot "+ Add" dropdown — school section-edit-ui `AddFormItem` on a
- * plain toggle (no BareSelect / theme). Picking a type opens an insert
- * session at the slot's flat index (`total: 0`).
+ * plain toggle (no BareSelect / theme). Same catalog rows as `Side`
+ * (`FormMenuItem`); picking a type opens an insert session at the slot's
+ * flat index (`total: 0`).
  */
 import { useState } from "react";
 import type { FlatFormItemEditSession, ParamsDom } from "./_deps";
-import { FormMenuItem, openFormItemInsertSession } from "./_deps";
-import type { MenuItemDefinition } from "./_deps";
+import { openFormItemInsertSession } from "./_deps";
+import { FormMenuItem } from "./FormMenuItem";
+import type { MenuItemDefinition } from "./MenuItemDefinition.t";
 
 export type AddFormItemProps<
   TypeNames extends string,

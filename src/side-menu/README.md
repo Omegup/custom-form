@@ -1,10 +1,15 @@
 # side-menu
 
-**Library sidebar** — searchable catalog of item types plus "+ Add section",
-feeding the form-item-editor dialog with new-item insert sessions.
+**Library catalog** — searchable sidebar (`Side`) *and* in-slot add dropdown
+(`AddFormItem`), both fed by the same `MenuItemDefinition` list.
 
 Migrated from `school/components/custom-form` → `react-packages/form-edit-react`
-(`useSide`, `MenuItemDefinition`) + `section-edit-ui` (`FormMenuItem` `mapMenu`).
+(`useSide`, `MenuItemDefinition`, `makeUseRenderAddItem`) + `section-edit-ui`
+(`FormMenuItem`, `AddFormItem`).
+
+School's `CustomFormEditor` composes **both** entry points together from one
+`useMenuItems()` catalog — the sidebar is the ambiguous insert; the slot
+dropdown is the concrete-span insert. They belong in the same package.
 
 ## Library scope (this package)
 
@@ -15,30 +20,32 @@ Migrated from `school/components/custom-form` → `react-packages/form-edit-reac
 | `useSide.ts` | **`useSide({ menuItems, setAddFormItem, setAddSection, blankSection, random })`** — accent-insensitive search filter, `renderMenuItems`, `addSection` emitting a `NewSection` (`index: -1`); port of school `useSide` |
 | `FormMenuItem.tsx` | Catalog row button — click emits `createBlankFormItem(definition, random)` |
 | `Side.tsx` | Sidebar UI: title, search input, catalog rows, "+ Add section" (school `form-edit-ui/Side` minus theme / i18n / icon set) |
+| `AddFormItem.tsx` | In-slot "+ Add" dropdown of the same `FormMenuItem` rows; opens insert session at `{ index, sIndex }` |
+| `makeUseRenderAddItem.ts` | **`makeUseRenderAddItem(renderAddItem, useMenuItems, random)(setAddItem)`** → `(span) => ReactNode` — school factory; list shell injects it at every list slot |
 
-## Add flow (school parity)
+## Two add flows (school parity)
 
-Click a type → **open the form-item-editor dialog** with a new-item session.
-No blank item is inserted on click; the list only changes on dialog Save:
+**Sidebar** — ambiguous insert; dialog may ask which section:
 
 ```
-FormMenuItem click
-  → createBlankFormItem(definition, random)     NewFormItem { header, children }
-  → openFormItemInsertSession(newItem)          index/sIndex: -1, total: 0   (form-edit)
-  → form-item-editor dialog (validate)
-  → applyFlatFormItem(items, session, item, n)  appends to session.sIndex's section
+FormMenuItem click (Side)
+  → createBlankFormItem(definition, random)
+  → openFormItemInsertSession(newItem)          index/sIndex: -1, total: 0
+  → form-item-editor (+ sectionPicker when >1 section)
+  → applyFlatFormItem(…)
 ```
 
-**Which section?** — school `editors/selectSection.tsx`: whenever there's more
-than one non-deleted section, the dialog also asks. The demo passes
-`extra.sectionPicker = { sIndex, setSIndex, sections }` where each option's
-`index` is the section marker's **flat** index (`section.meta.index`, school
-`p.index`). Picking an option updates `session.sIndex` before Save;
-`applyFlatFormItem` then appends after the last *non-deleted* item in that
-section (school `justAfter` — never after trailing soft-deleted items). With
-exactly one section, `sIndex` stays `-1` and resolves to that section
-automatically (no picker shown) — same as `edit-section`'s slot inserts, which
-always have a concrete index/section and never show the picker.
+**In-slot** — concrete span; no section picker (school FlatDnd `render.addItem`):
+
+```
+AddFormItem pick (section or nested panel column)
+  → openFormItemInsertSession(newItem, { index, sIndex })   total: 0
+  → form-item-editor (no picker)
+  → applyFlatFormItem(…)  inserts at that flat index
+```
+
+The list shell computes `index` via `getFlatInsertionIndex` (same formula as
+FlatDnd list-node indexes) for section columns *and* nested panel columns.
 
 "+ Add section" emits `NewSection`
 (`{ header: blankSection(random()), index: -1, items: [[]], total: 0 }`); the
@@ -50,22 +57,20 @@ consumer opens the section-edit dialog and saves via `updateSectionInFlat`
 | School | Here | Why |
 |---|---|---|
 | `addSection` hardcodes the `AppSection` blank header | `blankSection(id)` factory param | `SectionConfig` is generic in this repo |
-| `FormMenuItem` click payload carries `index/sIndex: -1` | payload is `NewFormItem` (header + children only) | the consumer attaches the span (`openFormItemInsertSession` default for the sidebar, concrete slot index for `edit-section`), so one row component serves both |
+| `FormMenuItem` click payload carries `index/sIndex: -1` | payload is `NewFormItem` (header + children only) | the consumer attaches the span (`openFormItemInsertSession` default for the sidebar, concrete slot index for `AddFormItem`), so one row component serves both |
 | `MenuItem` / `InputSearch` / theme / i18n design system | plain elements + `title` / `addSectionLabel` props | no design system in this repo |
 
 ## Demo
 
-`side-menu/Side menu` story: the multi-type list shell
-(`FormItemEditorFormTest`, form-item-editor demo) with `renderLayout` placing
-`Side` beside the list. Adds reuse the form-item-editor demo editor stack
-(`FormItemEditor`, `itemName`) plus its `extra.sectionPicker` for the
-multi-section case; "Add section" reuses the section-edit demo
-`SectionDialog`. Try it with the default fixture (two sections, "Personal" /
-"Details") to see the picker.
+`side-menu/Side menu` story: multi-type list shell (`FormItemEditorFormTest`)
+with `renderLayout` placing `Side` beside the list **and** `renderAddItem`
+from `makeUseRenderAddItem` (section + nested panel columns). Same editor
+stack as form-item-editor; slot inserts skip the section picker
+(`session.index !== -1`). "Add section" reuses section-edit's `SectionDialog`.
 
 ## Dependency rule
 
-Imports from: `form`, `recursive-form`, `form-edit` (types) via `_deps`.
+Imports from: `form`, `recursive-form`, `form-edit` (via `_deps`).
 
-Does **not** import: `form-item-editor`, `section-edit`, `edit-section`.
+Does **not** import: `form-item-editor`, `section-edit`.
 The demo composes those packages for Storybook only.

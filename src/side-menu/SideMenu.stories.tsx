@@ -28,7 +28,7 @@ export default {
       },
       description: {
         component:
-          "Library sidebar. Click a catalog row — the form-item-editor dialog opens with a **new-item session** (`index/sIndex: -1`); Save appends it to the end of the first non-deleted section via `applyFlatFormItem`. **+ Add section** opens the section-edit dialog with an `index: -1` session; save appends via `updateSectionInFlat`. The search box filters the catalog (accent-insensitive).",
+          "School composition: **Side** sidebar (ambiguous insert + section picker) and **+ Add item** on every list slot — section columns *and* nested panel columns (`makeUseRenderAddItem` / FlatDnd). Same catalog for both. **+ Add section** opens the section-edit dialog (`index: -1` → `updateSectionInFlat`).",
       },
     },
   },

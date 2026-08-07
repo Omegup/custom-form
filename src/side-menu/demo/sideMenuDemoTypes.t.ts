@@ -1,6 +1,6 @@
 /**
  * Demo domain = form-item-editor demo types (`field` / `heading` / `panel`)
- * so one editor stack serves the side-menu and edit-section stories.
+ * so one editor stack serves the side-menu story.
  */
 import type * as itemTypes from "../../form-item-editor/demo/formItemEditorDemoTypes.t";
 import type * as lib from "./library";

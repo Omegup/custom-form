@@ -58,7 +58,7 @@ export type SectionOption = { index: number; title: string };
 /**
  * Present only on **insert** sessions (`index === -1` — side-menu "add",
  * school `add: editFormItem.index === -1`); undefined for edits and for
- * slot inserts (`edit-section`, which already has a concrete `index`).
+ * slot inserts (`AddFormItem` slots, which already have a concrete `index`).
  * `useItemEditor` / `renderDialog` read this to render/validate the section
  * `<select>` when there is more than one non-deleted section to choose from.
  */
@@ -173,15 +173,12 @@ export type ListSection = lib.SectionWithItems<
   ItemMeta
 >;
 
-/** Column "+ add" slot handed to `renderAddItem` (see form-edit `EditFormTest`). */
-export type AddItemSlot = {
-  section: ListSection;
-  /** Section ordinal — `sIndex` for insert sessions. */
-  sIndex: number;
-  colIndex: number;
-  /** Flat index where a new item lands at the end of this column. */
-  insertionIndex: number;
-};
+/**
+ * Column "+ add" slot — school `AppNodeIndex` (`{ index, sIndex }`).
+ * Hosts compute `index` via `getFlatInsertionIndex` (FlatDnd list-node index);
+ * `makeUseRenderAddItem` returns a renderer of this exact shape.
+ */
+export type AddItemSlot = { index: number; sIndex: number };
 
 /** Rendered blocks handed to `renderLayout` so demos can add a sidebar. */
 export type ListLayoutArgs = {

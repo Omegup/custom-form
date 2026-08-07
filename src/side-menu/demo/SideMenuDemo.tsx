@@ -1,14 +1,12 @@
 /**
- * Demo: library sidebar (`Side`) feeding the form-item-editor dialog.
+ * Demo: library sidebar (`Side`) + in-slot add dropdown (`AddFormItem`).
  *
- * Catalog click → `createBlankFormItem` → `openFormItemInsertSession`
- * (`index/sIndex: -1` → end of first non-deleted section) → same editor
- * stack as the form-item-editor demo, this time passing `sectionPicker` on
- * `extra` so a form with more than one section asks which one to add into
- * (school `editors/selectSection.tsx`, shown only when
- * `add && sections.length > 1`) → Save commits via `applyFlatFormItem`.
- * "+ Add section" opens the section-edit dialog with an `index: -1` session;
- * save appends via `updateSectionInFlat`.
+ * School `CustomFormEditor` composes both from the same `menuItems` catalog:
+ * - `Side` — ambiguous insert (`index/sIndex: -1`) → section picker when needed
+ * - `makeUseRenderAddItem` → injected at every list slot (section *and* nested
+ *   panel columns) with a concrete span (no picker)
+ *
+ * "+ Add section" opens the section-edit dialog with an `index: -1` session.
  */
 import { useCallback, useMemo, useState } from "react";
 import {
@@ -29,6 +27,15 @@ const blankSection = (id: string): types.Section => ({
   description: "",
 });
 
+const useRenderAddItem = lib.makeUseRenderAddItem<
+  types.TypeNames,
+  types.Params
+>(
+  (args) => <lib.AddFormItem {...args} />,
+  () => MENU_ITEMS,
+  randomId,
+);
+
 export const SideMenuDemo = ({
   heading,
   flatItems,
@@ -38,6 +45,7 @@ export const SideMenuDemo = ({
   const [sectionSession, setSectionSession] =
     useState<types.SectionSession | null>(null);
   const ctx: types.Ctx = lib.branded({ flatItems });
+  const renderAdd = useRenderAddItem(setSession);
 
   /** School `sections.filter(d => !d.header.deleted).map(p => ({ value: p.index, label: p.header.title }))` — `index` is the section marker's flat index. */
   const sectionOptions = useMemo(
@@ -88,13 +96,16 @@ export const SideMenuDemo = ({
           }
           extra={lib.branded<types.ItemExtra, "item-edit-extra">({
             onCommit: commitDraft,
-            /** Every side-menu session is an insert (`index === -1`) — always offer the picker. */
-            sectionPicker: {
-              sIndex: session.sIndex,
-              sections: sectionOptions,
-              setSIndex: (sIndex) =>
-                setSession((prev) => prev && { ...prev, sIndex }),
-            },
+            /** Sidebar inserts (`index === -1`) need the picker; slot inserts already have a concrete span. */
+            sectionPicker:
+              session.index === -1
+                ? {
+                    sIndex: session.sIndex,
+                    sections: sectionOptions,
+                    setSIndex: (sIndex) =>
+                      setSession((prev) => prev && { ...prev, sIndex }),
+                  }
+                : undefined,
           })}
         />
       )}
@@ -124,6 +135,7 @@ export const SideMenuDemo = ({
         flatItems={flatItems}
         updateArgs={updateArgs}
         itemName={(header) => itemName(ctx, header)}
+        renderAddItem={renderAdd}
         renderLayout={({ alert, details, sections }) => (
           <demo.LayoutWithSidebar
             main={

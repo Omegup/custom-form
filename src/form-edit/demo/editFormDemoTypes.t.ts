@@ -48,15 +48,11 @@ export type EditorArgs = {
 
 export type ExtraAction = { label: string; onClick: () => void };
 
-/** Column "+ add" slot handed to `renderAddItem`. */
-export type AddItemSlot = {
-  section: DemoSection;
-  /** Section ordinal — `sIndex` for insert sessions. */
-  sIndex: number;
-  colIndex: number;
-  /** Flat index where a new item lands at the end of this column. */
-  insertionIndex: number;
-};
+/**
+ * Column "+ add" slot — school `AppNodeIndex` (`{ index, sIndex }`).
+ * Hosts compute `index` via `getFlatInsertionIndex` (FlatDnd list-node index).
+ */
+export type AddItemSlot = { index: number; sIndex: number };
 
 /** Rendered blocks handed to `renderLayout` so demos can add a sidebar. */
 export type EditFormLayoutArgs = EditFormSideArgs & {

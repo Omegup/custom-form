@@ -459,11 +459,28 @@ export const FormItemEditorFormTest = ({
           extra={parentDeleted ? [] : extra?.(item) ?? []}
           parentDeleted={parentDeleted}
         />
+        {/*
+          School RecursiveEdit/FlatDnd: every list slot (section column *and*
+          nested panel column) ends with `render.addItem(node)`, where the
+          list-node index is `lastChild.index + lastChild.total` — same as
+          `getFlatInsertionIndex(parent.meta.index, parent.children, col)`.
+        */}
         {item.children.length > 0 && (
           <NestedColumns
-            columns={item.children.map((column) =>
-              column.map((child) => renderItem(child, deleted)),
-            )}
+            columns={item.children.map((column, colIndex) => (
+              <>
+                {column.map((child) => renderItem(child, deleted))}
+                {!deleted &&
+                  renderAddItem?.({
+                    index: lib.getFlatInsertionIndex(
+                      item.meta.index,
+                      item.children,
+                      colIndex,
+                    ),
+                    sIndex: item.meta.sIndex,
+                  })}
+              </>
+            ))}
           />
         )}
       </div>
@@ -513,14 +530,12 @@ export const FormItemEditorFormTest = ({
                 {column.map((item) => renderItem(item, sectionDeleted))}
                 {!sectionDeleted &&
                   renderAddItem?.({
-                    section,
-                    sIndex,
-                    colIndex,
-                    insertionIndex: lib.getFlatInsertionIndex(
+                    index: lib.getFlatInsertionIndex(
                       section.meta.index,
                       section.items,
                       colIndex,
                     ),
+                    sIndex,
                   })}
               </>
             ))}

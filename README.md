@@ -27,9 +27,8 @@ Each module has a colocated `*.stories.tsx`. Story titles match folder names, e.
 | move-actions/Move actions | `move-actions/` | Item list with up/down/clone/remove |
 | form-edit/Edit form | `form-edit/` | Section/field list with move actions only |
 | form-item-editor/Form item editor | `form-item-editor/` | Edit form + per-field edit dialog |
-| side-menu/Side menu | `side-menu/` | Edit form + library sidebar |
+| side-menu/Side menu | `side-menu/` | Library sidebar + in-slot add (section & nested panels) |
 | section-edit/Section edit | `section-edit/` | Edit form + section edit dialog |
-| edit-section/Edit section | `edit-section/` | SectionFormItemHOC + viewers demo |
 | recursive-form/Recursive form | `recursive-form/` | Nested recursive item rendering |
 
 Shared edit-form fixtures for tests and the all-in demo: `form-edit/fixtures.ts`.
@@ -47,12 +46,12 @@ form / recursive-form          ← domain types (items, trees, branded params)
 move-actions                   ← up/down/clone/remove action helpers
 form-edit                      ← flat edit representation + move actions on sections/items
 form-item-editor               ← single-item edit dialog (HOC factory)
-side-menu                      ← library sidebar (search + add item/section)
+side-menu                      ← library catalog: Side sidebar + AddFormItem slots
 section-edit                   ← section title/description edit dialog
-edit-section                   ← SectionHOC + viewers + column add-item slots
 editor                         ← Composed shell + all-in Storybook demo
 ```
 
+`SectionHOC` / section viewers are still deferred (not a package here yet).
 **Canonical edit state** is the **flat list** (`FlatFormItems`): an array of `{ section }`, `{ item, n }`, and `{ end: null }` markers. The tree is rebuilt on demand via `consolidateSections`.
 
 ### Conventions (every package)
@@ -73,9 +72,8 @@ Original packages live under `school/components/custom-form/src/`:
 | `form/` | `ts-packages/form-model`, `react-packages/form-react` |
 | `form-edit/` | `ts-packages/form-edit` |
 | `form-item-editor/` | `react-packages/form-item-edit-react` |
-| `side-menu/` | `react-packages/form-edit-react` (`useSide`, `MenuItemDefinition`) |
+| `side-menu/` | `react-packages/form-edit-react` (`useSide`, `MenuItemDefinition`, `makeUseRenderAddItem`) + `section-edit-ui` (`FormMenuItem`, `AddFormItem`) |
 | `section-edit/` | `react-packages/form-edit-react` (`SectionEdit`; `validateSectionForm` not ported — see section-edit/README.md) |
-| `edit-section/` | `react-packages/form-edit-react` (`SectionHOC`, `SectionFormItemHOC`, `createRenderEditFormItem`, `makeUseRenderAddItem`) |
 | `editor/` | `form-edit-react` (`makeUseDialogs`, `applyFlatFormItem`, `setEditFormItemX`) |
 
-Still to migrate from `form-edit-react`: `recursive-edit-ui` (RecursiveEdit + FlatDnd), …
+Still to migrate from `form-edit-react`: `SectionHOC` / `SectionFormItemHOC`, `recursive-edit-ui` (RecursiveEdit + FlatDnd), …
