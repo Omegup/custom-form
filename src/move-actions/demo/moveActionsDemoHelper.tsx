@@ -1,3 +1,4 @@
+export type { StoryArgs } from "./moveActionsDemoTypes.t";
 import type { MoveActions } from "../MoveActions.t";
 import moveActionsDemoSource from "./MoveActionsDemo.tsx?raw";
 import type { Ctx, Data, Item } from "./moveActionsDemoTypes.t";

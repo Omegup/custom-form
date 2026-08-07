@@ -1,4 +1,4 @@
-import type { FlatFormItems, ParamsDom, SectionDom } from "./_deps";
+import type { FlatFormItems, ParamsDom, SectionDom } from "../flat-move-actions/_deps";
 
 export const buildItemSectionDict = <
   TypeNames extends string,

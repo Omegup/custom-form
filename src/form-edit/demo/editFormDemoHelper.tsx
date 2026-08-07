@@ -101,7 +101,7 @@ export const FieldRow = ({
   actions,
   extra,
 }: {
-  name: string;
+  name: ReactNode;
   focused: boolean | null;
   actions: lib.MoveActions;
   extra: types.ExtraAction[];

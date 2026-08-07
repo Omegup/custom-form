@@ -6,7 +6,7 @@ import type {
   TheVariants,
   TypedFormItem,
 } from "../form.t";
-import type { Viewers as ViewersType, WithChildren } from "../form-react.t";
+import type { Children, Viewers as ViewersType } from "../form-react.t";
 
 export type TypeNames = "text" | "group";
 
@@ -48,18 +48,19 @@ export type StoryArgs = Omit<Props, "variants" | "onValueChange"> & {
   groupVariant: Variants["group"];
 };
 
-type ItemExtra = ExtraDom & {
+export type ItemExtra = ExtraDom & {
   value: string;
   onChange: (value: string) => void;
 };
 
-export type Extra = WithChildren<ItemExtra>;
+export type ViewerExtra = ItemExtra & Children;
 
 export type Viewers = ViewersType<
   TypeNames,
   Params,
   Variants,
-  Extra,
+  ViewerExtra,
+  ItemExtra,
   Context,
   string
 >;
