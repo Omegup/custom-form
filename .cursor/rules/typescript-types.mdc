@@ -1,0 +1,48 @@
+---
+description: Use real/existing types instead of ad-hoc inline shapes and casts
+globs: **/*.ts,**/*.tsx
+alwaysApply: false
+---
+
+# Prefer real types over ad-hoc shapes + casts
+
+When a function operates on a recursive or already-modeled structure, its
+parameter types must mirror the actual structure it expects — not a
+loosely-typed stand-in that requires an internal cast to be usable.
+
+If you find yourself writing `as typeof X` (or any cast) to make a narrowed
+inline type behave like the real one, that's a signal the parameter type is
+wrong. Fix the type, don't cast around it.
+
+```typescript
+// ❌ BAD — inline shape with `unknown[][]` children can't actually recurse;
+// requires a cast to "restore" the real type when descending.
+const walk = (
+  columns: { header: { deleted: boolean }; meta: { index: number }; children: unknown[][] }[][],
+) => {
+  for (const node of columns.flat()) {
+    if (!node.header.deleted) walk(node.children as typeof columns);
+  }
+};
+
+// ✅ GOOD — use the library's real recursive type; `node.children` is already
+// that same type, so no cast is needed to recurse.
+const walk = (
+  columns: RecursiveFormItem<TypeNames, Params, MetaDom<SIndexed>>[][],
+) => {
+  for (const node of columns.flat()) {
+    if (!node.header.deleted) walk(node.children);
+  }
+};
+```
+
+Guidelines:
+
+- Search for an existing type (e.g. `RecursiveFormItem`, `SectionWithItems`)
+  before inventing a local inline object type for a function parameter.
+- A parameter typed to accept `X[]` (or `unknown[]`) should genuinely be able
+  to handle any value of type `X` — if the function body assumes a narrower
+  shape, that narrower shape belongs in the parameter type.
+- Prefer generic parameters matching the module's existing generics
+  (`TypeNames`, `Params`, `Meta`, `SectionConfig`, …) over hardcoding concrete
+  field lists.

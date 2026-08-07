@@ -34,7 +34,7 @@ export const getFormItemMoveActions = <
         .filter((p: Item) => "section" in p && !p.section.deleted).length > 1 ||
       items
         .slice(0, index)
-        .find((p: Item) => ("item" in p && !isIgnored(p.item)) || "end" in p)
+        .find((p: Item) => ("item" in p || "end" in p) && !isIgnored(p))
         ? {}
         : { up: undefined }),
     };
