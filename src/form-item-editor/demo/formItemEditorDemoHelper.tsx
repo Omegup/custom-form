@@ -442,22 +442,27 @@ export const FormItemEditorFormTest = ({
   };
   const itemActions = lib.getFormItemMoveActions(actionsArgs, cloneFn, jump);
 
-  const renderItem = (item: types.ListItem): ReactNode => {
+  const renderItem = (
+    item: types.ListItem,
+    parentDeleted = false,
+  ): ReactNode => {
     if (item.header.deleted && !showDeleted) return null;
     const actions = itemActions(item);
     const fieldFocused = ctx.autoFocused(item.header.id);
+    const deleted = parentDeleted || item.header.deleted;
     return (
       <div key={item.header.id}>
         <FieldRow
           name={itemName(item.header)}
           focused={fieldFocused}
           actions={actions}
-          extra={extra?.(item) ?? []}
+          extra={parentDeleted ? [] : extra?.(item) ?? []}
+          parentDeleted={parentDeleted}
         />
         {item.children.length > 0 && (
           <NestedColumns
             columns={item.children.map((column) =>
-              column.map((child) => renderItem(child)),
+              column.map((child) => renderItem(child, deleted)),
             )}
           />
         )}
@@ -495,6 +500,7 @@ export const FormItemEditorFormTest = ({
           section,
           jump,
         );
+        const sectionDeleted = section.header.deleted;
         return (
           <SectionPanel
             key={section.header.id}
@@ -504,17 +510,18 @@ export const FormItemEditorFormTest = ({
             sectionExtra={[]}
             columns={section.items.map((column, colIndex) => (
               <>
-                {column.map((item) => renderItem(item))}
-                {renderAddItem?.({
-                  section,
-                  sIndex,
-                  colIndex,
-                  insertionIndex: lib.getFlatInsertionIndex(
-                    section.meta.index,
-                    section.items,
+                {column.map((item) => renderItem(item, sectionDeleted))}
+                {!sectionDeleted &&
+                  renderAddItem?.({
+                    section,
+                    sIndex,
                     colIndex,
-                  ),
-                })}
+                    insertionIndex: lib.getFlatInsertionIndex(
+                      section.meta.index,
+                      section.items,
+                      colIndex,
+                    ),
+                  })}
               </>
             ))}
           />

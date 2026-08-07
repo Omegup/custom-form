@@ -73,6 +73,7 @@ export const EditFormTest = ({
   const sectionsNode = (
     <demo.SectionsList>
       {sections.map((section, sIndex) => {
+        if (section.header.deleted && !showDeleted) return null;
         const sectionFocused = ctx.autoFocused(section.header.id);
         const sActions = lib.getSectionMoveActions(
           actionsArgs,
@@ -80,13 +81,14 @@ export const EditFormTest = ({
           section,
           jump,
         );
+        const sectionDeleted = section.header.deleted;
         return (
           <demo.SectionPanel
             key={section.header.id}
             title={section.header.title}
             focused={sectionFocused}
             sectionActions={sActions}
-            sectionExtra={sectionExtra?.(section) ?? []}
+            sectionExtra={sectionDeleted ? [] : sectionExtra?.(section) ?? []}
             columns={section.items.map((column, colIndex) => (
               <>
                 {column.map((item) => {
@@ -99,20 +101,22 @@ export const EditFormTest = ({
                       name={item.header.params.name}
                       focused={fieldFocused}
                       actions={actions}
-                      extra={extra?.(item) ?? []}
+                      extra={sectionDeleted ? [] : extra?.(item) ?? []}
+                      parentDeleted={sectionDeleted}
                     />
                   );
                 })}
-                {renderAddItem?.({
-                  section,
-                  sIndex,
-                  colIndex,
-                  insertionIndex: lib.getFlatInsertionIndex(
-                    section.meta.index,
-                    section.items,
+                {!sectionDeleted &&
+                  renderAddItem?.({
+                    section,
+                    sIndex,
                     colIndex,
-                  ),
-                })}
+                    insertionIndex: lib.getFlatInsertionIndex(
+                      section.meta.index,
+                      section.items,
+                      colIndex,
+                    ),
+                  })}
               </>
             ))}
           />
