@@ -8,6 +8,7 @@
  * `section-view` composition, not a second `form-item-editor`/`form-dialogs`.
  */
 import { useMemo, useState } from "react";
+import * as sideMenu from "../../side-menu/demo/sideMenuDemoHelper";
 import * as demo from "./sectionViewDemoHelper";
 import * as types from "./sectionViewDemoTypes.t";
 import * as lib from "./library";
@@ -26,7 +27,9 @@ const cloneFn: lib.Clone<types.TypeNames, types.Params, types.Ctx, types.Section
   );
 
 const useRenderAddItem = lib.makeUseRenderAddItem<types.TypeNames, types.Params>(
-  (args) => <lib.AddFormItem {...args} />,
+  (args) => (
+    <lib.AddFormItem {...args} render={sideMenu.renderAddFormItem} />
+  ),
   () => demo.MENU_ITEMS,
   demo.randomId,
 );
@@ -41,6 +44,7 @@ const SectionComponent = lib.SectionFormItemHOC<
 >({
   viewers: demo.viewers,
   useRenderAddItem,
+  columnsChrome: demo.columnsChrome,
   renderTitle: (props) => <strong>{props.section.header.title}</strong>,
 });
 
