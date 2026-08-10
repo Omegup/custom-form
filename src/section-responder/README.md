@@ -5,15 +5,15 @@ viewers with `ResponseSetter` / error / deleted state, and aggregates item
 `impRef`s into a section-level `validate` / `update` / `getKeys`.
 
 Migrated from `school/components/custom-form` → `ui-packages/section-responder-ui`
-(`SectionResponderHOC`). School's JSS `SectionTitle` / `ErrorDescription` /
-`Close` are replaced by minimal inline chrome.
+(`SectionResponderHOC`). **No HTML in the library** — title / columns / clear /
+appendix chrome is injected via `SectionResponderChrome` (demo owns DOM).
 
 ## Library scope
 
 | File | Role |
 |---|---|
-| `types.ts` | `ResponderExtra`, `ResponderAdditionalChanges`, `SectionValidator`, `SectionResponderProps` |
-| `SectionResponder.tsx` | **`SectionResponderHOC(viewers)`** — `FormItemHOC` + `getUseImpRefViewProps`, recursive slots |
+| `types.ts` | `ResponderExtra`, `ResponderAdditionalChanges`, `SectionValidator`, `SectionResponderChrome`, `SectionResponderProps` |
+| `SectionResponder.tsx` | **`SectionResponderHOC(viewers, chrome)`** — `FormItemHOC` + `getUseImpRefViewProps`, recursive slots |
 
 ## How it plugs in
 
@@ -41,5 +41,5 @@ form / response / recursive-form / form-edit (SectionWithItems)
  section-responder
 ```
 
-Does **not** import `section-view` / `form-dialogs`. Multi-section shell is
-next: school `form-responder-ui` / `CustomFormResponderHOC`.
+Does **not** import `section-view` / `form-dialogs`. Multi-section shell:
+[`form-responder/`](../form-responder/) (`CustomFormResponderHOC`).

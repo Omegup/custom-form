@@ -1,7 +1,7 @@
 import { useImperativeHandle, type ReactNode } from "react";
-import sectionResponderDemoSource from "./SectionResponderDemo.tsx?raw";
-import sectionResponderDemoTypesSource from "./sectionResponderDemoTypes.t.ts?raw";
-import type * as types from "./sectionResponderDemoTypes.t";
+import formResponderDemoSource from "./FormResponderDemo.tsx?raw";
+import formResponderDemoTypesSource from "./formResponderDemoTypes.t.ts?raw";
+import type * as types from "./formResponderDemoTypes.t";
 import * as lib from "./library";
 
 export const FormContainer = ({
@@ -11,14 +11,38 @@ export const FormContainer = ({
   title: string;
   children: ReactNode;
 }) => (
-  <div style={{ fontFamily: "system-ui, sans-serif", maxWidth: 520, margin: "0 auto" }}>
+  <div style={{ fontFamily: "system-ui, sans-serif", maxWidth: 700, margin: "0 auto" }}>
     <h2 style={{ marginTop: 0 }}>{title}</h2>
     {children}
   </div>
 );
 
-/** Demo HTML chrome for `SectionResponderHOC` — not part of the library. */
-export const sectionChrome: lib.SectionResponderChrome = {
+/** Demo HTML chrome for `CustomFormResponderHOC` — not part of the library. */
+export const formChrome: lib.FormResponderChrome = {
+  renderHeader: (header) => (
+    <div style={{ marginBottom: 4 }}>
+      <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 600 }}>
+        {header.title}
+      </h2>
+      {header.description ? (
+        <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{header.description}</p>
+      ) : null}
+    </div>
+  ),
+  renderForm: ({ header, sections, children }) => (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 20,
+        maxWidth: 700,
+      }}
+    >
+      {header}
+      {sections}
+      {children}
+    </div>
+  ),
   renderSection: ({ deleted, title, description, i, multiSection, columns }) => (
     <div style={{ marginBottom: 20, opacity: deleted ? 0.5 : 1 }}>
       <div style={{ marginBottom: 12 }}>
@@ -85,30 +109,47 @@ const field = (
   children: [],
 });
 
-export const INITIAL_SECTION: types.ListSection = {
-  meta: { index: 0, total: 3 },
-  header: {
-    id: "s1",
-    deleted: false,
-    title: "Personal",
-    description: "Fill the fields below, then Validate.",
+export const INITIAL_SECTIONS: types.ListSection[] = [
+  {
+    meta: { index: 0, total: 3 },
+    header: {
+      id: "s1",
+      deleted: false,
+      title: "Personal",
+      description: "Who you are.",
+    },
+    items: [[field("name", "Full name", true)]],
   },
-  items: [[field("name", "Full name", true), field("note", "Note (optional)", false)]],
-};
+  {
+    meta: { index: 3, total: 3 },
+    header: {
+      id: "s2",
+      deleted: false,
+      title: "Notes",
+      description: "Anything else.",
+    },
+    items: [[field("note", "Note (optional)", false)]],
+  },
+];
 
 export const INITIAL_RESPONSES: Record<string, lib.Response> = {};
+
+export const INITIAL_HEADER: lib.FormHeader = {
+  title: "Application",
+  description: "Fill every section, then Validate.",
+};
 
 const withFileHeader = (path: string, source: string) =>
   `// ── ${path} ──\n${source.trimEnd()}`;
 
-export const SECTION_RESPONDER_DEMO_SOURCE = [
+export const FORM_RESPONDER_DEMO_SOURCE = [
   withFileHeader(
-    "section-responder/demo/sectionResponderDemoTypes.t.ts",
-    sectionResponderDemoTypesSource,
+    "form-responder/demo/formResponderDemoTypes.t.ts",
+    formResponderDemoTypesSource,
   ),
   withFileHeader(
-    "section-responder/demo/SectionResponderDemo.tsx",
-    sectionResponderDemoSource,
+    "form-responder/demo/FormResponderDemo.tsx",
+    formResponderDemoSource,
   ),
 ].join("\n\n");
 

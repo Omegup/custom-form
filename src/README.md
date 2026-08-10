@@ -15,7 +15,8 @@ src/
 ├── section-view/            SectionHOC + ColumnsEdit (section list rendering, no DnD)
 ├── flat-dnd/                SectionNodes ↔ drag-drop-tree (lib); demo wires React DnD
 ├── form-dialogs/            Dialog orchestrator (makeUseDialogs) + All-in demo
-└── section-responder/       Section fill shell (SectionResponderHOC)
+├── section-responder/       Section fill shell (SectionResponderHOC)
+└── form-responder/          Multi-section fill shell (CustomFormResponderHOC)
 ```
 
 Each module owns its **Storybook story** (`*.stories.tsx` with args/controls) and a **playground component** (`*Playground.tsx`). Vitest tests live in `*.test.ts`.
@@ -24,7 +25,7 @@ Each module owns its **Storybook story** (`*.stories.tsx` with args/controls) an
 
 ```
 form ◀── response (types only; form owns getUseImpRefViewProps)
-form / recursive-form / form-edit / response ──▶ section-responder
+form / recursive-form / form-edit / response ──▶ section-responder ──▶ form-responder
 form ─────────────────────────────────────────┐
 recursive-form ───────────────────────────────┤
 move-actions ─────────────────────────────────┤
@@ -45,9 +46,10 @@ drag-drop-tree (standalone leaf, no _deps) ──▶ flat-dnd (+ form-edit)
 `form-edit` does not import `form-item-editor`, `side-menu`, `section-edit`, or `section-view`.
 `response` is a leaf (types + `emptyResponse`). `form` imports it for
 `getUseImpRefViewProps`. `section-responder` composes form + response +
-`SectionWithItems` (form-edit) into a fillable section shell. `drag-drop-tree`
-is a leaf (no `_deps`). `flat-dnd` imports its **pure ops** only; `flat-dnd/demo`
-is the only place that imports `drag-drop-tree`'s React components (`DnDTreeCore`,
+`SectionWithItems` (form-edit) into a fillable section shell; `form-responder`
+stacks sections via `CustomFormResponderHOC`. `drag-drop-tree` is a leaf
+(no `_deps`). `flat-dnd` imports its **pure ops** only; `flat-dnd/demo` is the
+only place that imports `drag-drop-tree`'s React components (`DnDTreeCore`,
 `RecursiveTreeNode`, …) — see `demo/WebRecursiveEdit.tsx`.
 
 Module demos compose features via props or, for the all-in editor, in `form-dialogs/demo/AllInEditor.tsx`
@@ -129,6 +131,7 @@ Use `branded({ ... })` to construct values; do not cast.
 - [form/README.md](./form/README.md)
 - [response/README.md](./response/README.md)
 - [section-responder/README.md](./section-responder/README.md)
+- [form-responder/README.md](./form-responder/README.md)
 - [recursive-form/README.md](./recursive-form/README.md)
 - [move-actions/README.md](./move-actions/README.md)
 - [form-edit/README.md](./form-edit/README.md) — also [flat-raw-actions](./form-edit/flat-raw-actions/README.md), [section-layout](./form-edit/section-layout/README.md)

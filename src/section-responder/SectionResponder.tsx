@@ -4,17 +4,10 @@
  * `getUseImpRefViewProps`, aggregates item validators into a section-level
  * `validate` / `update` / `getKeys`.
  *
- * No design-system chrome: title + slot layout use inline styles (school used
- * JSS `SectionTitle` / `ErrorDescription` / `Close`).
+ * All presentation is injected via {@link SectionResponderChrome} — this
+ * module emits no HTML (see `.cursor/rules/no-html-outside-demo.mdc`).
  */
-import {
-  Fragment,
-  useImperativeHandle,
-  useRef,
-  type CSSProperties,
-  type ReactNode,
-  type Ref,
-} from "react";
+import { Fragment, useImperativeHandle, useRef, type ReactNode, type Ref } from "react";
 import type {
   Children,
   MetaDom,
@@ -34,6 +27,7 @@ import {
 } from "./_deps";
 import type {
   ResponderExtra,
+  SectionResponderChrome,
   SectionResponderContext,
   SectionResponderHeader,
   SectionResponderProps,
@@ -42,44 +36,6 @@ import type {
 
 type ViewerExtra = ResponderExtra & { impRef: Ref<ViewerMethods> };
 type HostExtra = ResponderExtra & { impRef: Ref<StrictViewerMethods> };
-
-const sectionStyle = (deleted: boolean): CSSProperties => ({
-  marginBottom: 20,
-  opacity: deleted ? 0.5 : 1,
-});
-
-const slotsStyle: CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 16,
-};
-
-const questionsStyle: CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 12,
-};
-
-const SectionTitle = ({
-  index,
-  multiSection,
-  title,
-  description,
-}: {
-  index: number;
-  multiSection: boolean;
-  title: string;
-  description: string;
-}) => (
-  <div style={{ marginBottom: 12 }}>
-    <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 600 }}>
-      {multiSection ? `${index + 1}. ${title}` : title}
-    </h3>
-    {description ? (
-      <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{description}</p>
-    ) : null}
-  </div>
-);
 
 export const SectionResponderHOC = <
   TypeNames extends string,
@@ -97,6 +53,7 @@ export const SectionResponderHOC = <
     Context,
     string
   >,
+  chrome: SectionResponderChrome,
 ) => {
   const FormItem = FormItemHOC<
     TypeNames,
@@ -115,6 +72,9 @@ export const SectionResponderHOC = <
       Context
     >(),
   );
+
+  const { renderSection, renderItemShell, renderClearIcon, renderAppendix } =
+    chrome;
 
   return <
     SectionMeta extends SectionMetaDom,
@@ -149,78 +109,64 @@ export const SectionResponderHOC = <
       slots: RecursiveFormItem<TypeNames, Params, Meta>[][],
       idSuffix: string,
       parentDeleted: boolean,
-    ): ReactNode => (
-      <div style={slotsStyle}>
-        {slots.map((items, col) => (
-          <Fragment key={col}>
-            <div style={questionsStyle}>
-              {items
-                .filter(({ header: q }) => {
-                  if (!q.deleted) return true;
-                  const res = responses[q.id];
-                  return res != null && Object.keys(res.data).length > 0;
-                })
-                .map((q) =>
-                  !idSuffix
-                    ? q
-                    : {
-                        ...q,
-                        header: { ...q.header, id: q.header.id + idSuffix },
-                      },
-                )
-                .map(({ header: q, children }, index) => {
-                  const comment = old?.changes[q.id]?.comment;
-                  const oldValue = old?.values[q.id];
-                  const value = responses[q.id] || oldValue;
-                  const editable = !oldValue || comment != null;
-                  const error = getError(q.id);
+    ): ReactNode[] =>
+      slots.map((items, col) => (
+        <Fragment key={col}>
+          {items
+            .filter(({ header: q }) => {
+              if (!q.deleted) return true;
+              const res = responses[q.id];
+              return res != null && Object.keys(res.data).length > 0;
+            })
+            .map((q) =>
+              !idSuffix
+                ? q
+                : {
+                    ...q,
+                    header: { ...q.header, id: q.header.id + idSuffix },
+                  },
+            )
+            .map(({ header: q, children }, index) => {
+              const comment = old?.changes[q.id]?.comment;
+              const oldValue = old?.values[q.id];
+              const value = responses[q.id] || oldValue;
+              const editable = !oldValue || comment != null;
+              const error = getError(q.id);
+              const onActivate =
+                !responses[q.id] && editable && oldValue
+                  ? () => setResponse(q.id, emptyResponse())
+                  : undefined;
 
-                  return (
-                    <div
-                      key={q.id}
-                      onClick={
-                        !responses[q.id] && editable && oldValue
-                          ? () => setResponse(q.id, emptyResponse())
-                          : undefined
-                      }
-                    >
+              return (
+                <Fragment key={q.id}>
+                  {renderItemShell({
+                    id: q.id,
+                    onActivate,
+                    children: (
                       <FormItem
                         viewProps={{
                           ctx,
                           formItem: q,
                           variant: variants[q.type],
                           extra: branded({
-                            getChild: (suffix: string) =>
-                              renderSlots(
-                                children,
-                                suffix,
-                                q.deleted || parentDeleted,
-                              ),
+                            getChild: (suffix: string) => (
+                              <>
+                                {renderSlots(
+                                  children,
+                                  suffix,
+                                  q.deleted || parentDeleted,
+                                )}
+                              </>
+                            ),
                             error: error || (old && editable ? true : null),
                             parentDeleted,
                             index,
                             icon:
-                              oldValue && responses[q.id] ? (
-                                <button
-                                  type="button"
-                                  aria-label="Clear draft answer"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setResponse(q.id, undefined);
-                                  }}
-                                  style={{
-                                    margin: "0 4px",
-                                    border: "none",
-                                    background: "transparent",
-                                    cursor: "pointer",
-                                    color: "#666",
-                                    fontSize: 16,
-                                    lineHeight: 1,
-                                  }}
-                                >
-                                  ×
-                                </button>
-                              ) : undefined,
+                              oldValue && responses[q.id]
+                                ? renderClearIcon(() =>
+                                    setResponse(q.id, undefined),
+                                  )
+                                : undefined,
                             response: {
                               setValue: editable
                                 ? (key, v) => {
@@ -232,17 +178,9 @@ export const SectionResponderHOC = <
                                 : null,
                               value: value || emptyResponse(),
                             },
-                            appendix: comment ? (
-                              <div
-                                style={{
-                                  marginTop: 4,
-                                  color: "#c00",
-                                  fontSize: 12,
-                                }}
-                              >
-                                {comment}
-                              </div>
-                            ) : undefined,
+                            appendix: comment
+                              ? renderAppendix(comment)
+                              : undefined,
                             impRef: editable
                               ? (ref) => {
                                   validators.current[q.id] = ref;
@@ -252,14 +190,13 @@ export const SectionResponderHOC = <
                         }}
                         renderCard={(view) => view}
                       />
-                    </div>
-                  );
-                })}
-            </div>
-          </Fragment>
-        ))}
-      </div>
-    );
+                    ),
+                  })}
+                </Fragment>
+              );
+            })}
+        </Fragment>
+      ));
 
     useImperativeHandle(
       impRef,
@@ -289,16 +226,13 @@ export const SectionResponderHOC = <
       }),
     );
 
-    return (
-      <div style={sectionStyle(section.header.deleted)}>
-        <SectionTitle
-          index={i}
-          multiSection={multiSection}
-          title={section.header.title}
-          description={section.header.description}
-        />
-        {renderSlots(section.items, "", section.header.deleted)}
-      </div>
-    );
+    return renderSection({
+      deleted: section.header.deleted,
+      title: section.header.title,
+      description: section.header.description,
+      i,
+      multiSection,
+      columns: renderSlots(section.items, "", section.header.deleted),
+    });
   };
 };

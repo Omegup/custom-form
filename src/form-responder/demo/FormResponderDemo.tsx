@@ -1,10 +1,10 @@
 /**
- * `section-responder` showcase — school `SectionResponderHOC`:
- * one section of fillable fields, section-level Validate via `impRef`.
+ * `form-responder` showcase — school `CustomFormResponderHOC`:
+ * multi-section fill + form-level Validate via `impRef`.
  */
 import { useCallback, useRef, useState, type Ref } from "react";
-import * as demo from "./sectionResponderDemoHelper";
-import type * as types from "./sectionResponderDemoTypes.t";
+import * as demo from "./formResponderDemoHelper";
+import type * as types from "./formResponderDemoTypes.t";
 import * as lib from "./library";
 
 const viewers: lib.Viewers<
@@ -54,26 +54,29 @@ const viewers: lib.Viewers<
   },
 };
 
-const SectionResponder = lib.SectionResponderHOC<
+const variants = lib.branded<types.Variants, "variants">({ field: "default" });
+
+const FormResponder = lib.CustomFormResponderHOC<
   types.TypeNames,
   types.Params,
   types.Variants,
   types.Ctx,
   types.Section
->(viewers, demo.sectionChrome);
+>(viewers, variants, demo.formChrome);
 
 const ctx = lib.branded<types.Ctx, "context">({
   t: () => "Required",
 });
-const variants = lib.branded<types.Variants, "variants">({ field: "default" });
 
-export const SectionResponderDemo = ({
+export const FormResponderDemo = ({
   heading,
-  section,
+  header,
+  sections,
   responses,
+  showDeleted,
   updateArgs,
 }: types.DemoProps) => {
-  const sectionRef = useRef<lib.SectionValidator | null>(null);
+  const formRef = useRef<lib.SectionValidator | null>(null);
   const [errors, setErrors] = useState<Record<string, string | null>>({});
 
   const setResponse = useCallback(
@@ -88,27 +91,26 @@ export const SectionResponderDemo = ({
     [responses, updateArgs],
   );
 
-  const validateSection = () => {
-    const next = sectionRef.current?.validate(responses) ?? {};
+  const validateForm = () => {
+    const next = formRef.current?.validate(responses) ?? {};
     setErrors(next);
   };
 
   return (
     <demo.FormContainer title={heading}>
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <SectionResponder
+        <FormResponder
           ctx={ctx}
-          multiSection={false}
-          section={section}
+          header={header}
+          sections={sections}
           responses={responses}
           old={null}
           setResponse={setResponse}
           getError={(id) => errors[id] ?? null}
-          impRef={sectionRef}
-          variants={variants}
-          i={0}
+          impRef={formRef}
+          showDeleted={showDeleted}
         />
-        <button type="button" onClick={validateSection} style={{ alignSelf: "flex-start" }}>
+        <button type="button" onClick={validateForm} style={{ alignSelf: "flex-start" }}>
           Validate
         </button>
         <pre

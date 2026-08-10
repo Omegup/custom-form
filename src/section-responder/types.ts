@@ -2,6 +2,9 @@
  * Fill-path section types — school `types/form-response-app` (`ResponderExtra`,
  * `ResponderAdditionalChanges`) + the section-level validator contract from
  * `section-responder-ui/SectionResponder`.
+ *
+ * Chrome (title, layout, clear control, appendix) is injected via
+ * {@link SectionResponderChrome} — library code emits no HTML.
  */
 import type { ReactNode, Ref } from "react";
 import type {
@@ -48,6 +51,29 @@ export type SectionResponderContext = ContextDom & {
 export type SectionResponderHeader = SectionDom & {
   title: string;
   description: string;
+};
+
+/**
+ * Host-owned presentation — same seam as `SectionHOC`'s `renderTitle` /
+ * `renderEdit`. Library never creates DOM tags.
+ */
+export type SectionResponderChrome = {
+  renderSection: (args: {
+    deleted: boolean;
+    title: string;
+    description: string;
+    i: number;
+    multiSection: boolean;
+    /** One ReactNode per column (already a fragment of item shells). */
+    columns: ReactNode[];
+  }) => ReactNode;
+  renderItemShell: (args: {
+    id: string;
+    children: ReactNode;
+    onActivate?: () => void;
+  }) => ReactNode;
+  renderClearIcon: (onClear: () => void) => ReactNode;
+  renderAppendix: (comment: string) => ReactNode;
 };
 
 export type SectionResponderProps<

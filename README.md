@@ -26,6 +26,7 @@ Each module has a colocated `*.stories.tsx`. Story titles match folder names, e.
 | form/Form | `form/` | Viewers rendering a JSON-driven form |
 | response/Response | `response/` | Fill-path foundation (`ResponseSetter` + `getUseImpRefViewProps` validate) |
 | section-responder/Section responder | `section-responder/` | One section of fillable fields + section-level validate |
+| form-responder/Form responder | `form-responder/` | Multi-section fill shell + form-level validate |
 | move-actions/Move actions | `move-actions/` | Item list with up/down/clone/remove |
 | form-edit/Edit form | `form-edit/` | Section/field list with move actions only |
 | form-item-editor/Form item editor | `form-item-editor/` | Edit form + per-field edit dialog |
@@ -57,6 +58,7 @@ section-view                   ← SectionHOC + ColumnsEdit (section list render
 flat-dnd                       ← SectionNodes ↔ drag-drop-tree conversion (lib); demo wires React DnD
 form-dialogs                   ← dialog orchestration (makeUseDialogs) + All-in demo
 section-responder              ← section fill shell (SectionResponderHOC)
+form-responder                 ← multi-section fill shell (CustomFormResponderHOC)
 ```
 
 **Canonical edit state** is the **flat list** (`FlatFormItems`): an array of `{ section }`, `{ item, n }`, and `{ end: null }` markers. The tree is rebuilt on demand via `consolidateSections`.
@@ -79,6 +81,7 @@ Original packages live under `school/components/custom-form/src/`:
 | `form/` | `ts-packages/form-model`, `react-packages/form-react` (`FormItemHOC`, `getUseImpRefViewProps`) |
 | `response/` | `types/response`, `types/form-response-react` (`ViewerMethods`) |
 | `section-responder/` | `ui-packages/section-responder-ui` (`SectionResponderHOC`) |
+| `form-responder/` | `ui-packages/form-responder-ui` (`CustomFormResponderHOC`) |
 | `form-edit/` | `ts-packages/form-edit` |
 | `form-item-editor/` | `react-packages/form-item-edit-react` |
 | `side-menu/` | `react-packages/form-edit-react` (`useSide`, `MenuItemDefinition`, `makeUseRenderAddItem`) + `section-edit-ui` (`FormMenuItem`, `AddFormItem`) |

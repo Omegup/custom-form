@@ -1,6 +1,7 @@
 export type {
   ResponderAdditionalChanges,
   ResponderExtra,
+  SectionResponderChrome,
   SectionResponderContext,
   SectionResponderHeader,
   SectionResponderProps,

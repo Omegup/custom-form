@@ -83,7 +83,7 @@ hand-wiring so the focused story stays a one-package showcase.
 | Real modal chrome | app / `form-dialogs` | `form-edit-ui/renderDefaultDialog.tsx` |
 | `update` + `validate` on responses | **done** — `response/` + `form/getUseImpRefViewProps` | `getUseImpRefViewProps` |
 | Section fill shell | **done** — `section-responder/` | `SectionResponderHOC` |
-| Multi-section fill shell | *(deferred)* | `CustomFormResponderHOC` |
+| Multi-section fill shell | **done** — `form-responder/` | `CustomFormResponderHOC` |
 
 ## Architecture
 
