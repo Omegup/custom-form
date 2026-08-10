@@ -46,13 +46,13 @@ See **[src/README.md](./src/README.md)** for the full module map, dependency gra
 ```
 form / recursive-form          ← domain types (items, trees, branded params)
 move-actions                   ← up/down/clone/remove action helpers
-drag-drop-tree                 ← pure id-addressed tree DnD ops (no React/HTML5)
+drag-drop-tree                 ← school's drag-drop-tree package (ops + React DnD engine)
 form-edit                      ← flat edit representation + move actions on sections/items
 form-item-editor               ← single-item edit dialog (HOC factory)
 side-menu                      ← library catalog: Side sidebar + AddFormItem slots
 section-edit                   ← section title/description edit dialog
 section-view                   ← SectionHOC + ColumnsEdit (section list rendering, no DnD)
-flat-dnd                       ← SectionNodes ↔ drag-drop-tree conversion (no React); web DnD demo
+flat-dnd                       ← SectionNodes ↔ drag-drop-tree conversion (lib); demo wires React DnD
 form-dialogs                   ← dialog orchestration (makeUseDialogs) + All-in demo
 ```
 
@@ -79,6 +79,6 @@ Original packages live under `school/components/custom-form/src/`:
 | `side-menu/` | `react-packages/form-edit-react` (`useSide`, `MenuItemDefinition`, `makeUseRenderAddItem`) + `section-edit-ui` (`FormMenuItem`, `AddFormItem`) |
 | `section-edit/` | `react-packages/form-edit-react` (`SectionEdit`; `validateSectionForm` not ported — see section-edit/README.md) |
 | `section-view/` | `react-packages/form-edit-react` (`Section.tsx` `SectionHOC`, `renderEditFormItem.tsx`) + `ts-packages/form-edit` (`section.data.ts` `getSectionEdit`, ported into `form-edit/flat-move-actions`) |
-| `drag-drop-tree/` | `components/drag-drop-tree` (`src/types.ts` + `src/utils.ts` — tree shape + ops only; `Components/` UI ported into `flat-dnd/demo` instead, see below) |
-| `flat-dnd/` | `react-packages/form-edit-react` `ui-packages/recursive-edit-ui/FlatDnd.tsx` (`filterDeleted`/`cleanNodes`, no React) — the demo (`flat-dnd/demo/`) additionally ports `FlatDnd`/`RecursiveEdit`'s React half **as-is**, plus school's `drag-drop-tree` `Components/` (`DnDTreeCore`, `TreeNodeComponent`/`RecursiveTreeNode`/`Indicator`, `Handle`), restyled with inline styles (no JSS/`school-style` dependency here) |
+| `drag-drop-tree/` | `components/drag-drop-tree` (full package — `types`/`utils`/`DnDTree`/`Components`; JSS → inline styles + `theme.ts`) |
+| `flat-dnd/` | `recursive-edit-ui/FlatDnd.tsx` pure half (`toDndTree`/`cleanNodes`); demo wires `drag-drop-tree` React API via `WebRecursiveEdit` |
 | `form-dialogs/` | `form-edit-react` (`makeUseDialogs`; the pure `setEditFormItemX` part lives in `form-edit/applyFlatFormItem`) |

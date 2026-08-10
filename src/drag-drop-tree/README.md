@@ -1,39 +1,51 @@
 # drag-drop-tree
 
-**Pure drag-and-drop tree ops** — id-addressed tree mutations, no React, no
-HTML5 events, no styling. Usable from a web HTML5 DnD UI or a mobile gesture
-UI alike.
+**Drag-and-drop tree package** — literal port of `school/components/drag-drop-tree`:
+pure tree ops **and** the React DnD engine (`DnDTreeCore`, `TreeNodeComponent`, …).
+JSS/`school-style` is replaced by inline styles + a minimal `Theme` (`theme.ts`).
 
-Migrated from `school/components/drag-drop-tree` (`src/types.ts` + `src/utils.ts`,
-tree shape and ops only).
+## Package layout (mirrors school)
 
-## Library scope (this package)
+```
+drag-drop-tree/
+├── types.ts              TreeNode, DropPosition, Handlers, DnDTreeProps, …
+├── utils.ts              findNodeById, removeNode, insertNode, moveNode, …
+├── applyDrop.ts          pure drop helper (used by DnDTreeCore.handleDrop)
+├── theme.ts              Theme + defaultTheme (school-style stand-in)
+├── DnDTree.tsx           DnDTreeCore, DnDTree
+└── Components/
+    ├── TreeNode/         RecursiveTreeNode, TreeNodeCore, TreeNodeComponent, Indicator
+    └── Handle/           HandleVertical, HandleHorizontal + variant helpers
+```
 
-| File | Role |
+Public API matches school's `index.ts`:
+
+- `DnDTree`, `DnDTreeCore`
+- `TreeNodeComponent`, `RecursiveTreeNode`, `Indicator`, `Handle*` exports
+- types: `TreeNode`, `Handlers`, `RenderItem`, `DropPosition`, `DropTarget`, …
+
+## Who imports what
+
+| Consumer | Imports |
 |---|---|
-| `types.ts` | `TreeNode<T>` (`_id`, `children`, optional `isExpanded`/`parentId` — kept for field-for-field parity with school), `DropPosition` (`'inside' \| 'before' \| 'after' \| null`), `DropTarget`, `Direction` |
-| `utils.ts` | `findNodeById`, `isDescendant`, `collectSubtreeIds`, `removeNode`, `insertNode`, `insertNodeIn`, `moveNode` — same behavior as school's `utils.ts` |
-| `applyDrop.ts` | **`applyDrop(nodes, draggedId, target)`** — thin wrapper of school `DnDTreeCore.handleDrop`'s pure body: find dragged node → reject dropping into its own subtree → `removeNode` + `insertNode` |
+| `flat-dnd` (lib) | pure ops only — `applyDrop`, `TreeNode`, … via `_deps` |
+| `flat-dnd/demo` | React engine — `DnDTreeCore`, `RecursiveTreeNode`, `Indicator` |
+| Everything else | nothing (yet) |
 
-**Not ported here** (school `Components/`): `DnDTree`/`DnDTreeCore` (React,
-holds `draggedId`/`dropTarget` state), `TreeNodeComponent`/`RecursiveTreeNode`/
-`Indicator` (React, hover/render), `Handle` (JSS + `school-style` `Theme`).
-Those are UI and belong in a host demo, not this package — see
-[`flat-dnd/README.md`](../flat-dnd/README.md) for where the web demo puts them.
+Hosts that only need headless ops can import `utils` / `applyDrop` directly and
+bring their own UI (e.g. mobile gestures). Web hosts use the React components
+the same way school does — see `flat-dnd/demo/WebRecursiveEdit.tsx` (~30 lines
+of glue over `flat-dnd`'s `toDndTree` / `cleanNodes`).
 
 ## Deviations from school
 
 | School | Here | Why |
 |---|---|---|
-| `removeNode` builds via `.map(...).filter(Boolean) as TreeNode<T>[]` | `.flatMap(...)` | same behavior, no cast (`.cursor/rules/typescript-types.mdc`) |
-| `handleDrop`'s find/reject/remove/insert body lives inline in `DnDTreeCore` | extracted as a standalone, independently testable `applyDrop(nodes, draggedId, target)` | this package has no React component to host it in; the host's `onDrop` calls it directly |
-
-Everything else (`TreeNode<T>` shape, `insertNode`'s `isExpanded`/`parentId`
-bookkeeping, `moveNode`'s boundary behavior) is byte-for-byte the same
-algorithm as school, so a school-style DnD UI (`DnDTreeCore`,
-`TreeNodeComponent`, `Handle`) can be dropped into a host demo and driven by
-these ops unmodified — see the `flat-dnd` demo.
+| `react-jss` + `school-style` `Theme` | inline styles + `theme.ts` / `defaultTheme` | no design-system dependency in this repo |
+| `removeNode` via `.filter(Boolean) as TreeNode<T>[]` | `.flatMap` | same behavior, no cast |
+| inline `handleDrop` body in `DnDTreeCore` | calls `applyDrop` | shared with headless callers / tests |
 
 ## Dependency rule
 
-No sibling imports — this package is a leaf (no `_deps.ts`), usable standalone.
+No sibling imports — leaf package (no `_deps.ts`). Depends on `react` only for
+`Components/` and `DnDTree.tsx`.

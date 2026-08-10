@@ -2,7 +2,7 @@
  * `flat-dnd` showcase — same composition as `section-view/Section view`
  * (`SectionFormItemHOC` + viewers + in-slot "+ Add"), but with
  * `renderEdit: WebRecursiveEdit` swapped in for `ColumnsEdit` — drag rows to
- * reorder within a column, across sections, or into a nested panel column.
+ * reorder within a column or into a nested panel column.
  */
 import { useMemo, useState } from "react";
 import * as demo from "./flatDndDemoHelper";
@@ -64,12 +64,12 @@ export const FlatDndTest = ({ flatItems, updateArgs, renderLayout }: types.ListP
   const sectionOfItem = useMemo(() => lib.buildItemSectionDict(flatItems), [flatItems]);
 
   const jump = true;
-  const args = {
+  const args: lib.GetActionsArgs<types.TypeNames, types.Params, types.Ctx, types.Section> = {
     items: flatItems,
     setItems,
     ctx,
     sectionOfItem,
-    setToRemove: () => {},
+    setToRemove: (pending) => pending?.rm(),
   };
   const itemActions = lib.getFormItemMoveActions(args, cloneFn, jump);
 

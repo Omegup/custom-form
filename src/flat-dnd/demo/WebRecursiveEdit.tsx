@@ -1,24 +1,17 @@
 /**
- * Section `renderEdit` — ported **as-is** from school
- * `ui-packages/recursive-edit-ui/FlatDnd.tsx` + `RecursiveEdit.tsx`: builds
- * the DnD tree via `flat-dnd`'s `toDndTree`, drives it through
- * `dndTreeUi.DnDTreeCore`/`RecursiveTreeNode` (the copied school engine), and
- * persists any change (drop, move up/down, toggle) via `flat-dnd`'s
- * `cleanNodes` — school's `setCleanNodes = tree => setNodes(cleanNodes(tree, nodes))`.
- *
- * Deviation: school's item branch recomputes `item.children` from the live
- * dnd sub-tree on every render (`cleanNodes(node.children, node.value).children`)
- * so a still-in-progress *nested* drag repaints immediately. This repo's
- * `render.node` consumer (`createRenderEditFormItem`) never reads
- * `item.children`/`item.meta` — only `item.header` — so that recomputation is
- * dead work here; `node.item` (the `toDndTree` snapshot) is passed straight
- * through.
+ * Section `renderEdit` — school `FlatDnd`/`RecursiveEdit` wiring, minimal demo
+ * glue: `flat-dnd` builds/cleans the tree; `drag-drop-tree` owns all DnD UI.
  */
 import { useMemo, useRef, useState, type CSSProperties } from "react";
-import * as dnd from "./dndTreeUi";
+import {
+  DnDTreeCore,
+  Indicator,
+  RecursiveTreeNode,
+  type Handlers,
+} from "../../drag-drop-tree";
 import * as lib from "./library";
 
-type Ctx = Record<string, never>;
+type Ctx = {};
 
 const MoveActionsBar = ({ actions }: { actions: lib.MoveActions }) => {
   const Btn = ({
@@ -69,7 +62,7 @@ export const WebRecursiveEdit = <
   const { edit, title, render } = props;
   const { item, nodes, actions } = edit;
   const [showDeleted, setShowDeleted] = useState(true);
-  const handlersRef = useRef<dnd.Handlers<lib.DndNodeValue<TypeNames, Params>>>(undefined);
+  const handlersRef = useRef<Handlers<lib.DndNodeValue<TypeNames, Params>>>(undefined);
 
   const tree = useMemo(
     () => lib.toDndTree(nodes, { rootId: item.id, rootDeleted: item.deleted, showDeleted }),
@@ -110,18 +103,18 @@ export const WebRecursiveEdit = <
         </div>
       </div>
       <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-        <dnd.DnDTreeCore<lib.DndNodeValue<TypeNames, Params>>
+        <DnDTreeCore<lib.DndNodeValue<TypeNames, Params>>
           nodes={tree}
           setNodes={setTree}
           handlersRef={handlersRef}
           renderComponent={({ key, ...treeProps }) => (
-            <dnd.RecursiveTreeNode<lib.DndNodeValue<TypeNames, Params>, Ctx>
+            <RecursiveTreeNode<lib.DndNodeValue<TypeNames, Params>, Ctx>
               key={key}
               {...treeProps}
-              ctx={{}}
+              ctx={{ theme: lib.defaultTheme }}
               bottomThreshold={0.5}
               topThreshold={0.5}
-              renderIndicator={(where) => (where ? <dnd.Indicator /> : null)}
+              renderIndicator={(where) => (where ? <Indicator theme={lib.defaultTheme} /> : null)}
               renderChildren={(children, node) => (
                 <div
                   style={{

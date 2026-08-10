@@ -69,12 +69,12 @@ export const SectionViewTest = ({
   const sectionOfItem = useMemo(() => lib.buildItemSectionDict(flatItems), [flatItems]);
 
   const jump = true;
-  const args = {
+  const args: lib.GetActionsArgs<types.TypeNames, types.Params, types.Ctx, types.Section> = {
     items: flatItems,
     setItems,
     ctx,
     sectionOfItem,
-    setToRemove: () => {},
+    setToRemove: (pending) => pending?.rm(),
   };
   const itemActions = lib.getFormItemMoveActions(args, cloneFn, jump);
 

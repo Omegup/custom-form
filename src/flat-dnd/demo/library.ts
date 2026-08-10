@@ -1,6 +1,7 @@
 /** Demo-only cross-package imports — see src/README.md import rules. */
 export * from "../index";
 export * from "../_deps";
+export { defaultTheme } from "../../drag-drop-tree";
 export type {
   Branded,
   Children,
@@ -15,8 +16,7 @@ export type {
 export { branded } from "../../form";
 export type { AutoFocus, AutoFocusState, MoveActions } from "../../move-actions";
 export { autofocusCtx } from "../../move-actions";
-export type { FlatFormItemEditSession, FlatFormItems, Indexed, SectionMetaDom, SectionWithItems } from "../../form-edit";
-export type { Clone } from "../../form-edit";
+export type { FlatFormItemEditSession, FlatFormItems, GetActionsArgs, Indexed, SectionMetaDom, SectionWithItems, Clone } from "../../form-edit";
 export {
   applyFlatFormItem,
   buildItemSectionDict,

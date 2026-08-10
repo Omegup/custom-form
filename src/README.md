@@ -6,13 +6,13 @@ src/
 ├── form/                    View layer (read-only form rendering)
 ├── recursive-form/          Tree types with meta
 ├── move-actions/            Generic move/clone/remove actions
-├── drag-drop-tree/          Pure id-addressed tree DnD ops (no React/HTML5)
+├── drag-drop-tree/          School drag-drop-tree port (ops + React Components)
 ├── form-edit/               Edit orchestration (flat state + section/item actions)
 ├── form-item-editor/        Single-item edit dialog factory
 ├── side-menu/               Library catalog (Side + AddFormItem slots)
 ├── section-edit/            Section edit types + flat save
 ├── section-view/            SectionHOC + ColumnsEdit (section list rendering, no DnD)
-├── flat-dnd/                SectionNodes ↔ drag-drop-tree conversion (no React); web DnD demo
+├── flat-dnd/                SectionNodes ↔ drag-drop-tree (lib); demo wires React DnD
 └── form-dialogs/            Dialog orchestrator (makeUseDialogs) + All-in demo
 ```
 
@@ -41,10 +41,9 @@ drag-drop-tree (standalone leaf, no _deps) ──▶ flat-dnd (+ form-edit)
 
 **Rule:** upper layers import lower layers, never the reverse.
 `form-edit` does not import `form-item-editor`, `side-menu`, `section-edit`, or `section-view`.
-`drag-drop-tree` has no sibling imports at all. `flat-dnd` imports `drag-drop-tree` +
-`form-edit`; it does **not** import `section-view` — its demo composes
-`SectionFormItemHOC` (`section-view`) with `WebRecursiveEdit` (`flat-dnd/demo`) as a
-`renderEdit` plug-in, the same seam `ColumnsEdit` fills by default.
+`drag-drop-tree` is a leaf (no `_deps`). `flat-dnd` imports its **pure ops** only;
+`flat-dnd/demo` is the only place that imports `drag-drop-tree`'s React components
+(`DnDTreeCore`, `RecursiveTreeNode`, …) — see `demo/WebRecursiveEdit.tsx`.
 
 Module demos compose features via props or, for the all-in editor, in `form-dialogs/demo/AllInEditor.tsx`
 (`SectionFormItemHOC` + `makeUseDialogs`). The demo injects `side-menu`'s

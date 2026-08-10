@@ -1,6 +1,6 @@
 /** Demo chrome for the FlatDnd showcase — viewers + `renderCard` for
  * `SectionFormItemHOC` (same shape as the `section-view` demo); the DnD
- * engine itself lives in `dndTreeUi.tsx` / `WebRecursiveEdit.tsx`. */
+ * engine lives in `drag-drop-tree`; this demo only wires it via `WebRecursiveEdit.tsx`. */
 import type { ReactNode } from "react";
 import { FieldRow, FormContainer } from "../../form-edit/demo/editFormDemoHelper";
 import flatDndDemoSource from "./FlatDndDemo.tsx?raw";
