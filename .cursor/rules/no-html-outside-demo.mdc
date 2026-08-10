@@ -1,0 +1,58 @@
+---
+description: Library packages must not contain HTML/DOM chrome — only demos may
+globs: src/**/*.ts,src/**/*.tsx
+alwaysApply: true
+---
+
+# No HTML outside demos
+
+This repo is **host-agnostic**: not tied to HTML, the DOM, or any graphic
+design system. Library code under `src/<package>/` (everything except
+`demo/`, `*.stories.tsx`, and docs) must not emit HTML elements or
+design-specific chrome.
+
+## Forbidden in library code
+
+- Intrinsic JSX: `<div>`, `<span>`, `<button>`, `<input>`, `<h1>`–`<h6>`,
+  `<p>`, `<section>`, `<label>`, `<pre>`, … (any lowercase DOM tag)
+- Inline visual styling meant as product UI (`style={{ … }}` for layout,
+  color, typography) on library-owned elements
+- Hardcoded design-system widgets (icons, themed titles, scrolled shells)
+
+`React.Fragment` (`<>…</>`), composition of host-provided `ReactNode`, and
+calling host **render props** are fine.
+
+## Required pattern
+
+Inject chrome via **render props / HOC args**:
+
+```typescript
+// ✅ Library — structure + callbacks only
+return render({ title, onSelect, search, setSearch });
+
+// ✅ Demo / host — owns HTML
+render: ({ title, onSelect }) => (
+  <button type="button" onClick={onSelect}>{title}</button>
+);
+```
+
+```typescript
+// ❌ Library — ships HTML/design
+return (
+  <button type="button" onClick={onSelect} style={{ padding: 8 }}>
+    {title}
+  </button>
+);
+```
+
+## Where HTML is allowed
+
+| Path | OK? |
+|---|---|
+| `src/<pkg>/demo/**` | Yes |
+| `src/<pkg>/*.stories.tsx` | Yes (Storybook entry) |
+| `src/<pkg>/**` library modules | **No** |
+| `src/main.tsx` | App stub only — not a package API |
+
+If a school source file mixes logic + JSS/HTML, port the **logic** into the
+library and leave the chrome in the demo (or a host render-prop).

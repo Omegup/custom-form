@@ -1,10 +1,27 @@
 /**
- * Catalog row — school section-edit-ui `FormMenuItem` on plain buttons.
- * Click emits a blank item; the consumer wraps it in an insert session.
+ * Catalog row — school section-edit-ui `FormMenuItem` logic only.
+ * Click emits a blank item; the host owns the row chrome via `render`.
  */
+import type { ReactNode } from "react";
 import type { ParamsDom } from "./_deps";
 import { createBlankFormItem, type NewFormItem } from "./createBlankFormItem";
 import type { MenuItemDefinition } from "./MenuItemDefinition.t";
+
+export type FormMenuItemRenderArgs = {
+  title: string;
+  icon?: ReactNode;
+  onSelect: () => void;
+};
+
+export type FormMenuItemProps<
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames>,
+> = {
+  item: MenuItemDefinition<TypeNames, Params>;
+  onClick: (item: NewFormItem<TypeNames, Params>) => void;
+  random: () => string;
+  render: (args: FormMenuItemRenderArgs) => ReactNode;
+};
 
 export const FormMenuItem = <
   TypeNames extends string,
@@ -13,28 +30,10 @@ export const FormMenuItem = <
   item,
   onClick,
   random,
-}: {
-  item: MenuItemDefinition<TypeNames, Params>;
-  onClick: (item: NewFormItem<TypeNames, Params>) => void;
-  random: () => string;
-}) => (
-  <button
-    type="button"
-    onClick={() => onClick(createBlankFormItem(item, random))}
-    style={{
-      display: "flex",
-      alignItems: "center",
-      gap: 8,
-      padding: "6px 10px",
-      fontSize: 13,
-      textAlign: "left",
-      background: "white",
-      border: "1px solid #eee",
-      borderRadius: 4,
-      cursor: "pointer",
-    }}
-  >
-    {item.icon}
-    {item.title}
-  </button>
-);
+  render,
+}: FormMenuItemProps<TypeNames, Params>) =>
+  render({
+    title: item.title,
+    icon: item.icon,
+    onSelect: () => onClick(createBlankFormItem(item, random)),
+  });
