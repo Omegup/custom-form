@@ -77,3 +77,6 @@ names that don't exist on its actual header with no type error — and a field
 named `cols` silently collided with the fixed `cols` slot, producing `never`.
 The fix was to delete it and let the one caller that actually knows its
 concrete `Section` shape (the demo) write the four-line check inline.
+
+**Closed for `section-edit`:** do not reintroduce a library `validateSectionForm`.
+Host dialogs own required-field checks against their concrete form type.

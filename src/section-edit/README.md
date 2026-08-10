@@ -1,7 +1,8 @@
 # section-edit
 
-**Section edit** — types, validation, and pure flat save for editing one section
-(title / description / column count).
+**Section edit** — types and pure flat save for editing one section (header +
+column count). Required-field **validation is host-owned** (closed — not a
+library API).
 
 Migrated from `school/components/custom-form` → `react-packages/form-edit-react`
 (`SectionEdit.ts` + the section `onSave` branch of `useDialog.tsx`).
@@ -17,27 +18,23 @@ Migrated from `school/components/custom-form` → `react-packages/form-edit-reac
 No section HOC factory here — school's `SectionEdit.ts` is validate + type
 re-exports only; dialog chrome stays with the consumer (demo / app UI).
 
-**No `validateSectionForm` here** (school has one, fixed to `title`/`description`).
-Required-field validation needs to know the dialog's actual field names, and
-`SectionDom` (the only thing this library knows about a section header) is
-just `{ id, deleted }` — it says nothing about `title`/`description`. Two
-options were tried and rejected before landing on "don't abstract it":
-- Hardcoding `{ title, description }` into the library (like school) bakes in
-  a host's field names as if they were universal.
-- Genericizing over `Fields extends Record<string, string>` "fixed" that but
-  produced a function with no real link to any section type at all — its
-  `Fields` came only from the `errorMessages` argument, so nothing tied the
-  validated keys back to `SectionConfig`/`SectionEditForm`. That's not type
-  safety, just the same assumption moved one level down (plus an unchecked
-  `Object.keys(...) as (keyof Fields)[]` cast, and a silent hazard: a host
-  key named `cols` collides with the fixed `cols` field and resolves to
-  `never`). A function that needs no knowledge of "section" to work isn't
-  section-specific logic — it doesn't belong in this package's typed API.
+### Why no `validateSectionForm`
 
-`SectionDialog` (demo) now validates its own concrete `title`/`description`
-fields inline — see `sectionEditDemoTypes.t.ts` (`SectionForm`) and
-`SectionEditDemo.tsx`. A host with different header fields writes the same
-few lines against its own type; there's nothing to reuse.
+School ships a helper fixed to `title` / `description`. That cannot live in this
+package: `SectionDom` is only `{ id, deleted }`, so the library does not know
+which header fields a host dialog edits.
+
+Tried and rejected:
+
+- Hardcoding `{ title, description }` — bakes one host's field names into the
+  library.
+- `Fields extends Record<string, string>` driven only by `errorMessages` — no
+  link to `SectionConfig`, invites casts (`Object.keys` as `keyof Fields`), and
+  a host key named `cols` collides with the fixed `cols` slot (`never`).
+
+A function that needs no section knowledge is not section API. Hosts validate
+their concrete form inline (demo: `SectionEditDemo.tsx` + `SectionForm`). See
+`.cursor/rules/typescript-types.mdc` ("don't genericize a hardcoded assumption").
 
 ## Demo vs library vs deferred features
 
