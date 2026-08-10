@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import type { Theme } from "../../theme";
+import type { Theme } from "./theme";
 
 type VariantTheme = {
   background: string;

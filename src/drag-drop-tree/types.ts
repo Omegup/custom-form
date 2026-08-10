@@ -1,10 +1,9 @@
 /**
- * School `components/drag-drop-tree/src/types.ts` — tree shape + React DnD
- * contract. `Theme` comes from `./theme` (school's `school-style` stand-in).
+ * School `components/drag-drop-tree/src/types.ts` — tree shape + headless React
+ * DnD contract. HTML chrome lives in `demo/` (see no-html-outside-demo rule).
  */
 import type { ReactNode, RefObject } from "react";
 import type { CommonTreeNodeProps } from "./Components/TreeNode/types";
-import type { Theme } from "./theme";
 
 export type TreeNode<T> = T & {
   _id: string;
@@ -27,14 +26,6 @@ export type DnDTreeCoreProps<T> = {
   renderComponent: (args: CommonTreeNodeProps<T> & { key: string }) => ReactNode;
 };
 
-export type DnDTreeProps<T, Ctx> = {
-  ctx: { theme: Theme } & Ctx;
-  nodes: TreeNode<T>[];
-  setNodes: (arg: TreeNode<T>[] | ((prev: TreeNode<T>[]) => TreeNode<T>[])) => void;
-  renderItem: RenderItem<T, Ctx>;
-  handlersRef: RefObject<Handlers<T> | undefined>;
-};
-
 export type RenderItem<
   T,
   Ctx,
@@ -53,7 +44,7 @@ export type RenderItem<
     onUp: (_id: string) => void;
     onDown: (_id: string) => void;
   };
-  ctx: { theme: Theme } & Ctx;
+  ctx: Ctx;
 }) => ReactNode;
 
 export type Handlers<T> = {

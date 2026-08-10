@@ -79,6 +79,6 @@ Original packages live under `school/components/custom-form/src/`:
 | `side-menu/` | `react-packages/form-edit-react` (`useSide`, `MenuItemDefinition`, `makeUseRenderAddItem`) + `section-edit-ui` (`FormMenuItem`, `AddFormItem`) |
 | `section-edit/` | `react-packages/form-edit-react` (`SectionEdit`; `validateSectionForm` not ported — see section-edit/README.md) |
 | `section-view/` | `react-packages/form-edit-react` (`Section.tsx` `SectionHOC`, `renderEditFormItem.tsx`) + `ts-packages/form-edit` (`section.data.ts` `getSectionEdit`, ported into `form-edit/flat-move-actions`) |
-| `drag-drop-tree/` | `components/drag-drop-tree` (full package — `types`/`utils`/`DnDTree`/`Components`; JSS → inline styles + `theme.ts`) |
+| `drag-drop-tree/` | `components/drag-drop-tree` (ops + headless React engine; HTML chrome in `demo/`) |
 | `flat-dnd/` | `recursive-edit-ui/FlatDnd.tsx` pure half (`toDndTree`/`cleanNodes`); demo wires `drag-drop-tree` React API via `WebRecursiveEdit` |
 | `form-dialogs/` | `form-edit-react` (`makeUseDialogs`; the pure `setEditFormItemX` part lives in `form-edit/applyFlatFormItem`) |

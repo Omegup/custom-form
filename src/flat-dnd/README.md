@@ -2,7 +2,8 @@
 
 **Section item grid ↔ DnD tree** — pure conversion between `form-edit`'s
 `SectionNodes` and [`drag-drop-tree`](../drag-drop-tree/)'s `TreeNode<T>` shape.
-No React — the web demo wires this into `drag-drop-tree`'s React engine.
+No React — the web demo wires this into `drag-drop-tree`'s **headless** React
+engine (`DnDTreeCore` + `RecursiveTreeNode`) and owns the HTML chrome.
 
 Migrated from `school/components/custom-form` →
 `ui-packages/recursive-edit-ui/FlatDnd.tsx` (`filterDeleted` / `cleanNodes` only).
@@ -20,14 +21,16 @@ Migrated from `school/components/custom-form` →
 
 ## Demo (`flat-dnd/Flat dnd` story)
 
-Minimal school-style integration — all DnD UI lives in `drag-drop-tree`; the
-demo only:
+Minimal school-style integration:
 
 1. builds the tree with `toDndTree`
-2. passes it to `DnDTreeCore` + `RecursiveTreeNode` (same as school's `FlatDnd`)
-3. writes back with `cleanNodes` on every `setNodes` (school's `setCleanNodes`)
+2. passes it to headless `DnDTreeCore` + `RecursiveTreeNode` (same as school's `FlatDnd`)
+3. supplies HTML via `renderDraggable` / `renderChildren` / `renderIndicator`
+4. writes back with `cleanNodes` on every `setNodes` (school's `setCleanNodes`)
 
-See `demo/WebRecursiveEdit.tsx` (~30 lines of glue beyond section chrome).
+See `demo/WebRecursiveEdit.tsx`. Stock school chrome (`Indicator`, `Handle*`,
+`TreeNodeComponent`, `DnDTree`) also lives under `drag-drop-tree/demo/` if a
+host wants that look without reinventing it.
 
 `section-view`'s `SectionFormItemHOC` is composed in the demo with
 `renderEdit: WebRecursiveEdit` — the same plug-in seam as `ColumnsEdit`.
