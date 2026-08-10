@@ -4,6 +4,7 @@
 src/
 ├── main.tsx                 Legacy Vite entry (points to Storybook)
 ├── form/                    View layer (read-only form rendering)
+├── response/                Form response values + viewer validate/update contract
 ├── recursive-form/          Tree types with meta
 ├── move-actions/            Generic move/clone/remove actions
 ├── drag-drop-tree/          School drag-drop-tree port (ops + React Components)
@@ -16,13 +17,12 @@ src/
 └── form-dialogs/            Dialog orchestrator (makeUseDialogs) + All-in demo
 ```
 
-`response/` (form response value helpers) is not a package yet (deferred).
-
 Each module owns its **Storybook story** (`*.stories.tsx` with args/controls) and a **playground component** (`*Playground.tsx`). Vitest tests live in `*.test.ts`.
 
 ## Dependency graph
 
 ```
+form ◀── response (types only; form owns getUseImpRefViewProps)
 form ─────────────────────────────────────────┐
 recursive-form ───────────────────────────────┤
 move-actions ─────────────────────────────────┤
@@ -41,9 +41,11 @@ drag-drop-tree (standalone leaf, no _deps) ──▶ flat-dnd (+ form-edit)
 
 **Rule:** upper layers import lower layers, never the reverse.
 `form-edit` does not import `form-item-editor`, `side-menu`, `section-edit`, or `section-view`.
-`drag-drop-tree` is a leaf (no `_deps`). `flat-dnd` imports its **pure ops** only;
-`flat-dnd/demo` is the only place that imports `drag-drop-tree`'s React components
-(`DnDTreeCore`, `RecursiveTreeNode`, …) — see `demo/WebRecursiveEdit.tsx`.
+`response` is a leaf (types + `emptyResponse`). `form` imports it for
+`getUseImpRefViewProps`. `drag-drop-tree` is a leaf (no `_deps`). `flat-dnd`
+imports its **pure ops** only; `flat-dnd/demo` is the only place that imports
+`drag-drop-tree`'s React components (`DnDTreeCore`, `RecursiveTreeNode`, …) —
+see `demo/WebRecursiveEdit.tsx`.
 
 Module demos compose features via props or, for the all-in editor, in `form-dialogs/demo/AllInEditor.tsx`
 (`SectionFormItemHOC` + `WebRecursiveEdit` + `makeUseDialogs`). The demo injects
@@ -122,6 +124,7 @@ Use `branded({ ... })` to construct values; do not cast.
 ## Per-module docs
 
 - [form/README.md](./form/README.md)
+- [response/README.md](./response/README.md)
 - [recursive-form/README.md](./recursive-form/README.md)
 - [move-actions/README.md](./move-actions/README.md)
 - [form-edit/README.md](./form-edit/README.md) — also [flat-raw-actions](./form-edit/flat-raw-actions/README.md), [section-layout](./form-edit/section-layout/README.md)

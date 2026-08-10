@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import * as demo from "./formDemoHelper";
 import * as types from "./formDemoTypes.t";
-import { branded, createFormItemByGetChild } from "./library";
+import { branded, createFormItemByGetChildPlain } from "./library";
 
 const viewers: types.Viewers = {
   text: {
@@ -32,7 +32,7 @@ const viewers: types.Viewers = {
   },
 };
 
-const FormItem = createFormItemByGetChild(viewers, (x) => x);
+const FormItem = createFormItemByGetChildPlain(viewers);
 
 export const FormDemo = () => {
   const { ctx, variants, values, items, updateArgs } = demo.useStoryArgs();

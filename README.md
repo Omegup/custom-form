@@ -24,6 +24,7 @@ Each module has a colocated `*.stories.tsx`. Story titles match folder names, e.
 |---|---|---|
 | **form-dialogs/All-in** | `form-dialogs/` | Full composed editor (`SectionFormItemHOC` + `WebRecursiveEdit` DnD + every dialog flow) |
 | form/Form | `form/` | Viewers rendering a JSON-driven form |
+| response/Response | `response/` | Fill-path foundation (`ResponseSetter` + `getUseImpRefViewProps` validate) |
 | move-actions/Move actions | `move-actions/` | Item list with up/down/clone/remove |
 | form-edit/Edit form | `form-edit/` | Section/field list with move actions only |
 | form-item-editor/Form item editor | `form-item-editor/` | Edit form + per-field edit dialog |
@@ -44,7 +45,7 @@ See **[src/README.md](./src/README.md)** for the full module map, dependency gra
 ### Layer overview
 
 ```
-form / recursive-form          ← domain types (items, trees, branded params)
+form / recursive-form / response  ← domain types (items, trees, branded params, answers)
 move-actions                   ← up/down/clone/remove action helpers
 drag-drop-tree                 ← school's drag-drop-tree package (ops + React DnD engine)
 form-edit                      ← flat edit representation + move actions on sections/items
@@ -73,7 +74,8 @@ Original packages live under `school/components/custom-form/src/`:
 
 | slot-tree | school source |
 |---|---|
-| `form/` | `ts-packages/form-model`, `react-packages/form-react` |
+| `form/` | `ts-packages/form-model`, `react-packages/form-react` (`FormItemHOC`, `getUseImpRefViewProps`) |
+| `response/` | `types/response`, `types/form-response-react` (`ViewerMethods`) |
 | `form-edit/` | `ts-packages/form-edit` |
 | `form-item-editor/` | `react-packages/form-item-edit-react` |
 | `side-menu/` | `react-packages/form-edit-react` (`useSide`, `MenuItemDefinition`, `makeUseRenderAddItem`) + `section-edit-ui` (`FormMenuItem`, `AddFormItem`) |

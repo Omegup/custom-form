@@ -19,7 +19,7 @@ import type {
   VariantsDom,
   Viewers,
 } from "./_deps";
-import { createFormItemByGetChild } from "./_deps";
+import { createFormItemByGetChildPlain } from "./_deps";
 import type { EditExtra, RenderNodeArgs, SectionProps } from "./types";
 
 export const createRenderEditFormItem = <
@@ -39,7 +39,7 @@ export const createRenderEditFormItem = <
     string
   >,
 ) => {
-  const FormItem = createFormItemByGetChild<
+  const FormItem = createFormItemByGetChildPlain<
     TypeNames,
     Params,
     Variants,

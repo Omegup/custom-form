@@ -157,7 +157,7 @@ const nameViewers: types.NameViewers = {
   },
 };
 
-const ItemName = lib.createFormItemByGetChild(nameViewers, (x) => x);
+const ItemName = lib.createFormItemByGetChildPlain(nameViewers);
 
 /** Exported for the side-menu demo (same editor stack). */
 export const itemName = (ctx: types.Ctx, header: types.ItemHeader): ReactNode => (
