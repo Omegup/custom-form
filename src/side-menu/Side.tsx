@@ -24,8 +24,8 @@ export const Side = <
   Params extends ParamsDom<TypeNames>,
   SectionConfig extends SectionDom,
 >({
-  title = "Library",
-  addSectionLabel = "+ Add section",
+  title,
+  addSectionLabel,
   menuItems,
   setAddFormItem,
   setAddSection,
@@ -34,8 +34,8 @@ export const Side = <
   render,
   renderMenuItem,
 }: {
-  title?: string;
-  addSectionLabel?: string;
+  title: string;
+  addSectionLabel: string;
   menuItems: MenuItemDefinition<TypeNames, Params>[];
   setAddFormItem: (item: NewFormItem<TypeNames, Params>) => void;
   setAddSection: (section: NewSection<TypeNames, Params, SectionConfig>) => void;

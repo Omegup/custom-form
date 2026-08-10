@@ -20,7 +20,8 @@ export type AddFormItemRenderArgs = {
   }[];
 };
 
-export type AddFormItemArgs<
+/** Slot wiring the factory can fill — host adds `label` when rendering `AddFormItem`. */
+export type AddFormItemSlotArgs<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
 > = {
@@ -29,7 +30,14 @@ export type AddFormItemArgs<
   menuItems: MenuItemDefinition<TypeNames, Params>[];
   random: () => string;
   setAddItem: (session: FlatFormItemEditSession<TypeNames, Params>) => void;
-  label?: string;
+};
+
+export type AddFormItemArgs<
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames>,
+> = AddFormItemSlotArgs<TypeNames, Params> & {
+  /** Host-owned control copy (e.g. demo `"+ Add item"`). */
+  label: string;
 };
 
 export type AddFormItemProps<
@@ -47,7 +55,7 @@ export const AddFormItem = <
   menuItems,
   random,
   setAddItem,
-  label = "+ Add item",
+  label,
   render,
 }: AddFormItemProps<TypeNames, Params>) => {
   const [open, setOpen] = useState(false);
