@@ -81,11 +81,7 @@ export const EditFormTest = ({
               title={section.header.title}
               focused={sectionFocused}
               sectionActions={sActions}
-              sectionExtra={
-                sectionExtra?.(section.header, {
-                  cols: section.items.length,
-                }) ?? []
-              }
+              sectionExtra={sectionExtra?.(section) ?? []}
               columns={section.items.map((column) =>
                 column.map((item) => {
                   if (item.header.deleted && !showDeleted) return null;

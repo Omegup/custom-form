@@ -26,7 +26,7 @@ Everything else is **consumer code** (demo, app UI, or a sibling package).
 | School | Slot-tree | Why |
 |---|---|---|
 | `props` + `extra` only; draft in `useHook` via formik | `formItem` / `setFormItem` on props | flat edit model instead of recursive draft inside the hook |
-| `recursiveFormItem`, `setFormItemSection`, `cols` on hook state | panel `n` on `FlatFormItem`; section pick deferred | flat-first demo; section editor not migrated |
+| `recursiveFormItem`, `setFormItemSection`, `cols` on hook state | panel `n` on `FlatFormItem`; section pick deferred | flat-first demo; section save lives in `section-edit`, in-dialog picker waits for `edit-section` |
 | `Editor` has `render()` slot for companion sub-editors | no `render()` slot yet | **parity gap** — add when a real multi-ref editor needs it |
 
 ## Demo vs library vs deferred features
@@ -78,7 +78,7 @@ needs `form-item-editor` + `section-edit`, so it lands with `editor/`.
 | Concern | Target package | School reference |
 |---|---|---|
 | Formik `useFormItemEditor` (`handleSubmit`, `isError`, `setColumns`) | app UI layer | `legacy-front/.../useFormItemEditor.ts` |
-| Section picker + `setFormItemSection` | `section-edit` + editor extras | `editors/selectSection.tsx` |
+| Section picker + `setFormItemSection` | `edit-section` + editor extras (section flat save already in **`section-edit`** `updateSectionInFlat`) | `editors/selectSection.tsx` |
 | Real modal chrome | app / `editor/` | `form-edit-ui/renderDefaultDialog.tsx` |
 | `update` + `validate` on responses | `response/` + `form-react` | `getUseImpRefViewProps`, `CustomFormResponder` |
 
