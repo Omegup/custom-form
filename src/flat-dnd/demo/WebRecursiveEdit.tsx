@@ -115,19 +115,23 @@ export const WebRecursiveEdit = <
               bottomThreshold={0.5}
               topThreshold={0.5}
               renderIndicator={(where) => (where ? <Indicator theme={lib.defaultTheme} /> : null)}
-              renderChildren={(children, node) => (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: node.type === "column" ? "column" : "row",
-                    gap: node.type === "column" ? 6 : 12,
-                    flex: node.type === "item" ? 1 : undefined,
-                    minWidth: 0,
-                  }}
-                >
-                  {children}
-                </div>
-              )}
+              renderChildren={(children, node) =>
+                node.type === "column" ? (
+                  <>{children}</>
+                ) : (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      gap: 12,
+                      flex: 1,
+                      minWidth: 0,
+                    }}
+                  >
+                    {children}
+                  </div>
+                )
+              }
               renderItem={() => null}
               renderDraggable={(args) => {
                 const { node, ord, children } = args;
@@ -142,15 +146,23 @@ export const WebRecursiveEdit = <
                 if (node.type === "column") {
                   if (node.children.length > 0)
                     return (
-                      <>
+                      <div
+                        style={{
+                          flex: 1,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 6,
+                          minWidth: 0,
+                        }}
+                      >
                         {children}
                         {render.addItem(node)}
-                      </>
+                      </div>
                     );
                   return (
                     <div
                       {...dragHandlers}
-                      style={emptyColumnStyle}
+                      style={{ ...emptyColumnStyle, flex: 1, minWidth: 0 }}
                       onDragOver={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
