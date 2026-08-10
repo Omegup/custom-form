@@ -31,7 +31,7 @@ const useRenderAddItem = lib.makeUseRenderAddItem<
   types.TypeNames,
   types.Params
 >(
-  (args) => <lib.AddFormItem {...args} />,
+  (args) => <lib.AddFormItem {...args} render={demo.renderAddFormItem} />,
   () => MENU_ITEMS,
   randomId,
 );
@@ -150,6 +150,8 @@ export const SideMenuDemo = ({
                 menuItems={MENU_ITEMS}
                 random={randomId}
                 blankSection={blankSection}
+                render={demo.renderSide}
+                renderMenuItem={demo.renderMenuItem}
                 setAddFormItem={(item) =>
                   setSession(lib.openFormItemInsertSession(item))
                 }

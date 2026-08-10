@@ -18,9 +18,9 @@ dropdown is the concrete-span insert. They belong in the same package.
 | `MenuItemDefinition.t.ts` | Catalog entry `{ title, icon?, n?, header: { type, params } }` |
 | `createBlankFormItem.ts` | **`createBlankFormItem(definition, random)`** → `NewFormItem` (`header` with fresh id + `deleted: false`, `children: n × []`); school `FormMenuItem` `mapMenu` |
 | `useSide.ts` | **`useSide({ menuItems, setAddFormItem, setAddSection, blankSection, random })`** — accent-insensitive search filter, `renderMenuItems`, `addSection` emitting a `NewSection` (`index: -1`); port of school `useSide` |
-| `FormMenuItem.tsx` | Catalog row button — click emits `createBlankFormItem(definition, random)` |
-| `Side.tsx` | Sidebar UI: title, search input, catalog rows, "+ Add section" (school `form-edit-ui/Side` minus theme / i18n / icon set) |
-| `AddFormItem.tsx` | In-slot "+ Add" dropdown of the same `FormMenuItem` rows; opens insert session at `{ index, sIndex }` |
+| `FormMenuItem.tsx` | Catalog row **logic** — `render({ title, icon, onSelect })`; click emits `createBlankFormItem` |
+| `Side.tsx` | Sidebar **logic** — `useSide` + `render` / `renderMenuItem` (no HTML) |
+| `AddFormItem.tsx` | In-slot add **logic** — open state + insert session; host `render` owns dropdown chrome |
 | `makeUseRenderAddItem.ts` | **`makeUseRenderAddItem(renderAddItem, useMenuItems, random)(setAddItem)`** → `(span) => ReactNode` — school factory; list shell injects it at every list slot |
 
 ## Two add flows (school parity)
@@ -58,7 +58,7 @@ consumer opens the section-edit dialog and saves via `updateSectionInFlat`
 |---|---|---|
 | `addSection` hardcodes the `AppSection` blank header | `blankSection(id)` factory param | `SectionConfig` is generic in this repo |
 | `FormMenuItem` click payload carries `index/sIndex: -1` | payload is `NewFormItem` (header + children only) | the consumer attaches the span (`openFormItemInsertSession` default for the sidebar, concrete slot index for `AddFormItem`), so one row component serves both |
-| `MenuItem` / `InputSearch` / theme / i18n design system | plain elements + `title` / `addSectionLabel` props | no design system in this repo |
+| `MenuItem` / `InputSearch` / theme / i18n design system | **no HTML in library** — host `render` / `renderMenuItem` (demo chrome) | host-agnostic; see `.cursor/rules/no-html-outside-demo.mdc` |
 
 ## Demo
 
