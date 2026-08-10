@@ -39,4 +39,6 @@ section-responder
 ```
 
 Does **not** import `section-view` / `form-dialogs`. Review / admin response
-UIs (school `section-review-ui`, `form-response-ui`) are still deferred.
+UIs live in the sibling [`section-review/`](../section-review/) /
+[`form-review/`](../form-review/) packages (school `section-review-ui`,
+`form-response-ui`).

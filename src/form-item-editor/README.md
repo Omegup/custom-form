@@ -84,6 +84,8 @@ hand-wiring so the focused story stays a one-package showcase.
 | `update` + `validate` on responses | **done** — `response/` + `form/getUseImpRefViewProps` | `getUseImpRefViewProps` |
 | Section fill shell | **done** — `section-responder/` | `SectionResponderHOC` |
 | Multi-section fill shell | **done** — `form-responder/` | `CustomFormResponderHOC` |
+| Section review shell | **done** — `section-review/` | `SectionReviewHOC` |
+| Multi-section review shell | **done** — `form-review/` | `CustomFormReviewHOC` |
 
 ## Architecture
 
