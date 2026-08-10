@@ -40,4 +40,5 @@ when empty). JSON dump shows the live `responses` map.
 Leaf package — no `_deps.ts`. Pure types + `emptyResponse` only.
 
 Does **not** import `form` / React. Hosts that need the impRef bridge import
-`getUseImpRefViewProps` from `form`.
+`getUseImpRefViewProps` from `form`. Section aggregation lives in
+[`section-responder/`](../section-responder/).

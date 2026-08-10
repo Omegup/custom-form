@@ -25,6 +25,7 @@ Each module has a colocated `*.stories.tsx`. Story titles match folder names, e.
 | **form-dialogs/All-in** | `form-dialogs/` | Full composed editor (`SectionFormItemHOC` + `WebRecursiveEdit` DnD + every dialog flow) |
 | form/Form | `form/` | Viewers rendering a JSON-driven form |
 | response/Response | `response/` | Fill-path foundation (`ResponseSetter` + `getUseImpRefViewProps` validate) |
+| section-responder/Section responder | `section-responder/` | One section of fillable fields + section-level validate |
 | move-actions/Move actions | `move-actions/` | Item list with up/down/clone/remove |
 | form-edit/Edit form | `form-edit/` | Section/field list with move actions only |
 | form-item-editor/Form item editor | `form-item-editor/` | Edit form + per-field edit dialog |
@@ -55,6 +56,7 @@ section-edit                   ← section title/description edit dialog
 section-view                   ← SectionHOC + ColumnsEdit (section list rendering, no DnD)
 flat-dnd                       ← SectionNodes ↔ drag-drop-tree conversion (lib); demo wires React DnD
 form-dialogs                   ← dialog orchestration (makeUseDialogs) + All-in demo
+section-responder              ← section fill shell (SectionResponderHOC)
 ```
 
 **Canonical edit state** is the **flat list** (`FlatFormItems`): an array of `{ section }`, `{ item, n }`, and `{ end: null }` markers. The tree is rebuilt on demand via `consolidateSections`.
@@ -76,6 +78,7 @@ Original packages live under `school/components/custom-form/src/`:
 |---|---|
 | `form/` | `ts-packages/form-model`, `react-packages/form-react` (`FormItemHOC`, `getUseImpRefViewProps`) |
 | `response/` | `types/response`, `types/form-response-react` (`ViewerMethods`) |
+| `section-responder/` | `ui-packages/section-responder-ui` (`SectionResponderHOC`) |
 | `form-edit/` | `ts-packages/form-edit` |
 | `form-item-editor/` | `react-packages/form-item-edit-react` |
 | `side-menu/` | `react-packages/form-edit-react` (`useSide`, `MenuItemDefinition`, `makeUseRenderAddItem`) + `section-edit-ui` (`FormMenuItem`, `AddFormItem`) |

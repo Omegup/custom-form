@@ -81,7 +81,9 @@ hand-wiring so the focused story stays a one-package showcase.
 |---|---|---|
 | Formik `useFormItemEditor` (`handleSubmit`, `isError`, `setColumns`) | app UI layer | `legacy-front/.../useFormItemEditor.ts` |
 | Real modal chrome | app / `form-dialogs` | `form-edit-ui/renderDefaultDialog.tsx` |
-| `update` + `validate` on responses | **done** — `response/` + `form/getUseImpRefViewProps` | `getUseImpRefViewProps`, `CustomFormResponder` (section shell still deferred) |
+| `update` + `validate` on responses | **done** — `response/` + `form/getUseImpRefViewProps` | `getUseImpRefViewProps` |
+| Section fill shell | **done** — `section-responder/` | `SectionResponderHOC` |
+| Multi-section fill shell | *(deferred)* | `CustomFormResponderHOC` |
 
 ## Architecture
 
