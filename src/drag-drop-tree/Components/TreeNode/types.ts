@@ -1,6 +1,5 @@
 import type { DragEvent, ReactNode, RefObject } from "react";
 import type { DropPosition, Handlers, RenderItem, TreeNode } from "../../types";
-import type { Theme } from "../../theme";
 
 export type CommonTreeNodeProps<T> = {
   ord: number;
@@ -19,11 +18,6 @@ export type CommonTreeNodeProps<T> = {
   handlersRef: RefObject<Handlers<T> | undefined>;
 };
 
-export type TreeNodeProps<T, Ctx> = CommonTreeNodeProps<T> & {
-  ctx: { theme: Theme } & Ctx;
-  renderItem: RenderItem<T, Ctx>;
-};
-
 type State = { isSelected: boolean; isOver: boolean; dragging: boolean };
 
 export type DraggableArgs<T> = {
@@ -40,8 +34,9 @@ export type DraggableArgs<T> = {
   ord: number;
 };
 
+/** Headless node — host supplies chrome via render props. */
 export type TreeNodeCoreProps<T, Ctx> = CommonTreeNodeProps<T> & {
-  ctx: { theme: Theme } & Ctx;
+  ctx: Ctx;
   renderItem: RenderItem<T, Ctx, State>;
   renderDraggable: (args: DraggableArgs<T>) => ReactNode;
   topThreshold: number;

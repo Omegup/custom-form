@@ -1,0 +1,53 @@
+---
+description: Never define React components inside other components or render callbacks
+globs: **/*.tsx,**/*.jsx
+alwaysApply: true
+---
+
+# No components created during render
+
+Never declare a React component (function/const returning JSX with a
+**Capitalized** name) inside another component body, a render prop, a
+hook, or any other function that runs during render.
+
+Each call creates a **new component type**. React treats it as a different
+element, remounts the subtree every time, resets local state, and wastes
+work.
+
+```tsx
+// ❌ BAD — new `Btn` type every renderMoveActions call
+renderMoveActions: (actions) => {
+  const Btn = ({ label, onClick }) => <button …>{label}</button>;
+  return <Btn label="↑" onClick={actions.up} />;
+};
+
+// ❌ BAD — nested inside a parent component
+const Parent = () => {
+  const Row = () => <div />;
+  return <Row />;
+};
+
+// ✅ GOOD — stable module-scope component
+const Btn = ({ label, onClick }: { … }) => (
+  <button type="button" onClick={onClick ?? undefined} disabled={!onClick}>
+    {label}
+  </button>
+);
+
+renderMoveActions: (actions) => (
+  <span>
+    <Btn label="↑" onClick={actions.up} />
+  </span>
+);
+```
+
+## What to do instead
+
+1. Hoist the child to **module scope** (same file is fine).
+2. Or reuse an existing shared chrome helper (e.g. demo `MoveBar` / `Btn`).
+3. If you only need markup once, **inline the JSX** — do not wrap it in a
+   nested capitalized function just to shorten the call site.
+
+Helpers that return ReactNode and are **not** used as `<Helper />` (plain
+functions called as `helper()`) are fine; the bug is specifically
+**`<Capitalized />` whose type is re-created each render**.

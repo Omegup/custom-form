@@ -24,32 +24,25 @@ calling host **render props** are fine.
 
 ## Required pattern
 
-Inject chrome the way `SectionHOC` does — **render props / HOC args**:
+Inject chrome via **render props / HOC args** (same seam as `SectionHOC`,
+`Side`, `AddFormItem`, …):
 
 ```typescript
 // ✅ Library — structure + callbacks only
-return renderSection({
-  title: section.header.title,
-  columns: itemNodes,
-  deleted: section.header.deleted,
-});
+return render({ title, onSelect, search, setSearch });
 
 // ✅ Demo / host — owns HTML
-renderSection: ({ title, columns, deleted }) => (
-  <section style={{ opacity: deleted ? 0.5 : 1 }}>
-    <h3>{title}</h3>
-    {columns}
-  </section>
+render: ({ title, onSelect }) => (
+  <button type="button" onClick={onSelect}>{title}</button>
 );
 ```
 
 ```typescript
 // ❌ Library — ships HTML/design
 return (
-  <div style={{ marginBottom: 20 }}>
-    <h3>{title}</h3>
-    <button type="button">×</button>
-  </div>
+  <button type="button" onClick={onSelect} style={{ padding: 8 }}>
+    {title}
+  </button>
 );
 ```
 

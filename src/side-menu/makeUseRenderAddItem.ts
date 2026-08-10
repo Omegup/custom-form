@@ -8,11 +8,11 @@
 import type { ReactNode } from "react";
 import type { FlatFormItemEditSession, ParamsDom } from "./_deps";
 import type { MenuItemDefinition } from "./MenuItemDefinition.t";
-import type { AddFormItemProps } from "./AddFormItem";
+import type { AddFormItemSlotArgs } from "./AddFormItem";
 
 export const makeUseRenderAddItem =
   <TypeNames extends string, Params extends ParamsDom<TypeNames>>(
-    renderAddItem: (args: AddFormItemProps<TypeNames, Params>) => ReactNode,
+    renderAddItem: (args: AddFormItemSlotArgs<TypeNames, Params>) => ReactNode,
     useMenuItems: () => MenuItemDefinition<TypeNames, Params>[],
     random: () => string,
   ) =>

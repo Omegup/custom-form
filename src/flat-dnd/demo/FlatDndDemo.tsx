@@ -5,6 +5,8 @@
  * reorder within a column or into a nested panel column.
  */
 import { useMemo, useState } from "react";
+import { columnsChrome } from "../../section-view/demo/sectionViewDemoHelper";
+import { renderAddFormItem } from "../../side-menu/demo/sideMenuDemoHelper";
 import * as demo from "./flatDndDemoHelper";
 import * as types from "./flatDndDemoTypes.t";
 import { WebRecursiveEdit } from "./WebRecursiveEdit";
@@ -24,7 +26,13 @@ const cloneFn: lib.Clone<types.TypeNames, types.Params, types.Ctx, types.Section
   );
 
 const useRenderAddItem = lib.makeUseRenderAddItem<types.TypeNames, types.Params>(
-  (args) => <lib.AddFormItem {...args} />,
+  (args) => (
+    <lib.AddFormItem
+      {...args}
+      label="+ Add item"
+      render={renderAddFormItem}
+    />
+  ),
   () => demo.MENU_ITEMS,
   demo.randomId,
 );
@@ -39,6 +47,7 @@ const SectionComponent = lib.SectionFormItemHOC<
 >({
   viewers: demo.viewers,
   useRenderAddItem,
+  columnsChrome,
   renderTitle: (props) => <strong>{props.section.header.title}</strong>,
   renderEdit: WebRecursiveEdit,
 });

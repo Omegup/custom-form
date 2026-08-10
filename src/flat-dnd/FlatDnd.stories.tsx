@@ -22,7 +22,7 @@ export default {
       },
       description: {
         component:
-          "Web HTML5 drag-and-drop `renderEdit` — `SectionFormItemHOC` (`section-view`) with `renderEdit: WebRecursiveEdit` swapped in for `ColumnsEdit`. All DnD UI comes from the local `drag-drop-tree` package (literal port of school's package); `WebRecursiveEdit` is ~30 lines of demo glue (`toDndTree` → `DnDTreeCore` → `cleanNodes`), same wiring as school's `FlatDnd`. Drag within a column or into nested panel columns. Each section has its own `DnDTreeCore` (school parity). Soft-deleted rows aren't draggable. Pure conversion logic stays in `flat-dnd` (lib); only the demo imports `drag-drop-tree`'s React components.",
+          "Web HTML5 drag-and-drop `renderEdit` — `SectionFormItemHOC` (`section-view`) with `renderEdit: WebRecursiveEdit` swapped in for `ColumnsEdit`. Headless engine from `drag-drop-tree` (`DnDTreeCore` + `RecursiveTreeNode`); HTML chrome is demo-owned. `WebRecursiveEdit` wires `toDndTree` → core → `cleanNodes`, same as school's `FlatDnd`. Drag within a column or into nested panel columns. Each section has its own `DnDTreeCore`. Soft-deleted rows aren't draggable. Pure conversion stays in `flat-dnd` (lib).",
       },
     },
   },

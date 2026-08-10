@@ -1,50 +1,31 @@
 /**
- * Section `renderEdit` — school `FlatDnd`/`RecursiveEdit` wiring, minimal demo
- * glue: `flat-dnd` builds/cleans the tree; `drag-drop-tree` owns all DnD UI.
+ * Section `renderEdit` — school `FlatDnd`/`RecursiveEdit` wiring.
+ * Demo owns all HTML; `drag-drop-tree` lib is headless (`DnDTreeCore` +
+ * `RecursiveTreeNode`). Drop indicator chrome is local.
  */
 import { useMemo, useRef, useState, type CSSProperties } from "react";
-import {
-  DnDTreeCore,
-  Indicator,
-  RecursiveTreeNode,
-  type Handlers,
-} from "../../drag-drop-tree";
+import { DnDTreeCore, RecursiveTreeNode, type Handlers } from "../../drag-drop-tree";
+import { MoveBar } from "../../form-edit/demo/editFormDemoHelper";
 import * as lib from "./library";
 
-type Ctx = {};
+type Ctx = Record<string, never>;
 
-const MoveActionsBar = ({ actions }: { actions: lib.MoveActions }) => {
-  const Btn = ({
-    label,
-    onClick,
-  }: {
-    label: string;
-    onClick: null | undefined | (() => void);
-  }) => (
-    <button
-      type="button"
-      disabled={!onClick}
-      onClick={onClick ?? undefined}
-      style={{ padding: "2px 7px", fontSize: 11, opacity: onClick ? 1 : 0.3 }}
-    >
-      {label}
-    </button>
-  );
-  return (
-    <span style={{ display: "inline-flex", gap: 3, flexShrink: 0 }}>
-      {actions.isDeleted ? (
-        <Btn label="Restore" onClick={actions.restore} />
-      ) : (
-        <>
-          <Btn label="↑" onClick={actions.up} />
-          <Btn label="↓" onClick={actions.down} />
-          <Btn label="Clone" onClick={actions.clone} />
-          <Btn label="Remove" onClick={actions.remove} />
-        </>
-      )}
-    </span>
-  );
-};
+const INDICATOR_COLOR = "#4a90d9";
+
+const Indicator = ({ color }: { color: string }) => (
+  <div style={{ display: "flex", alignItems: "center", height: 0, overflow: "visible" }}>
+    <div
+      style={{
+        width: 0,
+        height: 0,
+        borderTop: "5px solid transparent",
+        borderBottom: "5px solid transparent",
+        borderLeft: `8px solid ${color}`,
+      }}
+    />
+    <div style={{ width: "100%", height: 2, background: color }} />
+  </div>
+);
 
 const emptyColumnStyle: CSSProperties = {
   minHeight: 28,
@@ -99,7 +80,7 @@ export const WebRecursiveEdit = <
             />
             Show deleted
           </label>
-          <MoveActionsBar actions={actions} />
+          <MoveBar actions={actions} extra={[]} />
         </div>
       </div>
       <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
@@ -111,10 +92,10 @@ export const WebRecursiveEdit = <
             <RecursiveTreeNode<lib.DndNodeValue<TypeNames, Params>, Ctx>
               key={key}
               {...treeProps}
-              ctx={{ theme: lib.defaultTheme }}
+              ctx={{}}
               bottomThreshold={0.5}
               topThreshold={0.5}
-              renderIndicator={(where) => (where ? <Indicator theme={lib.defaultTheme} /> : null)}
+              renderIndicator={(where) => (where ? <Indicator color={INDICATOR_COLOR} /> : null)}
               renderChildren={(children, node) =>
                 node.type === "column" ? (
                   <>{children}</>

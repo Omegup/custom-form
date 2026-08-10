@@ -1,6 +1,9 @@
+/**
+ * Headless DnD tree engine — school `DnDTreeCore`. Host supplies node chrome
+ * via `renderComponent` (see `demo/DnDTree.tsx` for the HTML convenience wrap).
+ */
 import { useImperativeHandle, useMemo, useState, type DragEvent } from "react";
-import { TreeNodeComponent } from "./Components";
-import type { DnDTreeCoreProps, DnDTreeProps, DropPosition, TreeNode } from "./types";
+import type { DnDTreeCoreProps, DropPosition, TreeNode } from "./types";
 import { applyDrop } from "./applyDrop";
 import {
   collectSubtreeIds,
@@ -135,20 +138,3 @@ export const DnDTreeCore = <T,>({
     </>
   );
 };
-
-export const DnDTree = <T, Ctx>({
-  ctx,
-  nodes,
-  setNodes,
-  renderItem,
-  handlersRef,
-}: DnDTreeProps<T, Ctx>) => (
-  <DnDTreeCore<T>
-    nodes={nodes}
-    setNodes={setNodes}
-    handlersRef={handlersRef}
-    renderComponent={({ key, ...props }) => (
-      <TreeNodeComponent key={key} {...props} renderItem={renderItem} ctx={ctx} />
-    )}
-  />
-);

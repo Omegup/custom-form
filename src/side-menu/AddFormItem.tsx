@@ -1,16 +1,27 @@
 /**
- * Column-slot "+ Add" dropdown — school section-edit-ui `AddFormItem` on a
- * plain toggle (no BareSelect / theme). Same catalog rows as `Side`
- * (`FormMenuItem`); picking a type opens an insert session at the slot's
- * flat index (`total: 0`).
+ * Column-slot "+ Add" dropdown — school section-edit-ui `AddFormItem` logic
+ * (open/close + insert session). Host owns toggle/menu chrome via `render`.
  */
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { FlatFormItemEditSession, ParamsDom } from "./_deps";
 import { openFormItemInsertSession } from "./_deps";
-import { FormMenuItem } from "./FormMenuItem";
+import { createBlankFormItem } from "./createBlankFormItem";
 import type { MenuItemDefinition } from "./MenuItemDefinition.t";
 
-export type AddFormItemProps<
+export type AddFormItemRenderArgs = {
+  open: boolean;
+  label: string;
+  toggle: () => void;
+  items: {
+    key: string;
+    title: string;
+    icon?: ReactNode;
+    onSelect: () => void;
+  }[];
+};
+
+/** Slot wiring the factory can fill — host adds `label` when rendering `AddFormItem`. */
+export type AddFormItemSlotArgs<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
 > = {
@@ -19,7 +30,21 @@ export type AddFormItemProps<
   menuItems: MenuItemDefinition<TypeNames, Params>[];
   random: () => string;
   setAddItem: (session: FlatFormItemEditSession<TypeNames, Params>) => void;
-  label?: string;
+};
+
+export type AddFormItemArgs<
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames>,
+> = AddFormItemSlotArgs<TypeNames, Params> & {
+  /** Host-owned control copy (e.g. demo `"+ Add item"`). */
+  label: string;
+};
+
+export type AddFormItemProps<
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames>,
+> = AddFormItemArgs<TypeNames, Params> & {
+  render: (args: AddFormItemRenderArgs) => ReactNode;
 };
 
 export const AddFormItem = <
@@ -30,33 +55,27 @@ export const AddFormItem = <
   menuItems,
   random,
   setAddItem,
-  label = "+ Add item",
+  label,
+  render,
 }: AddFormItemProps<TypeNames, Params>) => {
   const [open, setOpen] = useState(false);
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        style={{ fontSize: 12, opacity: 0.75 }}
-      >
-        {label}
-      </button>
-      {open && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          {menuItems.map((item) => (
-            <FormMenuItem
-              key={item.header.type}
-              item={item}
-              random={random}
-              onClick={(newItem) => {
-                setOpen(false);
-                setAddItem(openFormItemInsertSession(newItem, span));
-              }}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
+  return render({
+    open,
+    label,
+    toggle: () => setOpen((v) => !v),
+    items: menuItems.map((item) => ({
+      key: item.header.type,
+      title: item.title,
+      icon: item.icon,
+      onSelect: () => {
+        setOpen(false);
+        setAddItem(
+          openFormItemInsertSession(
+            createBlankFormItem(item, random),
+            span,
+          ),
+        );
+      },
+    })),
+  });
 };

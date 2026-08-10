@@ -1,7 +1,6 @@
 /** Demo-only cross-package imports — see src/README.md import rules. */
 export * from "../index";
 export * from "../_deps";
-export { defaultTheme } from "../../drag-drop-tree";
 export type {
   Branded,
   Children,

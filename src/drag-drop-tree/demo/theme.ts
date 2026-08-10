@@ -1,7 +1,5 @@
 /**
- * Minimal `Theme` stand-in for school's `school-style` `Theme` — only the
- * tokens `Components/` actually read. Hosts pass `defaultTheme` (or their own)
- * via `DnDTree` / `TreeNodeComponent`'s `ctx.theme`.
+ * Minimal theme stand-in for school's `school-style` — demo/host chrome only.
  */
 export type Theme = {
   colors: {

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { FieldRow, FormContainer } from "../../form-edit/demo/editFormDemoHelper";
+import { FieldRow, FormContainer, MoveBar } from "../../form-edit/demo/editFormDemoHelper";
 import sectionViewDemoSource from "./SectionViewDemo.tsx?raw";
 import sectionViewDemoTypesSource from "./sectionViewDemoTypes.t.ts?raw";
 import * as types from "./sectionViewDemoTypes.t";
@@ -109,6 +109,49 @@ export const renderCard = (
     )}
   </div>
 );
+
+// ── ColumnsEdit chrome (demo HTML — not part of the library) ─────────────────
+
+export const columnsChrome: lib.ColumnsEditChrome = {
+  renderMoveActions: (actions) => <MoveBar actions={actions} extra={[]} />,
+  renderColumn: ({ children }) => (
+    <div
+      style={{
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        gap: 6,
+        minWidth: 0,
+      }}
+    >
+      {children}
+    </div>
+  ),
+  renderSection: ({ deleted, title, actions, body }) => (
+    <section
+      style={{
+        opacity: deleted ? 0.6 : 1,
+        border: "1px solid #ddd",
+        borderRadius: 6,
+        padding: 12,
+        marginBottom: 12,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 8,
+        }}
+      >
+        <div>{title}</div>
+        {columnsChrome.renderMoveActions(actions)}
+      </div>
+      <div style={{ display: "flex", gap: 12, marginTop: 8 }}>{body}</div>
+    </section>
+  ),
+};
 
 // ── Per-item extra: live name binding + move actions, keyed by id ─────────────
 
