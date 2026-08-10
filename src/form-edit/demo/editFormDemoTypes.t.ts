@@ -1,4 +1,4 @@
-import type { Dispatch, SetStateAction } from "react";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
 import type * as lib from "./library";
 
 export type TypeNames = "field";
@@ -48,11 +48,26 @@ export type EditorArgs = {
 
 export type ExtraAction = { label: string; onClick: () => void };
 
+/**
+ * Column "+ add" slot — school `AppNodeIndex` (`{ index, sIndex }`).
+ * Hosts compute `index` via `getFlatInsertionIndex` (FlatDnd list-node index).
+ */
+export type AddItemSlot = { index: number; sIndex: number };
+
+/** Rendered blocks handed to `renderLayout` so demos can add a sidebar. */
+export type EditFormLayoutArgs = EditFormSideArgs & {
+  alert: ReactNode;
+  details: ReactNode;
+  sections: ReactNode;
+};
+
 export type EditFormTestProps = {
   flatItems: FlatItems;
   updateArgs: (patch: Partial<Data>) => void;
   extra?: (item: DemoRecursiveItem) => ExtraAction[];
   sectionExtra?: (section: DemoSection) => ExtraAction[];
+  renderAddItem?: (slot: AddItemSlot) => ReactNode;
+  renderLayout?: (args: EditFormLayoutArgs) => ReactNode;
 };
 
 export type Data = {

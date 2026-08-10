@@ -159,7 +159,8 @@ const nameViewers: types.NameViewers = {
 
 const ItemName = lib.createFormItemByGetChild(nameViewers, (x) => x);
 
-const itemName = (ctx: types.Ctx, header: types.ItemHeader): ReactNode => (
+/** Exported for the side-menu demo (same editor stack). */
+export const itemName = (ctx: types.Ctx, header: types.ItemHeader): ReactNode => (
   <ItemName
     viewProps={{
       formItem: header,
@@ -175,11 +176,21 @@ const itemName = (ctx: types.Ctx, header: types.ItemHeader): ReactNode => (
 
 // ── useHook + wrapper ─────────────────────────────────────────────────────────
 
+/**
+ * Shared hook for every type (unlike school's per-type Formik `useFormItemEditor`),
+ * so a cross-cutting concern like "which section?" (school's `renderSection`
+ * companion sub-editor, composed into each domain editor via `question()`)
+ * is added **once here** instead of decorated onto each `Editor` — no
+ * `impRef` composition needed. Only active for insert sessions with more
+ * than one candidate section (`extra.sectionPicker` set by side-menu);
+ * a no-op for edits and for `AddFormItem` slot inserts, which already have
+ * a concrete `index`/section.
+ */
 const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
   props: types.EditorProps<K>,
   { validate }: types.Validate<K>,
 ): types.ItemStateFor<K> => {
-  const { onCommit } = props.extra;
+  const { onCommit, sectionPicker } = props.extra;
   const { formItem: draft } = props;
   const [errors, setErrors] = useState<types.ItemValidateErrors<K>>({});
 
@@ -194,13 +205,16 @@ const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
         next.sIndex ??= message;
       },
     });
+    if (sectionPicker && sectionPicker.sections.length > 1 && sectionPicker.sIndex === -1) {
+      next.sIndex ??= "Pick a section";
+    }
     setErrors(next);
     if (next.sIndex) return;
     if (next.header?.params && Object.keys(next.header.params).length > 0) {
       return;
     }
     onCommit(draft);
-  }, [draft, onCommit, validate]);
+  }, [draft, onCommit, validate, sectionPicker]);
 
   return {
     state: lib.branded<types.ItemState<K>, "item-edit-state">({
@@ -208,11 +222,45 @@ const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
       errors,
       isError: (param) => Boolean(errors.header?.params[param]),
       isSectionError: Boolean(errors.sIndex),
+      sectionPicker,
     }),
   };
 };
 
-const FormItemEditor = lib.createFormItemEditorWrapper<
+const renderDialog = <K extends types.TypeNames>(
+  dialogArgs: types.DialogArgs,
+  state: types.ItemState<K>,
+  children: ReactNode,
+) => {
+  const picker = state.sectionPicker;
+  const showPicker = Boolean(picker && picker.sections.length > 1);
+  return (
+    <demo.EditorDialog
+      title={dialogArgs.title}
+      onCancel={dialogArgs.onCancel}
+      onSave={state.save}
+      saveError={showPicker ? null : state.errors.sIndex ?? null}
+    >
+      {children}
+      {picker && showPicker && (
+        <demo.SelectSection
+          sections={picker.sections}
+          value={picker.sIndex}
+          error={state.errors.sIndex ?? null}
+          onChange={picker.setSIndex}
+        />
+      )}
+    </demo.EditorDialog>
+  );
+};
+
+/**
+ * Exported for the side-menu demo (same editor stack).
+ * Pass `sectionPicker` on `extra` (side-menu "add") to ask which section a
+ * new item belongs to; omit it (edits, `AddFormItem` slot inserts) and the
+ * form behaves exactly as before.
+ */
+export const FormItemEditor = lib.createFormItemEditorWrapper<
   types.TypeNames,
   types.Params,
   types.Ctx,
@@ -226,16 +274,7 @@ const FormItemEditor = lib.createFormItemEditorWrapper<
     panel: { editor: PanelEditor },
   },
   useItemEditor,
-  (dialogArgs, state, children) => (
-    <demo.EditorDialog
-      title={dialogArgs.title}
-      onCancel={dialogArgs.onCancel}
-      onSave={state.save}
-      saveError={state.errors.sIndex ?? null}
-    >
-      {children}
-    </demo.EditorDialog>
-  ),
+  renderDialog,
 );
 
 // ── Story integration ─────────────────────────────────────────────────────────

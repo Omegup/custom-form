@@ -17,6 +17,8 @@ export const EditFormTest = ({
   updateArgs,
   extra,
   sectionExtra,
+  renderAddItem,
+  renderLayout,
 }: types.EditFormTestProps) => {
   const [focused, setFocused] = useState<lib.AutoFocusState>(null);
   const [toRemove, setToRemove] = useState<types.PendingRemove | null>(null);
@@ -33,8 +35,10 @@ export const EditFormTest = ({
     [flatItems],
   );
 
+  // Visibility only — school always jumps deleted neighbors when moving
+  // (action.utils `isDeleted`), so active items never land in a deleted section.
   const [showDeleted, setShowDeleted] = useState(true);
-  const jump = !showDeleted;
+  const jump = true;
 
   const sectionOfItem = useMemo(
     () => lib.buildItemSectionDict(flatItems),
@@ -51,39 +55,43 @@ export const EditFormTest = ({
 
   const itemActions = lib.getFormItemMoveActions(actionsArgs, cloneFn, jump);
 
-  return (
-    <>
-      {toRemove && (
-        <demo.RemoveAlert
-          pending={toRemove}
-          onConfirm={() => {
-            toRemove.rm();
-            setToRemove(null);
-          }}
-          onCancel={() => setToRemove(null)}
-        />
-      )}
-      <button onClick={() => setShowDeleted(!showDeleted)}>
-        {showDeleted ? "Hide deleted" : "Show deleted"}
-      </button>
-      <demo.SectionsList>
-        {sections.map((section) => {
-          const sectionFocused = ctx.autoFocused(section.header.id);
-          const sActions = lib.getSectionMoveActions(
-            actionsArgs,
-            cloneFn,
-            section,
-            jump,
-          );
-          return (
-            <demo.SectionPanel
-              key={section.header.id}
-              title={section.header.title}
-              focused={sectionFocused}
-              sectionActions={sActions}
-              sectionExtra={sectionExtra?.(section) ?? []}
-              columns={section.items.map((column) =>
-                column.map((item) => {
+  const alert = toRemove && (
+    <demo.RemoveAlert
+      pending={toRemove}
+      onConfirm={() => {
+        toRemove.rm();
+        setToRemove(null);
+      }}
+      onCancel={() => setToRemove(null)}
+    />
+  );
+  const details = (
+    <button onClick={() => setShowDeleted(!showDeleted)}>
+      {showDeleted ? "Hide deleted" : "Show deleted"}
+    </button>
+  );
+  const sectionsNode = (
+    <demo.SectionsList>
+      {sections.map((section, sIndex) => {
+        if (section.header.deleted && !showDeleted) return null;
+        const sectionFocused = ctx.autoFocused(section.header.id);
+        const sActions = lib.getSectionMoveActions(
+          actionsArgs,
+          cloneFn,
+          section,
+          jump,
+        );
+        const sectionDeleted = section.header.deleted;
+        return (
+          <demo.SectionPanel
+            key={section.header.id}
+            title={section.header.title}
+            focused={sectionFocused}
+            sectionActions={sActions}
+            sectionExtra={sectionDeleted ? [] : sectionExtra?.(section) ?? []}
+            columns={section.items.map((column, colIndex) => (
+              <>
+                {column.map((item) => {
                   if (item.header.deleted && !showDeleted) return null;
                   const actions = itemActions(item);
                   const fieldFocused = ctx.autoFocused(item.header.id);
@@ -93,17 +101,46 @@ export const EditFormTest = ({
                       name={item.header.params.name}
                       focused={fieldFocused}
                       actions={actions}
-                      extra={extra?.(item) ?? []}
+                      extra={sectionDeleted ? [] : extra?.(item) ?? []}
+                      parentDeleted={sectionDeleted}
                     />
                   );
-                }),
-              )}
-            />
-          );
-        })}
-      </demo.SectionsList>
-    </>
+                })}
+                {!sectionDeleted &&
+                  renderAddItem?.({
+                    index: lib.getFlatInsertionIndex(
+                      section.meta.index,
+                      section.items,
+                      colIndex,
+                    ),
+                    sIndex,
+                  })}
+              </>
+            ))}
+          />
+        );
+      })}
+    </demo.SectionsList>
   );
+
+  if (!renderLayout)
+    return (
+      <>
+        {alert}
+        {details}
+        {sectionsNode}
+      </>
+    );
+  return renderLayout({
+    alert,
+    details,
+    sections: sectionsNode,
+    setFlatItems: (update) =>
+      updateArgs({
+        flatItems: typeof update === "function" ? update(flatItems) : update,
+      }),
+    focus: (id) => setFocused({ id, value: true }),
+  });
 };
 
 export const EditFormDemo = ({

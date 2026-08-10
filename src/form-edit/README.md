@@ -19,10 +19,10 @@ Flat markers ↔ consolidated tree, plus pure flat mutations.
 | `consolidate.ts` | `consolidateSections()` / `customConsolidateSections()` — flat array → `SectionWithItems[]` tree |
 | `flatten.ts` | `flatten()` / `customFlat()` — recursive item/section → flat markers |
 | `SectionWithItems.t.ts` | Hydrated section: `{ meta, header, items[][] }` |
-| `getFlatInsertionIndex.ts` | Column slot → flat insertion index |
+| `getFlatInsertionIndex.ts` | **`getFlatInsertionIndex(sectionFlatIndex, columns, colIndex)`** — column slot → flat insertion index (used by `side-menu` add dropdowns) |
 | `buildItemSectionDict.ts` | Item id → owning section dictionary |
 | `applyFlatFormItem.ts` | **`applyFlatFormItem(items, editing, item, cols)`** — save an edited item span (`resizeColumns` + `flatten().formItem` + `toSpliced`); `editing.index === -1` inserts into section `sIndex` instead. Port of school `useDialog.tsx` `setEditFormItemX` |
-| `openFormItemEditSession.ts` | **`openFormItemEditSession(item)`** — snapshot a consolidated item into `{ draft, children, index, total, sIndex }` (`FlatFormItemEditSession`) for a single-item edit dialog |
+| `openFormItemEditSession.ts` | **`openFormItemEditSession(item)`** — snapshot a consolidated item into `{ draft, children, index, total, sIndex }` (`FlatFormItemEditSession`) for a single-item edit dialog. Also **`openFormItemInsertSession(newItem, span?)`** — same session shape for a *new* item (`total: 0`; default span `-1/-1` appends, slots pass a concrete index) |
 
 ### `flat-move-actions/`
 
@@ -62,16 +62,30 @@ Central interactive demo. Owns:
 <EditFormTest
   extra={(item) => [{ label: "Edit", onClick: () => openItemEditor(item) }]}
   sectionExtra={(s) => [{ label: "Edit", onClick: () => openSectionEditor(s) }]}
-  renderLayout={({ sections, alert, details, setFlatItems, setFocused, ctx }) => (
+  renderAddItem={({ index, sIndex }) => (
+    <AddDropdown onPick={(newItem) =>
+      openItemEditor(openFormItemInsertSession(newItem, { index, sIndex }))
+    } />
+  )}
+  renderLayout={({ sections, alert, details, setFlatItems, focus }) => (
     <>
       {alert}
-      <MySidePanel setFlatItems={setFlatItems} focus={(id) => setFocused({ id, focused: true })} />
+      <MySidePanel setFlatItems={setFlatItems} focus={focus} />
       {sections}
       {details}
     </>
   )}
 />
 ```
+
+`renderAddItem` is school's `addItem: (node: { index, sIndex }) => ReactNode`
+— injected at the end of every list slot (section columns and nested panel
+columns). The host (or `makeUseRenderAddItem`) receives the already-computed
+span; `getFlatInsertionIndex` mirrors FlatDnd's list-node index. `renderLayout`
+replaces the default stacked layout (alert / details / sections) so demos can
+place a sidebar. The same two props exist on the multi-type list shell
+`FormItemEditorFormTest` (form-item-editor demo), which the side-menu story
+composes.
 
 Both callbacks receive the full consolidated node: `extra(item)` gets the
 recursive item with `meta` (`index` / `total` / `sIndex`), `sectionExtra(section)`

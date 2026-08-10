@@ -52,9 +52,26 @@ export type ItemMeta = lib.MetaDom<{
   sIndex: number;
 }>;
 
+/** One choice in the section picker — school `value: p.index` (section marker's flat index). */
+export type SectionOption = { index: number; title: string };
+
+/**
+ * Present only on **insert** sessions (`index === -1` — side-menu "add",
+ * school `add: editFormItem.index === -1`); undefined for edits and for
+ * slot inserts (`AddFormItem` slots, which already have a concrete `index`).
+ * `useItemEditor` / `renderDialog` read this to render/validate the section
+ * `<select>` when there is more than one non-deleted section to choose from.
+ */
+export type SectionPicker = {
+  sIndex: number;
+  setSIndex: (sIndex: number) => void;
+  sections: SectionOption[];
+};
+
 export type ItemDraft = {
   /** Called after validate succeeds — commits the current draft as-is. */
   onCommit: <K extends TypeNames>(draft: lib.FlatFormItem<K, Params>) => void;
+  sectionPicker?: SectionPicker;
 };
 
 export type ItemExtra = lib.ItemEditExtraDom<ItemDraft>;
@@ -75,6 +92,8 @@ export type ItemState<K extends TypeNames> = lib.ItemEditStateDom<{
   isError: (param: keyof Params[K]) => boolean;
   isSectionError: boolean;
   errors: ItemValidateErrors<K>;
+  /** Passed through from `extra.sectionPicker` so `renderDialog` can render it once, for any type. */
+  sectionPicker?: SectionPicker;
 }>;
 
 export type ItemStateMap = { [K in TypeNames]: ItemState<K> };
@@ -144,6 +163,31 @@ export type HeadingEditorProps = EditorPropsFor<"heading">;
 export type PanelEditorProps = EditorPropsFor<"panel">;
 
 export type SetEditingSession = Dispatch<SetStateAction<EditingSession | null>>;
+
+/** Consolidated section as rendered by the list shell — meta carries the flat span. */
+export type ListSection = lib.SectionWithItems<
+  TypeNames,
+  Params,
+  Section,
+  lib.SectionMetaDom<lib.Indexed>,
+  ItemMeta
+>;
+
+/**
+ * Column "+ add" slot — school `AppNodeIndex` (`{ index, sIndex }`).
+ * Hosts compute `index` via `getFlatInsertionIndex` (FlatDnd list-node index);
+ * `makeUseRenderAddItem` returns a renderer of this exact shape.
+ */
+export type AddItemSlot = { index: number; sIndex: number };
+
+/** Rendered blocks handed to `renderLayout` so demos can add a sidebar. */
+export type ListLayoutArgs = {
+  alert: ReactNode;
+  details: ReactNode;
+  sections: ReactNode;
+  setFlatItems: Dispatch<SetStateAction<FlatItems>>;
+  focus: (id: string) => void;
+};
 
 export type StoryArgs = {
   flatItems: FlatItems;

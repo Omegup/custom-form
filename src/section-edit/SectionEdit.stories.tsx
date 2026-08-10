@@ -28,7 +28,7 @@ export default {
       },
       description: {
         component:
-          "Click **Edit** on a section header. The dialog edits **title**, **description**, and **column count** (1–3); `validateSectionForm` requires non-empty title and description. Save re-flattens the section via `updateSectionInFlat` (`resizeColumns` + `flatten().section` + `toSpliced`). Decreasing columns merges trailing slots into the last kept column.",
+          "Click **Edit** on a section header. The dialog edits **title**, **description**, and **column count** (1–3); the demo's own `validate` requires non-empty title and description. Save re-flattens the section via `updateSectionInFlat` (`resizeColumns` + `flatten().section` + `toSpliced`). Decreasing columns merges trailing slots into the last kept column.",
       },
     },
   },

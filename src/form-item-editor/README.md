@@ -26,8 +26,8 @@ Everything else is **consumer code** (demo, app UI, or a sibling package).
 | School | Slot-tree | Why |
 |---|---|---|
 | `props` + `extra` only; draft in `useHook` via formik | `formItem` / `setFormItem` on props | flat edit model instead of recursive draft inside the hook |
-| `recursiveFormItem`, `setFormItemSection`, `cols` on hook state | panel `n` on `FlatFormItem`; section pick deferred | flat-first demo; section save lives in `section-edit`, in-dialog picker waits for `edit-section` |
-| `Editor` has `render()` slot for companion sub-editors | no `render()` slot yet | **parity gap** — add when a real multi-ref editor needs it |
+| `recursiveFormItem`, `setFormItemSection`, `cols` on hook state | panel `n` on `FlatFormItem`; section pick via `extra.sectionPicker` | flat-first demo; section save lives in `section-edit` |
+| `Editor` has `render()` slot for companion sub-editors, composed per-type via `question()` | no `render()` slot; `impRef` is already a plain named-ref map (`.main`, …) so an `Editor` *could* register extra validators directly | not needed yet — school needs `render()` because each type has its own Formik `useHook`; here `useItemEditor` is one hook shared by every type, so a cross-cutting rule (e.g. the section picker) is added once there instead of decorated onto each `Editor` |
 
 ## Demo vs library vs deferred features
 
@@ -78,7 +78,6 @@ needs `form-item-editor` + `section-edit`, so it lands with `editor/`.
 | Concern | Target package | School reference |
 |---|---|---|
 | Formik `useFormItemEditor` (`handleSubmit`, `isError`, `setColumns`) | app UI layer | `legacy-front/.../useFormItemEditor.ts` |
-| Section picker + `setFormItemSection` | `edit-section` + editor extras (section flat save already in **`section-edit`** `updateSectionInFlat`) | `editors/selectSection.tsx` |
 | Real modal chrome | app / `editor/` | `form-edit-ui/renderDefaultDialog.tsx` |
 | `update` + `validate` on responses | `response/` + `form-react` | `getUseImpRefViewProps`, `CustomFormResponder` |
 
@@ -106,6 +105,30 @@ createFormItemEditorWrapper(editors, useHook, renderDialog)
 1. **Edit** opens a session (`form-edit` `openFormItemEditSession`) with draft + children + flat span
 2. **`FormItemEditor`** edits the draft via `setFormItem`
 3. **`save`** validates, then `onCommit` → `form-edit` `applyFlatFormItem` (React orchestrator itself → **`editor/`** when migrated)
+
+### Cross-cutting rule example: "which section?" (`side-menu`)
+
+School's `editors/selectSection.tsx` is a companion sub-editor — composed
+into *every* domain editor via the `question()` decorator — that shows a
+section `<select>` and blocks Save until one is picked, but only for an
+**insert** with more than one candidate section (`add && sections.length !== 1`,
+`add = editFormItem.index === -1`). Slot inserts (`AddFormItem`) already
+have a concrete index/section, so `add` is false there and nothing shows.
+
+Slot-tree needs no `Editor`-level composition to get the same behavior,
+because — unlike school — `useItemEditor` is **one hook shared by every
+type**. The rule is added once, at the hook + `renderDialog`, not per-`Editor`:
+
+```
+extra.sectionPicker = { sIndex, setSIndex, sections }   // set only by side-menu, only on insert
+  → useItemEditor: required + reflected in errors.sIndex/state.sectionPicker when sections.length > 1
+  → renderDialog: renders <SelectSection> once, after `children`, for whichever type is open
+```
+
+`FieldEditor` / `HeadingEditor` / `PanelEditor` are unaware of any of this —
+same as before the picker existed. See `side-menu/demo/SideMenuDemo.tsx`
+(builds `sectionPicker.sections` via `consolidateSections`) and
+`side-menu/README.md`.
 
 ## Types cheat sheet
 

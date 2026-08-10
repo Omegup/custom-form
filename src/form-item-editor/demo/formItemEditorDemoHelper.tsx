@@ -285,6 +285,42 @@ export const SelectColumns = ({
   </fieldset>
 );
 
+/** School `editors/selectSection.tsx` `<Select>` — visible only when there's more than one section to choose from. */
+export const SelectSection = ({
+  sections,
+  value,
+  error,
+  onChange,
+}: {
+  sections: types.SectionOption[];
+  value: number;
+  error: string | null;
+  onChange: (index: number) => void;
+}) => (
+  <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+    <span style={{ fontSize: 12, opacity: 0.7 }}>Section</span>
+    <select
+      value={value}
+      onChange={(e) => onChange(Number(e.target.value))}
+      style={{
+        padding: "6px 8px",
+        borderRadius: 4,
+        border: `1px solid ${error ? "#c00" : "#ccc"}`,
+      }}
+    >
+      <option value={-1} disabled>
+        Choose a section…
+      </option>
+      {sections.map(({ index, title }) => (
+        <option key={index} value={index}>
+          {title}
+        </option>
+      ))}
+    </select>
+    {error && <span style={{ color: "#c00", fontSize: 12 }}>{error}</span>}
+  </label>
+);
+
 const MIN_PANEL_TITLE_LEN = 2;
 
 export const PanelTitleHint = ({ title }: { title: string }) => (
@@ -361,11 +397,15 @@ export const FormItemEditorFormTest = ({
   updateArgs,
   itemName,
   extra,
+  renderAddItem,
+  renderLayout,
 }: {
   flatItems: types.FlatItems;
   updateArgs: (patch: Partial<types.StoryArgs>) => void;
   itemName: (header: types.ItemHeader) => ReactNode;
   extra?: (item: types.ListItem) => ExtraAction[];
+  renderAddItem?: (slot: types.AddItemSlot) => ReactNode;
+  renderLayout?: (args: types.ListLayoutArgs) => ReactNode;
 }) => {
   const [focused, setFocused] = useState<lib.AutoFocusState>(null);
   const [toRemove, setToRemove] = useState<PendingRemove | null>(null);
@@ -384,8 +424,10 @@ export const FormItemEditorFormTest = ({
     () => lib.consolidateSections(flatItems),
     [flatItems],
   );
+  // Visibility only — school always jumps deleted neighbors when moving
+  // (action.utils `isDeleted`), so active items never land in a deleted section.
   const [showDeleted, setShowDeleted] = useState(true);
-  const jump = !showDeleted;
+  const jump = true;
   const sectionOfItem = useMemo(
     () => lib.buildItemSectionDict(flatItems),
     [flatItems],
@@ -400,73 +442,125 @@ export const FormItemEditorFormTest = ({
   };
   const itemActions = lib.getFormItemMoveActions(actionsArgs, cloneFn, jump);
 
-  const renderItem = (item: types.ListItem): ReactNode => {
+  const renderItem = (
+    item: types.ListItem,
+    parentDeleted = false,
+  ): ReactNode => {
     if (item.header.deleted && !showDeleted) return null;
     const actions = itemActions(item);
     const fieldFocused = ctx.autoFocused(item.header.id);
+    const deleted = parentDeleted || item.header.deleted;
     return (
       <div key={item.header.id}>
         <FieldRow
           name={itemName(item.header)}
           focused={fieldFocused}
           actions={actions}
-          extra={extra?.(item) ?? []}
+          extra={parentDeleted ? [] : extra?.(item) ?? []}
+          parentDeleted={parentDeleted}
         />
+        {/*
+          School RecursiveEdit/FlatDnd: every list slot (section column *and*
+          nested panel column) ends with `render.addItem(node)`, where the
+          list-node index is `lastChild.index + lastChild.total` — same as
+          `getFlatInsertionIndex(parent.meta.index, parent.children, col)`.
+        */}
         {item.children.length > 0 && (
           <NestedColumns
-            columns={item.children.map((column) =>
-              column.map((child) => renderItem(child)),
-            )}
+            columns={item.children.map((column, colIndex) => (
+              <>
+                {column.map((child) => renderItem(child, deleted))}
+                {!deleted &&
+                  renderAddItem?.({
+                    index: lib.getFlatInsertionIndex(
+                      item.meta.index,
+                      item.children,
+                      colIndex,
+                    ),
+                    sIndex: item.meta.sIndex,
+                  })}
+              </>
+            ))}
           />
         )}
       </div>
     );
   };
 
-  return (
-    <>
-      {toRemove && (
-        <RemoveAlert
-          pending={{
-            ...toRemove,
-            label:
-              "item" in toRemove.item
-                ? itemName(toRemove.item.item)
-                : undefined,
-          }}
-          onConfirm={() => {
-            toRemove.rm();
-            setToRemove(null);
-          }}
-          onCancel={() => setToRemove(null)}
-        />
-      )}
-      <button type="button" onClick={() => setShowDeleted(!showDeleted)}>
-        {showDeleted ? "Hide deleted" : "Show deleted"}
-      </button>
-      <SectionsList>
-        {sections.map((section) => {
-          const sectionFocused = ctx.autoFocused(section.header.id);
-          const sActions = lib.getSectionMoveActions(
-            actionsArgs,
-            cloneFn,
-            section,
-            jump,
-          );
-          return (
-            <SectionPanel
-              key={section.header.id}
-              title={section.header.title}
-              focused={sectionFocused}
-              sectionActions={sActions}
-              sectionExtra={[]}
-              columns={section.items.map((column) =>
-                column.map((item) => renderItem(item)),
-              )}
-            />
-          );
-        })}
-      </SectionsList>
-    </>
+  const alert = toRemove && (
+    <RemoveAlert
+      pending={{
+        ...toRemove,
+        label:
+          "item" in toRemove.item ? itemName(toRemove.item.item) : undefined,
+      }}
+      onConfirm={() => {
+        toRemove.rm();
+        setToRemove(null);
+      }}
+      onCancel={() => setToRemove(null)}
+    />
   );
+  const details = (
+    <button type="button" onClick={() => setShowDeleted(!showDeleted)}>
+      {showDeleted ? "Hide deleted" : "Show deleted"}
+    </button>
+  );
+  const sectionsNode = (
+    <SectionsList>
+      {sections.map((section, sIndex) => {
+        if (section.header.deleted && !showDeleted) return null;
+        const sectionFocused = ctx.autoFocused(section.header.id);
+        const sActions = lib.getSectionMoveActions(
+          actionsArgs,
+          cloneFn,
+          section,
+          jump,
+        );
+        const sectionDeleted = section.header.deleted;
+        return (
+          <SectionPanel
+            key={section.header.id}
+            title={section.header.title}
+            focused={sectionFocused}
+            sectionActions={sActions}
+            sectionExtra={[]}
+            columns={section.items.map((column, colIndex) => (
+              <>
+                {column.map((item) => renderItem(item, sectionDeleted))}
+                {!sectionDeleted &&
+                  renderAddItem?.({
+                    index: lib.getFlatInsertionIndex(
+                      section.meta.index,
+                      section.items,
+                      colIndex,
+                    ),
+                    sIndex,
+                  })}
+              </>
+            ))}
+          />
+        );
+      })}
+    </SectionsList>
+  );
+
+  if (!renderLayout)
+    return (
+      <>
+        {alert}
+        {details}
+        {sectionsNode}
+      </>
+    );
+  return renderLayout({
+    alert,
+    details,
+    sections: sectionsNode,
+    setFlatItems: (update) =>
+      updateArgs({
+        flatItems: typeof update === "function" ? update(flatItems) : update,
+      }),
+    focus: (id) => setFocused({ id, value: true }),
+  });
 };

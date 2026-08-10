@@ -1,0 +1,79 @@
+---
+description: Use real/existing types instead of ad-hoc inline shapes and casts
+globs: **/*.ts,**/*.tsx
+alwaysApply: false
+---
+
+# Prefer real types over ad-hoc shapes + casts
+
+When a function operates on a recursive or already-modeled structure, its
+parameter types must mirror the actual structure it expects — not a
+loosely-typed stand-in that requires an internal cast to be usable.
+
+If you find yourself writing `as typeof X` (or any cast) to make a narrowed
+inline type behave like the real one, that's a signal the parameter type is
+wrong. Fix the type, don't cast around it.
+
+```typescript
+// ❌ BAD — inline shape with `unknown[][]` children can't actually recurse;
+// requires a cast to "restore" the real type when descending.
+const walk = (
+  columns: { header: { deleted: boolean }; meta: { index: number }; children: unknown[][] }[][],
+) => {
+  for (const node of columns.flat()) {
+    if (!node.header.deleted) walk(node.children as typeof columns);
+  }
+};
+
+// ✅ GOOD — use the library's real recursive type; `node.children` is already
+// that same type, so no cast is needed to recurse.
+const walk = (
+  columns: RecursiveFormItem<TypeNames, Params, MetaDom<SIndexed>>[][],
+) => {
+  for (const node of columns.flat()) {
+    if (!node.header.deleted) walk(node.children);
+  }
+};
+```
+
+Guidelines:
+
+- Search for an existing type (e.g. `RecursiveFormItem`, `SectionWithItems`)
+  before inventing a local inline object type for a function parameter.
+- A parameter typed to accept `X[]` (or `unknown[]`) should genuinely be able
+  to handle any value of type `X` — if the function body assumes a narrower
+  shape, that narrower shape belongs in the parameter type.
+- Prefer generic parameters matching the module's existing generics
+  (`TypeNames`, `Params`, `Meta`, `SectionConfig`, …) over hardcoding concrete
+  field lists.
+
+## Don't "genericize" a hardcoded assumption into a floating one
+
+If a function hardcodes concrete field names that the domain type doesn't
+actually guarantee (e.g. assuming a `Section` has `title`/`description` when
+the real type only requires `id`/`deleted`), making it generic over those
+field names is **not** a fix if the generic has no real link back to the
+domain type. That just moves the same untyped assumption one level down —
+often introducing a genuine cast (`Object.keys(x) as (keyof T)[]`) along the
+way, which this rule already flags as a smell.
+
+Ask: once genericized, does this function still need to know anything about
+the real domain type (`SectionConfig`, `SectionDom`, …)? If **no** — it only
+operates on whatever shape you hand it — it isn't domain-specific logic and
+doesn't belong as typed "library" API for that domain. Either:
+
+- tie the generic to the real shared type (e.g. `Fields extends
+  Pick<SectionConfig, ...>`, constrained by an actual type used elsewhere in
+  the module), so mismatches are real compile errors, or
+- if it truly needs no domain knowledge, don't dress it up as reusable
+  library code — inline the few lines where the concrete shape is already
+  known (usually the demo/host), and delete the "generic" version.
+
+Example: `validateSectionForm({ title, description })` hardcoded to school's
+field names → "genericized" to `Fields extends Record<string, string>` with
+`Fields` inferred only from the `errorMessages` argument. Nothing tied the
+validated keys back to any real `SectionConfig`, so a host could pass field
+names that don't exist on its actual header with no type error — and a field
+named `cols` silently collided with the fixed `cols` slot, producing `never`.
+The fix was to delete it and let the one caller that actually knows its
+concrete `Section` shape (the demo) write the four-line check inline.

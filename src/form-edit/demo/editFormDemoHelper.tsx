@@ -100,11 +100,14 @@ export const FieldRow = ({
   focused,
   actions,
   extra,
+  parentDeleted = false,
 }: {
   name: ReactNode;
   focused: boolean | null;
   actions: lib.MoveActions;
   extra: types.ExtraAction[];
+  /** School `HandledCard`: when the parent is soft-deleted, hide child actions entirely (no Restore). */
+  parentDeleted?: boolean;
 }) => (
   <div
     style={{
@@ -115,19 +118,20 @@ export const FieldRow = ({
       borderRadius: 4,
       border: "1px solid #eee",
       animation: focused !== null ? `pulse${focused ? 1 : 2} .2s 2` : undefined,
-      background: actions.isDeleted ? "#fafafa" : "white",
+      background: actions.isDeleted || parentDeleted ? "#fafafa" : "white",
     }}
   >
     <span
       style={{
         fontSize: 13,
-        opacity: actions.isDeleted ? 0.55 : 1,
-        textDecoration: actions.isDeleted ? "line-through" : undefined,
+        opacity: actions.isDeleted || parentDeleted ? 0.55 : 1,
+        textDecoration:
+          actions.isDeleted || parentDeleted ? "line-through" : undefined,
       }}
     >
       {name}
     </span>
-    <MoveBar actions={actions} extra={extra} />
+    {!parentDeleted && <MoveBar actions={actions} extra={extra} />}
   </div>
 );
 
@@ -143,47 +147,65 @@ export const SectionPanel = ({
   sectionActions: lib.MoveActions;
   sectionExtra: types.ExtraAction[];
   columns: ReactNode[];
-}) => (
-  <div
-    style={{
-      border: "1px solid #ddd",
-      borderRadius: 6,
-      overflow: "hidden",
-      opacity: sectionActions.isDeleted ? 0.45 : 1,
-    }}
-  >
+}) => {
+  const deleted = sectionActions.isDeleted;
+  return (
     <div
       style={{
-        background: "#f2f2f2",
-        padding: "6px 10px",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        animation:
-          focused !== null ? `pulse${focused ? 1 : 2} .2s 2` : undefined,
+        border: "1px solid #ddd",
+        borderRadius: 6,
+        overflow: "hidden",
       }}
     >
-      <strong style={{ fontSize: 13 }}>{title}</strong>
-      <MoveBar actions={sectionActions} extra={sectionExtra} />
-    </div>
-    <div style={{ display: "flex", flexDirection: "row", gap: 4 }}>
-      {columns.map((column, i) => (
-        <div
-          key={i}
+      <div
+        style={{
+          background: "#f2f2f2",
+          padding: "6px 10px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          animation:
+            focused !== null ? `pulse${focused ? 1 : 2} .2s 2` : undefined,
+        }}
+      >
+        <strong
           style={{
-            padding: "6px 10px",
-            display: "flex",
-            flexDirection: "column",
-            gap: 4,
-            flex: 1,
+            fontSize: 13,
+            opacity: deleted ? 0.55 : 1,
+            textDecoration: deleted ? "line-through" : undefined,
           }}
         >
-          {column}
-        </div>
-      ))}
+          {title}
+        </strong>
+        {/* Keep Restore at full opacity — school does not fade clickable endActions. */}
+        <MoveBar actions={sectionActions} extra={sectionExtra} />
+      </div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          gap: 4,
+          opacity: deleted ? 0.55 : 1,
+        }}
+      >
+        {columns.map((column, i) => (
+          <div
+            key={i}
+            style={{
+              padding: "6px 10px",
+              display: "flex",
+              flexDirection: "column",
+              gap: 4,
+              flex: 1,
+            }}
+          >
+            {column}
+          </div>
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export const SectionsList = ({ children }: { children: ReactNode }) => (
   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>

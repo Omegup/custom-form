@@ -8,9 +8,8 @@ src/
 ├── move-actions/            Generic move/clone/remove actions
 ├── form-edit/               Edit orchestration (flat state + section/item actions)
 ├── form-item-editor/        Single-item edit dialog factory
-├── side-menu/               Add-item library sidebar
-├── section-edit/            Section edit types + validation + flat save
-├── edit-section/            SectionHOC + item viewers + add-item slots
+├── side-menu/               Library catalog (Side + AddFormItem slots)
+├── section-edit/            Section edit types + flat save
 ├── editor/                  Composed shell + all-in Storybook demo
 └── response/                Form response value helpers
 ```
@@ -31,14 +30,13 @@ move-actions ──────────────────────�
                               │               │               │
                               └───────────────┴───────────────┘
                                               │
-                                         edit-section
-                                              │
                                          editor
 ```
 
 **Rule:** upper layers import lower layers, never the reverse.
 `form-edit` does not import `form-item-editor`, `side-menu`, or `section-edit`.
 Module demos compose features via props or, for the all-in editor, in `editor/AllInEditor.tsx`.
+`SectionHOC` / section viewers are not a package yet (deferred).
 
 ## Import rules
 
@@ -96,8 +94,9 @@ side-menu, form-item-editor, and section-edit demos.
 | Prop | Purpose |
 |---|---|
 | `extra(item)` | Extra buttons on each field row (e.g. "Edit") |
-| `sectionExtra(section, { cols })` | Extra buttons on each section header (e.g. "Edit") |
-| `renderLayout({ sections, alert, details, ctx, setFlatItems, setFocused })` | Full page layout |
+| `sectionExtra(section)` | Extra buttons on each section header (e.g. "Edit") |
+| `renderAddItem({ index, sIndex })` | "+ Add" control at the end of each list slot (section + nested panel columns) |
+| `renderLayout({ sections, alert, details, setFlatItems, focus })` | Full page layout (e.g. place a sidebar) |
 
 **Exported helpers:** `container(title, children)`, `EditFormTest`, types `EditFormSection`, `EditFormCtx`, …
 
@@ -118,6 +117,5 @@ Use `branded({ ... })` to construct values; do not cast.
 - [form-item-editor/README.md](./form-item-editor/README.md)
 - [side-menu/README.md](./side-menu/README.md)
 - [section-edit/README.md](./section-edit/README.md)
-- [edit-section/README.md](./edit-section/README.md)
 - [editor/README.md](./editor/README.md)
 - [response/README.md](./response/README.md)
