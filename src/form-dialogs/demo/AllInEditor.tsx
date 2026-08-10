@@ -74,7 +74,13 @@ const useRenderAddItem = lib.makeUseRenderAddItem<
   types.TypeNames,
   types.Params
 >(
-  (args) => <lib.AddFormItem {...args} render={renderAddFormItem} />,
+  (args) => (
+    <lib.AddFormItem
+      {...args}
+      label="+ Add item"
+      render={renderAddFormItem}
+    />
+  ),
   () => MENU_ITEMS,
   randomId,
 );
@@ -290,6 +296,8 @@ export const AllInEditor = ({
           }
           sidebar={
             <lib.Side<types.TypeNames, types.Params, types.Section>
+              title="Library"
+              addSectionLabel="+ Add section"
               menuItems={MENU_ITEMS}
               random={randomId}
               blankSection={blankSection}

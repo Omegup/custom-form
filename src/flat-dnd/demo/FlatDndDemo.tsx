@@ -26,7 +26,13 @@ const cloneFn: lib.Clone<types.TypeNames, types.Params, types.Ctx, types.Section
   );
 
 const useRenderAddItem = lib.makeUseRenderAddItem<types.TypeNames, types.Params>(
-  (args) => <lib.AddFormItem {...args} render={renderAddFormItem} />,
+  (args) => (
+    <lib.AddFormItem
+      {...args}
+      label="+ Add item"
+      render={renderAddFormItem}
+    />
+  ),
   () => demo.MENU_ITEMS,
   demo.randomId,
 );
