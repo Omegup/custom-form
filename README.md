@@ -22,7 +22,7 @@ Each module has a colocated `*.stories.tsx`. Story titles match folder names, e.
 
 | Story | Module | What it shows |
 |---|---|---|
-| **form-dialogs/All-in** | `form-dialogs/` | Full composed editor (`SectionFormItemHOC` + every dialog flow) |
+| **form-dialogs/All-in** | `form-dialogs/` | Full composed editor (`SectionFormItemHOC` + `WebRecursiveEdit` DnD + every dialog flow) |
 | form/Form | `form/` | Viewers rendering a JSON-driven form |
 | move-actions/Move actions | `move-actions/` | Item list with up/down/clone/remove |
 | form-edit/Edit form | `form-edit/` | Section/field list with move actions only |

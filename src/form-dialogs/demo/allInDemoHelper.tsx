@@ -45,7 +45,7 @@ export const viewers: lib.Viewers<
     viewer: ({ props: { formItem } }) => (
       <span style={{ fontWeight: 600 }}>{formItem.params.name}</span>
     ),
-    /** One slot — `ColumnsEdit` already built the full column flex into `getChild`. */
+    /** One slot — column flex already built into `getChild` by the `renderEdit`. */
     repeatChildren: () => [""],
   },
 };

@@ -2,8 +2,9 @@
  * Demo domain = form-item-editor demo types (`field` / `heading` / `panel`)
  * so the same editor stack serves the All-in story.
  *
- * List shell uses `section-view` (`SectionFormItemHOC`); dialog sessions still
- * use form-item-editor / section-edit chrome via `makeUseDialogs`.
+ * List shell uses `section-view` (`SectionFormItemHOC` + `WebRecursiveEdit`);
+ * dialog sessions still use form-item-editor / section-edit chrome via
+ * `makeUseDialogs`.
  */
 import type * as itemTypes from "../../form-item-editor/demo/formItemEditorDemoTypes.t";
 import type * as lib from "./library";

@@ -31,6 +31,7 @@ See `demo/WebRecursiveEdit.tsx` (~30 lines of glue beyond section chrome).
 
 `section-view`'s `SectionFormItemHOC` is composed in the demo with
 `renderEdit: WebRecursiveEdit` — the same plug-in seam as `ColumnsEdit`.
+`form-dialogs/All-in` reuses the same `WebRecursiveEdit` for the full editor.
 
 ## Scope: one section at a time
 

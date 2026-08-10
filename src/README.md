@@ -46,8 +46,8 @@ drag-drop-tree (standalone leaf, no _deps) ──▶ flat-dnd (+ form-edit)
 (`DnDTreeCore`, `RecursiveTreeNode`, …) — see `demo/WebRecursiveEdit.tsx`.
 
 Module demos compose features via props or, for the all-in editor, in `form-dialogs/demo/AllInEditor.tsx`
-(`SectionFormItemHOC` + `makeUseDialogs`). The demo injects `side-menu`'s
-`makeUseRenderAddItem` into `section-view`, same as school.
+(`SectionFormItemHOC` + `WebRecursiveEdit` + `makeUseDialogs`). The demo injects
+`side-menu`'s `makeUseRenderAddItem` into `section-view`, same as school.
 
 ## Import rules
 

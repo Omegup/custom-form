@@ -1,13 +1,15 @@
 /**
  * All-in composition — school `CustomFormEditor` + `DialogsHOC` (`DialogUi`):
  * one `makeUseDialogs` instance orchestrates every dialog flow over a
- * `section-view` list shell (`SectionFormItemHOC` + `ColumnsEdit`):
+ * `section-view` list shell (`SectionFormItemHOC` + `WebRecursiveEdit` DnD):
  * - row "Edit" → item edit session
  * - sidebar catalog → ambiguous insert (`-1/-1`, section picker when >1)
  * - in-slot "+ Add" (section & nested panel columns) → concrete-span insert
  * - section header "Edit" / sidebar "+ Add section" → section session
+ * - drag rows to reorder within a column or into a nested panel column
  */
 import { createContext, useContext, useMemo, useState } from "react";
+import { WebRecursiveEdit } from "../../flat-dnd/demo/WebRecursiveEdit";
 import {
   FormItemEditor,
   itemName,
@@ -84,6 +86,7 @@ const SectionComponent = lib.SectionFormItemHOC<
   viewers: demo.viewers,
   useRenderAddItem,
   renderTitle: (props) => <SectionTitle {...props} />,
+  renderEdit: WebRecursiveEdit,
 });
 
 const cloneFn: lib.Clone<

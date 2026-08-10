@@ -30,7 +30,7 @@ Public API matches school's `index.ts`:
 |---|---|
 | `flat-dnd` (lib) | pure ops only — `applyDrop`, `TreeNode`, … via `_deps` |
 | `flat-dnd/demo` | React engine — `DnDTreeCore`, `RecursiveTreeNode`, `Indicator` |
-| Everything else | nothing (yet) |
+| `form-dialogs/demo` | same via `flat-dnd/demo/WebRecursiveEdit` |
 
 Hosts that only need headless ops can import `utils` / `applyDrop` directly and
 bring their own UI (e.g. mobile gestures). Web hosts use the React components
