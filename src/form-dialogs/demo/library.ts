@@ -11,6 +11,7 @@ export {
 export type { Clone } from "../../form-edit";
 export {
   SectionFormItemHOC,
+  type ColumnsEditChrome,
   type EditExtra,
   type SectionProps,
 } from "../../section-view";

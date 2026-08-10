@@ -20,9 +20,9 @@ Distinct from:
 |---|---|
 | `types.ts` | `NodeIndex` (`{ index, sIndex }`), `RecursiveEditProps`, `SectionProps`, `RenderFormItem`, `EditExtra` |
 | `createRenderEditFormItem.tsx` | **`createRenderEditFormItem(viewers)`** — per-item viewer dispatch via `form/createFormItemByGetChild`; school `renderEditFormItem.tsx` |
-| `ColumnsEdit.tsx` | **`ColumnsEdit`** — default non-DnD `renderEdit`: walks a section's columns and each item's nested panel columns, calling `render.node` / `render.addItem` |
+| `ColumnsEdit.tsx` | **`createColumnsEdit(chrome)`** + `ColumnsEditChrome` — non-DnD `renderEdit` (walk columns / nested panels); **no HTML** |
 | `SectionHOC.tsx` | **`SectionHOC({ renderEdit, useRenderAddItem, renderTitle, renderFormItem })`** — pure composition; builds `getSectionEdit` and hands it to `renderEdit` |
-| `SectionFormItemHOC.tsx` | **`SectionFormItemHOC({ viewers, useRenderAddItem, renderTitle, renderEdit? })`** — thin compose of the above, defaulting `renderEdit` to `ColumnsEdit` |
+| `SectionFormItemHOC.tsx` | **`SectionFormItemHOC({ viewers, useRenderAddItem, renderTitle, columnsChrome, renderEdit? })`** — defaults `renderEdit` to `createColumnsEdit(columnsChrome)` |
 
 `form-edit/flat-move-actions/getSectionEdit.ts` (+ `RecursiveEditManager.t.ts`)
 is the pure, non-React half — school `section.data.ts` — and lives in
@@ -47,7 +47,7 @@ SectionHOC(args)(props)
        title: renderTitle(props),
        render: { addItem, node: renderFormItem(props) },
     })
-renderEdit = ColumnsEdit (default, no DnD)
+renderEdit = createColumnsEdit(columnsChrome) (default, no DnD; host owns HTML)
 ```
 
 ```mermaid
@@ -68,7 +68,8 @@ flowchart TB
 |---|---|---|
 | `getSectionEdit`'s `setNodes` rebuilds the whole flat list (`sections.toSpliced(i,1,…).flatMap(flatten().section)`) | rewrites only the section's own span (`items.toSpliced(section.meta.index, section.meta.total, ...list)`) | same pattern as `section-edit/updateSectionInFlat`; column count never changes via `setNodes`, only item content/order within the section's existing columns — no need to touch sibling sections |
 | `SectionProps` bundles `edit: SectionEditArgs` (`{ clone, actions, sections, section, i }`) + a branded `SectionExtraDom` `extra` bag | flat fields (`args`, `clone`, `section`, `sIndex`, `jump`) + a plain `itemExtra: (id) => Extra` callback | `getSectionEdit` here doesn't need the full `sections` array (see above), and there's no design-system `Extra` bag to genericize over yet |
-| `RecursiveEdit`/`FlatDnd` (drag-and-drop reorder) | `ColumnsEdit` (click-based move actions only) | out of scope for this MVP — `nodes`/`setNodes` on `RecursiveEditManager` already shape the data for a future DnD `renderEdit` to plug in without changing `getSectionEdit` |
+| `RecursiveEdit`/`FlatDnd` (drag-and-drop reorder) | `createColumnsEdit(chrome)` (click-based move actions; chrome in demo) | out of scope for this MVP — `nodes`/`setNodes` on `RecursiveEditManager` already shape the data for a future DnD `renderEdit` to plug in without changing `getSectionEdit` |
+| School JSS section chrome | **no HTML in library** — `ColumnsEditChrome` render props | host-agnostic; see `.cursor/rules/no-html-outside-demo.mdc` |
 
 ## Demo
 

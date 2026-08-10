@@ -12,4 +12,5 @@ export {
 } from "../../form-edit";
 export type { MenuItemDefinition } from "../../side-menu";
 export { AddFormItem, makeUseRenderAddItem } from "../../side-menu";
+export type { ColumnsEditChrome } from "../index";
 export { SECTION_VIEW_INITIAL } from "./fixtures";

@@ -18,7 +18,11 @@ import { MENU_ITEMS, randomId } from "../../side-menu/demo/fixtures";
 import {
   FormContainer,
   LayoutWithSidebar,
+  renderAddFormItem,
+  renderMenuItem,
+  renderSide,
 } from "../../side-menu/demo/sideMenuDemoHelper";
+import { columnsChrome } from "../../section-view/demo/sectionViewDemoHelper";
 import * as demo from "./allInDemoHelper";
 import type * as types from "./allInDemoTypes.t";
 import * as lib from "./library";
@@ -68,7 +72,7 @@ const useRenderAddItem = lib.makeUseRenderAddItem<
   types.TypeNames,
   types.Params
 >(
-  (args) => <lib.AddFormItem {...args} />,
+  (args) => <lib.AddFormItem {...args} render={renderAddFormItem} />,
   () => MENU_ITEMS,
   randomId,
 );
@@ -83,6 +87,7 @@ const SectionComponent = lib.SectionFormItemHOC<
 >({
   viewers: demo.viewers,
   useRenderAddItem,
+  columnsChrome,
   renderTitle: (props) => <SectionTitle {...props} />,
 });
 
@@ -285,6 +290,8 @@ export const AllInEditor = ({
               menuItems={MENU_ITEMS}
               random={randomId}
               blankSection={blankSection}
+              render={renderSide}
+              renderMenuItem={renderMenuItem}
               setAddFormItem={(item) => dialogs.openItemInsert(item)}
               setAddSection={dialogs.openSectionAdd}
             />
