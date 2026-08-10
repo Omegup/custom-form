@@ -397,6 +397,7 @@ export const FormItemEditorFormTest = ({
   updateArgs,
   itemName,
   extra,
+  sectionExtra,
   renderAddItem,
   renderLayout,
 }: {
@@ -404,6 +405,7 @@ export const FormItemEditorFormTest = ({
   updateArgs: (patch: Partial<types.StoryArgs>) => void;
   itemName: (header: types.ItemHeader) => ReactNode;
   extra?: (item: types.ListItem) => ExtraAction[];
+  sectionExtra?: (section: types.ListSection) => ExtraAction[];
   renderAddItem?: (slot: types.AddItemSlot) => ReactNode;
   renderLayout?: (args: types.ListLayoutArgs) => ReactNode;
 }) => {
@@ -524,7 +526,7 @@ export const FormItemEditorFormTest = ({
             title={section.header.title}
             focused={sectionFocused}
             sectionActions={sActions}
-            sectionExtra={[]}
+            sectionExtra={sectionDeleted ? [] : sectionExtra?.(section) ?? []}
             columns={section.items.map((column, colIndex) => (
               <>
                 {column.map((item) => renderItem(item, sectionDeleted))}

@@ -114,6 +114,9 @@ export const FieldRow = ({
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
+      gap: 8,
+      width: "100%",
+      boxSizing: "border-box",
       padding: "5px 8px",
       borderRadius: 4,
       border: "1px solid #eee",
@@ -123,6 +126,8 @@ export const FieldRow = ({
   >
     <span
       style={{
+        flex: 1,
+        minWidth: 0,
         fontSize: 13,
         opacity: actions.isDeleted || parentDeleted ? 0.55 : 1,
         textDecoration:
