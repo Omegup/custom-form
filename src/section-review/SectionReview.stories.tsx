@@ -10,11 +10,12 @@ import {
 import type * as types from "./demo/sectionReviewDemoTypes.t";
 
 const SectionReviewStory = () => {
-  const [{ heading, section, responses, changes, reviewPending }, updateArgs] =
+  const [{ heading, phase, section, responses, changes, reviewPending }, updateArgs] =
     useArgs<types.StoryArgs>();
   return (
     <SectionReviewDemo
       heading={heading}
+      phase={phase}
       section={section}
       responses={responses}
       changes={changes}
@@ -36,20 +37,26 @@ export default {
       },
       description: {
         component:
-          "Read-only teacher review of one section — **`SectionReviewHOC`**. Lock/unlock the reviewer comment, ask a follow-up question, and toggle **Review round pending** to see `highlight` vs `disabled` status. JSON dump shows the live `AdditionalChanges` map.",
+          "Lifecycle demo for **`SectionReviewHOC`**. Switch **Design → Response → Follow** to see the section blueprint, student answers, and teacher review. Three JSON panels stay visible for `section`, `responses`, and `AdditionalChanges`.",
       },
     },
   },
   render: SectionReviewStory,
   argTypes: {
     heading: { control: "text", table: { category: "Layout" } },
+    phase: {
+      control: "select",
+      options: ["design", "response", "follow"],
+      table: { category: "Layout" },
+    },
     section: { control: "object", table: { category: "Form data" } },
     responses: { control: "object", table: { category: "Form data" } },
     changes: { control: "object", table: { category: "Form data" } },
-    reviewPending: { control: "boolean", table: { category: "Layout" } },
+    reviewPending: { control: "boolean", table: { category: "Follow" } },
   },
   args: {
-    heading: "Section review",
+    heading: "Section review lifecycle",
+    phase: "follow",
     section: INITIAL_SECTION,
     responses: INITIAL_RESPONSES,
     changes: INITIAL_CHANGES,
@@ -60,3 +67,15 @@ export default {
 type Story = StoryObj<types.StoryArgs>;
 
 export const Default: Story = {};
+
+export const Design: Story = {
+  args: { phase: "design" },
+};
+
+export const Response: Story = {
+  args: { phase: "response" },
+};
+
+export const Follow: Story = {
+  args: { phase: "follow" },
+};

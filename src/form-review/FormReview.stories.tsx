@@ -12,12 +12,22 @@ import type * as types from "./demo/formReviewDemoTypes.t";
 
 const FormReviewStory = () => {
   const [
-    { heading, header, sections, responses, changes, reviewPending, showDeleted },
+    {
+      heading,
+      phase,
+      header,
+      sections,
+      responses,
+      changes,
+      reviewPending,
+      showDeleted,
+    },
     updateArgs,
   ] = useArgs<types.StoryArgs>();
   return (
     <FormReviewDemo
       heading={heading}
+      phase={phase}
       header={header}
       sections={sections}
       responses={responses}
@@ -41,22 +51,28 @@ export default {
       },
       description: {
         component:
-          "Multi-section review shell — **`CustomFormReviewHOC`**. Maps sections through `SectionReviewHOC`, sharing one `AdditionalChanges` map across the form. Toggle **Review round pending** to see `highlight` vs `disabled` status; toggle `showDeleted` to keep deleted sections visible.",
+          "Lifecycle demo for **`CustomFormReviewHOC`**. Switch **Design → Response → Follow** to see the form blueprint, student answers, and teacher review (comments / follow-ups / status). Three JSON panels stay visible so you can compare `sections`, `responses`, and `AdditionalChanges` at every step.",
       },
     },
   },
   render: FormReviewStory,
   argTypes: {
     heading: { control: "text", table: { category: "Layout" } },
+    phase: {
+      control: "select",
+      options: ["design", "response", "follow"],
+      table: { category: "Layout" },
+    },
     header: { control: "object", table: { category: "Form data" } },
     sections: { control: "object", table: { category: "Form data" } },
     responses: { control: "object", table: { category: "Form data" } },
     changes: { control: "object", table: { category: "Form data" } },
-    reviewPending: { control: "boolean", table: { category: "Layout" } },
-    showDeleted: { control: "boolean", table: { category: "Layout" } },
+    reviewPending: { control: "boolean", table: { category: "Follow" } },
+    showDeleted: { control: "boolean", table: { category: "Follow" } },
   },
   args: {
-    heading: "Form review",
+    heading: "Form review lifecycle",
+    phase: "follow",
     header: INITIAL_HEADER,
     sections: INITIAL_SECTIONS,
     responses: INITIAL_RESPONSES,
@@ -69,3 +85,15 @@ export default {
 type Story = StoryObj<types.StoryArgs>;
 
 export const Default: Story = {};
+
+export const Design: Story = {
+  args: { phase: "design" },
+};
+
+export const Response: Story = {
+  args: { phase: "response" },
+};
+
+export const Follow: Story = {
+  args: { phase: "follow" },
+};

@@ -1,6 +1,8 @@
 /**
- * `form-review` showcase — school `CustomFormResponsesHOC`: multi-section
- * read-only review with reviewer comment + follow-up-question overlays.
+ * `form-review` showcase — Design → Response → Follow walkthrough.
+ * Only the Follow phase mounts `CustomFormReviewHOC`; earlier phases are
+ * demo-only blueprints so you can compare structure, answers, and reviewer
+ * annotations side by side (JSON panels always visible).
  */
 import { useCallback, type Ref } from "react";
 import * as demo from "./formReviewDemoHelper";
@@ -72,6 +74,7 @@ const tCommon = (term: "add" | "cancel" | "save" | "delete") =>
 
 export const FormReviewDemo = ({
   heading,
+  phase,
   header,
   sections,
   responses,
@@ -81,44 +84,82 @@ export const FormReviewDemo = ({
   updateArgs,
 }: types.DemoProps) => {
   const setChanges = useCallback(
-    (next: lib.AdditionalChanges<types.TypeNames, types.Params>) => updateArgs({ changes: next }),
+    (next: lib.AdditionalChanges<types.TypeNames, types.Params>) =>
+      updateArgs({ changes: next }),
     [updateArgs],
   );
 
   return (
     <demo.FormContainer title={heading}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14 }}>
-          <input
-            type="checkbox"
-            checked={reviewPending}
-            onChange={(e) => updateArgs({ reviewPending: e.target.checked })}
+      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+        <demo.PhaseTabs
+          phase={phase}
+          onChange={(next) => updateArgs({ phase: next })}
+        />
+
+        {phase === "design" ? (
+          <demo.DesignView header={header} sections={sections} />
+        ) : null}
+
+        {phase === "response" ? (
+          <demo.ResponseView
+            header={header}
+            sections={sections}
+            responses={responses}
           />
-          Review round pending (drives highlight status)
-        </label>
-        <FormReview
-          ctx={ctx}
-          header={header}
+        ) : null}
+
+        {phase === "follow" ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 16,
+                fontSize: 14,
+              }}
+            >
+              <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <input
+                  type="checkbox"
+                  checked={reviewPending}
+                  onChange={(e) =>
+                    updateArgs({ reviewPending: e.target.checked })
+                  }
+                />
+                Review round pending (highlight status)
+              </label>
+              <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <input
+                  type="checkbox"
+                  checked={showDeleted}
+                  onChange={(e) =>
+                    updateArgs({ showDeleted: e.target.checked })
+                  }
+                />
+                Show deleted sections
+              </label>
+            </div>
+            <FormReview
+              ctx={ctx}
+              header={header}
+              sections={sections}
+              responses={responses}
+              lastPending={reviewPending ? demo.PENDING_DATE : null}
+              changes={changes}
+              setChanges={setChanges}
+              tCommon={tCommon}
+              showDeleted={showDeleted}
+            />
+          </div>
+        ) : null}
+
+        <demo.PhaseJsonPanels
+          phase={phase}
           sections={sections}
           responses={responses}
-          lastPending={reviewPending ? demo.PENDING_DATE : null}
           changes={changes}
-          setChanges={setChanges}
-          tCommon={tCommon}
-          showDeleted={showDeleted}
         />
-        <pre
-          style={{
-            margin: 0,
-            padding: 12,
-            background: "#f6f7f9",
-            borderRadius: 6,
-            fontSize: 12,
-            overflow: "auto",
-          }}
-        >
-          {JSON.stringify(changes, null, 2)}
-        </pre>
       </div>
     </demo.FormContainer>
   );

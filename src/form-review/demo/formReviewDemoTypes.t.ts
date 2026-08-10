@@ -1,5 +1,6 @@
 /**
- * Multi-section review domain for `CustomFormReview` — one text field type.
+ * Multi-section review domain for `CustomFormReview` — one text field type,
+ * walked through Design → Response → Follow phases in the Storybook demo.
  */
 import type { Ref } from "react";
 import type * as lib from "./library";
@@ -35,8 +36,12 @@ export type FieldExtra = lib.ReviewExtra & {
   impRef: Ref<lib.ViewerMethods>;
 };
 
+/** Demo walkthrough stage — not part of the library API. */
+export type DemoPhase = "design" | "response" | "follow";
+
 export type StoryArgs = {
   heading: string;
+  phase: DemoPhase;
   header: lib.FormHeader;
   sections: ListSection[];
   responses: Record<string, lib.Response>;

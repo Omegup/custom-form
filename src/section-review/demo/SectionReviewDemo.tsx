@@ -1,6 +1,6 @@
 /**
- * `section-review` showcase — school `SectionReviewHOC`: read-only view of
- * one section's answers, with reviewer comment + follow-up-question overlays.
+ * `section-review` showcase — Design → Response → Follow for one section.
+ * Only Follow mounts `SectionReviewHOC`; earlier phases are demo blueprints.
  */
 import { useCallback, type Ref } from "react";
 import * as demo from "./sectionReviewDemoHelper";
@@ -71,6 +71,7 @@ const tCommon = (term: "add" | "cancel" | "save" | "delete") =>
 
 export const SectionReviewDemo = ({
   heading,
+  phase,
   section,
   responses,
   changes,
@@ -78,45 +79,56 @@ export const SectionReviewDemo = ({
   updateArgs,
 }: types.DemoProps) => {
   const setChanges = useCallback(
-    (next: lib.AdditionalChanges<types.TypeNames, types.Params>) => updateArgs({ changes: next }),
+    (next: lib.AdditionalChanges<types.TypeNames, types.Params>) =>
+      updateArgs({ changes: next }),
     [updateArgs],
   );
 
   return (
     <demo.FormContainer title={heading}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14 }}>
-          <input
-            type="checkbox"
-            checked={reviewPending}
-            onChange={(e) => updateArgs({ reviewPending: e.target.checked })}
-          />
-          Review round pending (drives highlight status)
-        </label>
-        <SectionReview
-          ctx={ctx}
-          multiSection={false}
+      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+        <demo.PhaseTabs
+          phase={phase}
+          onChange={(next) => updateArgs({ phase: next })}
+        />
+
+        {phase === "design" ? <demo.DesignView section={section} /> : null}
+
+        {phase === "response" ? (
+          <demo.ResponseView section={section} responses={responses} />
+        ) : null}
+
+        {phase === "follow" ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14 }}>
+              <input
+                type="checkbox"
+                checked={reviewPending}
+                onChange={(e) => updateArgs({ reviewPending: e.target.checked })}
+              />
+              Review round pending (highlight status)
+            </label>
+            <SectionReview
+              ctx={ctx}
+              multiSection={false}
+              section={section}
+              responses={responses}
+              lastPending={reviewPending ? demo.PENDING_DATE : null}
+              changes={changes}
+              setChanges={setChanges}
+              variants={variants}
+              tCommon={tCommon}
+              i={0}
+            />
+          </div>
+        ) : null}
+
+        <demo.PhaseJsonPanels
+          phase={phase}
           section={section}
           responses={responses}
-          lastPending={reviewPending ? demo.PENDING_DATE : null}
           changes={changes}
-          setChanges={setChanges}
-          variants={variants}
-          tCommon={tCommon}
-          i={0}
         />
-        <pre
-          style={{
-            margin: 0,
-            padding: 12,
-            background: "#f6f7f9",
-            borderRadius: 6,
-            fontSize: 12,
-            overflow: "auto",
-          }}
-        >
-          {JSON.stringify(changes, null, 2)}
-        </pre>
       </div>
     </demo.FormContainer>
   );

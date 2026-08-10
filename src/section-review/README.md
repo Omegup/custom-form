@@ -51,10 +51,11 @@ never touches `changes` directly.
 
 ## Demo (`section-review/Section review` story)
 
-One section, seeded with a comment and a follow-up question so both `normal`
-and `highlight` statuses are visible. Lock/unlock the comment, add a
-follow-up question (single demo field type), and toggle `lastPending` via
-controls.
+Lifecycle walkthrough — **Design → Response → Follow** for one section
+(name / email / note). Three JSON panels stay visible (`section`,
+`responses`, `AdditionalChanges`). Follow phase mounts `SectionReviewHOC`
+with seeded comments + a follow-up question; toggle **Review round pending**
+to see `highlight` vs `disabled`.
 
 ## Dependency rule
 

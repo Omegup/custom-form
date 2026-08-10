@@ -27,6 +27,8 @@ Each module has a colocated `*.stories.tsx`. Story titles match folder names, e.
 | response/Response | `response/` | Fill-path foundation (`ResponseSetter` + `getUseImpRefViewProps` validate) |
 | section-responder/Section responder | `section-responder/` | One section of fillable fields + section-level validate |
 | form-responder/Form responder | `form-responder/` | Multi-section fill shell + form-level validate |
+| section-review/Section review | `section-review/` | Design → Response → Follow for one section + JSON per phase |
+| form-review/Form review | `form-review/` | Multi-section review lifecycle + JSON for design/response/follow |
 | move-actions/Move actions | `move-actions/` | Item list with up/down/clone/remove |
 | form-edit/Edit form | `form-edit/` | Section/field list with move actions only |
 | form-item-editor/Form item editor | `form-item-editor/` | Edit form + per-field edit dialog |
@@ -59,6 +61,8 @@ flat-dnd                       ← SectionNodes ↔ drag-drop-tree conversion (l
 form-dialogs                   ← dialog orchestration (makeUseDialogs) + All-in demo
 section-responder              ← section fill shell (SectionResponderHOC)
 form-responder                 ← multi-section fill shell (CustomFormResponderHOC)
+section-review                 ← section review shell (SectionReviewHOC)
+form-review                    ← multi-section review shell (CustomFormReviewHOC)
 ```
 
 **Canonical edit state** is the **flat list** (`FlatFormItems`): an array of `{ section }`, `{ item, n }`, and `{ end: null }` markers. The tree is rebuilt on demand via `consolidateSections`.
@@ -82,6 +86,8 @@ Original packages live under `school/components/custom-form/src/`:
 | `response/` | `types/response`, `types/form-response-react` (`ViewerMethods`) |
 | `section-responder/` | `ui-packages/section-responder-ui` (`SectionResponderHOC`) |
 | `form-responder/` | `ui-packages/form-responder-ui` (`CustomFormResponderHOC`) |
+| `section-review/` | `ui-packages/section-review-ui` (`SectionReviewHOC`) |
+| `form-review/` | `ui-packages/form-response-ui` (`CustomFormResponsesHOC`) |
 | `form-edit/` | `ts-packages/form-edit` |
 | `form-item-editor/` | `react-packages/form-item-edit-react` |
 | `side-menu/` | `react-packages/form-edit-react` (`useSide`, `MenuItemDefinition`, `makeUseRenderAddItem`) + `section-edit-ui` (`FormMenuItem`, `AddFormItem`) |

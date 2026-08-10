@@ -11,14 +11,335 @@ export const FormContainer = ({
   title: string;
   children: ReactNode;
 }) => (
-  <div style={{ fontFamily: "system-ui, sans-serif", maxWidth: 700, margin: "0 auto" }}>
-    <h2 style={{ marginTop: 0 }}>{title}</h2>
+  <div
+    style={{
+      fontFamily: "system-ui, sans-serif",
+      maxWidth: 920,
+      margin: "0 auto",
+      color: "#1a1a1a",
+    }}
+  >
+    <h2 style={{ marginTop: 0, marginBottom: 4 }}>{title}</h2>
     {children}
   </div>
 );
 
 /** Stable reference so `lastPending === history.at(-1).date` can match by identity. */
 export const PENDING_DATE = new Date("2024-01-15T00:00:00Z");
+
+const PHASES: {
+  id: types.DemoPhase;
+  label: string;
+  blurb: string;
+}[] = [
+  {
+    id: "design",
+    label: "1. Design",
+    blurb: "Author builds the form — sections and fields only. No answers yet.",
+  },
+  {
+    id: "response",
+    label: "2. Response",
+    blurb: "Student fills answers. Reviewer comments are not applied yet.",
+  },
+  {
+    id: "follow",
+    label: "3. Follow",
+    blurb:
+      "Teacher reviews answers: lock/unlock comments, ask follow-ups, status highlighting.",
+  },
+];
+
+/** Module-scope phase switcher — never define this inside a render callback. */
+export const PhaseTabs = ({
+  phase,
+  onChange,
+}: {
+  phase: types.DemoPhase;
+  onChange: (phase: types.DemoPhase) => void;
+}) => {
+  const current = PHASES.find((p) => p.id === phase)!;
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div
+        role="tablist"
+        aria-label="Lifecycle phase"
+        style={{ display: "flex", gap: 0, borderBottom: "1px solid #ddd" }}
+      >
+        {PHASES.map((p) => {
+          const active = p.id === phase;
+          return (
+            <button
+              key={p.id}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => onChange(p.id)}
+              style={{
+                flex: 1,
+                padding: "10px 12px",
+                border: "none",
+                borderBottom: active ? "2px solid #1a5fb4" : "2px solid transparent",
+                background: active ? "#f0f5fb" : "transparent",
+                color: active ? "#1a5fb4" : "#555",
+                fontWeight: active ? 600 : 500,
+                fontSize: 14,
+                cursor: "pointer",
+              }}
+            >
+              {p.label}
+            </button>
+          );
+        })}
+      </div>
+      <p style={{ margin: 0, fontSize: 13, color: "#555", lineHeight: 1.4 }}>
+        {current.blurb}
+      </p>
+    </div>
+  );
+};
+
+const jsonPanelStyle = (active: boolean): CSSProperties => ({
+  flex: 1,
+  minWidth: 0,
+  margin: 0,
+  padding: 10,
+  background: active ? "#eef4fb" : "#f6f7f9",
+  border: active ? "1px solid #1a5fb4" : "1px solid #e0e0e0",
+  borderRadius: 6,
+  fontSize: 11,
+  overflow: "auto",
+  maxHeight: 260,
+  lineHeight: 1.4,
+});
+
+/** Three JSON dumps — Design / Response / Follow — always visible for comparison. */
+export const PhaseJsonPanels = ({
+  phase,
+  sections,
+  responses,
+  changes,
+}: {
+  phase: types.DemoPhase;
+  sections: types.ListSection[];
+  responses: Record<string, lib.Response>;
+  changes: lib.AdditionalChanges<types.TypeNames, types.Params>;
+}) => {
+  const panels: {
+    id: types.DemoPhase;
+    title: string;
+    value: unknown;
+  }[] = [
+    { id: "design", title: "design · sections", value: sections },
+    { id: "response", title: "response · answers", value: responses },
+    { id: "follow", title: "follow · AdditionalChanges", value: changes },
+  ];
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <div
+        style={{
+          fontSize: 12,
+          fontWeight: 600,
+          color: "#444",
+          letterSpacing: "0.02em",
+          textTransform: "uppercase",
+        }}
+      >
+        JSON by phase
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+          gap: 10,
+        }}
+      >
+        {panels.map((p) => (
+          <div key={p.id} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: phase === p.id ? 700 : 500,
+                color: phase === p.id ? "#1a5fb4" : "#666",
+              }}
+            >
+              {p.title}
+              {phase === p.id ? " · active" : ""}
+            </div>
+            <pre style={jsonPanelStyle(phase === p.id)}>
+              {JSON.stringify(p.value, null, 2)}
+            </pre>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const fieldRowStyle: CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 4,
+  padding: "8px 10px",
+  border: "1px solid #e5e5e5",
+  borderRadius: 4,
+  background: "#fff",
+};
+
+/** Read-only blueprint of the form (Design phase) — demo chrome only. */
+export const DesignView = ({
+  header,
+  sections,
+}: {
+  header: lib.FormHeader;
+  sections: types.ListSection[];
+}) => (
+  <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+    <div>
+      <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 600 }}>{header.title}</h2>
+      {header.description ? (
+        <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{header.description}</p>
+      ) : null}
+      <p
+        style={{
+          margin: "8px 0 0",
+          fontSize: 12,
+          color: "#888",
+          fontStyle: "italic",
+        }}
+      >
+        Design blueprint — field labels and required flags only.
+      </p>
+    </div>
+    {sections.map((section, i) => (
+      <div
+        key={section.header.id}
+        style={{
+          opacity: section.header.deleted ? 0.5 : 1,
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
+        }}
+      >
+        <div>
+          <h3 style={{ margin: "0 0 4px", fontSize: 17, fontWeight: 600 }}>
+            {i + 1}. {section.header.title}
+            {section.header.deleted ? " (deleted)" : ""}
+          </h3>
+          {section.header.description ? (
+            <p style={{ margin: 0, color: "#555", fontSize: 13 }}>
+              {section.header.description}
+            </p>
+          ) : null}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {section.items.flat().map(({ header: q }) => (
+            <div key={q.id} style={fieldRowStyle}>
+              <span style={{ fontSize: 14, fontWeight: 600 }}>
+                {q.params.name}
+                {q.params.required ? (
+                  <span style={{ color: "#b00020", marginLeft: 4 }}>*</span>
+                ) : null}
+              </span>
+              <span style={{ fontSize: 12, color: "#888" }}>
+                id: {q.id}
+                {q.deleted ? " · deleted" : ""} · type: {q.type}
+              </span>
+              <div
+                style={{
+                  height: 28,
+                  borderRadius: 3,
+                  border: "1px dashed #ccc",
+                  background: "#fafafa",
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+/** Read-only filled form (Response phase) — demo chrome only. */
+export const ResponseView = ({
+  header,
+  sections,
+  responses,
+}: {
+  header: lib.FormHeader;
+  sections: types.ListSection[];
+  responses: Record<string, lib.Response>;
+}) => (
+  <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+    <div>
+      <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 600 }}>{header.title}</h2>
+      {header.description ? (
+        <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{header.description}</p>
+      ) : null}
+      <p
+        style={{
+          margin: "8px 0 0",
+          fontSize: 12,
+          color: "#888",
+          fontStyle: "italic",
+        }}
+      >
+        Student response — answers only; no reviewer annotations yet.
+      </p>
+    </div>
+    {sections.map((section, i) => (
+      <div
+        key={section.header.id}
+        style={{
+          opacity: section.header.deleted ? 0.5 : 1,
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
+        }}
+      >
+        <div>
+          <h3 style={{ margin: "0 0 4px", fontSize: 17, fontWeight: 600 }}>
+            {i + 1}. {section.header.title}
+          </h3>
+          {section.header.description ? (
+            <p style={{ margin: 0, color: "#555", fontSize: 13 }}>
+              {section.header.description}
+            </p>
+          ) : null}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {section.items.flat().map(({ header: q }) => {
+            const raw = responses[q.id]?.data.value;
+            const value = typeof raw === "string" ? raw : raw != null ? String(raw) : "";
+            return (
+              <div key={q.id} style={fieldRowStyle}>
+                <span style={{ fontSize: 14, fontWeight: 600 }}>
+                  {q.params.name}
+                  {q.params.required ? (
+                    <span style={{ color: "#b00020", marginLeft: 4 }}>*</span>
+                  ) : null}
+                </span>
+                <div
+                  style={{
+                    padding: "6px 8px",
+                    borderRadius: 3,
+                    border: "1px solid #c8d4e0",
+                    background: value ? "#f3f8fc" : "#fafafa",
+                    fontSize: 14,
+                    minHeight: 28,
+                  }}
+                >
+                  {value || <em style={{ color: "#999" }}>No answer</em>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    ))}
+  </div>
+);
 
 const overlayBox: CSSProperties = {
   marginTop: 16,
@@ -36,7 +357,10 @@ const actionButtonStyle: CSSProperties = {
   lineHeight: 1,
 };
 
-const ACTION_ICON: Record<"lock" | "unlock" | "addQuestion" | "edit", { glyph: string; label: string }> = {
+const ACTION_ICON: Record<
+  "lock" | "unlock" | "addQuestion" | "edit",
+  { glyph: string; label: string }
+> = {
   lock: { glyph: "🔒", label: "Remove comment" },
   unlock: { glyph: "🔓", label: "Add comment" },
   addQuestion: { glyph: "💬", label: "Ask follow-up question" },
@@ -51,10 +375,21 @@ export const formChrome: lib.FormReviewChrome<types.TypeNames, types.Params> = {
       {header.description ? (
         <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{header.description}</p>
       ) : null}
+      <p
+        style={{
+          margin: "8px 0 0",
+          fontSize: 12,
+          color: "#888",
+          fontStyle: "italic",
+        }}
+      >
+        Follow / review — status border colors: green = commented, amber = needs attention,
+        grey = idle.
+      </p>
     </div>
   ),
   renderForm: ({ header, sections, children }) => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 20, maxWidth: 700 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {header}
       {sections}
       {children}
@@ -80,7 +415,7 @@ export const formChrome: lib.FormReviewChrome<types.TypeNames, types.Params> = {
     </div>
   ),
   renderItemShell: ({ children, action }) => (
-    <div style={{ position: "relative", padding: "4px 24px 4px 0" }}>
+    <div style={{ position: "relative", padding: "4px 28px 4px 0" }}>
       {children}
       {action ? <span style={{ position: "absolute", top: 0, right: 0 }}>{action}</span> : null}
     </div>
@@ -266,58 +601,85 @@ const field = (id: string, name: string, required: boolean): types.ListItem => (
 
 export const INITIAL_SECTIONS: types.ListSection[] = [
   {
-    meta: { index: 0, total: 3 },
+    meta: { index: 0, total: 4 },
     header: {
       id: "s1",
       deleted: false,
       title: "Personal",
-      description: "Who they are.",
+      description: "Identity and contact.",
     },
-    items: [[field("name", "Full name", true)]],
+    items: [
+      [
+        field("name", "Full name", true),
+        field("email", "Email", true),
+      ],
+    ],
   },
   {
-    meta: { index: 3, total: 3 },
+    meta: { index: 4, total: 3 },
     header: {
       id: "s2",
       deleted: false,
-      title: "Notes",
-      description: "Anything else.",
+      title: "Experience",
+      description: "Background the reviewer will assess.",
     },
-    items: [[field("note", "Note (optional)", false)]],
+    items: [
+      [
+        field("years", "Years of experience", true),
+        field("summary", "Project summary", false),
+      ],
+    ],
+  },
+  {
+    meta: { index: 7, total: 1 },
+    header: {
+      id: "s3",
+      deleted: true,
+      title: "Archived extras",
+      description: "Deleted section — only visible when showDeleted is on.",
+    },
+    items: [[field("legacy", "Legacy note", false)]],
   },
 ];
 
 export const INITIAL_RESPONSES: Record<string, lib.Response> = {
   name: { meta: {}, data: { value: "Ada Lovelace" } },
+  email: { meta: {}, data: { value: "ada@analytical.engine" } },
+  years: { meta: {}, data: { value: "12" } },
+  // summary intentionally empty — reviewer will flag it
 };
 
 export const INITIAL_CHANGES: lib.AdditionalChanges<types.TypeNames, types.Params> = {
-  note: {
-    comment: "Please add a note here.",
+  name: {
+    history: [{ date: PENDING_DATE }],
+  },
+  email: {
+    comment: "Please use your institutional address.",
+  },
+  summary: {
+    comment: "Add a short description of your last project.",
     questions: [
       {
-        comment: "Which topic did you struggle with?",
+        comment: "Which stack did you use?",
         question: lib.branded({
-          id: "note-followup-0",
+          id: "summary-followup-0",
           type: "field",
           deleted: false,
-          params: { name: "Topic", required: false },
+          params: { name: "Tech stack", required: false },
         }),
         date: PENDING_DATE,
       },
     ],
   },
-  name: {
-    history: [{ date: PENDING_DATE }],
-  },
 };
 
 export const INITIAL_HEADER: lib.FormHeader = {
-  title: "Application review",
-  description: "Comment on any section, then follow up with the student.",
+  title: "Fellowship application",
+  description: "Design the form, collect answers, then follow up in review.",
 };
 
-const withFileHeader = (path: string, source: string) => `// ── ${path} ──\n${source.trimEnd()}`;
+const withFileHeader = (path: string, source: string) =>
+  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const FORM_REVIEW_DEMO_SOURCE = [
   withFileHeader("form-review/demo/formReviewDemoTypes.t.ts", formReviewDemoTypesSource),

@@ -26,9 +26,17 @@ host: sections / responses / changes / setChanges / lastPending
 
 ## Demo (`form-review/Form review` story)
 
-Two sections (Personal + Notes). Toggle **Review round pending** to see
-`highlight` vs `disabled` status; toggle `showDeleted` in controls to keep
-deleted sections visible.
+Lifecycle walkthrough — **Design → Response → Follow**:
+
+1. **Design** — form blueprint (Personal + Experience + a deleted Archived
+   section); JSON shows `sections`.
+2. **Response** — student answers (summary left empty on purpose); JSON shows
+   `responses`.
+3. **Follow** — mounts `CustomFormReviewHOC`: comments, follow-up questions,
+   status highlighting. Toggle **Review round pending** / **showDeleted**.
+   JSON shows live `AdditionalChanges`.
+
+All three JSON panels stay visible so you can compare phases while interacting.
 
 ## Dependency rule
 

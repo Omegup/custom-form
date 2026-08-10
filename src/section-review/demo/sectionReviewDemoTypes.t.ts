@@ -1,6 +1,6 @@
 /**
- * Minimal review domain for `SectionReview` — one text field type, reviewed
- * read-only, with a follow-up-question thread using the same field type.
+ * Section review domain — Design → Response → Follow walkthrough for one
+ * section (same phases as the form-review demo, narrowed to a single section).
  */
 import type { Ref } from "react";
 import type * as lib from "./library";
@@ -37,8 +37,12 @@ export type FieldExtra = lib.ReviewExtra & {
   impRef: Ref<lib.ViewerMethods>;
 };
 
+/** Demo walkthrough stage — not part of the library API. */
+export type DemoPhase = "design" | "response" | "follow";
+
 export type StoryArgs = {
   heading: string;
+  phase: DemoPhase;
   section: ListSection;
   responses: Record<string, lib.Response>;
   changes: lib.AdditionalChanges<TypeNames, Params>;
