@@ -64,9 +64,17 @@ export type FeedbackHistoryItem = {
  * School `FormResponse` — answers + teacher follow-up live on **one** document.
  * Created by Fill → Send (`customForms.addFormResponse`); Update / feedback
  * methods mutate this same record (`addAdditionalQuestions`, `addFeedback`).
+ *
+ * Shape mirrors `models.FormResponse`: `responses` is an array of
+ * `{ questionId, response }` (not a Record). First insert uses `changes: {}`.
  */
+export type FormResponseEntry = {
+  questionId: string;
+  response: lib.Response;
+};
+
 export type FormResponseDoc = {
-  responses: Record<string, lib.Response>;
+  responses: FormResponseEntry[];
   changes: lib.AdditionalChanges<itemTypes.TypeNames, itemTypes.Params>;
   feedbackHistory: FeedbackHistoryItem[];
   status: FeedbackStatus;
@@ -78,8 +86,9 @@ export type StoryArgs = {
   heading: string;
   phase: DemoPhase;
   /**
-   * Fill-session draft answers (school formik values) — not a persisted doc
-   * until Send writes / updates `formResponse`.
+   * Fill-session draft answers (school formik values) — not part of the
+   * FormResponse document. Sparse until the user types; Send writes the
+   * document without replacing this draft map.
    */
   responses: Record<string, lib.Response>;
   /** School FormResponse, or null before the first Send. */

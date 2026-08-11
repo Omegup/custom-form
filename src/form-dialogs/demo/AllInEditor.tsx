@@ -375,7 +375,10 @@ const FillPhase = ({
     for (const [id, entry] of Object.entries(formResponse.changes)) {
       if (entry.comment != null) responderChanges[id] = { comment: entry.comment };
     }
-    return { values: formResponse.responses, changes: responderChanges };
+    return {
+      values: phases.formResponseValues(formResponse),
+      changes: responderChanges,
+    };
   }, [formResponse]);
 
   const setResponse = useCallback(
@@ -393,8 +396,9 @@ const FillPhase = ({
 
   /**
    * School formik onSubmit → `customForms.addFormResponse` (first send) or
-   * update the same FormResponse on revise — answers + feedbackHistory live
-   * on that one document (not a separate "update" store).
+   * update the same FormResponse on revise. Matches Meteor insert:
+   * `changes: {}` on create; no per-item `history` stamp (that is review-side).
+   * Fill draft (`responses` args) stays formik session state — not overwritten.
    */
   const send = () => {
     const ref = formRef.current;
@@ -408,21 +412,16 @@ const FillPhase = ({
 
     const updated = ref.update(keyed);
     const sendDate = phases.rememberDate(new Date());
-    const nextChanges: lib.AdditionalChanges<types.TypeNames, types.Params> = {
-      ...(formResponse?.changes ?? {}),
+    // Revise: merge unlocked updates into prior answers (getKeys is only editable).
+    const nextValues = {
+      ...(formResponse ? phases.formResponseValues(formResponse) : {}),
+      ...updated,
     };
-    for (const id of Object.keys(updated)) {
-      const entry = nextChanges[id] ?? {};
-      nextChanges[id] = {
-        ...entry,
-        // Same Date instance as feedbackHistory so lastPending === history date.
-        history: [...(entry.history ?? []), { date: sendDate }],
-      };
-    }
 
     const nextDoc: types.FormResponseDoc = {
-      responses: updated,
-      changes: nextChanges,
+      responses: phases.toFormResponseEntries(nextValues),
+      // School addFormResponse sets `changes: {}`; keep teacher remarks on revise.
+      changes: formResponse?.changes ?? {},
       feedbackHistory: [
         ...(formResponse?.feedbackHistory ?? []),
         { status: "answered", date: sendDate.toISOString() },
@@ -430,7 +429,7 @@ const FillPhase = ({
       status: "answered",
     };
 
-    updateArgs({ responses: updated, formResponse: nextDoc });
+    updateArgs({ formResponse: nextDoc });
     setJustSent(true);
   };
 
@@ -699,7 +698,7 @@ const UpdatePhase = ({
                 "Same document as Fill — remarks / follow-ups / feedback live on FormResponse.changes + feedbackHistory.",
             }}
             sections={sections}
-            responses={formResponse.responses}
+            responses={phases.formResponseValues(formResponse)}
             lastPending={lastPending}
             changes={changes}
             setChanges={setChanges}

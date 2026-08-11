@@ -22,6 +22,21 @@ export const rememberDate = (date: Date): Date => {
 export const dateFromIso = (iso: string): Date =>
   datesByIso.get(iso) ?? rememberDate(new Date(iso));
 
+/** School `Object.fromEntries(response.responses.map(…))` for fill/review UIs. */
+export const formResponseValues = (
+  doc: types.FormResponseDoc,
+): Record<string, lib.Response> =>
+  Object.fromEntries(doc.responses.map((r) => [r.questionId, r.response]));
+
+/** School submit payload → persisted `FormResponse.responses` array. */
+export const toFormResponseEntries = (
+  values: Record<string, lib.Response>,
+): types.FormResponseEntry[] =>
+  Object.entries(values).map(([questionId, response]) => ({
+    questionId,
+    response,
+  }));
+
 /** @deprecated Prefer `dateFromIso` / live feedbackHistory — kept for older demos. */
 export const PENDING_DATE = rememberDate(new Date("2024-01-15T00:00:00Z"));
 
@@ -130,12 +145,17 @@ export const PhaseJsonPanels = ({
     {
       title: "FormResponse",
       active: phase === "fill" || phase === "update",
-      value: {
-        draftAnswers: responses,
-        document: formResponse,
-      },
+      value: formResponse,
     },
   ];
+  // Fill draft (formik) is session state — show beside the docs while filling.
+  if (phase === "fill") {
+    panels.push({
+      title: "Fill draft (formik)",
+      active: true,
+      value: responses,
+    });
+  }
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 16 }}>
       <div
@@ -152,7 +172,7 @@ export const PhaseJsonPanels = ({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+          gridTemplateColumns: `repeat(${panels.length}, minmax(0, 1fr))`,
           gap: 10,
         }}
       >

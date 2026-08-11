@@ -35,7 +35,7 @@ export default {
       },
       description: {
         component:
-          "Lifecycle over **two school documents**: CustomForm (`flatItems`) + FormResponse (`responses` / `changes` / `feedbackHistory`). Design / Fill / Update are views — Send creates the FormResponse; teacher Update mutates that same doc.",
+          "Lifecycle over **two school documents**: CustomForm (`flatItems`) + FormResponse (`responses[]` / `changes` / `feedbackHistory`). Design / Fill / Update are views — Send is `addFormResponse` (`changes: {}`); teacher Update mutates that same doc. Fill draft (`responses` args) is formik session state, not the document.",
       },
     },
   },
