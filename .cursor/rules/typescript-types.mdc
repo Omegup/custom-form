@@ -118,3 +118,6 @@ pattern. Do **not** confuse this with inventing floating generics that drop
 domain constraints — see “Don't genericize a hardcoded assumption” above.
 The factory's type parameters must still be the real maps (`TypeNames`,
 `Params`, `ItemStateMap`, …).
+
+Related: never switch on concrete item type names outside viewers/editors —
+see `no-per-type-extension.mdc` (`withFormItemName` / `cloneFlatItems`).

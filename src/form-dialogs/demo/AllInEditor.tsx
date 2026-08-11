@@ -580,13 +580,7 @@ const UpdatePhase = ({
     const header = newItem.header;
     setAddition({
       ...addition,
-      question: {
-        ...header,
-        params: {
-          ...header.params,
-          name: header.params.name || header.type,
-        },
-      },
+      question: lib.withFormItemName(header, header.params.name || header.type),
     });
   };
 

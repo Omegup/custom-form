@@ -434,10 +434,7 @@ export const reviewChrome: lib.FormReviewChrome<types.TypeNames, types.Params> =
                   onChange={(e) =>
                     setAddition({
                       ...addition,
-                      question: {
-                        ...question,
-                        params: { ...question.params, name: e.target.value },
-                      },
+                      question: lib.withFormItemName(question, e.target.value),
                     })
                   }
                 />
@@ -522,6 +519,9 @@ export const fillViewers: lib.Viewers<
         formItem.params.required,
         ctx.t("fieldRequired"),
       );
+      // String = validate() message (useFillFieldMethods). Boolean true =
+      // revise-unlock highlight from SectionResponder — border only, no copy.
+      const err = typeof extra.error === "string" ? extra.error : null;
       return (
         <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 14 }}>
           <span>
@@ -539,6 +539,9 @@ export const fillViewers: lib.Viewers<
               borderRadius: 4,
             }}
           />
+          {err ? (
+            <span style={{ color: "#c00", fontSize: 12 }}>{err}</span>
+          ) : null}
           {extra.appendix}
         </label>
       );

@@ -19,3 +19,4 @@ export {
   createFormItemByGetChildPlain,
 } from "./createFormItemByGetChild";
 export { getUseImpRefViewProps } from "./getUseImpRefViewProps";
+export { withFormItemName } from "./withFormItemName";
