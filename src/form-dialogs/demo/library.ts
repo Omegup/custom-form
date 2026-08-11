@@ -26,6 +26,7 @@ export type {
 } from "../../response";
 export { emptyResponse } from "../../response";
 export type {
+  ResponderAdditionalChanges,
   ResponderExtra,
   SectionResponderChrome,
   SectionResponderContext,

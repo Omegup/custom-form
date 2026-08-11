@@ -7,7 +7,23 @@ import { useImperativeHandle, type CSSProperties, type Ref } from "react";
 import type * as types from "./allInDemoTypes.t";
 import * as lib from "./library";
 
-export const PENDING_DATE = new Date("2024-01-15T00:00:00Z");
+/**
+ * Keep Date identity for `lastPending === history.at(-1).date` (school
+ * review status). Storybook stores ISO strings; this map restores the
+ * live Date object used when the history entry was stamped.
+ */
+const datesByIso = new Map<string, Date>();
+
+export const rememberDate = (date: Date): Date => {
+  datesByIso.set(date.toISOString(), date);
+  return date;
+};
+
+export const dateFromIso = (iso: string): Date =>
+  datesByIso.get(iso) ?? rememberDate(new Date(iso));
+
+/** @deprecated Prefer `dateFromIso` / live feedbackHistory — kept for older demos. */
+export const PENDING_DATE = rememberDate(new Date("2024-01-15T00:00:00Z"));
 
 const PHASES: {
   id: types.DemoPhase;
@@ -22,13 +38,14 @@ const PHASES: {
   {
     id: "fill",
     label: "2. Fill",
-    blurb: "Student answers the designed form. Validate before moving to Update.",
+    blurb:
+      "Student answers then Sends — creates/updates the FormResponse document (school addFormResponse).",
   },
   {
     id: "update",
     label: "3. Update",
     blurb:
-      "Teacher review — remark unlocks a field for revise; Library sidebar picks follow-up question types.",
+      "Teacher view of the same FormResponse — Save remarks/follow-ups, then Request changes / Approve / Reject.",
   },
 ];
 
@@ -96,17 +113,28 @@ export const PhaseJsonPanels = ({
   phase,
   flatItems,
   responses,
-  changes,
+  formResponse,
 }: {
   phase: types.DemoPhase;
   flatItems: types.FlatItems;
   responses: Record<string, lib.Response>;
-  changes: lib.AdditionalChanges<types.TypeNames, types.Params>;
+  formResponse: types.FormResponseDoc | null;
 }) => {
-  const panels: { id: types.DemoPhase; title: string; value: unknown }[] = [
-    { id: "design", title: "design · flatItems", value: flatItems },
-    { id: "fill", title: "fill · responses", value: responses },
-    { id: "update", title: "update · AdditionalChanges", value: changes },
+  /** Two school documents — Design/Fill/Update are views, not third stores. */
+  const panels: { title: string; active: boolean; value: unknown }[] = [
+    {
+      title: "CustomForm · design",
+      active: phase === "design",
+      value: flatItems,
+    },
+    {
+      title: "FormResponse",
+      active: phase === "fill" || phase === "update",
+      value: {
+        draftAnswers: responses,
+        document: formResponse,
+      },
+    },
   ];
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 16 }}>
@@ -119,28 +147,28 @@ export const PhaseJsonPanels = ({
           textTransform: "uppercase",
         }}
       >
-        JSON by phase
+        Documents (school: CustomForm + FormResponse)
       </div>
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
           gap: 10,
         }}
       >
         {panels.map((p) => (
-          <div key={p.id} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <div key={p.title} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             <div
               style={{
                 fontSize: 12,
-                fontWeight: phase === p.id ? 700 : 500,
-                color: phase === p.id ? "#1a5fb4" : "#666",
+                fontWeight: p.active ? 700 : 500,
+                color: p.active ? "#1a5fb4" : "#666",
               }}
             >
               {p.title}
-              {phase === p.id ? " · active" : ""}
+              {p.active ? " · active view" : ""}
             </div>
-            <pre style={jsonPanelStyle(phase === p.id)}>
+            <pre style={jsonPanelStyle(p.active)}>
               {JSON.stringify(p.value, null, 2)}
             </pre>
           </div>

@@ -7,7 +7,7 @@ import type * as types from "./demo/allInDemoTypes.t";
 
 const AllInStory = () => {
   const [
-    { heading, phase, flatItems, responses, changes, reviewPending, showDeleted },
+    { heading, phase, flatItems, responses, formResponse, showDeleted },
     updateArgs,
   ] = useArgs<types.StoryArgs>();
   return (
@@ -16,8 +16,7 @@ const AllInStory = () => {
       phase={phase}
       flatItems={flatItems}
       responses={responses}
-      changes={changes}
-      reviewPending={reviewPending}
+      formResponse={formResponse}
       showDeleted={showDeleted}
       updateArgs={updateArgs}
     />
@@ -36,7 +35,7 @@ export default {
       },
       description: {
         component:
-          "Full lifecycle — **Design** (`makeUseDialogs` + `SectionFormItemHOC` + DnD + Library), **Fill** (`CustomFormResponderHOC`), **Update** (`CustomFormReviewHOC` with the same Library sidebar to pick follow-up question types). Remarks unlock answers; JSON panels show `flatItems` / `responses` / `AdditionalChanges`.",
+          "Lifecycle over **two school documents**: CustomForm (`flatItems`) + FormResponse (`responses` / `changes` / `feedbackHistory`). Design / Fill / Update are views — Send creates the FormResponse; teacher Update mutates that same doc.",
       },
     },
   },
@@ -50,21 +49,28 @@ export default {
     },
     flatItems: {
       control: "object",
-      description: "Flat edit list — Design phase rewrites it.",
-      table: { category: "Form data" },
+      description: "CustomForm design (flat edit list).",
+      table: { category: "CustomForm" },
     },
-    responses: { control: "object", table: { category: "Form data" } },
-    changes: { control: "object", table: { category: "Form data" } },
-    reviewPending: { control: "boolean", table: { category: "Update" } },
-    showDeleted: { control: "boolean", table: { category: "Update" } },
+    responses: {
+      control: "object",
+      description: "Fill draft answers (formik) until Send.",
+      table: { category: "Fill session" },
+    },
+    formResponse: {
+      control: "object",
+      description:
+        "School FormResponse document — null until Send; Update edits this same object.",
+      table: { category: "FormResponse" },
+    },
+    showDeleted: { control: "boolean", table: { category: "Update view" } },
   },
   args: {
     heading: "All-in lifecycle",
     phase: "design",
     flatItems: FORM_ITEM_EDITOR_INITIAL,
     responses: {},
-    changes: {},
-    reviewPending: true,
+    formResponse: null,
     showDeleted: false,
   },
 };

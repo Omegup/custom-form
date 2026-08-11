@@ -350,17 +350,37 @@ const DesignPhase = ({
 const FillPhase = ({
   sections,
   responses,
+  formResponse,
   updateArgs,
 }: {
   sections: types.ListSection[];
   responses: Record<string, lib.Response>;
+  formResponse: types.FormResponseDoc | null;
   updateArgs: types.DemoProps["updateArgs"];
 }) => {
   const formRef = useRef<lib.SectionValidator | null>(null);
   const [errors, setErrors] = useState<Record<string, string | null>>({});
+  const [justSent, setJustSent] = useState(false);
+
+  /**
+   * School `CustomFormResponder`: when a FormResponse exists, pass it as `old`
+   * so locked answers show and only remarked fields are editable.
+   */
+  const old = useMemo((): {
+    values: Record<string, lib.Response>;
+    changes: lib.ResponderAdditionalChanges;
+  } | null => {
+    if (!formResponse) return null;
+    const responderChanges: lib.ResponderAdditionalChanges = {};
+    for (const [id, entry] of Object.entries(formResponse.changes)) {
+      if (entry.comment != null) responderChanges[id] = { comment: entry.comment };
+    }
+    return { values: formResponse.responses, changes: responderChanges };
+  }, [formResponse]);
 
   const setResponse = useCallback(
     (id: string, next?: lib.Response) => {
+      setJustSent(false);
       if (next === undefined) {
         const { [id]: _, ...rest } = responses;
         updateArgs({ responses: rest });
@@ -371,45 +391,112 @@ const FillPhase = ({
     [responses, updateArgs],
   );
 
+  /**
+   * School formik onSubmit → `customForms.addFormResponse` (first send) or
+   * update the same FormResponse on revise — answers + feedbackHistory live
+   * on that one document (not a separate "update" store).
+   */
+  const send = () => {
+    const ref = formRef.current;
+    if (!ref) return;
+    const keyed = Object.fromEntries(
+      ref.getKeys().map((k) => [k, responses[k]]),
+    ) as Record<string, lib.Response>;
+    const nextErrors = ref.validate(keyed);
+    setErrors(nextErrors);
+    if (Object.values(nextErrors).some((e) => e != null && e !== "")) return;
+
+    const updated = ref.update(keyed);
+    const sendDate = phases.rememberDate(new Date());
+    const nextChanges: lib.AdditionalChanges<types.TypeNames, types.Params> = {
+      ...(formResponse?.changes ?? {}),
+    };
+    for (const id of Object.keys(updated)) {
+      const entry = nextChanges[id] ?? {};
+      nextChanges[id] = {
+        ...entry,
+        // Same Date instance as feedbackHistory so lastPending === history date.
+        history: [...(entry.history ?? []), { date: sendDate }],
+      };
+    }
+
+    const nextDoc: types.FormResponseDoc = {
+      responses: updated,
+      changes: nextChanges,
+      feedbackHistory: [
+        ...(formResponse?.feedbackHistory ?? []),
+        { status: "answered", date: sendDate.toISOString() },
+      ],
+      status: "answered",
+    };
+
+    updateArgs({ responses: updated, formResponse: nextDoc });
+    setJustSent(true);
+  };
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <FormResponder
         ctx={fillCtx}
         header={{
-          title: "Fill the form",
-          description: "Answers become the Update-phase review input.",
+          title: old ? "Revise your answers" : "Fill the form",
+          description: old
+            ? "Locked fields keep the prior FormResponse answer. Remarks unlock fields for revise — then Send again."
+            : "Send creates the FormResponse document (school addFormResponse).",
         }}
         sections={sections}
         responses={responses}
-        old={null}
+        old={old}
         setResponse={setResponse}
         getError={(id) => errors[id] ?? null}
         impRef={formRef}
         showDeleted={false}
       />
-      <button
-        type="button"
-        style={{ alignSelf: "flex-start" }}
-        onClick={() => setErrors(formRef.current?.validate(responses) ?? {})}
-      >
-        Validate
-      </button>
+      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <button
+          type="button"
+          onClick={() => setErrors(formRef.current?.validate(responses) ?? {})}
+        >
+          Validate
+        </button>
+        <button
+          type="button"
+          onClick={send}
+          style={{
+            background: "#1a5fb4",
+            color: "#fff",
+            border: "none",
+            padding: "6px 14px",
+            borderRadius: 4,
+            cursor: "pointer",
+            fontWeight: 600,
+          }}
+        >
+          Send
+        </button>
+        {justSent ? (
+          <span style={{ fontSize: 13, color: "#22883e" }}>
+            FormResponse saved — open Update to review the same document.
+          </span>
+        ) : null}
+        {formResponse && !justSent ? (
+          <span style={{ fontSize: 13, color: "#666" }}>
+            FormResponse on file — revise unlocked fields, then Send again.
+          </span>
+        ) : null}
+      </div>
     </div>
   );
 };
 
 const UpdatePhase = ({
   sections,
-  responses,
-  changes,
-  reviewPending,
+  formResponse,
   showDeleted,
   updateArgs,
 }: {
   sections: types.ListSection[];
-  responses: Record<string, lib.Response>;
-  changes: lib.AdditionalChanges<types.TypeNames, types.Params>;
-  reviewPending: boolean;
+  formResponse: types.FormResponseDoc | null;
   showDeleted: boolean;
   updateArgs: types.DemoProps["updateArgs"];
 }) => {
@@ -417,16 +504,78 @@ const UpdatePhase = ({
     lib.Addition<types.TypeNames, types.Params> | null
   >(null);
   const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
+  const [savedChanges, setSavedChanges] = useState(
+    formResponse?.changes ?? {},
+  );
+  const [feedbackComment, setFeedbackComment] = useState("");
+  const [statusNote, setStatusNote] = useState<string | null>(null);
+
+  const patchFormResponse = useCallback(
+    (patch: Partial<types.FormResponseDoc>) => {
+      if (!formResponse) return;
+      updateArgs({ formResponse: { ...formResponse, ...patch } });
+    },
+    [formResponse, updateArgs],
+  );
 
   const setChanges = useCallback(
     (next: lib.AdditionalChanges<types.TypeNames, types.Params>) =>
-      updateArgs({ changes: next }),
-    [updateArgs],
+      patchFormResponse({ changes: next }),
+    [patchFormResponse],
   );
 
-  const pickFollowUpType = (
-    newItem: { header: lib.SomeFormItem<types.TypeNames, types.Params> },
-  ) => {
+  const changes = formResponse?.changes ?? {};
+  const feedbackHistory = formResponse?.feedbackHistory ?? [];
+  const lastFeedback = feedbackHistory.at(-1) ?? null;
+  const lastPending = lastFeedback
+    ? phases.dateFromIso(lastFeedback.date)
+    : null;
+  const dirty = formResponse != null && savedChanges !== changes;
+
+  /**
+   * School `formResponses.addAdditionalQuestions` — persist teacher
+   * remarks / follow-ups on the same FormResponse; if status was
+   * `answered`, also push `draft`.
+   */
+  const saveChanges = () => {
+    if (!formResponse) return;
+    const nextHistory = [...feedbackHistory];
+    let nextStatus = formResponse.status;
+    if (formResponse.status === "answered") {
+      const draftDate = phases.rememberDate(new Date());
+      nextHistory.push({ status: "draft", date: draftDate.toISOString() });
+      nextStatus = "draft";
+    }
+    setSavedChanges(changes);
+    patchFormResponse({ feedbackHistory: nextHistory, status: nextStatus });
+    setStatusNote("FormResponse.changes saved.");
+  };
+
+  /** School `formResponses.addFeedback` — mutates the same FormResponse. */
+  const submitFeedback = (status: types.FeedbackStatus) => {
+    if (!formResponse) return;
+    const date = phases.rememberDate(new Date());
+    const comment = feedbackComment.trim() || undefined;
+    patchFormResponse({
+      status,
+      feedbackHistory: [
+        ...feedbackHistory,
+        { status, comment, date: date.toISOString() },
+      ],
+    });
+    setFeedbackComment("");
+    setStatusNote(
+      status === "changesRequested"
+        ? "Changes requested on FormResponse — student revises on Fill → Send."
+        : status === "approved"
+          ? "FormResponse approved."
+          : "FormResponse rejected.",
+    );
+  };
+
+  const pickFollowUpType = (newItem: {
+    header: lib.SomeFormItem<types.TypeNames, types.Params>;
+  }) => {
     if (!addition || addition.mode !== "question") return;
     const header = newItem.header;
     setAddition({
@@ -441,17 +590,39 @@ const UpdatePhase = ({
     });
   };
 
+  if (!formResponse) {
+    return (
+      <p style={{ margin: 0, fontSize: 14, color: "#a40" }}>
+        No FormResponse yet — use Fill → Send to create the response document.
+        Update is a teacher view of that same document, not a third store.
+      </p>
+    );
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 16, fontSize: 14 }}>
-        <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <input
-            type="checkbox"
-            checked={reviewPending}
-            onChange={(e) => updateArgs({ reviewPending: e.target.checked })}
-          />
-          Review round pending (highlight status)
-        </label>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 12,
+          alignItems: "center",
+          fontSize: 14,
+        }}
+      >
+        <button type="button" onClick={saveChanges} disabled={!dirty}>
+          Save changes
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setChanges(savedChanges);
+            setStatusNote("Changes discarded.");
+          }}
+          disabled={!dirty}
+        >
+          Cancel
+        </button>
         <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <input
             type="checkbox"
@@ -460,6 +631,54 @@ const UpdatePhase = ({
           />
           Show deleted sections
         </label>
+        <span style={{ fontSize: 13, color: "#555" }}>
+          FormResponse status: <code>{formResponse.status}</code>
+          {lastPending ? ` · ${lastPending.toISOString().slice(0, 10)}` : ""}
+        </span>
+        {statusNote ? (
+          <span style={{ fontSize: 13, color: "#22883e" }}>{statusNote}</span>
+        ) : null}
+      </div>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 8,
+          alignItems: "center",
+          padding: "10px 12px",
+          background: "#f6f7f9",
+          borderRadius: 6,
+          fontSize: 13,
+        }}
+      >
+        <span style={{ fontWeight: 600 }}>Feedback</span>
+        <input
+          type="text"
+          value={feedbackComment}
+          onChange={(e) => setFeedbackComment(e.target.value)}
+          placeholder="Optional comment"
+          style={{ flex: "1 1 160px", minWidth: 120, padding: "4px 8px" }}
+        />
+        <button
+          type="button"
+          onClick={() => submitFeedback("changesRequested")}
+        >
+          Request changes
+        </button>
+        <button
+          type="button"
+          onClick={() => submitFeedback("approved")}
+          style={{ color: "#1b7a36" }}
+        >
+          Approve
+        </button>
+        <button
+          type="button"
+          onClick={() => submitFeedback("rejected")}
+          style={{ color: "#a40" }}
+        >
+          Reject
+        </button>
       </div>
       {addition?.mode === "question" && !addition.question ? (
         <p
@@ -481,13 +700,13 @@ const UpdatePhase = ({
           <FormReview
             ctx={reviewCtx}
             header={{
-              title: "Update / review",
+              title: "Update FormResponse",
               description:
-                "Remarks unlock answers. Use 💬 then the Library to attach typed follow-ups.",
+                "Same document as Fill — remarks / follow-ups / feedback live on FormResponse.changes + feedbackHistory.",
             }}
             sections={sections}
-            responses={responses}
-            lastPending={reviewPending ? phases.PENDING_DATE : null}
+            responses={formResponse.responses}
+            lastPending={lastPending}
             changes={changes}
             setChanges={setChanges}
             addition={addition}
@@ -527,8 +746,7 @@ export const AllInEditor = ({
   phase,
   flatItems,
   responses,
-  changes,
-  reviewPending,
+  formResponse,
   showDeleted,
   updateArgs,
 }: types.DemoProps) => {
@@ -550,15 +768,14 @@ export const AllInEditor = ({
         <FillPhase
           sections={sections}
           responses={responses}
+          formResponse={formResponse}
           updateArgs={updateArgs}
         />
       ) : null}
       {phase === "update" ? (
         <UpdatePhase
           sections={sections}
-          responses={responses}
-          changes={changes}
-          reviewPending={reviewPending}
+          formResponse={formResponse}
           showDeleted={showDeleted}
           updateArgs={updateArgs}
         />
@@ -567,7 +784,7 @@ export const AllInEditor = ({
         phase={phase}
         flatItems={flatItems}
         responses={responses}
-        changes={changes}
+        formResponse={formResponse}
       />
     </FormContainer>
   );
