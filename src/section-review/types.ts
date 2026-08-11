@@ -165,6 +165,12 @@ export type SectionReviewProps<
   lastPending: Date | null;
   changes: AdditionalChanges<TypeNames, Params>;
   setChanges: (changes: AdditionalChanges<TypeNames, Params>) => void;
+  /** Host-owned overlay draft (comment / follow-up question) — so a sidebar catalog can fill `question`. */
+  addition: Addition<TypeNames, Params> | null;
+  setAddition: (addition: Addition<TypeNames, Params> | null) => void;
+  /** Item id pending comment deletion, or null. */
+  deleteCommentId: string | null;
+  setDeleteCommentId: (id: string | null) => void;
   variants: Variants;
   tCommon: (term: "add" | "cancel" | "save" | "delete") => string;
   /** Section ordinal for the title (1-based display when `multiSection`). */

@@ -2,7 +2,7 @@
  * `section-review` showcase — Design → Response → Follow for one section.
  * Only Follow mounts `SectionReviewHOC`; earlier phases are demo blueprints.
  */
-import { useCallback, type Ref } from "react";
+import { useCallback, useState, type Ref } from "react";
 import * as demo from "./sectionReviewDemoHelper";
 import type * as types from "./sectionReviewDemoTypes.t";
 import * as lib from "./library";
@@ -78,6 +78,11 @@ export const SectionReviewDemo = ({
   reviewPending,
   updateArgs,
 }: types.DemoProps) => {
+  const [addition, setAddition] = useState<
+    lib.Addition<types.TypeNames, types.Params> | null
+  >(null);
+  const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
+
   const setChanges = useCallback(
     (next: lib.AdditionalChanges<types.TypeNames, types.Params>) =>
       updateArgs({ changes: next }),
@@ -116,6 +121,10 @@ export const SectionReviewDemo = ({
               lastPending={reviewPending ? demo.PENDING_DATE : null}
               changes={changes}
               setChanges={setChanges}
+              addition={addition}
+              setAddition={setAddition}
+              deleteCommentId={deleteCommentId}
+              setDeleteCommentId={setDeleteCommentId}
               variants={variants}
               tCommon={tCommon}
               i={0}

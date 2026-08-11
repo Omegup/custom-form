@@ -43,11 +43,13 @@ between the fill and review shells.
 
 ### Overlay mutations
 
-`SectionReviewHOC` owns the transient `addition` / `deleteCommentId` state and
-derives `onSubmitComment`, `onConfirmDeleteComment`, `onSubmitQuestion` for
-`renderOverlays` — these write directly into `AdditionalChanges` via
-`setChanges`. Chrome only needs to collect input and call the callback; it
-never touches `changes` directly.
+Host owns `addition` / `deleteCommentId` (required props) so a Library sidebar
+can fill `question` when the teacher is adding a follow-up. Submit callbacks
+still write into `AdditionalChanges` via `setChanges`.
+
+A **remark unlocks** the answer for student revise: `unlock` icon when
+`comment` is set (click removes it); `lock` icon when none (click adds a
+remark).
 
 ## Demo (`section-review/Section review` story)
 

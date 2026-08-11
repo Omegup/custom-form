@@ -4,6 +4,7 @@
  */
 import type { ReactNode } from "react";
 import type {
+  Addition,
   AdditionalChanges,
   MetaDom,
   ParamsDom,
@@ -49,6 +50,10 @@ export type CustomFormReviewProps<
   lastPending: Date | null;
   changes: AdditionalChanges<TypeNames, Params>;
   setChanges: (changes: AdditionalChanges<TypeNames, Params>) => void;
+  addition: Addition<TypeNames, Params> | null;
+  setAddition: (addition: Addition<TypeNames, Params> | null) => void;
+  deleteCommentId: string | null;
+  setDeleteCommentId: (id: string | null) => void;
   tCommon: (term: "add" | "cancel" | "save" | "delete") => string;
   showDeleted: boolean;
   children?: ReactNode;

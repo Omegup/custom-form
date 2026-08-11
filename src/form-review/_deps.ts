@@ -15,6 +15,7 @@ export type {
 } from "../form-edit";
 export type { Response, StrictViewerMethods, ViewerMethods } from "../response";
 export type {
+  Addition,
   AdditionalChanges,
   ReviewExtra,
   SectionReviewChrome,

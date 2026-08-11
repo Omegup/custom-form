@@ -2,9 +2,8 @@
  * Demo domain = form-item-editor demo types (`field` / `heading` / `panel`)
  * so the same editor stack serves the All-in story.
  *
- * List shell uses `section-view` (`SectionFormItemHOC` + `WebRecursiveEdit`);
- * dialog sessions still use form-item-editor / section-edit chrome via
- * `makeUseDialogs`.
+ * Lifecycle phases: Design (edit flat list) → Fill (responses) → Update
+ * (teacher `AdditionalChanges` + Library sidebar for follow-up types).
  */
 import type * as itemTypes from "../../form-item-editor/demo/formItemEditorDemoTypes.t";
 import type * as lib from "./library";
@@ -38,9 +37,17 @@ export type ListExtra = lib.ExtraDom & {
   onEdit: () => void;
 };
 
+/** Design → Fill → Update walkthrough stage. */
+export type DemoPhase = "design" | "fill" | "update";
+
 export type StoryArgs = {
   flatItems: itemTypes.FlatItems;
   heading: string;
+  phase: DemoPhase;
+  responses: Record<string, lib.Response>;
+  changes: lib.AdditionalChanges<itemTypes.TypeNames, itemTypes.Params>;
+  reviewPending: boolean;
+  showDeleted: boolean;
 };
 
 export type DemoProps = StoryArgs & {

@@ -2,14 +2,18 @@
  * Section review shell — school `section-review-ui/SectionReview`
  * `SectionReviewHOC`. Renders one section's slots read-only through
  * `FormItemHOC`, threads per-item `status` derived from reviewer
- * `AdditionalChanges` + `lastPending`, and owns comment / follow-up-question
- * overlay state (submitted back to the host via `setChanges`).
+ * `AdditionalChanges` + `lastPending`, and drives comment / follow-up-question
+ * overlays via **host-owned** `addition` / `deleteCommentId` state (so a
+ * Library sidebar can fill `question.type`).
+ *
+ * A remark **unlocks** an answer for student revise (`unlock` icon when a
+ * comment exists; `lock` when none).
  *
  * All presentation is injected via {@link SectionReviewChrome} — this module
  * emits no HTML (see `.cursor/rules/no-html-outside-demo.mdc`). Overlays
  * render inline (sibling to content), never via `createPortal`.
  */
-import { Fragment, useState, type ReactNode, type Ref } from "react";
+import { Fragment, type ReactNode, type Ref } from "react";
 import type {
   Children,
   MetaDom,
@@ -24,7 +28,6 @@ import type {
 } from "./_deps";
 import { branded, emptyResponse, FormItemHOC, getUseImpRefViewProps } from "./_deps";
 import type {
-  Addition,
   ReviewExtra,
   ReviewStatus,
   SectionReviewChrome,
@@ -80,10 +83,22 @@ export const SectionReviewHOC = <
       Meta
     >,
   ) => {
-    const { multiSection, section, i, responses, ctx, changes, setChanges, lastPending, variants, tCommon } = props;
-
-    const [addition, setAddition] = useState<Addition<TypeNames, Params> | null>(null);
-    const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
+    const {
+      multiSection,
+      section,
+      i,
+      responses,
+      ctx,
+      changes,
+      setChanges,
+      lastPending,
+      variants,
+      tCommon,
+      addition,
+      setAddition,
+      deleteCommentId,
+      setDeleteCommentId,
+    } = props;
 
     const submitComment = (text: string) => {
       if (!addition || addition.mode !== "comment") return;
@@ -256,7 +271,9 @@ export const SectionReviewHOC = <
                             error: null,
                             parentDeleted,
                             index,
-                            icon: renderActionIcon(hasComment ? "lock" : "unlock", () => {
+                            // Remark unlocks the answer for student revise — show
+                            // unlock when a comment exists; lock when none.
+                            icon: renderActionIcon(hasComment ? "unlock" : "lock", () => {
                               if (hasComment) setDeleteCommentId(q.id);
                               else setAddition({ originId: q.id, mode: "comment" });
                             }),

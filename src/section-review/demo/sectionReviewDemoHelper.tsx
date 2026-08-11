@@ -293,8 +293,9 @@ const ACTION_ICON: Record<
   "lock" | "unlock" | "addQuestion" | "edit",
   { glyph: string; label: string }
 > = {
-  lock: { glyph: "🔒", label: "Remove comment" },
-  unlock: { glyph: "🔓", label: "Add comment" },
+  // Remark unlocks revise — lock = no remark yet; unlock = remark present.
+  lock: { glyph: "🔒", label: "Locked — add remark to unlock" },
+  unlock: { glyph: "🔓", label: "Unlocked by remark — remove remark" },
   addQuestion: { glyph: "💬", label: "Ask follow-up question" },
   edit: { glyph: "✎", label: "Edit follow-up question" },
 };

@@ -5,6 +5,7 @@ export type {
 } from "./types";
 export type {
   AdditionalChanges,
+  Addition,
   ReviewExtra,
   SectionReviewChrome,
   SectionReviewContext,

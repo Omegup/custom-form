@@ -1,14 +1,19 @@
 /**
- * All-in composition — school `CustomFormEditor` + `DialogsHOC` (`DialogUi`):
- * one `makeUseDialogs` instance orchestrates every dialog flow over a
- * `section-view` list shell (`SectionFormItemHOC` + `WebRecursiveEdit` DnD):
- * - row "Edit" → item edit session
- * - sidebar catalog → ambiguous insert (`-1/-1`, section picker when >1)
- * - in-slot "+ Add" (section & nested panel columns) → concrete-span insert
- * - section header "Edit" / sidebar "+ Add section" → section session
- * - drag rows to reorder within a column or into a nested panel column
+ * All-in composition — Design → Fill → Update lifecycle:
+ * 1. Design: school `CustomFormEditor` + `DialogsHOC` (`makeUseDialogs`) over
+ *    `SectionFormItemHOC` + `WebRecursiveEdit` + Library sidebar
+ * 2. Fill: `CustomFormResponderHOC` on the designed sections
+ * 3. Update: `CustomFormReviewHOC` — remarks unlock answers; Library sidebar
+ *    picks follow-up question types (same catalog as Design)
  */
-import { createContext, useContext, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { WebRecursiveEdit } from "../../flat-dnd/demo/WebRecursiveEdit";
 import {
   FormItemEditor,
@@ -26,6 +31,7 @@ import {
 } from "../../side-menu/demo/sideMenuDemoHelper";
 import { columnsChrome } from "../../section-view/demo/sectionViewDemoHelper";
 import * as demo from "./allInDemoHelper";
+import * as phases from "./allInPhases";
 import type * as types from "./allInDemoTypes.t";
 import * as lib from "./library";
 
@@ -145,7 +151,6 @@ const useDialogs = lib.makeUseDialogs<
       setFormItem={setDraft}
       extra={lib.branded<types.ItemExtra, "item-edit-extra">({
         onCommit: commit,
-        /** The label is host business — this demo's `Section` has `title`. */
         sectionPicker: add
           ? {
               sIndex: session.sIndex,
@@ -183,11 +188,42 @@ type PendingRemove = {
   item: lib.FlatNestedItem<types.TypeNames, types.Params, types.Section>;
 };
 
-export const AllInEditor = ({
-  heading,
+const fillVariants = lib.branded<types.Variants, "variants">({
+  field: "default",
+  heading: "default",
+  panel: "default",
+});
+
+const FormResponder = lib.CustomFormResponderHOC<
+  types.TypeNames,
+  types.Params,
+  types.Variants,
+  lib.SectionResponderContext,
+  types.Section
+>(phases.fillViewers, fillVariants, phases.fillChrome);
+
+const FormReview = lib.CustomFormReviewHOC<
+  types.TypeNames,
+  types.Params,
+  types.Variants,
+  lib.SectionReviewContext,
+  types.Section
+>(phases.reviewViewers, fillVariants, phases.reviewChrome);
+
+const fillCtx = lib.branded<lib.SectionResponderContext, "context">({
+  t: () => "Required",
+});
+const reviewCtx = lib.branded<lib.SectionReviewContext, "context">({});
+const tCommon = (term: "add" | "cancel" | "save" | "delete") =>
+  ({ add: "Add", cancel: "Cancel", save: "Save", delete: "Delete" })[term];
+
+const DesignPhase = ({
   flatItems,
   updateArgs,
-}: types.DemoProps) => {
+}: {
+  flatItems: types.FlatItems;
+  updateArgs: types.DemoProps["updateArgs"];
+}) => {
   const [focused, setFocused] = useState<lib.AutoFocusState>(null);
   const [toRemove, setToRemove] = useState<PendingRemove | null>(null);
 
@@ -284,31 +320,255 @@ export const AllInEditor = ({
 
   return (
     <DialogActionsCtx.Provider value={dialogActions}>
-      <FormContainer title={heading}>
-        {dialogs.formItemDialog}
-        {dialogs.sectionDialog}
-        <LayoutWithSidebar
-          main={
-            <>
-              {alert}
-              {list}
-            </>
-          }
-          sidebar={
-            <lib.Side<types.TypeNames, types.Params, types.Section>
-              title="Library"
-              addSectionLabel="+ Add section"
-              menuItems={MENU_ITEMS}
-              random={randomId}
-              blankSection={blankSection}
-              render={renderSide}
-              renderMenuItem={renderMenuItem}
-              setAddFormItem={(item) => dialogs.openItemInsert(item)}
-              setAddSection={dialogs.openSectionAdd}
-            />
-          }
-        />
-      </FormContainer>
+      {dialogs.formItemDialog}
+      {dialogs.sectionDialog}
+      <LayoutWithSidebar
+        main={
+          <>
+            {alert}
+            {list}
+          </>
+        }
+        sidebar={
+          <lib.Side<types.TypeNames, types.Params, types.Section>
+            title="Library"
+            addSectionLabel="+ Add section"
+            menuItems={MENU_ITEMS}
+            random={randomId}
+            blankSection={blankSection}
+            render={renderSide}
+            renderMenuItem={renderMenuItem}
+            setAddFormItem={(item) => dialogs.openItemInsert(item)}
+            setAddSection={dialogs.openSectionAdd}
+          />
+        }
+      />
     </DialogActionsCtx.Provider>
+  );
+};
+
+const FillPhase = ({
+  sections,
+  responses,
+  updateArgs,
+}: {
+  sections: types.ListSection[];
+  responses: Record<string, lib.Response>;
+  updateArgs: types.DemoProps["updateArgs"];
+}) => {
+  const formRef = useRef<lib.SectionValidator | null>(null);
+  const [errors, setErrors] = useState<Record<string, string | null>>({});
+
+  const setResponse = useCallback(
+    (id: string, next?: lib.Response) => {
+      if (next === undefined) {
+        const { [id]: _, ...rest } = responses;
+        updateArgs({ responses: rest });
+        return;
+      }
+      updateArgs({ responses: { ...responses, [id]: next } });
+    },
+    [responses, updateArgs],
+  );
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <FormResponder
+        ctx={fillCtx}
+        header={{
+          title: "Fill the form",
+          description: "Answers become the Update-phase review input.",
+        }}
+        sections={sections}
+        responses={responses}
+        old={null}
+        setResponse={setResponse}
+        getError={(id) => errors[id] ?? null}
+        impRef={formRef}
+        showDeleted={false}
+      />
+      <button
+        type="button"
+        style={{ alignSelf: "flex-start" }}
+        onClick={() => setErrors(formRef.current?.validate(responses) ?? {})}
+      >
+        Validate
+      </button>
+    </div>
+  );
+};
+
+const UpdatePhase = ({
+  sections,
+  responses,
+  changes,
+  reviewPending,
+  showDeleted,
+  updateArgs,
+}: {
+  sections: types.ListSection[];
+  responses: Record<string, lib.Response>;
+  changes: lib.AdditionalChanges<types.TypeNames, types.Params>;
+  reviewPending: boolean;
+  showDeleted: boolean;
+  updateArgs: types.DemoProps["updateArgs"];
+}) => {
+  const [addition, setAddition] = useState<
+    lib.Addition<types.TypeNames, types.Params> | null
+  >(null);
+  const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
+
+  const setChanges = useCallback(
+    (next: lib.AdditionalChanges<types.TypeNames, types.Params>) =>
+      updateArgs({ changes: next }),
+    [updateArgs],
+  );
+
+  const pickFollowUpType = (
+    newItem: { header: lib.SomeFormItem<types.TypeNames, types.Params> },
+  ) => {
+    if (!addition || addition.mode !== "question") return;
+    const header = newItem.header;
+    setAddition({
+      ...addition,
+      question: {
+        ...header,
+        params: {
+          ...header.params,
+          name: header.params.name || header.type,
+        },
+      },
+    });
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 16, fontSize: 14 }}>
+        <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <input
+            type="checkbox"
+            checked={reviewPending}
+            onChange={(e) => updateArgs({ reviewPending: e.target.checked })}
+          />
+          Review round pending (highlight status)
+        </label>
+        <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <input
+            type="checkbox"
+            checked={showDeleted}
+            onChange={(e) => updateArgs({ showDeleted: e.target.checked })}
+          />
+          Show deleted sections
+        </label>
+      </div>
+      {addition?.mode === "question" && !addition.question ? (
+        <p
+          style={{
+            margin: 0,
+            padding: "8px 12px",
+            background: "#f0f5fb",
+            border: "1px solid #1a5fb4",
+            borderRadius: 6,
+            fontSize: 13,
+          }}
+        >
+          Follow-up for item <code>{addition.originId}</code> — pick a type in the
+          Library sidebar.
+        </p>
+      ) : null}
+      <LayoutWithSidebar
+        main={
+          <FormReview
+            ctx={reviewCtx}
+            header={{
+              title: "Update / review",
+              description:
+                "Remarks unlock answers. Use 💬 then the Library to attach typed follow-ups.",
+            }}
+            sections={sections}
+            responses={responses}
+            lastPending={reviewPending ? phases.PENDING_DATE : null}
+            changes={changes}
+            setChanges={setChanges}
+            addition={addition}
+            setAddition={setAddition}
+            deleteCommentId={deleteCommentId}
+            setDeleteCommentId={setDeleteCommentId}
+            tCommon={tCommon}
+            showDeleted={showDeleted}
+          />
+        }
+        sidebar={
+          <lib.Side<types.TypeNames, types.Params, types.Section>
+            title="Library"
+            addSectionLabel="+ Add section"
+            menuItems={MENU_ITEMS}
+            random={randomId}
+            blankSection={blankSection}
+            render={renderSide}
+            renderMenuItem={renderMenuItem}
+            setAddFormItem={(item) => {
+              if (addition?.mode === "question") {
+                pickFollowUpType(item);
+              }
+            }}
+            setAddSection={() => {
+              /* sections are designed in Design phase only */
+            }}
+          />
+        }
+      />
+    </div>
+  );
+};
+
+export const AllInEditor = ({
+  heading,
+  phase,
+  flatItems,
+  responses,
+  changes,
+  reviewPending,
+  showDeleted,
+  updateArgs,
+}: types.DemoProps) => {
+  const sections = useMemo(
+    () => lib.consolidateSections(flatItems) as types.ListSection[],
+    [flatItems],
+  );
+
+  return (
+    <FormContainer title={heading}>
+      <phases.PhaseTabs
+        phase={phase}
+        onChange={(next) => updateArgs({ phase: next })}
+      />
+      {phase === "design" ? (
+        <DesignPhase flatItems={flatItems} updateArgs={updateArgs} />
+      ) : null}
+      {phase === "fill" ? (
+        <FillPhase
+          sections={sections}
+          responses={responses}
+          updateArgs={updateArgs}
+        />
+      ) : null}
+      {phase === "update" ? (
+        <UpdatePhase
+          sections={sections}
+          responses={responses}
+          changes={changes}
+          reviewPending={reviewPending}
+          showDeleted={showDeleted}
+          updateArgs={updateArgs}
+        />
+      ) : null}
+      <phases.PhaseJsonPanels
+        phase={phase}
+        flatItems={flatItems}
+        responses={responses}
+        changes={changes}
+      />
+    </FormContainer>
   );
 };

@@ -49,20 +49,19 @@ section: commit(header, cols)  → updateSectionInFlat(flatItems, session, heade
 
 ## Demo
 
-`form-dialogs/All-in` story (`demo/AllInEditor.tsx`): **`SectionFormItemHOC`**
-(`section-view`) as the list shell with **`renderEdit: WebRecursiveEdit`**
-(`flat-dnd/demo` — same plug-in as the flat-dnd story), with every dialog flow
-wired through one `useDialogs`:
+`form-dialogs/All-in` story (`demo/AllInEditor.tsx`) — **Design → Fill → Update**:
 
-- row **Edit** → `openItemEdit`
-- **Side** sidebar catalog → `openItemInsert` (section picker when >1 live section)
-- in-slot **+ Add** (section & nested panel columns) → `makeUseRenderAddItem(setItemSession)`
-- section header **Edit** → `openSectionEdit`; **+ Add section** → `openSectionAdd`
-- drag rows to reorder within a column or into a nested panel column
+1. **Design** — **`SectionFormItemHOC`** (`section-view`) + **`WebRecursiveEdit`**
+   DnD + Library sidebar; every dialog flow through one `useDialogs`
+   (row Edit, Side insert, in-slot Add, section Edit/Add).
+2. **Fill** — **`CustomFormResponderHOC`** on the designed sections.
+3. **Update** — **`CustomFormReviewHOC`**; a remark unlocks an answer; click 💬
+   then pick Field / Heading / Panel from the **same Library sidebar** to
+   attach a typed follow-up. JSON panels show `flatItems` / `responses` /
+   `AdditionalChanges`.
 
 Editors, dialog chrome, and fixtures are reused from the `form-item-editor`,
-`section-edit`, and `side-menu` demos (Storybook-only composition). List
-viewers are display-only; edits go through dialogs (not inline).
+`section-edit`, and `side-menu` demos (Storybook-only composition).
 
 ## Dependency rule
 

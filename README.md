@@ -22,7 +22,7 @@ Each module has a colocated `*.stories.tsx`. Story titles match folder names, e.
 
 | Story | Module | What it shows |
 |---|---|---|
-| **form-dialogs/All-in** | `form-dialogs/` | Full composed editor (`SectionFormItemHOC` + `WebRecursiveEdit` DnD + every dialog flow) |
+| **form-dialogs/All-in** | `form-dialogs/` | Design → Fill → Update lifecycle (`makeUseDialogs` + fill + review; Library picks follow-up types) |
 | form/Form | `form/` | Viewers rendering a JSON-driven form |
 | response/Response | `response/` | Fill-path foundation (`ResponseSetter` + `getUseImpRefViewProps` validate) |
 | section-responder/Section responder | `section-responder/` | One section of fillable fields + section-level validate |

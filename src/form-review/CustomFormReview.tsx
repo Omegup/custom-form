@@ -71,6 +71,10 @@ export const CustomFormReviewHOC = <
       lastPending,
       changes,
       setChanges,
+      addition,
+      setAddition,
+      deleteCommentId,
+      setDeleteCommentId,
       tCommon,
       showDeleted,
       ctx,
@@ -95,6 +99,10 @@ export const CustomFormReviewHOC = <
                   lastPending={lastPending}
                   changes={changes}
                   setChanges={setChanges}
+                  addition={addition}
+                  setAddition={setAddition}
+                  deleteCommentId={deleteCommentId}
+                  setDeleteCommentId={setDeleteCommentId}
                   variants={variants}
                   tCommon={tCommon}
                   i={i}

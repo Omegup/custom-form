@@ -4,7 +4,7 @@
  * demo-only blueprints so you can compare structure, answers, and reviewer
  * annotations side by side (JSON panels always visible).
  */
-import { useCallback, type Ref } from "react";
+import { useCallback, useState, type Ref } from "react";
 import * as demo from "./formReviewDemoHelper";
 import type * as types from "./formReviewDemoTypes.t";
 import * as lib from "./library";
@@ -83,6 +83,11 @@ export const FormReviewDemo = ({
   showDeleted,
   updateArgs,
 }: types.DemoProps) => {
+  const [addition, setAddition] = useState<
+    lib.Addition<types.TypeNames, types.Params> | null
+  >(null);
+  const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
+
   const setChanges = useCallback(
     (next: lib.AdditionalChanges<types.TypeNames, types.Params>) =>
       updateArgs({ changes: next }),
@@ -148,6 +153,10 @@ export const FormReviewDemo = ({
               lastPending={reviewPending ? demo.PENDING_DATE : null}
               changes={changes}
               setChanges={setChanges}
+              addition={addition}
+              setAddition={setAddition}
+              deleteCommentId={deleteCommentId}
+              setDeleteCommentId={setDeleteCommentId}
               tCommon={tCommon}
               showDeleted={showDeleted}
             />
