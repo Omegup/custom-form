@@ -22,18 +22,18 @@ export const rememberDate = (date: Date): Date => {
 export const dateFromIso = (iso: string): Date =>
   datesByIso.get(iso) ?? rememberDate(new Date(iso));
 
-/** School `Object.fromEntries(response.responses.map(…))` for fill/review UIs. */
+/** Map FormResponse.responses[] → Record for fill/review UIs. */
 export const formResponseValues = (
   doc: types.FormResponseDoc,
 ): Record<string, lib.Response> =>
-  Object.fromEntries(doc.responses.map((r) => [r.questionId, r.response]));
+  Object.fromEntries(doc.responses.map((r) => [r.formItemId, r.response]));
 
-/** School submit payload → persisted `FormResponse.responses` array. */
+/** Submit payload → persisted `FormResponse.responses` array. */
 export const toFormResponseEntries = (
   values: Record<string, lib.Response>,
 ): types.FormResponseEntry[] =>
-  Object.entries(values).map(([questionId, response]) => ({
-    questionId,
+  Object.entries(values).map(([formItemId, response]) => ({
+    formItemId,
     response,
   }));
 
@@ -213,13 +213,13 @@ const actionButtonStyle: CSSProperties = {
 };
 
 const ACTION_ICON: Record<
-  "lock" | "unlock" | "addQuestion" | "edit",
+  "lock" | "unlock" | "addFormItem" | "edit",
   { glyph: string; label: string }
 > = {
   lock: { glyph: "🔒", label: "Locked — add remark to unlock" },
   unlock: { glyph: "🔓", label: "Unlocked by remark — remove remark" },
-  addQuestion: { glyph: "💬", label: "Ask follow-up question" },
-  edit: { glyph: "✎", label: "Edit follow-up question" },
+  addFormItem: { glyph: "💬", label: "Ask follow-up" },
+  edit: { glyph: "✎", label: "Edit follow-up" },
 };
 
 const overlayBox: CSSProperties = {
@@ -297,7 +297,7 @@ export const reviewChrome: lib.FormReviewChrome<types.TypeNames, types.Params> =
       ) : null}
       <p style={{ margin: "8px 0 0", fontSize: 12, color: "#888", fontStyle: "italic" }}>
         Remark unlocks a field (🔓). Click 💬 then pick a type from the Library sidebar to attach
-        a follow-up question.
+        a follow-up.
       </p>
     </div>
   ),
@@ -365,7 +365,7 @@ export const reviewChrome: lib.FormReviewChrome<types.TypeNames, types.Params> =
       </button>
     </div>
   ),
-  renderQuestionAppendix: (nodes) => (
+  renderFormItemAppendix: (nodes) => (
     <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>{nodes}</div>
   ),
   renderActionIcon: (kind, onClick) => {
@@ -391,7 +391,7 @@ export const reviewChrome: lib.FormReviewChrome<types.TypeNames, types.Params> =
     clearDelete,
     onSubmitComment,
     onConfirmDeleteComment,
-    onSubmitQuestion,
+    onSubmitFormItem,
     tCommon,
   }) => {
     if (deleteCommentId) {
@@ -433,11 +433,11 @@ export const reviewChrome: lib.FormReviewChrome<types.TypeNames, types.Params> =
       );
     }
 
-    if (addition?.mode === "question") {
-      const question = addition.question;
+    if (addition?.mode === "formItem") {
+      const formItem = addition.formItem;
       return (
         <div style={overlayBox}>
-          {!question ? (
+          {!formItem ? (
             <p style={{ margin: "0 0 8px", fontSize: 14 }}>
               Pick a type from the <strong>Library</strong> sidebar (Field / Heading / Panel) to
               attach a follow-up under this answer.
@@ -445,16 +445,16 @@ export const reviewChrome: lib.FormReviewChrome<types.TypeNames, types.Params> =
           ) : (
             <>
               <p style={{ margin: "0 0 8px", fontSize: 13, color: "#555" }}>
-                Follow-up type: <strong>{question.type}</strong> · id: {question.id}
+                Follow-up type: <strong>{formItem.type}</strong> · id: {formItem.id}
               </p>
               <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 <span>Label</span>
                 <input
-                  value={question.params.name}
+                  value={formItem.params.name}
                   onChange={(e) =>
                     setAddition({
                       ...addition,
-                      question: lib.withFormItemName(question, e.target.value),
+                      formItem: lib.withFormItemName(formItem, e.target.value),
                     })
                   }
                 />
@@ -472,10 +472,10 @@ export const reviewChrome: lib.FormReviewChrome<types.TypeNames, types.Params> =
           <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
             <button
               type="button"
-              disabled={!question}
+              disabled={!formItem}
               onClick={() =>
-                question &&
-                onSubmitQuestion({ comment: addition.comment, question })
+                formItem &&
+                onSubmitFormItem({ comment: addition.comment, formItem })
               }
             >
               {tCommon("save")}

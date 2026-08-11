@@ -65,11 +65,12 @@ export type FeedbackHistoryItem = {
  * Created by Fill → Send (`customForms.addFormResponse`); Update / feedback
  * methods mutate this same record (`addAdditionalQuestions`, `addFeedback`).
  *
- * Shape mirrors `models.FormResponse`: `responses` is an array of
- * `{ questionId, response }` (not a Record). First insert uses `changes: {}`.
+ * Shape mirrors school `FormResponse`, with slot-tree naming: `responses` is
+ * an array of `{ formItemId, response }` (not a Record). First insert uses
+ * `changes: {}`.
  */
 export type FormResponseEntry = {
-  questionId: string;
+  formItemId: string;
   response: lib.Response;
 };
 

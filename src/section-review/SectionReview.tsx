@@ -2,9 +2,9 @@
  * Section review shell — school `section-review-ui/SectionReview`
  * `SectionReviewHOC`. Renders one section's slots read-only through
  * `FormItemHOC`, threads per-item `status` derived from reviewer
- * `AdditionalChanges` + `lastPending`, and drives comment / follow-up-question
+ * `AdditionalChanges` + `lastPending`, and drives comment / follow-up-form-item
  * overlays via **host-owned** `addition` / `deleteCommentId` state (so a
- * Library sidebar can fill `question.type`).
+ * Library sidebar can fill `formItem.type`).
  *
  * A remark **unlocks** an answer for student revise (`unlock` icon when a
  * comment exists; `lock` when none).
@@ -67,7 +67,7 @@ export const SectionReviewHOC = <
     renderItemShell,
     renderAppendix,
     renderComment,
-    renderQuestionAppendix,
+    renderFormItemAppendix,
     renderActionIcon,
     renderOverlays,
   } = chrome;
@@ -119,21 +119,21 @@ export const SectionReviewHOC = <
       setDeleteCommentId(null);
     };
 
-    const submitQuestion = (payload: {
+    const submitFormItem = (payload: {
       comment?: string;
-      question?: SomeFormItem<TypeNames, Params>;
+      formItem?: SomeFormItem<TypeNames, Params>;
     }) => {
-      if (!addition || addition.mode !== "question") return;
+      if (!addition || addition.mode !== "formItem") return;
       const { originId, replace } = addition;
       const current = changes[originId] ?? {};
-      const entry = { comment: payload.comment, question: payload.question, date: lastPending };
-      const questions = current.questions ? [...current.questions] : [];
+      const entry = { comment: payload.comment, formItem: payload.formItem, date: lastPending };
+      const formItems = current.formItems ? [...current.formItems] : [];
       if (replace) {
-        questions[replace.index] = entry;
+        formItems[replace.index] = entry;
       } else {
-        questions.push(entry);
+        formItems.push(entry);
       }
-      setChanges({ ...changes, [originId]: { ...current, questions } });
+      setChanges({ ...changes, [originId]: { ...current, formItems } });
       setAddition(null);
     };
 
@@ -154,23 +154,23 @@ export const SectionReviewHOC = <
         );
       }
 
-      change.questions?.forEach((sq, subIndex) => {
-        if (sq.question) {
-          const answered = !!responses[sq.question.id];
+      change.formItems?.forEach((sq, subIndex) => {
+        if (sq.formItem) {
+          const answered = !!responses[sq.formItem.id];
           const status: ReviewStatus =
             !sq.date || !lastPending ? "normal" : answered ? "disabled" : "highlight";
           nodes.push(
             <Fragment key={subIndex}>
               {renderItemShell({
-                id: sq.question.id,
+                id: sq.formItem.id,
                 action: answered
                   ? null
                   : renderActionIcon("edit", () =>
                       setAddition({
                         originId,
-                        mode: "question",
+                        mode: "formItem",
                         comment: sq.comment,
-                        question: sq.question,
+                        formItem: sq.formItem,
                         replace: { index: subIndex },
                       }),
                     ),
@@ -178,8 +178,8 @@ export const SectionReviewHOC = <
                   <FormItem
                     viewProps={{
                       ctx,
-                      formItem: sq.question,
-                      variant: variants[sq.question.type],
+                      formItem: sq.formItem,
+                      variant: variants[sq.formItem.type],
                       extra: branded({
                         getChild: () => null,
                         error: null,
@@ -188,7 +188,7 @@ export const SectionReviewHOC = <
                         icon: null,
                         response: {
                           setValue: null,
-                          value: responses[sq.question.id] ?? emptyResponse(),
+                          value: responses[sq.formItem.id] ?? emptyResponse(),
                         },
                         appendix: sq.comment ? renderAppendix(sq.comment) : undefined,
                         status,
@@ -209,9 +209,9 @@ export const SectionReviewHOC = <
                 onEdit: () =>
                   setAddition({
                     originId,
-                    mode: "question",
+                    mode: "formItem",
                     comment: sq.comment,
-                    question: undefined,
+                    formItem: undefined,
                     replace: { index: subIndex },
                   }),
               })}
@@ -255,8 +255,8 @@ export const SectionReviewHOC = <
                 <Fragment key={q.id}>
                   {renderItemShell({
                     id: q.id,
-                    action: renderActionIcon("addQuestion", () =>
-                      setAddition({ originId: q.id, mode: "question" }),
+                    action: renderActionIcon("addFormItem", () =>
+                      setAddition({ originId: q.id, mode: "formItem" }),
                     ),
                     children: (
                       <FormItem
@@ -282,7 +282,7 @@ export const SectionReviewHOC = <
                               value: responses[q.id] ?? emptyResponse(),
                             },
                             appendix: appendixNodes.length
-                              ? renderQuestionAppendix(appendixNodes)
+                              ? renderFormItemAppendix(appendixNodes)
                               : undefined,
                             status,
                             impRef: null,
@@ -315,7 +315,7 @@ export const SectionReviewHOC = <
           clearDelete: () => setDeleteCommentId(null),
           onSubmitComment: submitComment,
           onConfirmDeleteComment: confirmDeleteComment,
-          onSubmitQuestion: submitQuestion,
+          onSubmitFormItem: submitFormItem,
           tCommon,
         })}
       </>

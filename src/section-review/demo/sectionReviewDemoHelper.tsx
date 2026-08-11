@@ -290,14 +290,14 @@ const actionButtonStyle: CSSProperties = {
 };
 
 const ACTION_ICON: Record<
-  "lock" | "unlock" | "addQuestion" | "edit",
+  "lock" | "unlock" | "addFormItem" | "edit",
   { glyph: string; label: string }
 > = {
   // Remark unlocks revise — lock = no remark yet; unlock = remark present.
   lock: { glyph: "🔒", label: "Locked — add remark to unlock" },
   unlock: { glyph: "🔓", label: "Unlocked by remark — remove remark" },
-  addQuestion: { glyph: "💬", label: "Ask follow-up question" },
-  edit: { glyph: "✎", label: "Edit follow-up question" },
+  addFormItem: { glyph: "💬", label: "Ask follow-up" },
+  edit: { glyph: "✎", label: "Edit follow-up" },
 };
 
 /** Demo HTML chrome for `SectionReviewHOC` — not part of the library. */
@@ -363,7 +363,7 @@ export const sectionChrome: lib.SectionReviewChrome<types.TypeNames, types.Param
       </button>
     </div>
   ),
-  renderQuestionAppendix: (nodes) => (
+  renderFormItemAppendix: (nodes) => (
     <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>{nodes}</div>
   ),
   renderActionIcon: (kind, onClick) => {
@@ -389,7 +389,7 @@ export const sectionChrome: lib.SectionReviewChrome<types.TypeNames, types.Param
     clearDelete,
     onSubmitComment,
     onConfirmDeleteComment,
-    onSubmitQuestion,
+    onSubmitFormItem,
     tCommon,
   }) => {
     if (deleteCommentId) {
@@ -431,8 +431,8 @@ export const sectionChrome: lib.SectionReviewChrome<types.TypeNames, types.Param
       );
     }
 
-    if (addition?.mode === "question") {
-      const question = addition.question;
+    if (addition?.mode === "formItem") {
+      const formItem = addition.formItem;
       return (
         <div style={overlayBox}>
           <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -446,11 +446,11 @@ export const sectionChrome: lib.SectionReviewChrome<types.TypeNames, types.Param
           <label style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
             <input
               type="checkbox"
-              checked={!!question}
+              checked={!!formItem}
               onChange={(e) =>
                 setAddition({
                   ...addition,
-                  question: e.target.checked
+                  formItem: e.target.checked
                     ? {
                         id: `${addition.originId}-followup-${addition.replace?.index ?? Date.now()}`,
                         type: "field",
@@ -463,17 +463,17 @@ export const sectionChrome: lib.SectionReviewChrome<types.TypeNames, types.Param
             />
             Attach a follow-up field
           </label>
-          {question ? (
+          {formItem ? (
             <label style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 8 }}>
               <span>Field label</span>
               <input
-                value={question.params.name}
+                value={formItem.params.name}
                 onChange={(e) =>
                   setAddition({
                     ...addition,
-                    question: {
-                      ...question,
-                      params: { ...question.params, name: e.target.value },
+                    formItem: {
+                      ...formItem,
+                      params: { ...formItem.params, name: e.target.value },
                     },
                   })
                 }
@@ -483,7 +483,7 @@ export const sectionChrome: lib.SectionReviewChrome<types.TypeNames, types.Param
           <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
             <button
               type="button"
-              onClick={() => onSubmitQuestion({ comment: addition.comment, question })}
+              onClick={() => onSubmitFormItem({ comment: addition.comment, formItem })}
             >
               {tCommon("save")}
             </button>
@@ -542,10 +542,10 @@ export const INITIAL_CHANGES: lib.AdditionalChanges<types.TypeNames, types.Param
   },
   note: {
     comment: "Please add a short note.",
-    questions: [
+    formItems: [
       {
         comment: "Which topic did you struggle with?",
-        question: lib.branded({
+        formItem: lib.branded({
           id: "note-followup-0",
           type: "field",
           deleted: false,

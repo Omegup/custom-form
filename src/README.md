@@ -52,7 +52,7 @@ drag-drop-tree (standalone leaf, no _deps) ──▶ flat-dnd (+ form-edit)
 `SectionWithItems` (form-edit) into a fillable section shell; `form-responder`
 stacks sections via `CustomFormResponderHOC`. `section-review` composes the
 same layers into a read-only teacher/admin review shell (per-item `status` +
-comment/follow-up-question overlays mutating `AdditionalChanges`); `form-review`
+comment/follow-up-form-item overlays mutating `AdditionalChanges`); `form-review`
 stacks sections via `CustomFormReviewHOC`. `section-review`/`form-review` do
 **not** depend on `section-responder`/`form-responder` (siblings, not a
 stack) — a host may share one `viewers` bag between fill and review since

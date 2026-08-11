@@ -4,7 +4,7 @@
  *    `SectionFormItemHOC` + `WebRecursiveEdit` + Library sidebar
  * 2. Fill: `CustomFormResponderHOC` on the designed sections
  * 3. Update: `CustomFormReviewHOC` — remarks unlock answers; Library sidebar
- *    picks follow-up question types (same catalog as Design)
+ *    picks follow-up form item types (same catalog as Design)
  */
 import {
   createContext,
@@ -575,11 +575,11 @@ const UpdatePhase = ({
   const pickFollowUpType = (newItem: {
     header: lib.SomeFormItem<types.TypeNames, types.Params>;
   }) => {
-    if (!addition || addition.mode !== "question") return;
+    if (!addition || addition.mode !== "formItem") return;
     const header = newItem.header;
     setAddition({
       ...addition,
-      question: lib.withFormItemName(header, header.params.name || header.type),
+      formItem: lib.withFormItemName(header, header.params.name || header.type),
     });
   };
 
@@ -673,7 +673,7 @@ const UpdatePhase = ({
           Reject
         </button>
       </div>
-      {addition?.mode === "question" && !addition.question ? (
+      {addition?.mode === "formItem" && !addition.formItem ? (
         <p
           style={{
             margin: 0,
@@ -720,7 +720,7 @@ const UpdatePhase = ({
             render={renderSide}
             renderMenuItem={renderMenuItem}
             setAddFormItem={(item) => {
-              if (addition?.mode === "question") {
+              if (addition?.mode === "formItem") {
                 pickFollowUpType(item);
               }
             }}

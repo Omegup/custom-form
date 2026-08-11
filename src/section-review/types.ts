@@ -3,6 +3,8 @@
  * (`AdditionalChanges`, `ReviewExtra`) + `types/form-app/addition`
  * (`Addition`, `CommentAddition`, `QuestionAddition`), adapted for the
  * section-level review contract from `section-review-ui/SectionReview`.
+ * slot-tree uses `formItem` naming throughout (school calls this a
+ * "follow-up question"; we attach a follow-up form item instead).
  *
  * Chrome (section shell, item cards, comment cards, overlays) is injected via
  * {@link SectionReviewChrome} — library code emits no HTML.
@@ -22,17 +24,17 @@ import type {
   VariantsDom,
 } from "./_deps";
 
-/** One reviewer follow-up question thread entry — school `AdditionalChanges[id].questions[]`. */
-export type ReviewQuestionEntry<
+/** One reviewer follow-up thread entry — school `AdditionalChanges[id].questions[]`. */
+export type ReviewFormItemEntry<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
 > = {
   comment?: string;
-  question?: SomeFormItem<TypeNames, Params>;
+  formItem?: SomeFormItem<TypeNames, Params>;
   date: Date | null;
 };
 
-/** Teacher/reviewer comments + follow-up questions keyed by item id — school `AdditionalChanges`. */
+/** Teacher/reviewer comments + follow-up form items keyed by item id — school `AdditionalChanges`. */
 export type AdditionalChanges<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
@@ -40,7 +42,7 @@ export type AdditionalChanges<
   string,
   {
     comment?: string;
-    questions?: ReviewQuestionEntry<TypeNames, Params>[];
+    formItems?: ReviewFormItemEntry<TypeNames, Params>[];
     history?: { date: Date }[];
   }
 >;
@@ -52,22 +54,22 @@ export type CommentAddition = {
   text?: string;
 };
 
-/** In-progress overlay state for adding/editing a follow-up question — school `QuestionAddition`. */
-export type QuestionAddition<
+/** In-progress overlay state for adding/editing a follow-up form item — school `QuestionAddition`. */
+export type FormItemAddition<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
 > = {
   originId: string;
-  mode: "question";
+  mode: "formItem";
   comment?: string;
-  question?: SomeFormItem<TypeNames, Params>;
+  formItem?: SomeFormItem<TypeNames, Params>;
   replace?: { index: number };
 };
 
 export type Addition<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-> = CommentAddition | QuestionAddition<TypeNames, Params>;
+> = CommentAddition | FormItemAddition<TypeNames, Params>;
 
 /** Per-item review status driving chrome highlighting — school `ReviewExtra["status"]`. */
 export type ReviewStatus = "normal" | "disabled" | "highlight";
@@ -106,9 +108,9 @@ export type ReviewOverlayArgs<
   clearDelete: () => void;
   onSubmitComment: (text: string) => void;
   onConfirmDeleteComment: () => void;
-  onSubmitQuestion: (payload: {
+  onSubmitFormItem: (payload: {
     comment?: string;
-    question?: SomeFormItem<TypeNames, Params>;
+    formItem?: SomeFormItem<TypeNames, Params>;
   }) => void;
   tCommon: (term: "add" | "cancel" | "save" | "delete") => string;
 };
@@ -139,10 +141,10 @@ export type SectionReviewChrome<
   renderAppendix: (comment: string) => ReactNode;
   /** Editable comment card (top-level comment, or a comment-only follow-up entry). */
   renderComment: (args: { text: string; onEdit: () => void }) => ReactNode;
-  /** Wraps the comment card + follow-up question nodes under one item. */
-  renderQuestionAppendix: (nodes: ReactNode[]) => ReactNode;
+  /** Wraps the comment card + follow-up form item nodes under one item. */
+  renderFormItemAppendix: (nodes: ReactNode[]) => ReactNode;
   renderActionIcon: (
-    kind: "lock" | "unlock" | "addQuestion" | "edit",
+    kind: "lock" | "unlock" | "addFormItem" | "edit",
     onClick: () => void,
   ) => ReactNode;
   renderOverlays: (args: ReviewOverlayArgs<TypeNames, Params>) => ReactNode;
@@ -165,7 +167,7 @@ export type SectionReviewProps<
   lastPending: Date | null;
   changes: AdditionalChanges<TypeNames, Params>;
   setChanges: (changes: AdditionalChanges<TypeNames, Params>) => void;
-  /** Host-owned overlay draft (comment / follow-up question) — so a sidebar catalog can fill `question`. */
+  /** Host-owned overlay draft (comment / follow-up form item) — so a sidebar catalog can fill `formItem`. */
   addition: Addition<TypeNames, Params> | null;
   setAddition: (addition: Addition<TypeNames, Params> | null) => void;
   /** Item id pending comment deletion, or null. */

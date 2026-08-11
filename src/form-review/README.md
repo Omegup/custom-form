@@ -32,7 +32,7 @@ Lifecycle walkthrough — **Design → Response → Follow**:
    section); JSON shows `sections`.
 2. **Response** — student answers (summary left empty on purpose); JSON shows
    `responses`.
-3. **Follow** — mounts `CustomFormReviewHOC`: comments, follow-up questions,
+3. **Follow** — mounts `CustomFormReviewHOC`: comments, follow-up form items,
    status highlighting. Toggle **Review round pending** / **showDeleted**.
    JSON shows live `AdditionalChanges`.
 
