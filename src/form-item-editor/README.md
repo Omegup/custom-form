@@ -38,6 +38,7 @@ Logic in `demo/FormItemEditorDemo.tsx` and friends, and where it belongs:
 | Demo code | Reason |
 |---|---|
 | `FieldEditor`, `HeadingEditor`, `PanelEditor` (in `FormItemEditorDemo.tsx`) | Domain editors — school keeps these in `editors/`, not in `form-item-edit-react` |
+| `wrapWithRequired` / `RequiredToggle` (demo helper) | School `renderRequired` / `question()` slice — toggles `field.params.required` under the field editor |
 | `useItemEditor` + `save` | App `useFormItemEditor` pattern (school: `legacy-front/.../useFormItemEditor.ts` + formik) |
 | `EditorDialog`, field UI chrome, `FormItemEditorFormTest` | Helper — school: `renderDefaultDialog`, design-system inputs, form-edit list |
 | Name `viewers` + `createFormItemByGetChild` | Same composition as `form` demo — per-type labels without a type switch |

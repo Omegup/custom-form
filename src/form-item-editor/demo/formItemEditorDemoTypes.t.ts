@@ -6,9 +6,10 @@ export type TypeNames = "field" | "heading" | "panel";
 /**
  * Shared `name` on every type — school `ParamsDom<…, { name: string }>` /
  * `cloneFlatItems` rename without a type switch. Extra display belongs in viewers.
+ * `field.required` mirrors school `CommonParams.required` (answerable items only).
  */
 export type Params = lib.TheParams<{
-  field: { name: string };
+  field: { name: string; required: boolean };
   heading: { name: string };
   panel: { name: string };
 }>;
@@ -124,7 +125,9 @@ export type Validate<K extends TypeNames> = lib.FormItemEditorValidate<
   Params,
   K
 >;
-export type ItemStateFor<K extends TypeNames> = lib.EditorHookResult<ItemState<K>>;
+export type ItemStateFor<K extends TypeNames> = lib.EditorHookResult<
+  ItemState<K>
+>;
 export type EditorProps<K extends TypeNames> = lib.FormItemEditorProps<
   Ctx,
   DialogArgs,
@@ -140,6 +143,54 @@ export type UseItemEditor = lib.UseFormItemEditor<
   DialogArgs,
   ItemExtraMap,
   ItemStateMap
+>;
+
+/**
+ * Unbound maps for `makeUseItemEditor` — see typescript-types.mdc
+ * “Generic factories can escape indexed-access assignability”.
+ */
+export type HookExtra<
+  TN extends string,
+  P extends lib.ParamsDom<TN>,
+> = lib.ItemEditExtraDom<{
+  onCommit: <KK extends TN>(draft: lib.FlatFormItem<KK, P>) => void;
+  sectionPicker?: SectionPicker;
+}>;
+
+export type HookStateFields<
+  P extends lib.ParamsDom<string>,
+  K extends string,
+> = {
+  save: () => void;
+  isError: (param: keyof P[K]) => boolean;
+  isSectionError: boolean;
+  errors: {
+    header?: { params: lib.Errors<P[K]> };
+    sIndex?: string;
+  };
+  sectionPicker?: SectionPicker;
+};
+
+export type HookExtraMap<
+  TN extends string,
+  P extends lib.ParamsDom<TN>,
+> = { [K in TN]: HookExtra<TN, P> };
+
+export type HookStateMap<
+  TN extends string,
+  P extends lib.ParamsDom<TN>,
+> = { [K in TN]: lib.ItemEditStateDom<HookStateFields<P, K>> };
+
+export type MakeUseItemEditor = <
+  TN extends string,
+  P extends lib.ParamsDom<TN>,
+>() => lib.UseFormItemEditor<
+  TN,
+  P,
+  Ctx,
+  DialogArgs,
+  HookExtraMap<TN, P>,
+  HookStateMap<TN, P>
 >;
 
 export type ParamKey<K extends TypeNames> = keyof Params[K];

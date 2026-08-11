@@ -30,7 +30,12 @@ export const viewers: lib.Viewers<
   string
 > = {
   field: {
-    viewer: ({ props: { formItem } }) => <span>{formItem.params.name}</span>,
+    viewer: ({ props: { formItem } }) => (
+      <span>
+        {formItem.params.name}
+        {formItem.params.required ? " *" : ""}
+      </span>
+    ),
   },
   heading: {
     viewer: ({ props: { formItem } }) => (

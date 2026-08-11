@@ -156,6 +156,56 @@ export const NameField = ({
   </label>
 );
 
+/**
+ * School `editors/required` `renderRequired` — Switch toggling
+ * `params.required`. Demo chrome only (library stays host-agnostic).
+ */
+export const RequiredToggle = ({
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  onChange: (required: boolean) => void;
+}) => (
+  <label
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      fontSize: 13,
+      marginTop: 4,
+    }}
+  >
+    <input
+      type="checkbox"
+      checked={checked}
+      onChange={(e) => onChange(e.target.checked)}
+    />
+    Required
+  </label>
+);
+
+/**
+ * School `question()` slice for required — wrap a field editor so the
+ * Required toggle sits below the domain fields (same seam as
+ * `props.render(renderRequired())`).
+ */
+export const wrapWithRequired =
+  (
+    Editor: (props: types.FieldEditorProps) => ReactNode,
+  ): ((props: types.FieldEditorProps) => ReactNode) =>
+  (props) => (
+    <>
+      <Editor {...props} />
+      <RequiredToggle
+        checked={props.flatFormItem.item.params.required}
+        onChange={(required) =>
+          props.setFormItemParam(() => ["required", required])
+        }
+      />
+    </>
+  );
+
 const MAX_NAME_LEN = 10;
 
 export const NameLengthHint = ({ name }: { name: string }) => (

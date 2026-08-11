@@ -147,7 +147,12 @@ const PanelEditor = ({
 
 const nameViewers: types.NameViewers = {
   field: {
-    viewer: ({ props: { formItem } }) => formItem.params.name,
+    viewer: ({ props: { formItem } }) => (
+      <>
+        {formItem.params.name}
+        {formItem.params.required ? " *" : ""}
+      </>
+    ),
   },
   heading: {
     viewer: ({ props: { formItem } }) => `§ ${formItem.params.name}`,
@@ -185,47 +190,71 @@ export const itemName = (ctx: types.Ctx, header: types.ItemHeader): ReactNode =>
  * than one candidate section (`extra.sectionPicker` set by side-menu);
  * a no-op for edits and for `AddFormItem` slot inserts, which already have
  * a concrete `index`/section.
+ *
+ * Built via a generic factory: assigning the hook body directly to
+ * `types.UseItemEditor` fails once `Params[K]` keys differ across K
+ * (`isError`'s param is contravariant — field has `"required"`, heading/panel
+ * do not). Checking the body under unbound `TN`/`P` escapes that (see
+ * `.cursor/rules/typescript-types.mdc` “Generic factories can escape
+ * indexed-access assignability”).
  */
-const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
-  props: types.EditorProps<K>,
-  { validate }: types.Validate<K>,
-): types.ItemStateFor<K> => {
-  const { onCommit, sectionPicker } = props.extra;
-  const { formItem: draft } = props;
-  const [errors, setErrors] = useState<types.ItemValidateErrors<K>>({});
+const makeUseItemEditor: types.MakeUseItemEditor =
+  <TN extends string, P extends lib.ParamsDom<TN>>() =>
+  <K extends TN>(
+    props: lib.FormItemEditorProps<
+      types.Ctx,
+      types.DialogArgs,
+      types.HookExtra<TN, P>,
+      TN,
+      P,
+      K
+    >,
+    { validate }: lib.FormItemEditorValidate<TN, P, K>,
+  ) => {
+    const { onCommit, sectionPicker } = props.extra;
+    const { formItem: draft } = props;
+    const [errors, setErrors] = useState<
+      types.HookStateFields<P, K>["errors"]
+    >({});
 
-  const save = useCallback(() => {
-    const next: types.ItemValidateErrors<K> = {};
-    validate(draft, {
-      param: (name, message) => {
-        next.header ??= { params: {} };
-        next.header.params[name] = message;
-      },
-      section: (message) => {
-        next.sIndex ??= message;
-      },
-    });
-    if (sectionPicker && sectionPicker.sections.length > 1 && sectionPicker.sIndex === -1) {
-      next.sIndex ??= "Pick a section";
-    }
-    setErrors(next);
-    if (next.sIndex) return;
-    if (next.header?.params && Object.keys(next.header.params).length > 0) {
-      return;
-    }
-    onCommit(draft);
-  }, [draft, onCommit, validate, sectionPicker]);
+    const save = useCallback(() => {
+      const next: types.HookStateFields<P, K>["errors"] = {};
+      validate(draft, {
+        param: (name, message) => {
+          next.header ??= { params: {} };
+          next.header.params[name] = message;
+        },
+        section: (message) => {
+          next.sIndex ??= message;
+        },
+      });
+      if (
+        sectionPicker &&
+        sectionPicker.sections.length > 1 &&
+        sectionPicker.sIndex === -1
+      ) {
+        next.sIndex ??= "Pick a section";
+      }
+      setErrors(next);
+      if (next.sIndex) return;
+      if (next.header?.params && Object.keys(next.header.params).length > 0) {
+        return;
+      }
+      onCommit(draft);
+    }, [draft, onCommit, validate, sectionPicker]);
 
-  return {
-    state: lib.branded<types.ItemState<K>, "item-edit-state">({
-      save,
-      errors,
-      isError: (param) => Boolean(errors.header?.params[param]),
-      isSectionError: Boolean(errors.sIndex),
-      sectionPicker,
-    }),
+    return {
+      state: lib.branded<types.HookStateFields<P, K>, "item-edit-state">({
+        save,
+        errors,
+        isError: (param) => Boolean(errors.header?.params[param]),
+        isSectionError: Boolean(errors.sIndex),
+        sectionPicker,
+      }),
+    };
   };
-};
+
+const useItemEditor = makeUseItemEditor<types.TypeNames, types.Params>();
 
 const renderDialog = <K extends types.TypeNames>(
   dialogArgs: types.DialogArgs,
@@ -269,7 +298,7 @@ export const FormItemEditor = lib.createFormItemEditorWrapper<
   types.ItemStateMap
 >(
   {
-    field: { editor: FieldEditor },
+    field: { editor: demo.wrapWithRequired(FieldEditor) },
     heading: { editor: HeadingEditor },
     panel: { editor: PanelEditor },
   },

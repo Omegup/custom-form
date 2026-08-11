@@ -478,9 +478,15 @@ export const reviewChrome: lib.FormReviewChrome<types.TypeNames, types.Params> =
 export const useFillFieldMethods = (
   impRef: Ref<lib.ViewerMethods> | null,
   response: lib.ResponseSetter,
+  required: boolean,
+  fieldRequired: string,
 ) => {
   useImperativeHandle(impRef, () => ({
-    validate: () => null,
+    validate: (value) => {
+      const text = value.data.value?.trim() ?? "";
+      if (required && !text) return fieldRequired;
+      return null;
+    },
     update: (value) => value ?? lib.emptyResponse(),
   }));
 
@@ -509,12 +515,18 @@ export const fillViewers: lib.Viewers<
   string
 > = {
   field: {
-    viewer: ({ props: { formItem, extra } }) => {
-      const { setDataValue, value } = useFillFieldMethods(extra.impRef, extra.response);
+    viewer: ({ props: { formItem, extra, ctx } }) => {
+      const { setDataValue, value } = useFillFieldMethods(
+        extra.impRef,
+        extra.response,
+        formItem.params.required,
+        ctx.t("fieldRequired"),
+      );
       return (
         <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 14 }}>
           <span>
             {formItem.params.name || "(unnamed field)"}
+            {formItem.params.required ? " *" : ""}
             {extra.icon}
           </span>
           <input
@@ -592,7 +604,10 @@ export const reviewViewers: lib.Viewers<
           }}
         >
           <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <strong>{formItem.params.name || "(unnamed field)"}</strong>
+            <strong>
+              {formItem.params.name || "(unnamed field)"}
+              {formItem.params.required ? " *" : ""}
+            </strong>
             {extra.icon}
           </span>
           <div

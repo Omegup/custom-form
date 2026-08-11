@@ -211,7 +211,7 @@ const FormReview = lib.CustomFormReviewHOC<
 >(phases.reviewViewers, fillVariants, phases.reviewChrome);
 
 const fillCtx = lib.branded<lib.SectionResponderContext, "context">({
-  t: () => "Required",
+  t: (term) => (term === "fieldRequired" ? "This field is required" : term),
 });
 const reviewCtx = lib.branded<lib.SectionReviewContext, "context">({});
 const tCommon = (term: "add" | "cancel" | "save" | "delete") =>
