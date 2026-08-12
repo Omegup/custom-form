@@ -6,11 +6,13 @@ src/
 ├── form/                    View layer (read-only form rendering)
 ├── recursive-form/          Tree types with meta
 ├── move-actions/            Generic move/clone/remove actions
+├── drag-drop-tree/          School drag-drop-tree port (ops + headless React; HTML in demo/)
 ├── form-edit/               Edit orchestration (flat state + section/item actions)
 ├── form-item-editor/        Single-item edit dialog factory
 ├── side-menu/               Library catalog (Side + AddFormItem slots)
 ├── section-edit/            Section edit types + flat save
 ├── section-view/            SectionHOC + ColumnsEdit (section list rendering, no DnD)
+├── flat-dnd/                SectionNodes ↔ drag-drop-tree (lib); demo wires headless DnD + HTML
 └── form-dialogs/            Dialog orchestrator (makeUseDialogs) + All-in demo
 ```
 
@@ -33,13 +35,20 @@ move-actions ──────────────────────�
                         └───────────────┴───────────────┘
                                         │
                                   form-dialogs
+
+drag-drop-tree (standalone leaf, no _deps) ──▶ flat-dnd (+ form-edit)
 ```
 
 **Rule:** upper layers import lower layers, never the reverse.
 `form-edit` does not import `form-item-editor`, `side-menu`, `section-edit`, or `section-view`.
+`drag-drop-tree` is a leaf (no `_deps`). `flat-dnd` imports its **pure ops** only;
+`flat-dnd/demo` wires the headless React engine (`DnDTreeCore`, `RecursiveTreeNode`)
+and owns HTML chrome — see `demo/WebRecursiveEdit.tsx`. Stock school widgets also
+live under `drag-drop-tree/demo/`.
+
 Module demos compose features via props or, for the all-in editor, in `form-dialogs/demo/AllInEditor.tsx`
-(`SectionFormItemHOC` + `makeUseDialogs`). The demo injects `side-menu`'s
-`makeUseRenderAddItem` into `section-view`, same as school.
+(`SectionFormItemHOC` + `WebRecursiveEdit` + `makeUseDialogs`). The demo injects
+`side-menu`'s `makeUseRenderAddItem` into `section-view`, same as school.
 
 ## Import rules
 
@@ -121,4 +130,6 @@ Use `branded({ ... })` to construct values; do not cast.
 - [side-menu/README.md](./side-menu/README.md)
 - [section-edit/README.md](./section-edit/README.md)
 - [section-view/README.md](./section-view/README.md)
+- [drag-drop-tree/README.md](./drag-drop-tree/README.md)
+- [flat-dnd/README.md](./flat-dnd/README.md)
 - [form-dialogs/README.md](./form-dialogs/README.md)

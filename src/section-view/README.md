@@ -6,13 +6,13 @@ of a hand-rolled demo walk.
 
 Migrated from `school/components/custom-form` → `react-packages/form-edit-react`
 (`Section.tsx` `SectionHOC`, `renderEditFormItem.tsx`) + `ts-packages/form-edit`
-(`section.data.ts` `getSectionEdit`) — **without** `recursive-edit-ui`'s
-`RecursiveEdit`/`FlatDnd` (drag-and-drop is deferred).
+(`section.data.ts` `getSectionEdit`) — default `renderEdit` is non-DnD
+`ColumnsEdit`; hosts plug in DnD via `renderEdit` (see `flat-dnd/demo/WebRecursiveEdit`).
 
 Distinct from:
 - [`section-edit`](../section-edit/) — section header edit dialog + `updateSectionInFlat`
 - [`form-dialogs`](../form-dialogs/) — session orchestration (`makeUseDialogs`)
-- School `section-edit-ui` / `recursive-edit-ui` — deferred FlatDnd chrome
+- [`flat-dnd`](../flat-dnd/) — SectionNodes ↔ drag-drop-tree + web DnD `renderEdit`
 
 ## Library scope (this package)
 
@@ -38,7 +38,7 @@ SectionHOC({ renderEdit, useRenderAddItem, renderTitle, renderFormItem })
        title: renderTitle(props),
        render: { addItem, node: renderFormItem(props) },
     })
-renderEdit = RecursiveEdit → FlatDnd                      // deferred here
+renderEdit = RecursiveEdit → FlatDnd
 
 here:
 SectionHOC(args)(props)
@@ -47,7 +47,8 @@ SectionHOC(args)(props)
        title: renderTitle(props),
        render: { addItem, node: renderFormItem(props) },
     })
-renderEdit = createColumnsEdit(columnsChrome) (default, no DnD; host owns HTML)
+renderEdit = createColumnsEdit(columnsChrome) (default, no HTML)
+            | WebRecursiveEdit (flat-dnd / All-in)
 ```
 
 ```mermaid
@@ -68,7 +69,7 @@ flowchart TB
 |---|---|---|
 | `getSectionEdit`'s `setNodes` rebuilds the whole flat list (`sections.toSpliced(i,1,…).flatMap(flatten().section)`) | rewrites only the section's own span (`items.toSpliced(section.meta.index, section.meta.total, ...list)`) | same pattern as `section-edit/updateSectionInFlat`; column count never changes via `setNodes`, only item content/order within the section's existing columns — no need to touch sibling sections |
 | `SectionProps` bundles `edit: SectionEditArgs` (`{ clone, actions, sections, section, i }`) + a branded `SectionExtraDom` `extra` bag | flat fields (`args`, `clone`, `section`, `sIndex`, `jump`) + a plain `itemExtra: (id) => Extra` callback | `getSectionEdit` here doesn't need the full `sections` array (see above), and there's no design-system `Extra` bag to genericize over yet |
-| `RecursiveEdit`/`FlatDnd` (drag-and-drop reorder) | `createColumnsEdit(chrome)` (click-based move actions; chrome in demo) | out of scope for this MVP — `nodes`/`setNodes` on `RecursiveEditManager` already shape the data for a future DnD `renderEdit` to plug in without changing `getSectionEdit` |
+| `RecursiveEdit`/`FlatDnd` (drag-and-drop reorder) | `createColumnsEdit(chrome)` default; DnD is a host `renderEdit` (`flat-dnd/demo/WebRecursiveEdit`) | keeps `section-view` free of DnD deps — same plug-in seam school uses; `nodes`/`setNodes` already shape the data for DnD |
 | School JSS section chrome | **no HTML in library** — `ColumnsEditChrome` render props | host-agnostic; see `.cursor/rules/no-html-outside-demo.mdc` |
 
 ## Demo
@@ -81,8 +82,8 @@ via `form-edit`'s `applyFlatFormItem` (no dialog) — this story's job is
 `section-view` composition alone.
 
 The full editor with dialogs (`form-dialogs/All-in`) also uses
-`SectionFormItemHOC` as its list shell, with display-only viewers and Edit
-opening `makeUseDialogs` sessions.
+`SectionFormItemHOC` as its list shell (with `WebRecursiveEdit` for DnD),
+display-only viewers, and Edit opening `makeUseDialogs` sessions.
 
 ## Dependency rule
 

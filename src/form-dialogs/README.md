@@ -50,13 +50,15 @@ section: commit(header, cols)  → updateSectionInFlat(flatItems, session, heade
 ## Demo
 
 `form-dialogs/All-in` story (`demo/AllInEditor.tsx`): **`SectionFormItemHOC`**
-(`section-view`) as the list shell, with every dialog flow wired through one
-`useDialogs`:
+(`section-view`) as the list shell with **`renderEdit: WebRecursiveEdit`**
+(`flat-dnd/demo` — same plug-in as the flat-dnd story), with every dialog flow
+wired through one `useDialogs`:
 
 - row **Edit** → `openItemEdit`
 - **Side** sidebar catalog → `openItemInsert` (section picker when >1 live section)
 - in-slot **+ Add** (section & nested panel columns) → `makeUseRenderAddItem(setItemSession)`
 - section header **Edit** → `openSectionEdit`; **+ Add section** → `openSectionAdd`
+- drag rows to reorder within a column or into a nested panel column
 
 Editors, dialog chrome, and fixtures are reused from the `form-item-editor`,
 `section-edit`, and `side-menu` demos (Storybook-only composition). List
@@ -66,7 +68,7 @@ viewers are display-only; edits go through dialogs (not inline).
 
 Imports from: `form`, `recursive-form`, `form-edit`, `section-edit` (via `_deps`).
 
-Does **not** import: `form-item-editor`, `side-menu`, `section-view`. The demo
-composes those packages for Storybook only (`section-view` for the list shell,
-`side-menu` for catalog / add slots, `form-item-editor` / `section-edit` for
-dialog chrome).
+Does **not** import: `form-item-editor`, `side-menu`, `section-view`, `flat-dnd`.
+The demo composes those packages for Storybook only (`section-view` for the
+list shell, `flat-dnd/demo/WebRecursiveEdit` for DnD, `side-menu` for catalog /
+add slots, `form-item-editor` / `section-edit` for dialog chrome).

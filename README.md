@@ -22,7 +22,7 @@ Each module has a colocated `*.stories.tsx`. Story titles match folder names, e.
 
 | Story | Module | What it shows |
 |---|---|---|
-| **form-dialogs/All-in** | `form-dialogs/` | Full composed editor (`SectionFormItemHOC` + every dialog flow) |
+| **form-dialogs/All-in** | `form-dialogs/` | Full composed editor (`SectionFormItemHOC` + `WebRecursiveEdit` DnD + every dialog flow) |
 | form/Form | `form/` | Viewers rendering a JSON-driven form |
 | move-actions/Move actions | `move-actions/` | Item list with up/down/clone/remove |
 | form-edit/Edit form | `form-edit/` | Section/field list with move actions only |
@@ -30,6 +30,7 @@ Each module has a colocated `*.stories.tsx`. Story titles match folder names, e.
 | side-menu/Side menu | `side-menu/` | Library sidebar + in-slot add (section & nested panels) |
 | section-edit/Section edit | `section-edit/` | Edit form + section edit dialog |
 | section-view/Section view | `section-view/` | `SectionHOC` + `ColumnsEdit` composing viewers + nested panels + add slots (no DnD) |
+| flat-dnd/Flat dnd | `flat-dnd/` | `SectionFormItemHOC` with HTML5 drag-and-drop reorder (`WebRecursiveEdit`, web-only) swapped in for `ColumnsEdit` |
 | recursive-form/Recursive form | `recursive-form/` | Nested recursive item rendering |
 
 Shared edit-form fixtures: `form-edit/demo/fixtures.ts` (single-type list) and `form-item-editor/demo/fixtures.ts` (multi-type list, reused by the side-menu and All-in stories).
@@ -45,11 +46,13 @@ See **[src/README.md](./src/README.md)** for the full module map, dependency gra
 ```
 form / recursive-form          ← domain types (items, trees, branded params)
 move-actions                   ← up/down/clone/remove action helpers
+drag-drop-tree                 ← school's drag-drop-tree package (ops + React DnD engine)
 form-edit                      ← flat edit representation + move actions on sections/items
 form-item-editor               ← single-item edit dialog (HOC factory)
 side-menu                      ← library catalog: Side sidebar + AddFormItem slots
 section-edit                   ← section title/description edit dialog
 section-view                   ← SectionHOC + ColumnsEdit (section list rendering, no DnD)
+flat-dnd                       ← SectionNodes ↔ drag-drop-tree conversion (lib); demo wires React DnD
 form-dialogs                   ← dialog orchestration (makeUseDialogs) + All-in demo
 ```
 
@@ -76,6 +79,6 @@ Original packages live under `school/components/custom-form/src/`:
 | `side-menu/` | `react-packages/form-edit-react` (`useSide`, `MenuItemDefinition`, `makeUseRenderAddItem`) + `section-edit-ui` (`FormMenuItem`, `AddFormItem`) |
 | `section-edit/` | `react-packages/form-edit-react` (`SectionEdit`; `validateSectionForm` not ported — see section-edit/README.md) |
 | `section-view/` | `react-packages/form-edit-react` (`Section.tsx` `SectionHOC`, `renderEditFormItem.tsx`) + `ts-packages/form-edit` (`section.data.ts` `getSectionEdit`, ported into `form-edit/flat-move-actions`) |
+| `drag-drop-tree/` | `components/drag-drop-tree` (ops + headless React engine; HTML chrome in `demo/`) |
+| `flat-dnd/` | `recursive-edit-ui/FlatDnd.tsx` pure half (`toDndTree`/`cleanNodes`); demo wires `drag-drop-tree` React API via `WebRecursiveEdit` |
 | `form-dialogs/` | `form-edit-react` (`makeUseDialogs`; the pure `setEditFormItemX` part lives in `form-edit/applyFlatFormItem`) |
-
-Still to migrate from `form-edit-react`: `recursive-edit-ui` (`RecursiveEdit` + `FlatDnd` — drag-and-drop reorder; `section-view/ColumnsEdit` covers the non-DnD layout only), …

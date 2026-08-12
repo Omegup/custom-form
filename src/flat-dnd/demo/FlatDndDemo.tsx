@@ -1,16 +1,15 @@
 /**
- * `section-view` showcase — composes `SectionFormItemHOC` (`ColumnsEdit` +
- * viewers + in-slot "+ Add") into a multi-section, multi-type list, proving
- * the library handles nested panel columns and add-item slots without any
- * FlatDnd/drag-and-drop.
- *
- * Item edits commit immediately (no dialog) — this story's job is
- * `section-view` composition, not a second `form-item-editor`/`form-dialogs`.
+ * `flat-dnd` showcase — same composition as `section-view/Section view`
+ * (`SectionFormItemHOC` + viewers + in-slot "+ Add"), but with
+ * `renderEdit: WebRecursiveEdit` swapped in for `ColumnsEdit` — drag rows to
+ * reorder within a column or into a nested panel column.
  */
 import { useMemo, useState } from "react";
-import * as sideMenu from "../../side-menu/demo/sideMenuDemoHelper";
-import * as demo from "./sectionViewDemoHelper";
-import * as types from "./sectionViewDemoTypes.t";
+import { columnsChrome } from "../../section-view/demo/sectionViewDemoHelper";
+import { renderAddFormItem } from "../../side-menu/demo/sideMenuDemoHelper";
+import * as demo from "./flatDndDemoHelper";
+import * as types from "./flatDndDemoTypes.t";
+import { WebRecursiveEdit } from "./WebRecursiveEdit";
 import * as lib from "./library";
 
 const cloneFn: lib.Clone<types.TypeNames, types.Params, types.Ctx, types.Section> = (
@@ -31,7 +30,7 @@ const useRenderAddItem = lib.makeUseRenderAddItem<types.TypeNames, types.Params>
     <lib.AddFormItem
       {...args}
       label="+ Add item"
-      render={sideMenu.renderAddFormItem}
+      render={renderAddFormItem}
     />
   ),
   () => demo.MENU_ITEMS,
@@ -48,15 +47,12 @@ const SectionComponent = lib.SectionFormItemHOC<
 >({
   viewers: demo.viewers,
   useRenderAddItem,
-  columnsChrome: demo.columnsChrome,
+  columnsChrome,
   renderTitle: (props) => <strong>{props.section.header.title}</strong>,
+  renderEdit: WebRecursiveEdit,
 });
 
-export const SectionViewTest = ({
-  flatItems,
-  updateArgs,
-  renderLayout,
-}: types.ListProps) => {
+export const FlatDndTest = ({ flatItems, updateArgs, renderLayout }: types.ListProps) => {
   const [focused, setFocused] = useState<lib.AutoFocusState>(null);
 
   const ctx = useMemo(
@@ -96,8 +92,6 @@ export const SectionViewTest = ({
       ctx,
     );
 
-  // Rebuilt every render (cheap, demo-only) — avoids memoizing against
-  // `itemActions`/`renameItem`, which are fresh closures each render anyway.
   const itemExtraMap = demo.buildItemExtraMap(sections, itemActions, renameItem);
   const itemExtra = (id: string): types.ItemExtra =>
     itemExtraMap.get(id) ??
@@ -144,12 +138,12 @@ export const SectionViewTest = ({
     </div>
   );
 
-  if (renderLayout) return renderLayout({ list, sidebar: null });
+  if (renderLayout) return renderLayout({ list, toolbar: null });
   return list;
 };
 
-export const SectionViewDemo = ({ heading, flatItems, updateArgs }: types.DemoProps) => (
+export const FlatDndDemo = ({ heading, flatItems, updateArgs }: types.DemoProps) => (
   <demo.FormContainer title={heading}>
-    <SectionViewTest flatItems={flatItems} updateArgs={updateArgs} />
+    <FlatDndTest flatItems={flatItems} updateArgs={updateArgs} />
   </demo.FormContainer>
 );

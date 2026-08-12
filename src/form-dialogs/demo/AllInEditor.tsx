@@ -1,13 +1,15 @@
 /**
  * All-in composition — school `CustomFormEditor` + `DialogsHOC` (`DialogUi`):
  * one `makeUseDialogs` instance orchestrates every dialog flow over a
- * `section-view` list shell (`SectionFormItemHOC` + `ColumnsEdit`):
+ * `section-view` list shell (`SectionFormItemHOC` + `WebRecursiveEdit` DnD):
  * - row "Edit" → item edit session
  * - sidebar catalog → ambiguous insert (`-1/-1`, section picker when >1)
  * - in-slot "+ Add" (section & nested panel columns) → concrete-span insert
  * - section header "Edit" / sidebar "+ Add section" → section session
+ * - drag rows to reorder within a column or into a nested panel column
  */
 import { createContext, useContext, useMemo, useState } from "react";
+import { WebRecursiveEdit } from "../../flat-dnd/demo/WebRecursiveEdit";
 import {
   FormItemEditor,
   itemName,
@@ -72,7 +74,13 @@ const useRenderAddItem = lib.makeUseRenderAddItem<
   types.TypeNames,
   types.Params
 >(
-  (args) => <lib.AddFormItem {...args} render={renderAddFormItem} />,
+  (args) => (
+    <lib.AddFormItem
+      {...args}
+      label="+ Add item"
+      render={renderAddFormItem}
+    />
+  ),
   () => MENU_ITEMS,
   randomId,
 );
@@ -89,6 +97,7 @@ const SectionComponent = lib.SectionFormItemHOC<
   useRenderAddItem,
   columnsChrome,
   renderTitle: (props) => <SectionTitle {...props} />,
+  renderEdit: WebRecursiveEdit,
 });
 
 const cloneFn: lib.Clone<
@@ -287,6 +296,8 @@ export const AllInEditor = ({
           }
           sidebar={
             <lib.Side<types.TypeNames, types.Params, types.Section>
+              title="Library"
+              addSectionLabel="+ Add section"
               menuItems={MENU_ITEMS}
               random={randomId}
               blankSection={blankSection}
