@@ -255,6 +255,13 @@ const FollowUpDesignItems = ({
   const setFlatItems = useCallback(
     (next: types.FlatItems) => {
       const roots = lib.consolidateSections(next)[0]?.items.flat() ?? [];
+      // Don't let a DnD/layout sync wipe follow-ups that still exist in `entries`.
+      if (
+        roots.length === 0 &&
+        entries.some((entry) => entry.formItem != null)
+      ) {
+        return;
+      }
       const current = new Map(
         entries.flatMap((entry) =>
           entry.formItem ? [[entry.formItem.id, entry] as const] : [],
@@ -355,37 +362,48 @@ const FollowUpDesignItems = ({
   );
 };
 
+const FOLLOW_UP_SECTION_ID = "review-follow-ups-fill";
+
+/**
+ * Build fill sections that include reviewer follow-ups.
+ *
+ * School attaches follow-ups under the origin; nesting them inside panel
+ * columns makes them easy to miss in the Fill demo. We keep the design
+ * sections as-is and append one visible "Follow-up questions" section with
+ * every `changes[*].formItems` entry that has a form item.
+ */
 const addReviewFollowUps = (
   sections: types.ListSection[],
   changes: lib.AdditionalChanges<types.TypeNames, types.Params>,
 ): types.ListSection[] => {
-  const addToSlots = (slots: types.ListItem[][]): types.ListItem[][] =>
-    slots.map((items) =>
-      items.flatMap((item) => {
-        const current = {
-          ...item,
-          children: addToSlots(item.children),
-        };
-        const added =
-          changes[item.header.id]?.formItems?.flatMap((entry) =>
-            entry.formItem
-              ? [
-                  {
-                    header: entry.formItem,
-                    children: addToSlots(entry.children ?? []),
-                    meta: item.meta,
-                  },
-                ]
-              : [],
-          ) ?? [];
-        return [current, ...added];
-      }),
-    );
+  const followUps: types.ListItem[] = [];
+  for (const change of Object.values(changes)) {
+    for (const entry of change.formItems ?? []) {
+      if (!entry.formItem) continue;
+      followUps.push({
+        header: entry.formItem,
+        children: entry.children ?? [],
+        meta: lib.branded({
+          index: 0,
+          total: 1,
+          sIndex: sections.length,
+        }),
+      });
+    }
+  }
+  if (followUps.length === 0) return sections;
 
-  return sections.map((section) => ({
-    ...section,
-    items: addToSlots(section.items),
-  }));
+  const followUpSection: types.ListSection = {
+    header: {
+      id: FOLLOW_UP_SECTION_ID,
+      deleted: false,
+      title: "Follow-up questions",
+      description: "Added by the reviewer — please answer these.",
+    },
+    meta: lib.branded({ index: sections.length, total: 1 }),
+    items: [followUps],
+  };
+  return [...sections, followUpSection];
 };
 
 const defaultVariants = lib.branded<types.Variants, "variants">({
@@ -570,27 +588,32 @@ const FillPhase = ({
   /** Write-through until Storybook args catch up after Send. */
   const [optimisticResponse, setOptimisticResponse] =
     useState<types.FormResponseDoc | null>(null);
-  const doc = optimisticResponse ?? formResponse;
+  const doc = formResponse ?? optimisticResponse;
+  const reviewChanges = formResponse?.changes ?? optimisticResponse?.changes ?? {};
   const fillSections = useMemo(
-    () => addReviewFollowUps(sections, doc?.changes ?? {}),
-    [sections, doc],
+    () => addReviewFollowUps(sections, reviewChanges),
+    [sections, reviewChanges],
   );
   const followUpIds = useMemo(() => {
     const ids = new Set<string>();
-    for (const change of Object.values(doc?.changes ?? {})) {
+    for (const change of Object.values(reviewChanges)) {
       for (const entry of change.formItems ?? []) {
         if (entry.formItem) ids.add(entry.formItem.id);
       }
     }
     return ids;
-  }, [doc?.changes]);
+  }, [reviewChanges]);
   const resolveVariant = useCallback(
     <K extends types.TypeNames>(
       item: lib.TypedFormItem<types.Params, K>,
-    ): types.Variants[K] =>
-      followUpIds.has(item.id)
+    ): types.Variants[K] => {
+      const baseId = item.id.includes(":")
+        ? item.id.slice(0, item.id.lastIndexOf(":"))
+        : item.id;
+      return followUpIds.has(item.id) || followUpIds.has(baseId)
         ? followUpVariants[item.type]
-        : defaultVariants[item.type],
+        : defaultVariants[item.type];
+    },
     [followUpIds],
   );
 
@@ -702,11 +725,14 @@ const FillPhase = ({
         ctx={fillCtx}
         header={{
           title: old ? "Revise your answers" : "Fill the form",
-          description: old
-            ? doc?.status === "changesRequested"
-              ? "Changes requested — edit remarked fields if you want, then Send again (resend is allowed with no edits)."
-              : "Waiting for the teacher to request changes before you can Send again."
-            : "Send creates the FormResponse document (school addFormResponse).",
+          description:
+            followUpIds.size > 0
+              ? `Includes ${followUpIds.size} reviewer follow-up field(s) in “Follow-up questions” below.`
+              : old
+                ? doc?.status === "changesRequested"
+                  ? "Changes requested — edit remarked fields if you want, then Send again (resend is allowed with no edits)."
+                  : "Waiting for the teacher to request changes before you can Send again."
+                : "Send creates the FormResponse document (school addFormResponse).",
         }}
         sections={fillSections}
         responses={responses}

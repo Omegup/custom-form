@@ -158,7 +158,7 @@ export const SectionResponderHOC = <
                                 )}
                               </>
                             ),
-                            error: error || (old && editable ? true : null),
+                            error: error || (old && editable && oldValue ? true : null),
                             parentDeleted,
                             index,
                             icon:
