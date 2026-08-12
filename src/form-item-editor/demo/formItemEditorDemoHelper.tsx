@@ -206,6 +206,48 @@ export const wrapWithRequired =
     </>
   );
 
+/** School panel `multiple` — student may add many answer rows. */
+export const MultipleToggle = ({
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  onChange: (multiple: boolean) => void;
+}) => (
+  <label
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      fontSize: 13,
+      marginTop: 4,
+    }}
+  >
+    <input
+      type="checkbox"
+      checked={checked}
+      onChange={(e) => onChange(e.target.checked)}
+    />
+    Multiple answers
+  </label>
+);
+
+export const wrapWithMultiple =
+  (
+    Editor: (props: types.PanelEditorProps) => ReactNode,
+  ): ((props: types.PanelEditorProps) => ReactNode) =>
+  (props) => (
+    <>
+      <Editor {...props} />
+      <MultipleToggle
+        checked={props.flatFormItem.item.params.multiple}
+        onChange={(multiple) =>
+          props.setFormItemParam(() => ["multiple", multiple])
+        }
+      />
+    </>
+  );
+
 const MAX_NAME_LEN = 10;
 
 export const NameLengthHint = ({ name }: { name: string }) => (

@@ -5,7 +5,14 @@
  * this file is the docs source — types in `formItemEditorDemoTypes.t.ts`,
  * chrome / list shell in `formItemEditorDemoHelper.tsx`.
  */
-import { useCallback, useImperativeHandle, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import * as demo from "./formItemEditorDemoHelper";
 import * as types from "./formItemEditorDemoTypes.t";
 import * as lib from "./library";
@@ -300,11 +307,81 @@ export const FormItemEditor = lib.createFormItemEditorWrapper<
   {
     field: { editor: demo.wrapWithRequired(FieldEditor) },
     heading: { editor: HeadingEditor },
-    panel: { editor: PanelEditor },
+    panel: { editor: demo.wrapWithMultiple(PanelEditor) },
   },
   useItemEditor,
   renderDialog,
 );
+
+/** Review follow-up — same `FormItemEditor` stack as Design (field / heading / panel). */
+export const FollowUpFormItemEditor = ({
+  formItem,
+  initialComment = "",
+  flatItems,
+  panelN,
+  onSubmit,
+  onCancel,
+}: {
+  formItem: lib.SomeFormItem<types.TypeNames, types.Params>;
+  initialComment?: string;
+  flatItems: types.FlatItems;
+  panelN: number;
+  onSubmit: (payload: {
+    comment?: string;
+    formItem: lib.SomeFormItem<types.TypeNames, types.Params>;
+  }) => void;
+  onCancel: () => void;
+}) => {
+  const [comment, setComment] = useState(initialComment);
+  const [draft, setDraft] = useState<lib.FlatFormItem<types.TypeNames, types.Params>>(
+    () => ({
+      item: formItem,
+      n: formItem.type === "panel" ? panelN : 0,
+    }),
+  );
+  const draftRef = useRef(draft);
+  draftRef.current = draft;
+
+  useEffect(() => {
+    setDraft({ item: formItem, n: formItem.type === "panel" ? panelN : 0 });
+    setComment(initialComment);
+  }, [formItem, panelN, initialComment]);
+
+  const ctx = lib.branded<types.Ctx, "context">({ flatItems });
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 14 }}>
+        <span>Follow-up comment</span>
+        <textarea
+          rows={2}
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+        />
+      </label>
+      <FormItemEditor
+        ctx={ctx}
+        dialogArgs={lib.branded({
+          title: <>Follow-up · {itemName(ctx, draft.item)}</>,
+          onCancel,
+        })}
+        formItem={draft}
+        setFormItem={(updater) =>
+          setDraft((prev) =>
+            typeof updater === "function" ? updater(prev) : updater,
+          )
+        }
+        extra={lib.branded<types.ItemExtra, "item-edit-extra">({
+          onCommit: () =>
+            onSubmit({
+              comment: comment.trim() || undefined,
+              formItem: draftRef.current.item,
+            }),
+        })}
+      />
+    </div>
+  );
+};
 
 // ── Story integration ─────────────────────────────────────────────────────────
 

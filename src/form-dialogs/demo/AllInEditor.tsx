@@ -17,6 +17,7 @@ import {
 } from "react";
 import { WebRecursiveEdit } from "../../flat-dnd/demo/WebRecursiveEdit";
 import {
+  FollowUpFormItemEditor,
   FormItemEditor,
   itemName,
 } from "../../form-item-editor/demo/FormItemEditorDemo";
@@ -541,11 +542,13 @@ const FillPhase = ({
 
 const UpdatePhase = ({
   sections,
+  flatItems,
   formResponse,
   showDeleted,
   updateArgs,
 }: {
   sections: types.ListSection[];
+  flatItems: types.FlatItems;
   formResponse: types.FormResponseDoc | null;
   showDeleted: boolean;
   updateArgs: types.DemoProps["updateArgs"];
@@ -554,6 +557,7 @@ const UpdatePhase = ({
     lib.Addition<types.TypeNames, types.Params> | null
   >(null);
   const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
+  const [followUpPanelN, setFollowUpPanelN] = useState(2);
   const [savedChanges, setSavedChanges] = useState(
     formResponse?.changes ?? {},
   );
@@ -624,16 +628,43 @@ const UpdatePhase = ({
     );
   };
 
-  const pickFollowUpType = (newItem: {
-    header: lib.SomeFormItem<types.TypeNames, types.Params>;
-  }) => {
+  const pickFollowUpType = (newItem: lib.NewFormItem<types.TypeNames, types.Params>) => {
     if (!addition || addition.mode !== "formItem") return;
     const header = newItem.header;
-    setAddition({
-      ...addition,
-      formItem: lib.withFormItemName(header, header.params.name || header.type),
-    });
+    if (header.type === "panel") {
+      setFollowUpPanelN(newItem.children.length > 0 ? newItem.children.length : 2);
+    }
+    const formItem = lib.withFormItemName(
+      header,
+      header.params.name || header.type,
+    );
+    setAddition({ ...addition, formItem });
   };
+
+  const submitFollowUpFormItem = useCallback(
+    (payload: {
+      comment?: string;
+      formItem: lib.SomeFormItem<types.TypeNames, types.Params>;
+    }) => {
+      if (!addition || addition.mode !== "formItem") return;
+      const { originId, replace } = addition;
+      const current = changes[originId] ?? {};
+      const entry = {
+        comment: payload.comment,
+        formItem: payload.formItem,
+        date: lastPending,
+      };
+      const formItems = current.formItems ? [...current.formItems] : [];
+      if (replace) {
+        formItems[replace.index] = entry;
+      } else {
+        formItems.push(entry);
+      }
+      setChanges({ ...changes, [originId]: { ...current, formItems } });
+      setAddition(null);
+    },
+    [addition, changes, lastPending, setChanges],
+  );
 
   if (!formResponse) {
     return (
@@ -741,6 +772,25 @@ const UpdatePhase = ({
           Reject
         </button>
       </div>
+      {addition?.mode === "formItem" && addition.formItem ? (
+        <div
+          style={{
+            padding: 12,
+            border: "1px solid #ddd",
+            borderRadius: 6,
+            background: "#fff",
+          }}
+        >
+          <FollowUpFormItemEditor
+            formItem={addition.formItem}
+            initialComment={addition.comment}
+            flatItems={flatItems}
+            panelN={followUpPanelN}
+            onSubmit={submitFollowUpFormItem}
+            onCancel={() => setAddition(null)}
+          />
+        </div>
+      ) : null}
       {addition?.mode === "formItem" && !addition.formItem ? (
         <p
           style={{
@@ -836,6 +886,7 @@ export const AllInEditor = ({
       {phase === "update" ? (
         <UpdatePhase
           sections={sections}
+          flatItems={flatItems}
           formResponse={formResponse}
           showDeleted={showDeleted}
           updateArgs={updateArgs}

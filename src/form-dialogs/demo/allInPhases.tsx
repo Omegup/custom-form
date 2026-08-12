@@ -3,9 +3,157 @@
  * review viewers, and review overlays that defer type picking to the Library
  * sidebar (same Side catalog as Design).
  */
-import { useImperativeHandle, type CSSProperties, type Ref } from "react";
+import {
+  useImperativeHandle,
+  type CSSProperties,
+  type ReactElement,
+  type ReactNode,
+  type Ref,
+} from "react";
 import type * as types from "./allInDemoTypes.t";
 import * as lib from "./library";
+
+/** Panel `data.instances` — comma-separated instance ids (`0,1,…`). */
+export const PANEL_INSTANCES_KEY = "instances";
+
+const parsePanelInstanceIds = (response: lib.Response): string[] => {
+  const raw = response.data[PANEL_INSTANCES_KEY];
+  if (!raw) return ["0"];
+  const ids = raw.split(",").filter((s) => s.length > 0);
+  return ids.length ? ids : ["0"];
+};
+
+/** Suffixes passed to `getChild` / `renderSlots` (`:0`, `:1`, …). */
+export const panelInstanceSuffixes = (
+  multiple: boolean,
+  response: lib.Response,
+): string[] => {
+  if (!multiple) return [""];
+  return parsePanelInstanceIds(response).map((id) => `:${id}`);
+};
+
+const nextPanelInstanceId = (response: lib.Response): string => {
+  const ids = parsePanelInstanceIds(response);
+  const max = ids.reduce((m, id) => Math.max(m, Number(id) || 0), 0);
+  return String(max + 1);
+};
+
+const withPanelInstances = (
+  response: lib.Response,
+  ids: string[],
+): lib.Response => ({
+  ...response,
+  data: {
+    ...response.data,
+    [PANEL_INSTANCES_KEY]: ids.join(","),
+  },
+});
+
+const panelRepeatChildren = (
+  formItem: lib.TypedFormItem<types.Params, "panel">,
+  extra: { response: lib.ResponseSetter },
+): string[] =>
+  panelInstanceSuffixes(formItem.params.multiple, extra.response.value);
+
+const panelShellStyle = (borderColor: string): CSSProperties => ({
+  display: "flex",
+  gap: 12,
+  paddingLeft: 8,
+  borderLeft: `2px solid ${borderColor}`,
+});
+
+const PanelBody = ({
+  formItem,
+  extra,
+  borderColor,
+  readOnly,
+}: {
+  formItem: lib.TypedFormItem<types.Params, "panel">;
+  extra: {
+    children: ReactElement[];
+    response: lib.ResponseSetter;
+    appendix?: ReactNode;
+    icon?: ReactNode;
+  };
+  borderColor: string;
+  readOnly: boolean;
+}) => {
+  const multiple = formItem.params.multiple;
+  const editable = !readOnly && extra.response.setValue != null;
+  const suffixes = panelInstanceSuffixes(multiple, extra.response.value);
+
+  const addInstance = () => {
+    if (!extra.response.setValue) return;
+    const ids = parsePanelInstanceIds(extra.response.value);
+    extra.response.setValue(
+      "data",
+      withPanelInstances(extra.response.value, [...ids, nextPanelInstanceId(extra.response.value)])
+        .data,
+    );
+  };
+
+  const removeInstance = (instanceId: string) => {
+    if (!extra.response.setValue) return;
+    const ids = parsePanelInstanceIds(extra.response.value).filter(
+      (id) => id !== instanceId,
+    );
+    extra.response.setValue(
+      "data",
+      withPanelInstances(extra.response.value, ids.length ? ids : ["0"]).data,
+    );
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <strong style={{ fontSize: 14 }}>
+          {formItem.params.name || "(panel)"}
+          {multiple ? " · multiple" : ""}
+        </strong>
+        {extra.icon}
+      </span>
+      {multiple ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {extra.children.map((child, i) => {
+            const instanceId = parsePanelInstanceIds(extra.response.value)[i] ?? String(i);
+            return (
+              <div key={suffixes[i] ?? i} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 8,
+                  }}
+                >
+                  <span style={{ fontSize: 12, color: "#666" }}>Entry {i + 1}</span>
+                  {editable && suffixes.length > 1 ? (
+                    <button
+                      type="button"
+                      onClick={() => removeInstance(instanceId)}
+                      style={{ fontSize: 12, color: "#a40" }}
+                    >
+                      Remove
+                    </button>
+                  ) : null}
+                </div>
+                <div style={panelShellStyle(borderColor)}>{child}</div>
+              </div>
+            );
+          })}
+          {editable ? (
+            <button type="button" onClick={addInstance} style={{ alignSelf: "flex-start" }}>
+              + Add entry
+            </button>
+          ) : null}
+        </div>
+      ) : (
+        <div style={panelShellStyle(borderColor)}>{extra.children}</div>
+      )}
+      {extra.appendix}
+    </div>
+  );
+};
 
 /**
  * Keep Date identity for `lastPending === history.at(-1).date` (school
@@ -391,7 +539,6 @@ export const reviewChrome: lib.FormReviewChrome<types.TypeNames, types.Params> =
     clearDelete,
     onSubmitComment,
     onConfirmDeleteComment,
-    onSubmitFormItem,
     tCommon,
   }) => {
     if (deleteCommentId) {
@@ -434,58 +581,20 @@ export const reviewChrome: lib.FormReviewChrome<types.TypeNames, types.Params> =
     }
 
     if (addition?.mode === "formItem") {
-      const formItem = addition.formItem;
-      return (
-        <div style={overlayBox}>
-          {!formItem ? (
+      if (!addition.formItem) {
+        return (
+          <div style={overlayBox}>
             <p style={{ margin: "0 0 8px", fontSize: 14 }}>
               Pick a type from the <strong>Library</strong> sidebar (Field / Heading / Panel) to
               attach a follow-up under this answer.
             </p>
-          ) : (
-            <>
-              <p style={{ margin: "0 0 8px", fontSize: 13, color: "#555" }}>
-                Follow-up type: <strong>{formItem.type}</strong> · id: {formItem.id}
-              </p>
-              <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <span>Label</span>
-                <input
-                  value={formItem.params.name}
-                  onChange={(e) =>
-                    setAddition({
-                      ...addition,
-                      formItem: lib.withFormItemName(formItem, e.target.value),
-                    })
-                  }
-                />
-              </label>
-            </>
-          )}
-          <label style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 8 }}>
-            <span>Follow-up comment</span>
-            <textarea
-              rows={2}
-              value={addition.comment ?? ""}
-              onChange={(e) => setAddition({ ...addition, comment: e.target.value })}
-            />
-          </label>
-          <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-            <button
-              type="button"
-              disabled={!formItem}
-              onClick={() =>
-                formItem &&
-                onSubmitFormItem({ comment: addition.comment, formItem })
-              }
-            >
-              {tCommon("save")}
-            </button>
             <button type="button" onClick={() => setAddition(null)}>
               {tCommon("cancel")}
             </button>
           </div>
-        </div>
-      );
+        );
+      }
+      return null;
     }
 
     return null;
@@ -577,22 +686,14 @@ export const fillViewers: lib.Viewers<
   },
   panel: {
     viewer: ({ props: { formItem, extra } }) => (
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <strong style={{ fontSize: 14 }}>{formItem.params.name || "(panel)"}</strong>
-        <div
-          style={{
-            display: "flex",
-            gap: 12,
-            paddingLeft: 8,
-            borderLeft: "2px solid #b8d4f0",
-          }}
-        >
-          {extra.children}
-        </div>
-        {extra.appendix}
-      </div>
+      <PanelBody
+        formItem={formItem}
+        extra={extra}
+        borderColor="#b8d4f0"
+        readOnly={false}
+      />
     ),
-    repeatChildren: () => [""],
+    repeatChildren: panelRepeatChildren,
   },
 };
 
@@ -661,24 +762,13 @@ export const reviewViewers: lib.Viewers<
   },
   panel: {
     viewer: ({ props: { formItem, extra } }) => (
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <span style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 600 }}>
-          {formItem.params.name || "(panel)"}
-          {extra.icon}
-        </span>
-        <div
-          style={{
-            display: "flex",
-            gap: 12,
-            paddingLeft: 8,
-            borderLeft: `2px solid ${STATUS_COLOR[extra.status]}`,
-          }}
-        >
-          {extra.children}
-        </div>
-        {extra.appendix}
-      </div>
+      <PanelBody
+        formItem={formItem}
+        extra={extra}
+        borderColor={STATUS_COLOR[extra.status]}
+        readOnly
+      />
     ),
-    repeatChildren: () => [""],
+    repeatChildren: panelRepeatChildren,
   },
 };

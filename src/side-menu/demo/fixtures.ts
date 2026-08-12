@@ -16,7 +16,7 @@ export const MENU_ITEMS: types.DemoMenuItem[] = [
     title: "Panel (2 columns)",
     icon: "▦",
     n: 2,
-    header: { type: "panel", params: { name: "" } },
+    header: { type: "panel", params: { name: "", multiple: false } },
   },
 ];
 

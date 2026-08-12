@@ -22,7 +22,7 @@ export const FORM_ITEM_EDITOR_INITIAL: FlatItems = [
     item: {
       id: "p1",
       type: "panel",
-      params: { name: "Name & email" },
+      params: { name: "Name & email", multiple: false },
       deleted: false,
     },
     n: 2,

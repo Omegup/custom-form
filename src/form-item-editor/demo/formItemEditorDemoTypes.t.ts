@@ -11,7 +11,7 @@ export type TypeNames = "field" | "heading" | "panel";
 export type Params = lib.TheParams<{
   field: { name: string; required: boolean };
   heading: { name: string };
-  panel: { name: string };
+  panel: { name: string; multiple: boolean };
 }>;
 
 export type Variants = lib.TheVariants<{

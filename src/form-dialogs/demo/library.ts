@@ -18,6 +18,7 @@ export {
 } from "../../section-view";
 export type { FlatNestedItem } from "../../form-edit";
 export { AddFormItem, makeUseRenderAddItem, Side } from "../../side-menu";
+export type { NewFormItem } from "../../side-menu/createBlankFormItem";
 export type {
   Response,
   ResponseSetter,
