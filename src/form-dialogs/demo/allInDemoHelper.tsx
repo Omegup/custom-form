@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { FieldRow } from "../../form-edit/demo/editFormDemoHelper";
 import allInEditorSource from "./AllInEditor.tsx?raw";
 import allInDemoTypesSource from "./allInDemoTypes.t.ts?raw";
@@ -78,11 +78,37 @@ export const renderCard = (
     types.ListCtx
   >,
 ) => {
-  const { extra, ctx, formItem } = viewProps;
+  const { extra, ctx, formItem, variant } = viewProps;
+  const followUpChrome: Record<"default" | "followUp", CSSProperties> = {
+    default: {},
+    followUp: {
+      padding: 8,
+      borderRadius: 6,
+      background: "#fffbeb",
+      border: "1px solid #e6b800",
+    },
+  };
+  const badge: Record<"default" | "followUp", ReactNode> = {
+    default: null,
+    followUp: (
+      <span
+        title="Added follow-up"
+        aria-label="Added follow-up"
+        style={{ color: "#b45309", fontSize: 12, fontWeight: 700 }}
+      >
+        ✚
+      </span>
+    ),
+  };
   return (
-    <div>
+    <div style={followUpChrome[variant]}>
       <FieldRow
-        name={view}
+        name={
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+            {view}
+            {badge[variant]}
+          </span>
+        }
         focused={ctx.autoFocused(formItem.id)}
         actions={extra.actions}
         extra={extra.parentDeleted ? [] : [{ label: "Edit", onClick: extra.onEdit }]}

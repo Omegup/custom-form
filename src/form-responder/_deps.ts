@@ -4,6 +4,7 @@ export type {
   ContextDom,
   ExtraDom,
   ParamsDom,
+  TypedFormItem,
   VariantsDom,
   Viewers,
 } from "../form";

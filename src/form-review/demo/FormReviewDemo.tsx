@@ -4,7 +4,7 @@
  * demo-only blueprints so you can compare structure, answers, and reviewer
  * annotations side by side (JSON panels always visible).
  */
-import { useCallback, useState, type Ref } from "react";
+import { useCallback, useState, type ReactNode, type Ref } from "react";
 import * as demo from "./formReviewDemoHelper";
 import type * as types from "./formReviewDemoTypes.t";
 import * as lib from "./library";
@@ -13,6 +13,32 @@ const STATUS_COLOR: Record<lib.ReviewStatus, string> = {
   normal: "#22883e",
   disabled: "#ddd",
   highlight: "#f59e0b",
+};
+
+const FOLLOW_UP_BADGE = (
+  <span
+    title="Added follow-up"
+    aria-label="Added follow-up"
+    style={{ color: "#b45309", fontSize: 12, fontWeight: 700 }}
+  >
+    ✚
+  </span>
+);
+
+const VARIANT_CHROME: Record<
+  types.Variants["field"],
+  { border: (status: lib.ReviewStatus) => string; background: string; badge: ReactNode }
+> = {
+  default: {
+    border: (status) => STATUS_COLOR[status],
+    background: "#fafafa",
+    badge: null,
+  },
+  followUp: {
+    border: () => "#e6b800",
+    background: "#fffbeb",
+    badge: FOLLOW_UP_BADGE,
+  },
 };
 
 const viewers: lib.Viewers<
@@ -25,8 +51,9 @@ const viewers: lib.Viewers<
   string
 > = {
   field: {
-    viewer: ({ props: { formItem, extra } }) => {
+    viewer: ({ props: { formItem, extra, variant } }) => {
       const value = extra.response.value.data.value ?? "";
+      const chrome = VARIANT_CHROME[variant];
       return (
         <div
           style={{
@@ -39,14 +66,15 @@ const viewers: lib.Viewers<
         >
           <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <strong>{formItem.params.name}</strong>
+            {chrome.badge}
             {extra.icon}
           </span>
           <div
             style={{
               padding: "6px 8px",
-              border: `1px solid ${STATUS_COLOR[extra.status]}`,
+              border: `1px solid ${chrome.border(extra.status)}`,
               borderRadius: 4,
-              background: "#fafafa",
+              background: chrome.background,
             }}
           >
             {value || <em style={{ color: "#999" }}>No answer</em>}
@@ -59,6 +87,9 @@ const viewers: lib.Viewers<
 };
 
 const variants = lib.branded<types.Variants, "variants">({ field: "default" });
+const followUpVariants = lib.branded<types.Variants, "variants">({
+  field: "followUp",
+});
 
 const FormReview = lib.CustomFormReviewHOC<
   types.TypeNames,
@@ -66,7 +97,7 @@ const FormReview = lib.CustomFormReviewHOC<
   types.Variants,
   types.Ctx,
   types.Section
->(viewers, variants, demo.formChrome);
+>(viewers, variants, followUpVariants, demo.formChrome);
 
 const ctx = lib.branded<types.Ctx, "context">({});
 const tCommon = (term: "add" | "cancel" | "save" | "delete") =>

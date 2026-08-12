@@ -100,7 +100,7 @@ export const SectionResponderHOC = <
       getError,
       ctx,
       old,
-      variants,
+      resolveVariant,
     } = props;
 
     const validators = useRef<Record<string, StrictViewerMethods | null>>({});
@@ -147,7 +147,7 @@ export const SectionResponderHOC = <
                         viewProps={{
                           ctx,
                           formItem: q,
-                          variant: variants[q.type],
+                          variant: resolveVariant(q),
                           extra: branded({
                             getChild: (suffix: string) => (
                               <>

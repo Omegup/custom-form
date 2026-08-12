@@ -96,6 +96,7 @@ export const SectionReviewHOC = <
       setChanges,
       lastPending,
       variants,
+      followUpVariants,
       tCommon,
       addition,
       setAddition,
@@ -194,7 +195,7 @@ export const SectionReviewHOC = <
                     viewProps={{
                       ctx,
                       formItem: sq.formItem,
-                      variant: variants[sq.formItem.type],
+                      variant: followUpVariants[sq.formItem.type],
                       extra: branded({
                         getChild: (suffix: string) => (
                           <>{renderSlots(sq.children ?? [], suffix, parentDeleted)}</>

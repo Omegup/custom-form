@@ -12,7 +12,7 @@ export type Params = lib.TheParams<{
 }>;
 
 export type Variants = lib.TheVariants<{
-  field: "default";
+  field: "default" | "followUp";
 }>;
 
 export type Ctx = lib.SectionReviewContext;

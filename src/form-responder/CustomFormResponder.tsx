@@ -4,8 +4,8 @@
  * aggregates section validators into a form-level `validate` / `update` /
  * `getKeys`.
  *
- * Host passes `ctx` and {@link FormResponderChrome} (no HTML in this module —
- * see `.cursor/rules/no-html-outside-demo.mdc`).
+ * Host passes `ctx`, `resolveVariant`, and {@link FormResponderChrome} (no HTML
+ * in this module — see `.cursor/rules/no-html-outside-demo.mdc`).
  */
 import { useImperativeHandle, useRef, type Ref } from "react";
 import type {
@@ -47,7 +47,6 @@ export const CustomFormResponderHOC = <
     Context,
     string
   >,
-  variants: Variants,
   chrome: FormResponderChrome,
 ) => {
   const { renderHeader, renderForm, ...sectionChrome } = chrome;
@@ -66,6 +65,7 @@ export const CustomFormResponderHOC = <
     props: CustomFormResponderProps<
       TypeNames,
       Params,
+      Variants,
       Context,
       SectionConfig,
       SectionMeta,
@@ -81,6 +81,7 @@ export const CustomFormResponderHOC = <
       setResponse,
       impRef,
       showDeleted,
+      resolveVariant,
       ctx,
       children,
     } = props;
@@ -131,7 +132,7 @@ export const CustomFormResponderHOC = <
                   impRef={(ref) => {
                     validators.current[section.header.id] = ref;
                   }}
-                  variants={variants}
+                  resolveVariant={resolveVariant}
                   i={i}
                 />
               ),

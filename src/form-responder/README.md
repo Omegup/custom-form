@@ -14,13 +14,13 @@ directly (no theme/portal rebuild).
 | File | Role |
 |---|---|
 | `types.ts` | `FormHeader`, `FormResponderChrome`, `CustomFormResponderProps` |
-| `CustomFormResponder.tsx` | **`CustomFormResponderHOC(viewers, variants, chrome)`** |
+| `CustomFormResponder.tsx` | **`CustomFormResponderHOC(viewers, chrome)`** + required `resolveVariant` prop |
 
 ## How it plugs in
 
 ```
 host: sections / responses / setResponse / form impRef
-  → CustomFormResponderHOC(viewers, variants)
+  → CustomFormResponderHOC(viewers, chrome) + resolveVariant
   → per section: SectionResponderHOC
   → form impRef.validate merges section errors (skips deleted)
 ```

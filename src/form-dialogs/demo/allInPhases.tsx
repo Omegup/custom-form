@@ -68,6 +68,7 @@ const PanelBody = ({
   extra,
   borderColor,
   readOnly,
+  badge,
 }: {
   formItem: lib.TypedFormItem<types.Params, "panel">;
   extra: {
@@ -78,6 +79,7 @@ const PanelBody = ({
   };
   borderColor: string;
   readOnly: boolean;
+  badge: ReactNode;
 }) => {
   const multiple = formItem.params.multiple;
   const editable = !readOnly && extra.response.setValue != null;
@@ -111,6 +113,7 @@ const PanelBody = ({
           {formItem.params.name || "(panel)"}
           {multiple ? " · multiple" : ""}
         </strong>
+        {badge}
         {extra.icon}
       </span>
       {multiple ? (
@@ -351,6 +354,72 @@ const STATUS_COLOR: Record<lib.ReviewStatus, string> = {
   normal: "#22883e",
   disabled: "#ddd",
   highlight: "#f59e0b",
+};
+
+/** Follow-up chrome — yellow + badge (not error red). Keyed by form `Variants`. */
+const FOLLOW_UP_BADGE = (
+  <span
+    title="Added follow-up"
+    aria-label="Added follow-up"
+    style={{ color: "#b45309", fontSize: 12, fontWeight: 700, lineHeight: 1 }}
+  >
+    ✚
+  </span>
+);
+
+type VariantChrome = {
+  border: string;
+  background: string;
+  badge: ReactNode;
+};
+
+const VARIANT_CHROME: Record<"default" | "followUp", VariantChrome> = {
+  default: { border: "#ccc", background: "#fff", badge: null },
+  followUp: { border: "#e6b800", background: "#fffbeb", badge: FOLLOW_UP_BADGE },
+};
+
+const VARIANT_SHELL: Record<"default" | "followUp", CSSProperties> = {
+  default: {},
+  followUp: {
+    padding: 8,
+    borderRadius: 6,
+    background: VARIANT_CHROME.followUp.background,
+    border: `1px solid ${VARIANT_CHROME.followUp.border}`,
+  },
+};
+
+const fillFieldBorder: Record<
+  types.Variants["field"],
+  (error: boolean | string | null) => string
+> = {
+  default: (error) => (error ? "#c00" : VARIANT_CHROME.default.border),
+  followUp: () => VARIANT_CHROME.followUp.border,
+};
+
+const reviewFieldBorder: Record<
+  types.Variants["field"],
+  (status: lib.ReviewStatus) => string
+> = {
+  default: (status) => STATUS_COLOR[status],
+  followUp: () => VARIANT_CHROME.followUp.border,
+};
+
+const reviewFieldBackground: Record<types.Variants["field"], string> = {
+  default: "#fafafa",
+  followUp: VARIANT_CHROME.followUp.background,
+};
+
+const panelBorder: Record<types.Variants["panel"], string> = {
+  default: "#b8d4f0",
+  followUp: VARIANT_CHROME.followUp.border,
+};
+
+const reviewPanelBorder: Record<
+  types.Variants["panel"],
+  (status: lib.ReviewStatus) => string
+> = {
+  default: (status) => STATUS_COLOR[status],
+  followUp: () => panelBorder.followUp,
 };
 
 const actionButtonStyle: CSSProperties = {
@@ -646,7 +715,7 @@ export const fillViewers: lib.Viewers<
   string
 > = {
   field: {
-    viewer: ({ props: { formItem, extra, ctx } }) => {
+    viewer: ({ props: { formItem, extra, ctx, variant } }) => {
       const { setDataValue, value } = useFillFieldMethods(
         extra.impRef,
         extra.response,
@@ -656,11 +725,21 @@ export const fillViewers: lib.Viewers<
       // String = validate() message (useFillFieldMethods). Boolean true =
       // revise-unlock highlight from SectionResponder — border only, no copy.
       const err = typeof extra.error === "string" ? extra.error : null;
+      const chrome = VARIANT_CHROME[variant];
       return (
-        <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 14 }}>
-          <span>
+        <label
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+            fontSize: 14,
+            ...VARIANT_SHELL[variant],
+          }}
+        >
+          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
             {formItem.params.name || "(unnamed field)"}
             {formItem.params.required ? " *" : ""}
+            {chrome.badge}
             {extra.icon}
           </span>
           <input
@@ -669,8 +748,9 @@ export const fillViewers: lib.Viewers<
             disabled={extra.response.setValue == null}
             style={{
               padding: "6px 8px",
-              border: extra.error ? "1px solid #c00" : "1px solid #ccc",
+              border: `1px solid ${fillFieldBorder[variant](extra.error)}`,
               borderRadius: 4,
+              background: chrome.background,
             }}
           />
           {err ? (
@@ -682,21 +762,37 @@ export const fillViewers: lib.Viewers<
     },
   },
   heading: {
-    viewer: ({ props: { formItem, extra } }) => (
-      <div style={{ fontSize: 15, fontWeight: 600 }}>
-        {formItem.params.name || "(heading)"}
-        {extra.appendix}
-      </div>
-    ),
+    viewer: ({ props: { formItem, extra, variant } }) => {
+      const chrome = VARIANT_CHROME[variant];
+      return (
+        <div
+          style={{
+            fontSize: 15,
+            fontWeight: 600,
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            ...VARIANT_SHELL[variant],
+          }}
+        >
+          {formItem.params.name || "(heading)"}
+          {chrome.badge}
+          {extra.appendix}
+        </div>
+      );
+    },
   },
   panel: {
-    viewer: ({ props: { formItem, extra } }) => (
-      <PanelBody
-        formItem={formItem}
-        extra={extra}
-        borderColor="#b8d4f0"
-        readOnly={false}
-      />
+    viewer: ({ props: { formItem, extra, variant } }) => (
+      <div style={VARIANT_SHELL[variant]}>
+        <PanelBody
+          formItem={formItem}
+          extra={extra}
+          borderColor={panelBorder[variant]}
+          readOnly={false}
+          badge={VARIANT_CHROME[variant].badge}
+        />
+      </div>
     ),
     repeatChildren: panelRepeatChildren,
   },
@@ -720,8 +816,9 @@ export const reviewViewers: lib.Viewers<
   string
 > = {
   field: {
-    viewer: ({ props: { formItem, extra } }) => {
+    viewer: ({ props: { formItem, extra, variant } }) => {
       const value = extra.response.value.data.value ?? "";
+      const chrome = VARIANT_CHROME[variant];
       return (
         <div
           style={{
@@ -730,6 +827,7 @@ export const reviewViewers: lib.Viewers<
             gap: 4,
             fontSize: 14,
             opacity: extra.parentDeleted ? 0.5 : 1,
+            ...VARIANT_SHELL[variant],
           }}
         >
           <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -737,14 +835,15 @@ export const reviewViewers: lib.Viewers<
               {formItem.params.name || "(unnamed field)"}
               {formItem.params.required ? " *" : ""}
             </strong>
+            {chrome.badge}
             {extra.icon}
           </span>
           <div
             style={{
               padding: "6px 8px",
-              border: `1px solid ${STATUS_COLOR[extra.status]}`,
+              border: `1px solid ${reviewFieldBorder[variant](extra.status)}`,
               borderRadius: 4,
-              background: "#fafafa",
+              background: reviewFieldBackground[variant],
             }}
           >
             {value || <em style={{ color: "#999" }}>No answer</em>}
@@ -755,24 +854,38 @@ export const reviewViewers: lib.Viewers<
     },
   },
   heading: {
-    viewer: ({ props: { formItem, extra } }) => (
-      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        <span style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 600 }}>
-          {formItem.params.name || "(heading)"}
-          {extra.icon}
-        </span>
-        {extra.appendix}
-      </div>
-    ),
+    viewer: ({ props: { formItem, extra, variant } }) => {
+      const chrome = VARIANT_CHROME[variant];
+      return (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+            ...VARIANT_SHELL[variant],
+          }}
+        >
+          <span style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 600 }}>
+            {formItem.params.name || "(heading)"}
+            {chrome.badge}
+            {extra.icon}
+          </span>
+          {extra.appendix}
+        </div>
+      );
+    },
   },
   panel: {
-    viewer: ({ props: { formItem, extra } }) => (
-      <PanelBody
-        formItem={formItem}
-        extra={extra}
-        borderColor={STATUS_COLOR[extra.status]}
-        readOnly
-      />
+    viewer: ({ props: { formItem, extra, variant } }) => (
+      <div style={VARIANT_SHELL[variant]}>
+        <PanelBody
+          formItem={formItem}
+          extra={extra}
+          borderColor={reviewPanelBorder[variant](extra.status)}
+          readOnly
+          badge={VARIANT_CHROME[variant].badge}
+        />
+      </div>
     ),
     repeatChildren: panelRepeatChildren,
   },

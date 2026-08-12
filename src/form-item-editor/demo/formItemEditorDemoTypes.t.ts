@@ -14,10 +14,11 @@ export type Params = lib.TheParams<{
   panel: { name: string; multiple: boolean };
 }>;
 
+/** `followUp` — reviewer-added items (yellow chrome); not an error/status flag. */
 export type Variants = lib.TheVariants<{
-  field: "default";
-  heading: "default";
-  panel: "default";
+  field: "default" | "followUp";
+  heading: "default" | "followUp";
+  panel: "default" | "followUp";
 }>;
 
 export type Section = {

@@ -14,13 +14,13 @@ directly (no theme/portal rebuild).
 | File | Role |
 |---|---|
 | `types.ts` | `FormHeader`, `FormReviewChrome`, `CustomFormReviewProps` |
-| `CustomFormReview.tsx` | **`CustomFormReviewHOC(viewers, variants, chrome)`** |
+| `CustomFormReview.tsx` | **`CustomFormReviewHOC(viewers, variants, followUpVariants, chrome)`** |
 
 ## How it plugs in
 
 ```
 host: sections / responses / changes / setChanges / lastPending
-  → CustomFormReviewHOC(viewers, variants, chrome)
+  → CustomFormReviewHOC(viewers, variants, followUpVariants, chrome)
   → per section: SectionReviewHOC (shares `changes` / `lastPending` across all sections)
 ```
 

@@ -49,5 +49,5 @@ export type {
 } from "../../section-review";
 export type { FormReviewChrome } from "../../form-review";
 export { CustomFormReviewHOC } from "../../form-review";
-export type { Children, SomeFormItem, Viewers, ViewerProps } from "../../form";
+export type { Children, SomeFormItem, TypedFormItem, Viewers, ViewerProps } from "../../form";
 export { branded } from "../../form";

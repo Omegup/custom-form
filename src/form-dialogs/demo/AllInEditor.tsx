@@ -286,9 +286,10 @@ const FollowUpDesignItems = ({
     () => lib.autofocusCtx<lib.ContextDom>(lib.branded({}), focused),
     [focused],
   );
+  // Entire editor is follow-up items — yellow chrome via `followUp` variant.
   const variants = useMemo(
     (): types.Variants =>
-      lib.branded({ field: "default", heading: "default", panel: "default" }),
+      lib.branded({ field: "followUp", heading: "followUp", panel: "followUp" }),
     [],
   );
   const setItems = (items: types.FlatItems, newCtx: types.ListCtx) => {
@@ -387,10 +388,16 @@ const addReviewFollowUps = (
   }));
 };
 
-const fillVariants = lib.branded<types.Variants, "variants">({
+const defaultVariants = lib.branded<types.Variants, "variants">({
   field: "default",
   heading: "default",
   panel: "default",
+});
+
+const followUpVariants = lib.branded<types.Variants, "variants">({
+  field: "followUp",
+  heading: "followUp",
+  panel: "followUp",
 });
 
 const FormResponder = lib.CustomFormResponderHOC<
@@ -399,7 +406,7 @@ const FormResponder = lib.CustomFormResponderHOC<
   types.Variants,
   lib.SectionResponderContext,
   types.Section
->(phases.fillViewers, fillVariants, phases.fillChrome);
+>(phases.fillViewers, phases.fillChrome);
 
 const FormReview = lib.CustomFormReviewHOC<
   types.TypeNames,
@@ -407,7 +414,7 @@ const FormReview = lib.CustomFormReviewHOC<
   types.Variants,
   lib.SectionReviewContext,
   types.Section
->(phases.reviewViewers, fillVariants, phases.reviewChrome);
+>(phases.reviewViewers, defaultVariants, followUpVariants, phases.reviewChrome);
 
 const fillCtx = lib.branded<lib.SectionResponderContext, "context">({
   t: (term) => (term === "fieldRequired" ? "This field is required" : term),
@@ -568,6 +575,24 @@ const FillPhase = ({
     () => addReviewFollowUps(sections, doc?.changes ?? {}),
     [sections, doc],
   );
+  const followUpIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const change of Object.values(doc?.changes ?? {})) {
+      for (const entry of change.formItems ?? []) {
+        if (entry.formItem) ids.add(entry.formItem.id);
+      }
+    }
+    return ids;
+  }, [doc?.changes]);
+  const resolveVariant = useCallback(
+    <K extends types.TypeNames>(
+      item: lib.TypedFormItem<types.Params, K>,
+    ): types.Variants[K] =>
+      followUpIds.has(item.id)
+        ? followUpVariants[item.type]
+        : defaultVariants[item.type],
+    [followUpIds],
+  );
 
   useEffect(() => {
     if (!optimisticResponse) return;
@@ -690,6 +715,7 @@ const FillPhase = ({
         getError={(id) => errors[id] ?? null}
         impRef={formRef}
         showDeleted={false}
+        resolveVariant={resolveVariant}
       />
       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
         <button

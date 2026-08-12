@@ -212,6 +212,8 @@ export type SectionReviewProps<
     args: ReviewFormItemsEditorArgs<TypeNames, Params>,
   ) => ReactNode;
   variants: Variants;
+  /** Chrome bag for reviewer-added form items (e.g. all `"followUp"`). */
+  followUpVariants: Variants;
   tCommon: (term: "add" | "cancel" | "save" | "delete") => string;
   /** Section ordinal for the title (1-based display when `multiSection`). */
   i: number;

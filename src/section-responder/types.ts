@@ -17,6 +17,7 @@ import type {
   SectionDom,
   SectionMetaDom,
   SectionWithItems,
+  TypedFormItem,
   VariantsDom,
 } from "./_deps";
 
@@ -96,7 +97,10 @@ export type SectionResponderProps<
   setResponse: (id: string, response?: Response) => void;
   getError: (id: string) => string | null;
   impRef: Ref<SectionValidator>;
-  variants: Variants;
+  /** Per-item chrome key — host maps follow-ups to `"followUp"`, design items to `"default"`. */
+  resolveVariant: <K extends TypeNames>(
+    item: TypedFormItem<Params, K>,
+  ) => Variants[K];
   /** Section ordinal for the title (1-based display when `multiSection`). */
   i: number;
 };
