@@ -351,9 +351,12 @@ export const PhaseJsonPanels = ({
 };
 
 const STATUS_COLOR: Record<lib.ReviewStatus, string> = {
+  /** Remark present — unlocked for revise. */
   normal: "#22883e",
-  disabled: "#ddd",
-  highlight: "#f59e0b",
+  /** Older answers (not from the latest student send). */
+  disabled: "#ccc",
+  /** Newly answered this round — black chrome; bold via fontWeight. */
+  highlight: "#333",
 };
 
 /** Follow-up chrome — yellow + badge (not error red). Keyed by form `Variants`. */
@@ -834,6 +837,7 @@ export const reviewViewers: lib.Viewers<
     viewer: ({ props: { formItem, extra, variant } }) => {
       const value = extra.response.value.data.value ?? "";
       const chrome = VARIANT_CHROME[variant];
+      const newlyAnswered = extra.status === "highlight";
       return (
         <div
           style={{
@@ -845,11 +849,25 @@ export const reviewViewers: lib.Viewers<
             ...VARIANT_SHELL[variant],
           }}
         >
-          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <strong>
-              {formItem.params.name || "(unnamed field)"}
-              {formItem.params.required ? " *" : ""}
-            </strong>
+          <span
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              fontWeight: newlyAnswered ? 700 : 400,
+            }}
+          >
+            {newlyAnswered ? (
+              <strong>
+                {formItem.params.name || "(unnamed field)"}
+                {formItem.params.required ? " *" : ""}
+              </strong>
+            ) : (
+              <span>
+                {formItem.params.name || "(unnamed field)"}
+                {formItem.params.required ? " *" : ""}
+              </span>
+            )}
             {chrome.badge}
             {extra.icon}
           </span>
@@ -859,9 +877,10 @@ export const reviewViewers: lib.Viewers<
               border: `1px solid ${reviewFieldBorder[variant](extra.status)}`,
               borderRadius: 4,
               background: reviewFieldBackground[variant],
+              fontWeight: newlyAnswered ? 700 : 400,
             }}
           >
-            {value || <em style={{ color: "#999" }}>No answer</em>}
+            {value || <em style={{ color: "#999", fontWeight: 400 }}>No answer</em>}
           </div>
           {extra.appendix}
         </div>
@@ -871,6 +890,7 @@ export const reviewViewers: lib.Viewers<
   heading: {
     viewer: ({ props: { formItem, extra, variant } }) => {
       const chrome = VARIANT_CHROME[variant];
+      const newlyAnswered = extra.status === "highlight";
       return (
         <div
           style={{
@@ -880,7 +900,14 @@ export const reviewViewers: lib.Viewers<
             ...VARIANT_SHELL[variant],
           }}
         >
-          <span style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 600 }}>
+          <span
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              fontWeight: newlyAnswered ? 700 : 600,
+            }}
+          >
             {formItem.params.name || "(heading)"}
             {chrome.badge}
             {extra.icon}

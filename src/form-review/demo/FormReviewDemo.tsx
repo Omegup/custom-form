@@ -11,8 +11,8 @@ import * as lib from "./library";
 
 const STATUS_COLOR: Record<lib.ReviewStatus, string> = {
   normal: "#22883e",
-  disabled: "#ddd",
-  highlight: "#f59e0b",
+  disabled: "#ccc",
+  highlight: "#333",
 };
 
 const FOLLOW_UP_BADGE = (
@@ -54,6 +54,7 @@ const viewers: lib.Viewers<
     viewer: ({ props: { formItem, extra, variant } }) => {
       const value = extra.response.value.data.value ?? "";
       const chrome = VARIANT_CHROME[variant];
+      const newlyAnswered = extra.status === "highlight";
       return (
         <div
           style={{
@@ -64,8 +65,19 @@ const viewers: lib.Viewers<
             opacity: extra.parentDeleted ? 0.5 : 1,
           }}
         >
-          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <strong>{formItem.params.name}</strong>
+          <span
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              fontWeight: newlyAnswered ? 700 : 400,
+            }}
+          >
+            {newlyAnswered ? (
+              <strong>{formItem.params.name}</strong>
+            ) : (
+              <span>{formItem.params.name}</span>
+            )}
             {chrome.badge}
             {extra.icon}
           </span>
@@ -75,9 +87,10 @@ const viewers: lib.Viewers<
               border: `1px solid ${chrome.border(extra.status)}`,
               borderRadius: 4,
               background: chrome.background,
+              fontWeight: newlyAnswered ? 700 : 400,
             }}
           >
-            {value || <em style={{ color: "#999" }}>No answer</em>}
+            {value || <em style={{ color: "#999", fontWeight: 400 }}>No answer</em>}
           </div>
           {extra.appendix}
         </div>

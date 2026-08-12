@@ -585,18 +585,40 @@ const FillPhase = ({
     }
     return ids;
   }, [reviewChanges]);
+  /** Unanswered follow-ups only — settled ones style like originals. */
+  const unansweredFollowUpIds = useMemo(() => {
+    const answered = doc ? phases.formResponseValues(doc) : {};
+    const ids = new Set<string>();
+    for (const id of followUpIds) {
+      const res = answered[id];
+      if (!res || Object.keys(res.data).length === 0) ids.add(id);
+    }
+    return ids;
+  }, [doc, followUpIds]);
+  const unlockedIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const [id, change] of Object.entries(reviewChanges)) {
+      if (change.comment != null) ids.add(id);
+    }
+    return ids;
+  }, [reviewChanges]);
   const resolveVariant = useCallback(
     <K extends types.TypeNames>(
       item: lib.TypedFormItem<types.Params, K>,
     ): types.Variants[K] => {
+      // Yellow only while revising a change-request round.
+      if (doc?.status !== "changesRequested") return defaultVariants[item.type];
       const baseId = item.id.includes(":")
         ? item.id.slice(0, item.id.lastIndexOf(":"))
         : item.id;
-      return followUpIds.has(item.id) || followUpIds.has(baseId)
-        ? followUpVariants[item.type]
-        : defaultVariants[item.type];
+      const pending =
+        unansweredFollowUpIds.has(item.id) ||
+        unansweredFollowUpIds.has(baseId) ||
+        unlockedIds.has(item.id) ||
+        unlockedIds.has(baseId);
+      return pending ? followUpVariants[item.type] : defaultVariants[item.type];
     },
-    [followUpIds],
+    [doc?.status, unansweredFollowUpIds, unlockedIds],
   );
 
   useEffect(() => {
@@ -654,6 +676,26 @@ const FillPhase = ({
   };
 
   /**
+   * Stamp `history` for newly answered ids so Review can bold them
+   * (`lastPending === history.at(-1).date` → highlight).
+   */
+  const withAnswerHistory = (
+    prior: lib.AdditionalChanges<types.TypeNames, types.Params>,
+    answeredIds: Iterable<string>,
+    sendDate: Date,
+  ): lib.AdditionalChanges<types.TypeNames, types.Params> => {
+    const next = withoutUnlockComments(prior);
+    for (const id of answeredIds) {
+      const cur = next[id] ?? {};
+      next[id] = {
+        ...cur,
+        history: [...(cur.history ?? []), { date: sendDate }],
+      };
+    }
+    return next;
+  };
+
+  /**
    * School fill submit → `customForms.addFormResponse` (first send) or
    * update the same FormResponse on revise after `changesRequested`.
    *
@@ -683,9 +725,29 @@ const FillPhase = ({
     const sendDate = phases.rememberDate(new Date());
     const nextValues = { ...prior, ...updated };
 
+    const answeredIds = Object.entries(nextValues)
+      .filter(([, r]) => r != null && Object.keys(r.data).length > 0)
+      .map(([id]) => id);
+
+    let nextChanges: lib.AdditionalChanges<types.TypeNames, types.Params> = {};
+    if (!doc) {
+      nextChanges = withAnswerHistory({}, answeredIds, sendDate);
+    } else {
+      const toStamp = new Set<string>();
+      for (const [id, entry] of Object.entries(doc.changes)) {
+        if (entry.comment != null) toStamp.add(id);
+        for (const fi of entry.formItems ?? []) {
+          if (fi.formItem && nextValues[fi.formItem.id]) {
+            toStamp.add(fi.formItem.id);
+          }
+        }
+      }
+      nextChanges = withAnswerHistory(doc.changes, toStamp, sendDate);
+    }
+
     const nextDoc: types.FormResponseDoc = {
       responses: phases.toFormResponseEntries(nextValues),
-      changes: doc ? withoutUnlockComments(doc.changes) : {},
+      changes: nextChanges,
       feedbackHistory: [
         ...(doc?.feedbackHistory ?? []),
         { status: "answered", date: sendDate.toISOString() },
