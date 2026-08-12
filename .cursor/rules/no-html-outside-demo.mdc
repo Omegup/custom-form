@@ -24,7 +24,8 @@ calling host **render props** are fine.
 
 ## Required pattern
 
-Inject chrome via **render props / HOC args**:
+Inject chrome via **render props / HOC args** (same seam as `SectionHOC`,
+`Side`, `AddFormItem`, …):
 
 ```typescript
 // ✅ Library — structure + callbacks only

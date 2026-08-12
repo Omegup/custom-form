@@ -12,7 +12,7 @@ import type {
   Variants,
   Viewers,
 } from "./recursiveFormDemoTypes.t";
-import { branded, createFormItemByGetChild } from "./library";
+import { branded, createFormItemByGetChildPlain } from "./library";
 
 const decorateViewers: ViewersDecorator = (inner) => ({
   text: {
@@ -69,8 +69,8 @@ const viewersSkeleton: Viewers = decorateViewers({
   },
 });
 
-const FormItemValues = createFormItemByGetChild(viewersValues, (x) => x);
-const FormItemSkeleton = createFormItemByGetChild(viewersSkeleton, (x) => x);
+const FormItemValues = createFormItemByGetChildPlain(viewersValues);
+const FormItemSkeleton = createFormItemByGetChildPlain(viewersSkeleton);
 
 const renderItem: RenderItem = (formItem, variants, ctx, FormItem, extra) => {
   if (formItem.header.deleted) return null;

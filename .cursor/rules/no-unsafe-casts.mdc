@@ -1,0 +1,24 @@
+---
+description: Never use unsafe TypeScript casts; escalate typing stuck points to the user
+globs: **/*.ts,**/*.tsx
+alwaysApply: true
+---
+
+# No unsafe casts — escalate instead
+
+Never paper over a type error with an unsafe cast.
+
+Forbidden (unless the user explicitly approved that exact cast):
+
+- `as unknown as T`
+- `as any`
+- double assertions (`x as A as B`)
+- casts whose only purpose is to silence the checker when the types are not actually related
+
+If a real type / API shape mismatch blocks you:
+
+1. **Stop** — do not invent a cast “just to compile”.
+2. **Show the user** the concrete types on both sides, where they meet, and why TypeScript rejects the assignment.
+3. **Wait** for the user to decide how to model it (change a parameter type, split generics, constrain `ExtraView`, etc.).
+
+Related: prefer real/existing types over ad-hoc shapes — see `typescript-types.mdc`. Fixing the parameter type is the default move; casting around a wrong type is not.

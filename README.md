@@ -24,6 +24,9 @@ Each module has a colocated `*.stories.tsx`. Story titles match folder names, e.
 |---|---|---|
 | **form-dialogs/All-in** | `form-dialogs/` | Full composed editor (`SectionFormItemHOC` + `WebRecursiveEdit` DnD + every dialog flow) |
 | form/Form | `form/` | Viewers rendering a JSON-driven form |
+| response/Response | `response/` | Fill-path foundation (`ResponseSetter` + `getUseImpRefViewProps` validate) |
+| section-responder/Section responder | `section-responder/` | One section of fillable fields + section-level validate |
+| form-responder/Form responder | `form-responder/` | Multi-section fill shell + form-level validate |
 | move-actions/Move actions | `move-actions/` | Item list with up/down/clone/remove |
 | form-edit/Edit form | `form-edit/` | Section/field list with move actions only |
 | form-item-editor/Form item editor | `form-item-editor/` | Edit form + per-field edit dialog |
@@ -44,7 +47,7 @@ See **[src/README.md](./src/README.md)** for the full module map, dependency gra
 ### Layer overview
 
 ```
-form / recursive-form          ← domain types (items, trees, branded params)
+form / recursive-form / response  ← domain types (items, trees, branded params, answers)
 move-actions                   ← up/down/clone/remove action helpers
 drag-drop-tree                 ← school's drag-drop-tree package (ops + React DnD engine)
 form-edit                      ← flat edit representation + move actions on sections/items
@@ -54,6 +57,8 @@ section-edit                   ← section title/description edit dialog
 section-view                   ← SectionHOC + ColumnsEdit (section list rendering, no DnD)
 flat-dnd                       ← SectionNodes ↔ drag-drop-tree conversion (lib); demo wires React DnD
 form-dialogs                   ← dialog orchestration (makeUseDialogs) + All-in demo
+section-responder              ← section fill shell (SectionResponderHOC)
+form-responder                 ← multi-section fill shell (CustomFormResponderHOC)
 ```
 
 **Canonical edit state** is the **flat list** (`FlatFormItems`): an array of `{ section }`, `{ item, n }`, and `{ end: null }` markers. The tree is rebuilt on demand via `consolidateSections`.
@@ -73,11 +78,14 @@ Original packages live under `school/components/custom-form/src/`:
 
 | slot-tree | school source |
 |---|---|
-| `form/` | `ts-packages/form-model`, `react-packages/form-react` |
+| `form/` | `ts-packages/form-model`, `react-packages/form-react` (`FormItemHOC`, `getUseImpRefViewProps`) |
+| `response/` | `types/response`, `types/form-response-react` (`ViewerMethods`) |
+| `section-responder/` | `ui-packages/section-responder-ui` (`SectionResponderHOC`) |
+| `form-responder/` | `ui-packages/form-responder-ui` (`CustomFormResponderHOC`) |
 | `form-edit/` | `ts-packages/form-edit` |
 | `form-item-editor/` | `react-packages/form-item-edit-react` |
 | `side-menu/` | `react-packages/form-edit-react` (`useSide`, `MenuItemDefinition`, `makeUseRenderAddItem`) + `section-edit-ui` (`FormMenuItem`, `AddFormItem`) |
-| `section-edit/` | `react-packages/form-edit-react` (`SectionEdit`; `validateSectionForm` not ported — see section-edit/README.md) |
+| `section-edit/` | `react-packages/form-edit-react` (`SectionEdit`; required-field validation stays **host-owned** — see section-edit/README.md) |
 | `section-view/` | `react-packages/form-edit-react` (`Section.tsx` `SectionHOC`, `renderEditFormItem.tsx`) + `ts-packages/form-edit` (`section.data.ts` `getSectionEdit`, ported into `form-edit/flat-move-actions`) |
 | `drag-drop-tree/` | `components/drag-drop-tree` (ops + headless React engine; HTML chrome in `demo/`) |
 | `flat-dnd/` | `recursive-edit-ui/FlatDnd.tsx` pure half (`toDndTree`/`cleanNodes`); demo wires `drag-drop-tree` React API via `WebRecursiveEdit` |

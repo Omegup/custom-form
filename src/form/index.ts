@@ -13,5 +13,9 @@ export type {
 } from "./form-react.t";
 
 export { branded } from "./branded";
-export { createFormItemByGetChild as FormItemHOC } from "./createFormItemByGetChild";
-export { createFormItemByGetChild } from "./createFormItemByGetChild";
+export {
+  createFormItemByGetChild as FormItemHOC,
+  createFormItemByGetChild,
+  createFormItemByGetChildPlain,
+} from "./createFormItemByGetChild";
+export { getUseImpRefViewProps } from "./getUseImpRefViewProps";
