@@ -284,30 +284,35 @@ export const SectionReviewHOC = <
                   : "disabled";
 
               const appendixNodes = buildAppendix(q.id, q.deleted || parentDeleted);
+              const hasFollowUpItems = !!change?.formItems?.some((e) => e.formItem);
 
               return (
                 <Fragment key={q.id}>
                   {renderItemShell({
                     id: q.id,
-                    action: renderAddFollowUp({
-                      originId: q.id,
-                      onPick: (payload) => {
-                        const current = changes[q.id] ?? {};
-                        const formItems = current.formItems
-                          ? [...current.formItems]
-                          : [];
-                        formItems.push({
-                          comment: payload.comment,
-                          formItem: payload.formItem,
-                          children: payload.children,
-                          date: lastPending,
-                        });
-                        setChanges({
-                          ...changes,
-                          [q.id]: { ...current, formItems },
-                        });
-                      },
-                    }),
+                    // Once follow-ups exist, Design's in-list "+ Add item" owns
+                    // adding more — hide the row-level "+ Follow-up".
+                    action: hasFollowUpItems
+                      ? null
+                      : renderAddFollowUp({
+                          originId: q.id,
+                          onPick: (payload) => {
+                            const current = changes[q.id] ?? {};
+                            const formItems = current.formItems
+                              ? [...current.formItems]
+                              : [];
+                            formItems.push({
+                              comment: payload.comment,
+                              formItem: payload.formItem,
+                              children: payload.children,
+                              date: lastPending,
+                            });
+                            setChanges({
+                              ...changes,
+                              [q.id]: { ...current, formItems },
+                            });
+                          },
+                        }),
                     children: (
                       <FormItem
                         viewProps={{
