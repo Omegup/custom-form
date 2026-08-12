@@ -75,6 +75,7 @@ export const CustomFormReviewHOC = <
       setAddition,
       deleteCommentId,
       setDeleteCommentId,
+      renderFormItemsEditor,
       tCommon,
       showDeleted,
       ctx,
@@ -103,6 +104,7 @@ export const CustomFormReviewHOC = <
                   setAddition={setAddition}
                   deleteCommentId={deleteCommentId}
                   setDeleteCommentId={setDeleteCommentId}
+                  renderFormItemsEditor={renderFormItemsEditor}
                   variants={variants}
                   tCommon={tCommon}
                   i={i}

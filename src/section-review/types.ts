@@ -15,11 +15,13 @@ import type {
   ExtraDom,
   MetaDom,
   ParamsDom,
+  RecursiveFormItem,
   Response,
   ResponseSetter,
   SectionDom,
   SectionMetaDom,
   SectionWithItems,
+  SIndexed,
   SomeFormItem,
   VariantsDom,
 } from "./_deps";
@@ -31,7 +33,18 @@ export type ReviewFormItemEntry<
 > = {
   comment?: string;
   formItem?: SomeFormItem<TypeNames, Params>;
+  /** Nested columns when `formItem` is a panel — same shape as design `children`. */
+  children?: RecursiveFormItem<TypeNames, Params, MetaDom<SIndexed>>[][];
   date: Date | null;
+};
+
+export type ReviewFormItemsEditorArgs<
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames>,
+> = {
+  entries: ReviewFormItemEntry<TypeNames, Params>[];
+  setEntries: (entries: ReviewFormItemEntry<TypeNames, Params>[]) => void;
+  fallback: ReactNode;
 };
 
 /** Teacher/reviewer comments + follow-up form items keyed by item id — school `AdditionalChanges`. */
@@ -111,6 +124,7 @@ export type ReviewOverlayArgs<
   onSubmitFormItem: (payload: {
     comment?: string;
     formItem?: SomeFormItem<TypeNames, Params>;
+    children?: RecursiveFormItem<TypeNames, Params, MetaDom<SIndexed>>[][];
   }) => void;
   tCommon: (term: "add" | "cancel" | "save" | "delete") => string;
 };
@@ -173,6 +187,13 @@ export type SectionReviewProps<
   /** Item id pending comment deletion, or null. */
   deleteCommentId: string | null;
   setDeleteCommentId: (id: string | null) => void;
+  /**
+   * Host may replace the stock read-only follow-up rendering with its design
+   * editor. Original answered items remain in the review renderer.
+   */
+  renderFormItemsEditor: (
+    args: ReviewFormItemsEditorArgs<TypeNames, Params>,
+  ) => ReactNode;
   variants: Variants;
   tCommon: (term: "add" | "cancel" | "save" | "delete") => string;
   /** Section ordinal for the title (1-based display when `multiSection`). */

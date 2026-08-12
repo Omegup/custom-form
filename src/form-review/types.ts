@@ -14,6 +14,7 @@ import type {
   SectionReviewContext,
   SectionReviewHeader,
   SectionWithItems,
+  ReviewFormItemsEditorArgs,
 } from "./_deps";
 
 /** Optional form title data — same shape as `form-responder`'s `FormHeader`. */
@@ -54,6 +55,9 @@ export type CustomFormReviewProps<
   setAddition: (addition: Addition<TypeNames, Params> | null) => void;
   deleteCommentId: string | null;
   setDeleteCommentId: (id: string | null) => void;
+  renderFormItemsEditor: (
+    args: ReviewFormItemsEditorArgs<TypeNames, Params>,
+  ) => ReactNode;
   tCommon: (term: "add" | "cancel" | "save" | "delete") => string;
   showDeleted: boolean;
   children?: ReactNode;

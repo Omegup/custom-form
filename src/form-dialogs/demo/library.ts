@@ -7,6 +7,7 @@ export {
   buildItemSectionDict,
   cloneFlatItems,
   consolidateSections,
+  flatten,
   getFormItemMoveActions,
 } from "../../form-edit";
 export type { Clone } from "../../form-edit";
@@ -40,6 +41,8 @@ export type {
   Addition,
   AdditionalChanges,
   ReviewExtra,
+  ReviewFormItemEntry,
+  ReviewFormItemsEditorArgs,
   ReviewStatus,
   SectionReviewChrome,
   SectionReviewContext,

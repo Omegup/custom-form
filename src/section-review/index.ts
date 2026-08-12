@@ -5,6 +5,7 @@ export type {
   FormItemAddition,
   ReviewExtra,
   ReviewFormItemEntry,
+  ReviewFormItemsEditorArgs,
   ReviewOverlayArgs,
   ReviewStatus,
   SectionReviewChrome,

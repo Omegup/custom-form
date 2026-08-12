@@ -15,6 +15,7 @@ export type {
   SectionDom,
   SectionMetaDom,
   SectionWithItems,
+  SIndexed,
 } from "../form-edit";
 export type {
   Response,

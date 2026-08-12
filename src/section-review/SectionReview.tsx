@@ -20,6 +20,7 @@ import type {
   ParamsDom,
   RecursiveFormItem,
   SectionMetaDom,
+  SIndexed,
   SomeFormItem,
   StrictViewerMethods,
   VariantsDom,
@@ -98,6 +99,7 @@ export const SectionReviewHOC = <
       setAddition,
       deleteCommentId,
       setDeleteCommentId,
+      renderFormItemsEditor,
     } = props;
 
     const submitComment = (text: string) => {
@@ -122,11 +124,21 @@ export const SectionReviewHOC = <
     const submitFormItem = (payload: {
       comment?: string;
       formItem?: SomeFormItem<TypeNames, Params>;
+      children?: RecursiveFormItem<
+        TypeNames,
+        Params,
+        MetaDom<SIndexed>
+      >[][];
     }) => {
       if (!addition || addition.mode !== "formItem") return;
       const { originId, replace } = addition;
       const current = changes[originId] ?? {};
-      const entry = { comment: payload.comment, formItem: payload.formItem, date: lastPending };
+      const entry = {
+        comment: payload.comment,
+        formItem: payload.formItem,
+        children: payload.children,
+        date: lastPending,
+      };
       const formItems = current.formItems ? [...current.formItems] : [];
       if (replace) {
         formItems[replace.index] = entry;
@@ -154,12 +166,13 @@ export const SectionReviewHOC = <
         );
       }
 
+      const formItemNodes: ReactNode[] = [];
       change.formItems?.forEach((sq, subIndex) => {
         if (sq.formItem) {
           const answered = !!responses[sq.formItem.id];
           const status: ReviewStatus =
             !sq.date || !lastPending ? "normal" : answered ? "disabled" : "highlight";
-          nodes.push(
+          formItemNodes.push(
             <Fragment key={subIndex}>
               {renderItemShell({
                 id: sq.formItem.id,
@@ -181,7 +194,9 @@ export const SectionReviewHOC = <
                       formItem: sq.formItem,
                       variant: variants[sq.formItem.type],
                       extra: branded({
-                        getChild: () => null,
+                        getChild: (suffix: string) => (
+                          <>{renderSlots(sq.children ?? [], suffix, parentDeleted)}</>
+                        ),
                         error: null,
                         parentDeleted,
                         index: subIndex,
@@ -202,7 +217,7 @@ export const SectionReviewHOC = <
             </Fragment>,
           );
         } else {
-          nodes.push(
+          formItemNodes.push(
             <Fragment key={subIndex}>
               {renderComment({
                 text: sq.comment ?? "",
@@ -219,6 +234,22 @@ export const SectionReviewHOC = <
           );
         }
       });
+
+      if (change.formItems?.length) {
+        nodes.push(
+          <Fragment key="form-items-editor">
+            {renderFormItemsEditor({
+              entries: change.formItems,
+              setEntries: (formItems) =>
+                setChanges({
+                  ...changes,
+                  [originId]: { ...change, formItems },
+                }),
+              fallback: renderFormItemAppendix(formItemNodes),
+            })}
+          </Fragment>,
+        );
+      }
 
       return nodes;
     };

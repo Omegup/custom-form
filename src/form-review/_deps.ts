@@ -18,6 +18,7 @@ export type {
   Addition,
   AdditionalChanges,
   ReviewExtra,
+  ReviewFormItemsEditorArgs,
   SectionReviewChrome,
   SectionReviewContext,
   SectionReviewHeader,

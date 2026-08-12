@@ -125,6 +125,7 @@ export const SectionReviewDemo = ({
               setAddition={setAddition}
               deleteCommentId={deleteCommentId}
               setDeleteCommentId={setDeleteCommentId}
+              renderFormItemsEditor={({ fallback }) => fallback}
               variants={variants}
               tCommon={tCommon}
               i={0}

@@ -17,7 +17,6 @@ import {
 } from "react";
 import { WebRecursiveEdit } from "../../flat-dnd/demo/WebRecursiveEdit";
 import {
-  FollowUpFormItemEditor,
   FormItemEditor,
   itemName,
 } from "../../form-item-editor/demo/FormItemEditorDemo";
@@ -108,6 +107,21 @@ const SectionComponent = lib.SectionFormItemHOC<
   renderEdit: WebRecursiveEdit,
 });
 
+const FollowUpSectionComponent = lib.SectionFormItemHOC<
+  types.TypeNames,
+  types.Params,
+  types.Variants,
+  types.Section,
+  types.BaseCtx,
+  types.ListExtra
+>({
+  viewers: demo.viewers,
+  useRenderAddItem,
+  columnsChrome,
+  renderTitle: () => <strong>Follow-up items</strong>,
+  renderEdit: WebRecursiveEdit,
+});
+
 const cloneFn: lib.Clone<
   types.TypeNames,
   types.Params,
@@ -188,6 +202,156 @@ const useDialogs = lib.makeUseDialogs<
 type PendingRemove = {
   rm: () => void;
   item: lib.FlatNestedItem<types.TypeNames, types.Params, types.Section>;
+};
+
+const followUpSection = (): types.Section => ({
+  id: "review-follow-up-section",
+  deleted: false,
+  title: "Follow-up items",
+  description: "",
+});
+
+const followUpEntriesToFlat = (
+  entries: lib.ReviewFormItemEntry<types.TypeNames, types.Params>[],
+): types.FlatItems => {
+  const flatten = lib.flatten<
+    types.TypeNames,
+    types.Params,
+    types.Section,
+    types.ItemMeta
+  >();
+  return [
+    { section: followUpSection() },
+    ...entries.flatMap((entry) =>
+      entry.formItem
+        ? flatten.formItem({
+            header: entry.formItem,
+            children: entry.children ?? [],
+            meta: lib.branded({ index: 0, total: 0, sIndex: 0 }),
+          })
+        : [],
+    ),
+  ];
+};
+
+const FollowUpDesignItems = ({
+  entries,
+  designFlatItems,
+  setEntries,
+}: {
+  entries: lib.ReviewFormItemEntry<types.TypeNames, types.Params>[];
+  designFlatItems: types.FlatItems;
+  setEntries: (
+    entries: lib.ReviewFormItemEntry<types.TypeNames, types.Params>[],
+  ) => void;
+}) => {
+  const [focused, setFocused] = useState<lib.AutoFocusState>(null);
+  const [toRemove, setToRemove] = useState<PendingRemove | null>(null);
+  const flatItems = useMemo(() => followUpEntriesToFlat(entries), [entries]);
+  const dialogCtx: types.Ctx = lib.branded({
+    flatItems: [...designFlatItems, ...flatItems],
+  });
+
+  const setFlatItems = useCallback(
+    (next: types.FlatItems) => {
+      const roots = lib.consolidateSections(next)[0]?.items.flat() ?? [];
+      const current = new Map(
+        entries.flatMap((entry) =>
+          entry.formItem ? [[entry.formItem.id, entry] as const] : [],
+        ),
+      );
+      const commentOnly = entries.filter((entry) => !entry.formItem);
+      setEntries([
+        ...roots.map((root) => {
+          const previous = current.get(root.header.id);
+          return {
+            ...previous,
+            formItem: root.header,
+            children: root.children,
+            date: previous?.date ?? null,
+          };
+        }),
+        ...commentOnly,
+      ]);
+    },
+    [entries, setEntries],
+  );
+
+  const dialogs = useDialogs({
+    flatItems,
+    setFlatItems,
+    ctx: dialogCtx,
+  });
+  const listCtx = useMemo(
+    () => lib.autofocusCtx<lib.ContextDom>(lib.branded({}), focused),
+    [focused],
+  );
+  const variants = useMemo(
+    (): types.Variants =>
+      lib.branded({ field: "default", heading: "default", panel: "default" }),
+    [],
+  );
+  const setItems = (items: types.FlatItems, newCtx: types.ListCtx) => {
+    if (items !== flatItems) setFlatItems(items);
+    setFocused(newCtx.focused);
+  };
+  const sections = useMemo(() => lib.consolidateSections(flatItems), [flatItems]);
+  const args = {
+    items: flatItems,
+    setItems,
+    ctx: listCtx,
+    sectionOfItem: lib.buildItemSectionDict(flatItems),
+    setToRemove,
+  };
+  const itemActions = lib.getFormItemMoveActions(args, cloneFn, true);
+  const listExtraMap = demo.buildListExtraMap(
+    sections,
+    itemActions,
+    dialogs.openItemEdit,
+  );
+  const itemExtra = (id: string): types.ListExtra =>
+    listExtraMap.get(id) ?? demo.emptyListExtra();
+  const section = sections[0];
+  if (!section) return null;
+
+  return (
+    <DialogActionsCtx.Provider
+      value={{
+        openItemEdit: dialogs.openItemEdit,
+        openSectionEdit: () => {},
+      }}
+    >
+      {dialogs.formItemDialog}
+      {toRemove ? (
+        <RemoveAlert
+          pending={{
+            ...toRemove,
+            label:
+              "item" in toRemove.item
+                ? itemName(dialogCtx, toRemove.item.item)
+                : undefined,
+          }}
+          onConfirm={() => {
+            toRemove.rm();
+            setToRemove(null);
+          }}
+          onCancel={() => setToRemove(null)}
+        />
+      ) : null}
+      <FollowUpSectionComponent
+        ctx={listCtx}
+        variants={variants}
+        itemExtra={itemExtra}
+        renderCard={demo.renderCard}
+        args={args}
+        clone={cloneFn}
+        section={section}
+        sIndex={0}
+        jump
+        setAddItem={dialogs.setItemSession}
+      />
+    </DialogActionsCtx.Provider>
+  );
 };
 
 const fillVariants = lib.branded<types.Variants, "variants">({
@@ -557,7 +721,6 @@ const UpdatePhase = ({
     lib.Addition<types.TypeNames, types.Params> | null
   >(null);
   const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
-  const [followUpPanelN, setFollowUpPanelN] = useState(2);
   const [savedChanges, setSavedChanges] = useState(
     formResponse?.changes ?? {},
   );
@@ -628,43 +791,26 @@ const UpdatePhase = ({
     );
   };
 
-  const pickFollowUpType = (newItem: lib.NewFormItem<types.TypeNames, types.Params>) => {
+  const addFollowUpItem = (
+    newItem: lib.NewFormItem<types.TypeNames, types.Params>,
+  ) => {
     if (!addition || addition.mode !== "formItem") return;
-    const header = newItem.header;
-    if (header.type === "panel") {
-      setFollowUpPanelN(newItem.children.length > 0 ? newItem.children.length : 2);
-    }
-    const formItem = lib.withFormItemName(
-      header,
-      header.params.name || header.type,
-    );
-    setAddition({ ...addition, formItem });
+    const current = changes[addition.originId] ?? {};
+    const formItems = current.formItems ? [...current.formItems] : [];
+    formItems.push({
+      formItem: lib.withFormItemName(
+        newItem.header,
+        newItem.header.params.name || newItem.header.type,
+      ),
+      children: newItem.children,
+      date: lastPending,
+    });
+    setChanges({
+      ...changes,
+      [addition.originId]: { ...current, formItems },
+    });
+    setAddition(null);
   };
-
-  const submitFollowUpFormItem = useCallback(
-    (payload: {
-      comment?: string;
-      formItem: lib.SomeFormItem<types.TypeNames, types.Params>;
-    }) => {
-      if (!addition || addition.mode !== "formItem") return;
-      const { originId, replace } = addition;
-      const current = changes[originId] ?? {};
-      const entry = {
-        comment: payload.comment,
-        formItem: payload.formItem,
-        date: lastPending,
-      };
-      const formItems = current.formItems ? [...current.formItems] : [];
-      if (replace) {
-        formItems[replace.index] = entry;
-      } else {
-        formItems.push(entry);
-      }
-      setChanges({ ...changes, [originId]: { ...current, formItems } });
-      setAddition(null);
-    },
-    [addition, changes, lastPending, setChanges],
-  );
 
   if (!formResponse) {
     return (
@@ -772,40 +918,6 @@ const UpdatePhase = ({
           Reject
         </button>
       </div>
-      {addition?.mode === "formItem" && addition.formItem ? (
-        <div
-          style={{
-            padding: 12,
-            border: "1px solid #ddd",
-            borderRadius: 6,
-            background: "#fff",
-          }}
-        >
-          <FollowUpFormItemEditor
-            formItem={addition.formItem}
-            initialComment={addition.comment}
-            flatItems={flatItems}
-            panelN={followUpPanelN}
-            onSubmit={submitFollowUpFormItem}
-            onCancel={() => setAddition(null)}
-          />
-        </div>
-      ) : null}
-      {addition?.mode === "formItem" && !addition.formItem ? (
-        <p
-          style={{
-            margin: 0,
-            padding: "8px 12px",
-            background: "#f0f5fb",
-            border: "1px solid #1a5fb4",
-            borderRadius: 6,
-            fontSize: 13,
-          }}
-        >
-          Follow-up for item <code>{addition.originId}</code> — pick a type in the
-          Library sidebar.
-        </p>
-      ) : null}
       <LayoutWithSidebar
         main={
           <FormReview
@@ -824,6 +936,17 @@ const UpdatePhase = ({
             setAddition={setAddition}
             deleteCommentId={deleteCommentId}
             setDeleteCommentId={setDeleteCommentId}
+            renderFormItemsEditor={({ entries, setEntries, fallback }) =>
+              entries.some((entry) => entry.formItem) ? (
+                <FollowUpDesignItems
+                  entries={entries}
+                  designFlatItems={flatItems}
+                  setEntries={setEntries}
+                />
+              ) : (
+                fallback
+              )
+            }
             tCommon={tCommon}
             showDeleted={showDeleted}
           />
@@ -839,7 +962,7 @@ const UpdatePhase = ({
             renderMenuItem={renderMenuItem}
             setAddFormItem={(item) => {
               if (addition?.mode === "formItem") {
-                pickFollowUpType(item);
+                addFollowUpItem(item);
               }
             }}
             setAddSection={() => {
