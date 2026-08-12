@@ -10,6 +10,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -361,6 +362,16 @@ const FillPhase = ({
   const formRef = useRef<lib.SectionValidator | null>(null);
   const [errors, setErrors] = useState<Record<string, string | null>>({});
   const [justSent, setJustSent] = useState(false);
+  /** Write-through until Storybook args catch up after Send. */
+  const [optimisticResponse, setOptimisticResponse] =
+    useState<types.FormResponseDoc | null>(null);
+  const doc = optimisticResponse ?? formResponse;
+
+  useEffect(() => {
+    if (!optimisticResponse) return;
+    if (formResponse?.status === "answered") setOptimisticResponse(null);
+    if (formResponse?.status === "changesRequested") setOptimisticResponse(null);
+  }, [formResponse, optimisticResponse]);
 
   /**
    * School `CustomFormResponder`: when a FormResponse exists, pass it as `old`
@@ -370,16 +381,16 @@ const FillPhase = ({
     values: Record<string, lib.Response>;
     changes: lib.ResponderAdditionalChanges;
   } | null => {
-    if (!formResponse) return null;
+    if (!doc) return null;
     const responderChanges: lib.ResponderAdditionalChanges = {};
-    for (const [id, entry] of Object.entries(formResponse.changes)) {
+    for (const [id, entry] of Object.entries(doc.changes)) {
       if (entry.comment != null) responderChanges[id] = { comment: entry.comment };
     }
     return {
-      values: phases.formResponseValues(formResponse),
+      values: phases.formResponseValues(doc),
       changes: responderChanges,
     };
-  }, [formResponse]);
+  }, [doc]);
 
   const setResponse = useCallback(
     (id: string, next?: lib.Response) => {
@@ -394,44 +405,69 @@ const FillPhase = ({
     [responses, updateArgs],
   );
 
+  /** Drop teacher unlock remarks — Send consumes them (fields lock again). */
+  const withoutUnlockComments = (
+    changes: lib.AdditionalChanges<types.TypeNames, types.Params>,
+  ): lib.AdditionalChanges<types.TypeNames, types.Params> => {
+    const next: lib.AdditionalChanges<types.TypeNames, types.Params> = {};
+    for (const [id, entry] of Object.entries(changes)) {
+      if (entry.comment == null) {
+        next[id] = entry;
+        continue;
+      }
+      const { comment: _comment, ...rest } = entry;
+      if (Object.keys(rest).length) next[id] = rest;
+    }
+    return next;
+  };
+
   /**
-   * School formik onSubmit → `customForms.addFormResponse` (first send) or
-   * update the same FormResponse on revise. Matches Meteor insert:
-   * `changes: {}` on create; no per-item `history` stamp (that is review-side).
-   * Fill draft (`responses` args) stays formik session state — not overwritten.
+   * School fill submit → `customForms.addFormResponse` (first send) or
+   * update the same FormResponse on revise after `changesRequested`.
+   *
+   * Sendability is status-only: no FormResponse yet, or status is
+   * `changesRequested`. Remarks only control which fields are editable.
    */
   const send = () => {
     const ref = formRef.current;
     if (!ref) return;
-    const keyed = Object.fromEntries(
-      ref.getKeys().map((k) => [k, responses[k]]),
-    ) as Record<string, lib.Response>;
-    const nextErrors = ref.validate(keyed);
-    setErrors(nextErrors);
-    if (Object.values(nextErrors).some((e) => e != null && e !== "")) return;
+    if (doc && doc.status !== "changesRequested") return;
 
-    const updated = ref.update(keyed);
+    const prior = doc ? phases.formResponseValues(doc) : {};
+    const keys = ref.getKeys();
+    // First fill needs registered fields; change-request may resend prior as-is.
+    if (!doc && keys.length === 0) return;
+
+    const keyed = Object.fromEntries(
+      keys.map((k) => [k, responses[k] ?? prior[k]]),
+    ) as Record<string, lib.Response>;
+    if (keys.length > 0) {
+      const nextErrors = ref.validate(keyed);
+      setErrors(nextErrors);
+      if (Object.values(nextErrors).some((e) => e != null && e !== "")) return;
+    }
+
+    const updated = keys.length > 0 ? ref.update(keyed) : {};
     const sendDate = phases.rememberDate(new Date());
-    // Revise: merge unlocked updates into prior answers (getKeys is only editable).
-    const nextValues = {
-      ...(formResponse ? phases.formResponseValues(formResponse) : {}),
-      ...updated,
-    };
+    const nextValues = { ...prior, ...updated };
 
     const nextDoc: types.FormResponseDoc = {
       responses: phases.toFormResponseEntries(nextValues),
-      // School addFormResponse sets `changes: {}`; keep teacher remarks on revise.
-      changes: formResponse?.changes ?? {},
+      changes: doc ? withoutUnlockComments(doc.changes) : {},
       feedbackHistory: [
-        ...(formResponse?.feedbackHistory ?? []),
+        ...(doc?.feedbackHistory ?? []),
         { status: "answered", date: sendDate.toISOString() },
       ],
       status: "answered",
     };
 
-    updateArgs({ formResponse: nextDoc });
+    setOptimisticResponse(nextDoc);
+    updateArgs({ formResponse: nextDoc, responses: {} });
     setJustSent(true);
   };
+
+  /** Empty (no FormResponse) or teacher `changesRequested` — nothing else. */
+  const canSend = !doc || doc.status === "changesRequested";
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -440,7 +476,9 @@ const FillPhase = ({
         header={{
           title: old ? "Revise your answers" : "Fill the form",
           description: old
-            ? "Locked fields keep the prior FormResponse answer. Remarks unlock fields for revise — then Send again."
+            ? doc?.status === "changesRequested"
+              ? "Changes requested — edit remarked fields if you want, then Send again (resend is allowed with no edits)."
+              : "Waiting for the teacher to request changes before you can Send again."
             : "Send creates the FormResponse document (school addFormResponse).",
         }}
         sections={sections}
@@ -454,20 +492,28 @@ const FillPhase = ({
       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
         <button
           type="button"
-          onClick={() => setErrors(formRef.current?.validate(responses) ?? {})}
+          onClick={() => {
+            const prior = doc ? phases.formResponseValues(doc) : {};
+            const keys = formRef.current?.getKeys() ?? [];
+            const keyed = Object.fromEntries(
+              keys.map((k) => [k, responses[k] ?? prior[k]]),
+            ) as Record<string, lib.Response>;
+            setErrors(formRef.current?.validate(keyed) ?? {});
+          }}
         >
           Validate
         </button>
         <button
           type="button"
           onClick={send}
+          disabled={!canSend}
           style={{
-            background: "#1a5fb4",
+            background: canSend ? "#1a5fb4" : "#9aa7b8",
             color: "#fff",
             border: "none",
             padding: "6px 14px",
             borderRadius: 4,
-            cursor: "pointer",
+            cursor: canSend ? "pointer" : "not-allowed",
             fontWeight: 600,
           }}
         >
@@ -478,9 +524,14 @@ const FillPhase = ({
             FormResponse saved — open Update to review the same document.
           </span>
         ) : null}
-        {formResponse && !justSent ? (
+        {doc?.status === "changesRequested" ? (
           <span style={{ fontSize: 13, color: "#666" }}>
-            FormResponse on file — revise unlocked fields, then Send again.
+            Changes requested — Send is available (edits optional).
+          </span>
+        ) : null}
+        {doc && doc.status !== "changesRequested" && !justSent ? (
+          <span style={{ fontSize: 13, color: "#666" }}>
+            Sent — waiting for teacher feedback (Request changes unlocks Send).
           </span>
         ) : null}
       </div>
@@ -553,6 +604,7 @@ const UpdatePhase = ({
   /** School `formResponses.addFeedback` — mutates the same FormResponse. */
   const submitFeedback = (status: types.FeedbackStatus) => {
     if (!formResponse) return;
+    if (formResponse.status === status) return;
     const date = phases.rememberDate(new Date());
     const comment = feedbackComment.trim() || undefined;
     patchFormResponse({
@@ -603,7 +655,16 @@ const UpdatePhase = ({
           fontSize: 14,
         }}
       >
-        <button type="button" onClick={saveChanges} disabled={!dirty}>
+        <button
+          type="button"
+          onClick={saveChanges}
+          disabled={!dirty}
+          title={
+            formResponse.status === "answered"
+              ? "Commit remarks/follow-ups and move status answered → draft (school addAdditionalQuestions)."
+              : "Commit remarks/follow-ups on FormResponse.changes (school addAdditionalQuestions)."
+          }
+        >
           Save changes
         </button>
         <button
@@ -655,20 +716,27 @@ const UpdatePhase = ({
         <button
           type="button"
           onClick={() => submitFeedback("changesRequested")}
+          disabled={formResponse.status === "changesRequested"}
         >
           Request changes
         </button>
         <button
           type="button"
           onClick={() => submitFeedback("approved")}
-          style={{ color: "#1b7a36" }}
+          disabled={formResponse.status === "approved"}
+          style={{
+            color: formResponse.status === "approved" ? undefined : "#1b7a36",
+          }}
         >
           Approve
         </button>
         <button
           type="button"
           onClick={() => submitFeedback("rejected")}
-          style={{ color: "#a40" }}
+          disabled={formResponse.status === "rejected"}
+          style={{
+            color: formResponse.status === "rejected" ? undefined : "#a40",
+          }}
         >
           Reject
         </button>

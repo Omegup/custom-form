@@ -56,7 +56,7 @@ export type FeedbackStatus =
 export type FeedbackHistoryItem = {
   status: FeedbackStatus;
   comment?: string;
-  /** ISO string so Storybook args stay JSON-serializable. */
+  /** ISO string in the document (JSON-serializable). */
   date: string;
 };
 
@@ -81,22 +81,24 @@ export type FormResponseDoc = {
   status: FeedbackStatus;
 };
 
-export type StoryArgs = {
-  /** School CustomForm design (sections / items as flat edit list). */
+/** Props for `AllInEditor` — domain documents, not Storybook wire format. */
+export type DemoProps = {
   flatItems: itemTypes.FlatItems;
   heading: string;
   phase: DemoPhase;
-  /**
-   * Fill-session draft answers (school formik values) — not part of the
-   * FormResponse document. Sparse until the user types; Send writes the
-   * document without replacing this draft map.
-   */
+  showDeleted: boolean;
+  /** Fill-session draft answers — not part of the FormResponse document. */
   responses: Record<string, lib.Response>;
   /** School FormResponse, or null before the first Send. */
   formResponse: FormResponseDoc | null;
-  showDeleted: boolean;
-};
-
-export type DemoProps = StoryArgs & {
-  updateArgs: (patch: Partial<StoryArgs>) => void;
+  updateArgs: (
+    patch: Partial<{
+      flatItems: itemTypes.FlatItems;
+      heading: string;
+      phase: DemoPhase;
+      showDeleted: boolean;
+      responses: Record<string, lib.Response>;
+      formResponse: FormResponseDoc | null;
+    }>,
+  ) => void;
 };

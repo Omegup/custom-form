@@ -54,7 +54,7 @@ const PHASES: {
     id: "fill",
     label: "2. Fill",
     blurb:
-      "Student answers then Sends — creates/updates the FormResponse document (school addFormResponse).",
+      "Student answers then Sends — creates/updates the FormResponse. Send is available when there is no response yet, or status is changesRequested.",
   },
   {
     id: "update",
