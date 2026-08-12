@@ -354,6 +354,39 @@ const FollowUpDesignItems = ({
   );
 };
 
+const addReviewFollowUps = (
+  sections: types.ListSection[],
+  changes: lib.AdditionalChanges<types.TypeNames, types.Params>,
+): types.ListSection[] => {
+  const addToSlots = (slots: types.ListItem[][]): types.ListItem[][] =>
+    slots.map((items) =>
+      items.flatMap((item) => {
+        const current = {
+          ...item,
+          children: addToSlots(item.children),
+        };
+        const added =
+          changes[item.header.id]?.formItems?.flatMap((entry) =>
+            entry.formItem
+              ? [
+                  {
+                    header: entry.formItem,
+                    children: addToSlots(entry.children ?? []),
+                    meta: item.meta,
+                  },
+                ]
+              : [],
+          ) ?? [];
+        return [current, ...added];
+      }),
+    );
+
+  return sections.map((section) => ({
+    ...section,
+    items: addToSlots(section.items),
+  }));
+};
+
 const fillVariants = lib.branded<types.Variants, "variants">({
   field: "default",
   heading: "default",
@@ -531,6 +564,10 @@ const FillPhase = ({
   const [optimisticResponse, setOptimisticResponse] =
     useState<types.FormResponseDoc | null>(null);
   const doc = optimisticResponse ?? formResponse;
+  const fillSections = useMemo(
+    () => addReviewFollowUps(sections, doc?.changes ?? {}),
+    [sections, doc],
+  );
 
   useEffect(() => {
     if (!optimisticResponse) return;
@@ -646,7 +683,7 @@ const FillPhase = ({
               : "Waiting for the teacher to request changes before you can Send again."
             : "Send creates the FormResponse document (school addFormResponse).",
         }}
-        sections={sections}
+        sections={fillSections}
         responses={responses}
         old={old}
         setResponse={setResponse}
