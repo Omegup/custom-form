@@ -2,7 +2,8 @@
  * Section review shell — school `section-review-ui/SectionReview`
  * `SectionReviewHOC`. Renders one section's slots read-only through
  * `FormItemHOC`, threads per-item `status` derived from reviewer
- * `AdditionalChanges` + `lastPending`, and drives comment / follow-up-form-item
+ * `AdditionalChanges` history stamps (newest wave = recent) plus optional
+ * `lastPending`, and drives comment / follow-up-form-item
  * overlays via **host-owned** `addition` / `deleteCommentId` state, and
  * `renderAddFollowUp` for attaching follow-up form items (e.g. an
  * `AddFormItem` dropdown — no Library sidebar required).
@@ -87,6 +88,7 @@ export const SectionReviewHOC = <
     renderFormItemAppendix,
     renderAddFollowUp,
     renderActionIcon,
+    renderFollowUpMark,
     renderOverlays,
   } = chrome;
 
@@ -127,18 +129,57 @@ export const SectionReviewHOC = <
         (e) => e.formItem != null && !isAnswered(e.formItem.id),
       );
 
-    const reviewStatusFor = (id: string, hasComment: boolean): ReviewStatus => {
-      if (hasComment) return "normal";
-      const lastHistoryDate = changes[id]?.history?.at(-1)?.date;
-      if (lastPending == null || lastHistoryDate == null) return "disabled";
-      const historyMs =
-        lastHistoryDate instanceof Date
-          ? lastHistoryDate.getTime()
-          : new Date(lastHistoryDate as string | number).getTime();
-      return lastPending.getTime() === historyMs ? "highlight" : "disabled";
+    const historySec = (
+      date: Date | string | number | null | undefined,
+    ): number | null => {
+      if (date == null) return null;
+      const ms =
+        date instanceof Date ? date.getTime() : new Date(date).getTime();
+      return Number.isFinite(ms) ? Math.floor(ms / 1000) : null;
     };
 
-    /** Yellow while pending (unlock remark / unanswered follow-ups); else default. */
+    /** Newest answer-stamp across all items — that wave is "recent". */
+    const latestAnswerSec = (() => {
+      let max: number | null = null;
+      for (const entry of Object.values(changes)) {
+        for (const h of entry.history ?? []) {
+          const sec = historySec(h.date);
+          if (sec != null && (max == null || sec > max)) max = sec;
+        }
+      }
+      return max;
+    })();
+
+    const reviewStatusFor = (id: string, hasComment: boolean): ReviewStatus => {
+      if (hasComment) return "normal";
+      const ms = historySec(changes[id]?.history?.at(-1)?.date);
+      if (ms == null) {
+        // No stamp yet — treat answered items as recent so the round is visible.
+        return isAnswered(id) ? "highlight" : "disabled";
+      }
+      // Prefer lastPending when it aligns with an answer wave (student Send).
+      if (lastPending != null) {
+        const pendingSec = historySec(lastPending);
+        if (pendingSec != null) {
+          const pendingMatchesWave = Object.values(changes).some(
+            (entry) => historySec(entry.history?.at(-1)?.date) === pendingSec,
+          );
+          if (pendingMatchesWave) {
+            return pendingSec === ms ? "highlight" : "disabled";
+          }
+        }
+      }
+      // Fallback: newest answer wave = recent; older stamps = ancient.
+      if (latestAnswerSec == null) return "highlight";
+      return ms === latestAnswerSec ? "highlight" : "disabled";
+    };
+
+    /**
+     * Yellow only while pending (step 2): unlock remark and/or unanswered
+     * follow-ups. After Send (step 4) comments are cleared and follow-ups are
+     * answered → default/black. Answered follow-ups still use full review
+     * chrome (lock / remark / +Follow-up) via `renderReviewableItem`.
+     */
     const resolveVariant = <K extends TypeNames>(
       item: TypedFormItem<Params, K>,
       isUnansweredFollowUpEntry: boolean,
@@ -264,9 +305,10 @@ export const SectionReviewHOC = <
           children: entry.children ?? [],
           meta: { index: 0, total: 1, sIndex: 0 },
         };
+        // Answered follow-ups behave as originals (read + lock/remark/+Follow-up).
         nodes.push(
           <Fragment key={entry.formItem.id}>
-            {renderReviewableItem(item, 0, parentDeleted, false)}
+            {renderReviewableItem(item, 0, parentDeleted, true)}
           </Fragment>,
         );
       }
@@ -373,7 +415,7 @@ export const SectionReviewHOC = <
       item: RecursiveFormItem<TypeNames, Params, Meta>,
       index: number,
       parentDeleted: boolean,
-      _fromFollowUpTree: boolean,
+      fromFollowUpTree: boolean,
     ): ReactNode => {
       const q = item.header;
       const children = item.children;
@@ -382,6 +424,9 @@ export const SectionReviewHOC = <
       const status = reviewStatusFor(q.id, hasComment);
       const appendixNodes = buildAppendix(q.id, q.deleted || parentDeleted);
       const designingFollowUps = hasUnansweredFollowUps(q.id);
+      // Settled answered follow-ups: black like originals (not unanswered design).
+      // Pending yellow comes from remark / unanswered children only.
+      const variant = resolveVariant(q, false);
 
       return renderItemShell({
         id: q.id,
@@ -397,7 +442,7 @@ export const SectionReviewHOC = <
             viewProps={{
               ctx,
               formItem: q,
-              variant: resolveVariant(q, false),
+              variant,
               extra: branded({
                 getChild: (suffix: string) => (
                   <>
@@ -411,10 +456,15 @@ export const SectionReviewHOC = <
                 error: null,
                 parentDeleted,
                 index,
-                icon: renderActionIcon(hasComment ? "unlock" : "lock", () => {
-                  if (hasComment) setDeleteCommentId(q.id);
-                  else setAddition({ originId: q.id, mode: "comment" });
-                }),
+                icon: (
+                  <>
+                    {fromFollowUpTree ? renderFollowUpMark() : null}
+                    {renderActionIcon(hasComment ? "unlock" : "lock", () => {
+                      if (hasComment) setDeleteCommentId(q.id);
+                      else setAddition({ originId: q.id, mode: "comment" });
+                    })}
+                  </>
+                ),
                 response: {
                   setValue: null,
                   value: responses[q.id] ?? emptyResponse(),

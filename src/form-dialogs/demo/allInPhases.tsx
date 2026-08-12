@@ -353,11 +353,39 @@ export const PhaseJsonPanels = ({
 const STATUS_COLOR: Record<lib.ReviewStatus, string> = {
   /** Remark present — unlocked for revise. */
   normal: "#22883e",
-  /** Older answers (not from the latest student send). */
-  disabled: "#ccc",
-  /** Newly answered this round — black chrome; bold via fontWeight. */
-  highlight: "#333",
+  /** Older answer waves (ancient). */
+  disabled: "#b0b0b0",
+  /** Latest answer wave (recent) — black chrome; bold via fontWeight. */
+  highlight: "#111",
 };
+
+const STATUS_ANSWER_STYLE: Record<
+  lib.ReviewStatus,
+  { opacity: number; fontWeight: number; label: string | null }
+> = {
+  normal: { opacity: 1, fontWeight: 400, label: null },
+  disabled: { opacity: 0.55, fontWeight: 400, label: "earlier" },
+  highlight: { opacity: 1, fontWeight: 700, label: "new" },
+};
+
+const statusLabelBadge = (label: string | null, ancient: boolean) =>
+  label ? (
+    <span
+      style={{
+        fontSize: 10,
+        fontWeight: 700,
+        letterSpacing: "0.04em",
+        textTransform: "uppercase",
+        color: ancient ? "#888" : "#111",
+        border: `1px solid ${ancient ? "#ccc" : "#111"}`,
+        borderRadius: 3,
+        padding: "1px 5px",
+        lineHeight: 1.2,
+      }}
+    >
+      {label}
+    </span>
+  ) : null;
 
 /** Follow-up chrome — yellow + badge (not error red). Keyed by form `Variants`. */
 const FOLLOW_UP_BADGE = (
@@ -514,9 +542,25 @@ export const fillChrome: lib.FormResponderChrome = {
         marginTop: 8,
         marginLeft: 8,
         paddingLeft: 12,
+        paddingTop: 8,
+        paddingBottom: 8,
+        paddingRight: 8,
         borderLeft: `3px solid ${VARIANT_CHROME.followUp.border}`,
+        background: "#fffbeb88",
+        borderRadius: "0 6px 6px 0",
       }}
     >
+      <div
+        style={{
+          fontSize: 11,
+          fontWeight: 700,
+          letterSpacing: "0.04em",
+          textTransform: "uppercase",
+          color: "#b45309",
+        }}
+      >
+        Follow-up
+      </div>
       {items}
     </div>
   ),
@@ -532,7 +576,9 @@ export const reviewChrome: lib.FormReviewChrome<types.TypeNames, types.Params> =
       ) : null}
       <p style={{ margin: "8px 0 0", fontSize: 12, color: "#888", fontStyle: "italic" }}>
         Remark unlocks a field (🔓). Use <strong>+ Follow-up</strong> on an answer to attach a
-        Field / Heading / Panel (same dropdown as Design).
+        Field / Heading / Panel (same dropdown as Design). After the student sends again,{" "}
+        <strong>new</strong> marks this round&apos;s answers and <strong>earlier</strong> marks
+        prior sends.
       </p>
     </div>
   ),
@@ -641,6 +687,15 @@ export const reviewChrome: lib.FormReviewChrome<types.TypeNames, types.Params> =
       </button>
     );
   },
+  renderFollowUpMark: () => (
+    <span
+      title="Answered follow-up"
+      aria-label="Answered follow-up"
+      style={{ color: "#b45309", fontSize: 12, fontWeight: 700, lineHeight: 1 }}
+    >
+      ✚
+    </span>
+  ),
   renderOverlays: ({
     addition,
     deleteCommentId,
@@ -837,7 +892,9 @@ export const reviewViewers: lib.Viewers<
     viewer: ({ props: { formItem, extra, variant } }) => {
       const value = extra.response.value.data.value ?? "";
       const chrome = VARIANT_CHROME[variant];
+      const tone = STATUS_ANSWER_STYLE[extra.status];
       const newlyAnswered = extra.status === "highlight";
+      const ancient = extra.status === "disabled";
       return (
         <div
           style={{
@@ -845,7 +902,7 @@ export const reviewViewers: lib.Viewers<
             flexDirection: "column",
             gap: 4,
             fontSize: 14,
-            opacity: extra.parentDeleted ? 0.5 : 1,
+            opacity: extra.parentDeleted ? 0.5 : tone.opacity,
             ...VARIANT_SHELL[variant],
           }}
         >
@@ -854,20 +911,15 @@ export const reviewViewers: lib.Viewers<
               display: "flex",
               alignItems: "center",
               gap: 6,
-              fontWeight: newlyAnswered ? 700 : 400,
+              fontWeight: tone.fontWeight,
+              color: ancient ? "#777" : undefined,
             }}
           >
-            {newlyAnswered ? (
-              <strong>
-                {formItem.params.name || "(unnamed field)"}
-                {formItem.params.required ? " *" : ""}
-              </strong>
-            ) : (
-              <span>
-                {formItem.params.name || "(unnamed field)"}
-                {formItem.params.required ? " *" : ""}
-              </span>
-            )}
+            <span>
+              {formItem.params.name || "(unnamed field)"}
+              {formItem.params.required ? " *" : ""}
+            </span>
+            {statusLabelBadge(tone.label, ancient)}
             {chrome.badge}
             {extra.icon}
           </span>
@@ -876,8 +928,13 @@ export const reviewViewers: lib.Viewers<
               padding: "6px 8px",
               border: `1px solid ${reviewFieldBorder[variant](extra.status)}`,
               borderRadius: 4,
-              background: reviewFieldBackground[variant],
-              fontWeight: newlyAnswered ? 700 : 400,
+              background: newlyAnswered
+                ? "#fff"
+                : ancient
+                  ? "#f0f0f0"
+                  : reviewFieldBackground[variant],
+              fontWeight: tone.fontWeight,
+              color: ancient ? "#666" : undefined,
             }}
           >
             {value || <em style={{ color: "#999", fontWeight: 400 }}>No answer</em>}
@@ -890,13 +947,17 @@ export const reviewViewers: lib.Viewers<
   heading: {
     viewer: ({ props: { formItem, extra, variant } }) => {
       const chrome = VARIANT_CHROME[variant];
-      const newlyAnswered = extra.status === "highlight";
+      const tone = STATUS_ANSWER_STYLE[extra.status];
+      const ancient = extra.status === "disabled";
+      const weight =
+        extra.status === "highlight" ? 700 : extra.status === "normal" ? 600 : 400;
       return (
         <div
           style={{
             display: "flex",
             flexDirection: "column",
             gap: 4,
+            opacity: tone.opacity,
             ...VARIANT_SHELL[variant],
           }}
         >
@@ -905,10 +966,12 @@ export const reviewViewers: lib.Viewers<
               display: "flex",
               alignItems: "center",
               gap: 6,
-              fontWeight: newlyAnswered ? 700 : 600,
+              fontWeight: weight,
+              color: ancient ? "#777" : undefined,
             }}
           >
             {formItem.params.name || "(heading)"}
+            {statusLabelBadge(tone.label, ancient)}
             {chrome.badge}
             {extra.icon}
           </span>

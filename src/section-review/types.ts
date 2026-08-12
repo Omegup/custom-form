@@ -178,6 +178,11 @@ export type SectionReviewChrome<
     kind: "lock" | "unlock" | "edit",
     onClick: () => void,
   ) => ReactNode;
+  /**
+   * Mark for answered follow-up items that behave as originals (step 4) —
+   * host supplies chrome (e.g. ✚) without forcing pending yellow.
+   */
+  renderFollowUpMark: () => ReactNode;
   renderOverlays: (args: ReviewOverlayArgs<TypeNames, Params>) => ReactNode;
 };
 

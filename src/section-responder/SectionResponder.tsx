@@ -40,11 +40,6 @@ import type {
 type ViewerExtra = ResponderExtra & { impRef: Ref<ViewerMethods> };
 type HostExtra = ResponderExtra & { impRef: Ref<StrictViewerMethods> };
 
-const idSuffixOf = (id: string): string => {
-  const i = id.lastIndexOf(":");
-  return i >= 0 ? id.slice(i) : "";
-};
-
 const baseIdOf = (id: string): string => {
   const i = id.lastIndexOf(":");
   return i >= 0 ? id.slice(0, i) : id;
@@ -124,13 +119,31 @@ export const SectionResponderHOC = <
 
     const validators = useRef<Record<string, StrictViewerMethods | null>>({});
 
+    /**
+     * Follow-ups are keyed by the origin id used at review time (may include
+     * a panel instance suffix). Match exact, base, or any key with the same
+     * base — do **not** re-suffix follow-up ids (they already belong to that
+     * origin instance; re-suffixing broke answer keys under panels).
+     */
     const followUpsForOrigin = (
       originId: string,
     ): RecursiveFormItem<TypeNames, Params, Meta>[] => {
       const exact = followUpItems[originId];
       if (exact?.length) return exact;
-      return followUpItems[baseIdOf(originId)] ?? [];
+      const base = baseIdOf(originId);
+      const byBase = followUpItems[base];
+      if (byBase?.length) return byBase;
+      for (const [key, items] of Object.entries(followUpItems)) {
+        if (items?.length && baseIdOf(key) === base) return items;
+      }
+      return [];
     };
+
+    const unlockComment = (id: string): string | undefined =>
+      old?.changes[id]?.comment ?? old?.changes[baseIdOf(id)]?.comment;
+
+    const priorValue = (id: string) =>
+      old?.values[id] ?? old?.values[baseIdOf(id)];
 
     const renderSlots = (
       slots: RecursiveFormItem<TypeNames, Params, Meta>[][],
@@ -144,14 +157,19 @@ export const SectionResponderHOC = <
       ): ReactNode => {
         const q = item.header;
         const children = item.children;
-        const comment = old?.changes[q.id]?.comment;
-        const oldValue = old?.values[q.id];
-        const value = responses[q.id] || oldValue;
+        const comment = unlockComment(q.id);
+        const oldValue = priorValue(q.id);
+        const value = responses[q.id] ?? oldValue;
         const editable = !oldValue || comment != null;
         const error = getError(q.id);
+        // Seed the draft from the prior answer so revise Fill keeps it visible.
         const onActivate =
-          !responses[q.id] && editable && oldValue
-            ? () => setResponse(q.id, emptyResponse())
+          responses[q.id] == null && editable && oldValue
+            ? () =>
+                setResponse(q.id, {
+                  meta: { ...oldValue.meta },
+                  data: { ...oldValue.data },
+                })
             : undefined;
 
         return renderItemShell({
@@ -224,15 +242,7 @@ export const SectionResponderHOC = <
             )
             .map((item, index) => {
               const q = item.header;
-              const suffix = idSuffixOf(q.id);
-              const followUps = followUpsForOrigin(q.id).map((fu) =>
-                !suffix
-                  ? fu
-                  : {
-                      ...fu,
-                      header: { ...fu.header, id: fu.header.id + suffix },
-                    },
-              );
+              const followUps = followUpsForOrigin(q.id);
 
               return (
                 <Fragment key={q.id}>

@@ -362,9 +362,15 @@ const FollowUpDesignItems = ({
   );
 };
 
+const baseIdOf = (id: string): string => {
+  const i = id.lastIndexOf(":");
+  return i >= 0 ? id.slice(0, i) : id;
+};
+
 /**
  * Reviewer follow-ups keyed by origin id — Fill renders them under that item
  * via `SectionResponder` `followUpItems` (same placement as review appendix).
+ * Also index by base id so panel-instance suffix mismatches still resolve.
  */
 const followUpsByOrigin = (
   changes: lib.AdditionalChanges<types.TypeNames, types.Params>,
@@ -383,7 +389,10 @@ const followUpsByOrigin = (
             ]
           : [],
       ) ?? [];
-    if (items.length) map[originId] = items;
+    if (!items.length) continue;
+    map[originId] = items;
+    const base = baseIdOf(originId);
+    if (base !== originId && map[base] == null) map[base] = items;
   }
   return map;
 };
@@ -602,24 +611,6 @@ const FillPhase = ({
     }
     return ids;
   }, [reviewChanges]);
-  const resolveVariant = useCallback(
-    <K extends types.TypeNames>(
-      item: lib.TypedFormItem<types.Params, K>,
-    ): types.Variants[K] => {
-      // Yellow only while revising a change-request round.
-      if (doc?.status !== "changesRequested") return defaultVariants[item.type];
-      const baseId = item.id.includes(":")
-        ? item.id.slice(0, item.id.lastIndexOf(":"))
-        : item.id;
-      const pending =
-        unansweredFollowUpIds.has(item.id) ||
-        unansweredFollowUpIds.has(baseId) ||
-        unlockedIds.has(item.id) ||
-        unlockedIds.has(baseId);
-      return pending ? followUpVariants[item.type] : defaultVariants[item.type];
-    },
-    [doc?.status, unansweredFollowUpIds, unlockedIds],
-  );
 
   useEffect(() => {
     if (!optimisticResponse) return;
@@ -630,6 +621,8 @@ const FillPhase = ({
   /**
    * School `CustomFormResponder`: when a FormResponse exists, pass it as `old`
    * so locked answers show and only remarked fields are editable.
+   * Unlock is remark-only (step 2→3) — unanswered follow-ups are editable on
+   * their own (no prior value); do not invent unlock comments.
    */
   const old = useMemo((): {
     values: Record<string, lib.Response>;
@@ -645,6 +638,35 @@ const FillPhase = ({
       changes: responderChanges,
     };
   }, [doc]);
+
+  /**
+   * Lifecycle chrome (Fill):
+   * 1. first fill → black
+   * 3. after Request changes → yellow for unlocked origins + unanswered follow-ups
+   * Settled (answered) follow-ups stay default/black like originals.
+   */
+  const resolveVariant = useCallback(
+    <K extends types.TypeNames>(
+      item: lib.TypedFormItem<types.Params, K>,
+    ): types.Variants[K] => {
+      const baseId = baseIdOf(item.id);
+      // Unanswered follow-ups: yellow as soon as they exist (visible under origin).
+      if (
+        unansweredFollowUpIds.has(item.id) ||
+        unansweredFollowUpIds.has(baseId)
+      ) {
+        return followUpVariants[item.type];
+      }
+      // Origins: yellow only while revising a change-request round with a remark.
+      if (doc?.status === "changesRequested") {
+        if (unlockedIds.has(item.id) || unlockedIds.has(baseId)) {
+          return followUpVariants[item.type];
+        }
+      }
+      return defaultVariants[item.type];
+    },
+    [doc?.status, unansweredFollowUpIds, unlockedIds],
+  );
 
   const setResponse = useCallback(
     (id: string, next?: lib.Response) => {
@@ -737,11 +759,15 @@ const FillPhase = ({
       for (const [id, entry] of Object.entries(doc.changes)) {
         if (entry.comment != null) toStamp.add(id);
         for (const fi of entry.formItems ?? []) {
-          if (fi.formItem && nextValues[fi.formItem.id]) {
+          if (!fi.formItem) continue;
+          const res = nextValues[fi.formItem.id];
+          if (res != null && Object.keys(res.data).length > 0) {
             toStamp.add(fi.formItem.id);
           }
         }
       }
+      // Anything the student actually edited this send counts as recent.
+      for (const id of Object.keys(updated)) toStamp.add(id);
       nextChanges = withAnswerHistory(doc.changes, toStamp, sendDate);
     }
 
@@ -770,8 +796,10 @@ const FillPhase = ({
         header={{
           title: old ? "Revise your answers" : "Fill the form",
           description:
-            followUpIds.size > 0
-              ? `Includes ${followUpIds.size} reviewer follow-up field(s) under their related answers.`
+            unansweredFollowUpIds.size > 0
+              ? doc?.status === "changesRequested"
+                ? `Answer ${unansweredFollowUpIds.size} follow-up field(s) (yellow, under related answers), then Send.`
+                : `Follow-up questions are under related answers — Request changes on Update to unlock Send (and yellow revise chrome).`
               : old
                 ? doc?.status === "changesRequested"
                   ? "Changes requested — edit remarked fields if you want, then Send again (resend is allowed with no edits)."
@@ -877,9 +905,14 @@ const UpdatePhase = ({
 
   const changes = formResponse?.changes ?? {};
   const feedbackHistory = formResponse?.feedbackHistory ?? [];
-  const lastFeedback = feedbackHistory.at(-1) ?? null;
-  const lastPending = lastFeedback
-    ? phases.dateFromIso(lastFeedback.date)
+  // Highlight "newly answered" against the latest *answered* round — not draft /
+  // changesRequested / approved. Wave matching in SectionReview still falls back
+  // to newest history stamps when lastPending is not an answer stamp.
+  const lastAnswered = [...feedbackHistory]
+    .reverse()
+    .find((f) => f.status === "answered");
+  const lastPending = lastAnswered
+    ? phases.dateFromIso(lastAnswered.date)
     : null;
   // Storybook re-decodes args every render — compare by value, not reference.
   const dirty =

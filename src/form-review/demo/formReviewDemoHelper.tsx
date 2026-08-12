@@ -491,6 +491,15 @@ export const formChrome: lib.FormReviewChrome<types.TypeNames, types.Params> = {
       </button>
     );
   },
+  renderFollowUpMark: () => (
+    <span
+      title="Answered follow-up"
+      aria-label="Answered follow-up"
+      style={{ color: "#b45309", fontSize: 12, fontWeight: 700, lineHeight: 1 }}
+    >
+      ✚
+    </span>
+  ),
   renderOverlays: ({
     addition,
     deleteCommentId,

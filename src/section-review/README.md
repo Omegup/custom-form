@@ -32,11 +32,12 @@ host: responses / changes / setChanges / lastPending
 `response`, plus `status`), so a host can share one set of viewer components
 between the fill and review shells.
 
-### Status rules (ported verbatim from school)
+### Status rules
 
-- Top-level item: `comment` present → `normal`; else `highlight` when
-  `lastPending` matches the item's last `history` entry date, otherwise
-  `disabled`.
+- Top-level item: `comment` present → `normal`; else `highlight` when the
+  item's last `history` stamp matches the newest answer wave (or
+  `lastPending` when that date is itself an answer stamp), otherwise
+  `disabled` (ancient). Answered items with no history yet count as recent.
 - Follow-up form item entry: `normal` when it has no `date` or there's no
   `lastPending`; otherwise `highlight` until the student responds, then
   `disabled`.
