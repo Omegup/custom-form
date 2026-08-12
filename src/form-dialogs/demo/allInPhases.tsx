@@ -1,7 +1,6 @@
 /**
  * Shared All-in lifecycle chrome — Design / Fill / Update phase tabs, fill +
- * review viewers, and review overlays that defer type picking to the Library
- * sidebar (same Side catalog as Design).
+ * review viewers. Follow-ups use Design's `AddFormItem` dropdown in place.
  */
 import {
   useImperativeHandle,
@@ -10,6 +9,8 @@ import {
   type ReactNode,
   type Ref,
 } from "react";
+import { MENU_ITEMS, randomId } from "../../side-menu/demo/fixtures";
+import { renderAddFormItem } from "../../side-menu/demo/sideMenuDemoHelper";
 import type * as types from "./allInDemoTypes.t";
 import * as lib from "./library";
 
@@ -361,12 +362,11 @@ const actionButtonStyle: CSSProperties = {
 };
 
 const ACTION_ICON: Record<
-  "lock" | "unlock" | "addFormItem" | "edit",
+  "lock" | "unlock" | "edit",
   { glyph: string; label: string }
 > = {
   lock: { glyph: "🔒", label: "Locked — add remark to unlock" },
   unlock: { glyph: "🔓", label: "Unlocked by remark — remove remark" },
-  addFormItem: { glyph: "💬", label: "Ask follow-up" },
   edit: { glyph: "✎", label: "Edit follow-up" },
 };
 
@@ -435,7 +435,7 @@ export const fillChrome: lib.FormResponderChrome = {
   ),
 };
 
-/** Update/review chrome — follow-up type picking happens via the Library sidebar. */
+/** Update/review chrome — follow-ups use Design's `AddFormItem` dropdown. */
 export const reviewChrome: lib.FormReviewChrome<types.TypeNames, types.Params> = {
   renderHeader: (header) => (
     <div style={{ marginBottom: 4 }}>
@@ -444,8 +444,8 @@ export const reviewChrome: lib.FormReviewChrome<types.TypeNames, types.Params> =
         <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{header.description}</p>
       ) : null}
       <p style={{ margin: "8px 0 0", fontSize: 12, color: "#888", fontStyle: "italic" }}>
-        Remark unlocks a field (🔓). Click 💬 then pick a type from the Library sidebar to attach
-        a follow-up.
+        Remark unlocks a field (🔓). Use <strong>+ Follow-up</strong> on an answer to attach a
+        Field / Heading / Panel (same dropdown as Design).
       </p>
     </div>
   ),
@@ -476,9 +476,16 @@ export const reviewChrome: lib.FormReviewChrome<types.TypeNames, types.Params> =
     </div>
   ),
   renderItemShell: ({ children, action }) => (
-    <div style={{ position: "relative", padding: "4px 28px 4px 0" }}>
-      {children}
-      {action ? <span style={{ position: "absolute", top: 0, right: 0 }}>{action}</span> : null}
+    <div
+      style={{
+        display: "flex",
+        gap: 8,
+        alignItems: "flex-start",
+        padding: "4px 0",
+      }}
+    >
+      <div style={{ flex: 1, minWidth: 0 }}>{children}</div>
+      {action ? <div style={{ flexShrink: 0 }}>{action}</div> : null}
     </div>
   ),
   renderAppendix: (comment) => (
@@ -515,6 +522,21 @@ export const reviewChrome: lib.FormReviewChrome<types.TypeNames, types.Params> =
   ),
   renderFormItemAppendix: (nodes) => (
     <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>{nodes}</div>
+  ),
+  renderAddFollowUp: ({ onPick }) => (
+    <lib.AddFormItem<types.TypeNames, types.Params>
+      span={{ index: -1, sIndex: -1 }}
+      menuItems={MENU_ITEMS}
+      random={randomId}
+      setAddItem={(session) =>
+        onPick({
+          formItem: session.draft.item,
+          children: session.children,
+        })
+      }
+      label="+ Follow-up"
+      render={renderAddFormItem}
+    />
   ),
   renderActionIcon: (kind, onClick) => {
     const { glyph, label } = ACTION_ICON[kind];
@@ -578,23 +600,6 @@ export const reviewChrome: lib.FormReviewChrome<types.TypeNames, types.Params> =
           </div>
         </div>
       );
-    }
-
-    if (addition?.mode === "formItem") {
-      if (!addition.formItem) {
-        return (
-          <div style={overlayBox}>
-            <p style={{ margin: "0 0 8px", fontSize: 14 }}>
-              Pick a type from the <strong>Library</strong> sidebar (Field / Heading / Panel) to
-              attach a follow-up under this answer.
-            </p>
-            <button type="button" onClick={() => setAddition(null)}>
-              {tCommon("cancel")}
-            </button>
-          </div>
-        );
-      }
-      return null;
     }
 
     return null;

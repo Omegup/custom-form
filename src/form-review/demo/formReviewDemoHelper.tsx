@@ -358,13 +358,12 @@ const actionButtonStyle: CSSProperties = {
 };
 
 const ACTION_ICON: Record<
-  "lock" | "unlock" | "addFormItem" | "edit",
+  "lock" | "unlock" | "edit",
   { glyph: string; label: string }
 > = {
   // Remark unlocks revise — lock = no remark yet; unlock = remark present.
   lock: { glyph: "🔒", label: "Locked — add remark to unlock" },
   unlock: { glyph: "🔓", label: "Unlocked by remark — remove remark" },
-  addFormItem: { glyph: "💬", label: "Ask follow-up" },
   edit: { glyph: "✎", label: "Edit follow-up" },
 };
 
@@ -455,6 +454,26 @@ export const formChrome: lib.FormReviewChrome<types.TypeNames, types.Params> = {
   ),
   renderFormItemAppendix: (nodes) => (
     <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>{nodes}</div>
+  ),
+  renderAddFollowUp: ({ originId, onPick }) => (
+    <button
+      type="button"
+      aria-label="Ask follow-up"
+      onClick={(e) => {
+        e.stopPropagation();
+        onPick({
+          formItem: {
+            id: `${originId}-followup-${Date.now()}`,
+            type: "field",
+            deleted: false,
+            params: { name: "Follow-up field", required: false },
+          },
+        });
+      }}
+      style={actionButtonStyle}
+    >
+      💬
+    </button>
   ),
   renderActionIcon: (kind, onClick) => {
     const { glyph, label } = ACTION_ICON[kind];

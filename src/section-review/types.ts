@@ -157,8 +157,25 @@ export type SectionReviewChrome<
   renderComment: (args: { text: string; onEdit: () => void }) => ReactNode;
   /** Wraps the comment card + follow-up form item nodes under one item. */
   renderFormItemAppendix: (nodes: ReactNode[]) => ReactNode;
+  /**
+   * Host-owned control to attach a follow-up under an answered item (e.g.
+   * Design's `AddFormItem` dropdown). Called with a commit callback so the
+   * host does not need a Library sidebar or a pending `addition` draft.
+   */
+  renderAddFollowUp: (args: {
+    originId: string;
+    onPick: (payload: {
+      comment?: string;
+      formItem: SomeFormItem<TypeNames, Params>;
+      children?: RecursiveFormItem<
+        TypeNames,
+        Params,
+        MetaDom<SIndexed>
+      >[][];
+    }) => void;
+  }) => ReactNode;
   renderActionIcon: (
-    kind: "lock" | "unlock" | "addFormItem" | "edit",
+    kind: "lock" | "unlock" | "edit",
     onClick: () => void,
   ) => ReactNode;
   renderOverlays: (args: ReviewOverlayArgs<TypeNames, Params>) => ReactNode;

@@ -3,8 +3,9 @@
  * `SectionReviewHOC`. Renders one section's slots read-only through
  * `FormItemHOC`, threads per-item `status` derived from reviewer
  * `AdditionalChanges` + `lastPending`, and drives comment / follow-up-form-item
- * overlays via **host-owned** `addition` / `deleteCommentId` state (so a
- * Library sidebar can fill `formItem.type`).
+ * overlays via **host-owned** `addition` / `deleteCommentId` state, and
+ * `renderAddFollowUp` for attaching follow-up form items (e.g. an
+ * `AddFormItem` dropdown — no Library sidebar required).
  *
  * A remark **unlocks** an answer for student revise (`unlock` icon when a
  * comment exists; `lock` when none).
@@ -69,6 +70,7 @@ export const SectionReviewHOC = <
     renderAppendix,
     renderComment,
     renderFormItemAppendix,
+    renderAddFollowUp,
     renderActionIcon,
     renderOverlays,
   } = chrome;
@@ -286,9 +288,25 @@ export const SectionReviewHOC = <
                 <Fragment key={q.id}>
                   {renderItemShell({
                     id: q.id,
-                    action: renderActionIcon("addFormItem", () =>
-                      setAddition({ originId: q.id, mode: "formItem" }),
-                    ),
+                    action: renderAddFollowUp({
+                      originId: q.id,
+                      onPick: (payload) => {
+                        const current = changes[q.id] ?? {};
+                        const formItems = current.formItems
+                          ? [...current.formItems]
+                          : [];
+                        formItems.push({
+                          comment: payload.comment,
+                          formItem: payload.formItem,
+                          children: payload.children,
+                          date: lastPending,
+                        });
+                        setChanges({
+                          ...changes,
+                          [q.id]: { ...current, formItems },
+                        });
+                      },
+                    }),
                     children: (
                       <FormItem
                         viewProps={{
@@ -329,6 +347,18 @@ export const SectionReviewHOC = <
         </Fragment>
       ));
 
+    const ownsOverlay = (
+      slots: RecursiveFormItem<TypeNames, Params, Meta>[][],
+      id: string,
+    ): boolean =>
+      slots.some((items) =>
+        items.some(
+          (item) =>
+            item.header.id === id || ownsOverlay(item.children, id),
+        ),
+      );
+    const overlayId = addition?.originId ?? deleteCommentId;
+
     return (
       <>
         {renderSection({
@@ -339,16 +369,18 @@ export const SectionReviewHOC = <
           multiSection,
           columns: renderSlots(section.items, "", section.header.deleted),
         })}
-        {renderOverlays({
-          addition,
-          deleteCommentId,
-          setAddition,
-          clearDelete: () => setDeleteCommentId(null),
-          onSubmitComment: submitComment,
-          onConfirmDeleteComment: confirmDeleteComment,
-          onSubmitFormItem: submitFormItem,
-          tCommon,
-        })}
+        {overlayId && ownsOverlay(section.items, overlayId)
+          ? renderOverlays({
+              addition,
+              deleteCommentId,
+              setAddition,
+              clearDelete: () => setDeleteCommentId(null),
+              onSubmitComment: submitComment,
+              onConfirmDeleteComment: confirmDeleteComment,
+              onSubmitFormItem: submitFormItem,
+              tCommon,
+            })
+          : null}
       </>
     );
   };

@@ -3,8 +3,8 @@
  * 1. Design: school `CustomFormEditor` + `DialogsHOC` (`makeUseDialogs`) over
  *    `SectionFormItemHOC` + `WebRecursiveEdit` + Library sidebar
  * 2. Fill: `CustomFormResponderHOC` on the designed sections
- * 3. Update: `CustomFormReviewHOC` — remarks unlock answers; Library sidebar
- *    picks follow-up form item types (same catalog as Design)
+ * 3. Update: `CustomFormReviewHOC` — remarks unlock answers; `+ Follow-up`
+ *    dropdown attaches types (same catalog as Design)
  */
 import {
   createContext,
@@ -828,27 +828,6 @@ const UpdatePhase = ({
     );
   };
 
-  const addFollowUpItem = (
-    newItem: lib.NewFormItem<types.TypeNames, types.Params>,
-  ) => {
-    if (!addition || addition.mode !== "formItem") return;
-    const current = changes[addition.originId] ?? {};
-    const formItems = current.formItems ? [...current.formItems] : [];
-    formItems.push({
-      formItem: lib.withFormItemName(
-        newItem.header,
-        newItem.header.params.name || newItem.header.type,
-      ),
-      children: newItem.children,
-      date: lastPending,
-    });
-    setChanges({
-      ...changes,
-      [addition.originId]: { ...current, formItems },
-    });
-    setAddition(null);
-  };
-
   if (!formResponse) {
     return (
       <p style={{ margin: 0, fontSize: 14, color: "#a40" }}>
@@ -955,58 +934,35 @@ const UpdatePhase = ({
           Reject
         </button>
       </div>
-      <LayoutWithSidebar
-        main={
-          <FormReview
-            ctx={reviewCtx}
-            header={{
-              title: "Update FormResponse",
-              description:
-                "Same document as Fill — remarks / follow-ups / feedback live on FormResponse.changes + feedbackHistory.",
-            }}
-            sections={sections}
-            responses={phases.formResponseValues(formResponse)}
-            lastPending={lastPending}
-            changes={changes}
-            setChanges={setChanges}
-            addition={addition}
-            setAddition={setAddition}
-            deleteCommentId={deleteCommentId}
-            setDeleteCommentId={setDeleteCommentId}
-            renderFormItemsEditor={({ entries, setEntries, fallback }) =>
-              entries.some((entry) => entry.formItem) ? (
-                <FollowUpDesignItems
-                  entries={entries}
-                  designFlatItems={flatItems}
-                  setEntries={setEntries}
-                />
-              ) : (
-                fallback
-              )
-            }
-            tCommon={tCommon}
-            showDeleted={showDeleted}
-          />
+      <FormReview
+        ctx={reviewCtx}
+        header={{
+          title: "Update FormResponse",
+          description:
+            "Same document as Fill — remarks / follow-ups / feedback live on FormResponse.changes + feedbackHistory.",
+        }}
+        sections={sections}
+        responses={phases.formResponseValues(formResponse)}
+        lastPending={lastPending}
+        changes={changes}
+        setChanges={setChanges}
+        addition={addition}
+        setAddition={setAddition}
+        deleteCommentId={deleteCommentId}
+        setDeleteCommentId={setDeleteCommentId}
+        renderFormItemsEditor={({ entries, setEntries, fallback }) =>
+          entries.some((entry) => entry.formItem) ? (
+            <FollowUpDesignItems
+              entries={entries}
+              designFlatItems={flatItems}
+              setEntries={setEntries}
+            />
+          ) : (
+            fallback
+          )
         }
-        sidebar={
-          <lib.Side<types.TypeNames, types.Params, types.Section>
-            title="Library"
-            addSectionLabel="+ Add section"
-            menuItems={MENU_ITEMS}
-            random={randomId}
-            blankSection={blankSection}
-            render={renderSide}
-            renderMenuItem={renderMenuItem}
-            setAddFormItem={(item) => {
-              if (addition?.mode === "formItem") {
-                addFollowUpItem(item);
-              }
-            }}
-            setAddSection={() => {
-              /* sections are designed in Design phase only */
-            }}
-          />
-        }
+        tCommon={tCommon}
+        showDeleted={showDeleted}
       />
     </div>
   );
