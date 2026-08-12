@@ -362,48 +362,30 @@ const FollowUpDesignItems = ({
   );
 };
 
-const FOLLOW_UP_SECTION_ID = "review-follow-ups-fill";
-
 /**
- * Build fill sections that include reviewer follow-ups.
- *
- * School attaches follow-ups under the origin; nesting them inside panel
- * columns makes them easy to miss in the Fill demo. We keep the design
- * sections as-is and append one visible "Follow-up questions" section with
- * every `changes[*].formItems` entry that has a form item.
+ * Reviewer follow-ups keyed by origin id — Fill renders them under that item
+ * via `SectionResponder` `followUpItems` (same placement as review appendix).
  */
-const addReviewFollowUps = (
-  sections: types.ListSection[],
+const followUpsByOrigin = (
   changes: lib.AdditionalChanges<types.TypeNames, types.Params>,
-): types.ListSection[] => {
-  const followUps: types.ListItem[] = [];
-  for (const change of Object.values(changes)) {
-    for (const entry of change.formItems ?? []) {
-      if (!entry.formItem) continue;
-      followUps.push({
-        header: entry.formItem,
-        children: entry.children ?? [],
-        meta: lib.branded({
-          index: 0,
-          total: 1,
-          sIndex: sections.length,
-        }),
-      });
-    }
+): Record<string, types.ListItem[]> => {
+  const map: Record<string, types.ListItem[]> = {};
+  for (const [originId, change] of Object.entries(changes)) {
+    const items =
+      change.formItems?.flatMap((entry) =>
+        entry.formItem
+          ? [
+              {
+                header: entry.formItem,
+                children: entry.children ?? [],
+                meta: { index: 0, total: 1, sIndex: 0 },
+              },
+            ]
+          : [],
+      ) ?? [];
+    if (items.length) map[originId] = items;
   }
-  if (followUps.length === 0) return sections;
-
-  const followUpSection: types.ListSection = {
-    header: {
-      id: FOLLOW_UP_SECTION_ID,
-      deleted: false,
-      title: "Follow-up questions",
-      description: "Added by the reviewer — please answer these.",
-    },
-    meta: lib.branded({ index: sections.length, total: 1 }),
-    items: [followUps],
-  };
-  return [...sections, followUpSection];
+  return map;
 };
 
 const defaultVariants = lib.branded<types.Variants, "variants">({
@@ -590,9 +572,9 @@ const FillPhase = ({
     useState<types.FormResponseDoc | null>(null);
   const doc = formResponse ?? optimisticResponse;
   const reviewChanges = formResponse?.changes ?? optimisticResponse?.changes ?? {};
-  const fillSections = useMemo(
-    () => addReviewFollowUps(sections, reviewChanges),
-    [sections, reviewChanges],
+  const followUpItems = useMemo(
+    () => followUpsByOrigin(reviewChanges),
+    [reviewChanges],
   );
   const followUpIds = useMemo(() => {
     const ids = new Set<string>();
@@ -727,14 +709,14 @@ const FillPhase = ({
           title: old ? "Revise your answers" : "Fill the form",
           description:
             followUpIds.size > 0
-              ? `Includes ${followUpIds.size} reviewer follow-up field(s) in “Follow-up questions” below.`
+              ? `Includes ${followUpIds.size} reviewer follow-up field(s) under their related answers.`
               : old
                 ? doc?.status === "changesRequested"
                   ? "Changes requested — edit remarked fields if you want, then Send again (resend is allowed with no edits)."
                   : "Waiting for the teacher to request changes before you can Send again."
                 : "Send creates the FormResponse document (school addFormResponse).",
         }}
-        sections={fillSections}
+        sections={sections}
         responses={responses}
         old={old}
         setResponse={setResponse}
@@ -742,6 +724,7 @@ const FillPhase = ({
         impRef={formRef}
         showDeleted={false}
         resolveVariant={resolveVariant}
+        followUpItems={followUpItems}
       />
       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
         <button
@@ -811,7 +794,7 @@ const UpdatePhase = ({
   >(null);
   const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
   const [savedChanges, setSavedChanges] = useState(
-    formResponse?.changes ?? {},
+    () => JSON.stringify(formResponse?.changes ?? {}),
   );
   const [feedbackComment, setFeedbackComment] = useState("");
   const [statusNote, setStatusNote] = useState<string | null>(null);
@@ -836,7 +819,9 @@ const UpdatePhase = ({
   const lastPending = lastFeedback
     ? phases.dateFromIso(lastFeedback.date)
     : null;
-  const dirty = formResponse != null && savedChanges !== changes;
+  // Storybook re-decodes args every render — compare by value, not reference.
+  const dirty =
+    formResponse != null && savedChanges !== JSON.stringify(changes);
 
   /**
    * School `formResponses.addAdditionalQuestions` — persist teacher
@@ -852,7 +837,7 @@ const UpdatePhase = ({
       nextHistory.push({ status: "draft", date: draftDate.toISOString() });
       nextStatus = "draft";
     }
-    setSavedChanges(changes);
+    setSavedChanges(JSON.stringify(changes));
     patchFormResponse({ feedbackHistory: nextHistory, status: nextStatus });
     setStatusNote("FormResponse.changes saved.");
   };
@@ -915,7 +900,10 @@ const UpdatePhase = ({
         <button
           type="button"
           onClick={() => {
-            setChanges(savedChanges);
+            setChanges(JSON.parse(savedChanges) as lib.AdditionalChanges<
+              types.TypeNames,
+              types.Params
+            >);
             setStatusNote("Changes discarded.");
           }}
           disabled={!dirty}

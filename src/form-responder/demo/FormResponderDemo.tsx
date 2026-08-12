@@ -112,6 +112,7 @@ export const FormResponderDemo = ({
           impRef={formRef}
           showDeleted={showDeleted}
           resolveVariant={resolveVariant}
+          followUpItems={{}}
         />
         <button type="button" onClick={validateForm} style={{ alignSelf: "flex-start" }}>
           Validate

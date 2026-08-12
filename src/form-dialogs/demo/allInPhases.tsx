@@ -502,6 +502,21 @@ export const fillChrome: lib.FormResponderChrome = {
   renderAppendix: (comment) => (
     <div style={{ marginTop: 4, color: "#c00", fontSize: 12 }}>{comment}</div>
   ),
+  renderFollowUpGroup: ({ originId: _originId, items }) => (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 8,
+        marginTop: 8,
+        marginLeft: 8,
+        paddingLeft: 12,
+        borderLeft: `3px solid ${VARIANT_CHROME.followUp.border}`,
+      }}
+    >
+      {items}
+    </div>
+  ),
 };
 
 /** Update/review chrome — follow-ups use Design's `AddFormItem` dropdown. */

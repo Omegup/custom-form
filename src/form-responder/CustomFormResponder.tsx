@@ -82,6 +82,7 @@ export const CustomFormResponderHOC = <
       impRef,
       showDeleted,
       resolveVariant,
+      followUpItems,
       ctx,
       children,
     } = props;
@@ -133,6 +134,7 @@ export const CustomFormResponderHOC = <
                     validators.current[section.header.id] = ref;
                   }}
                   resolveVariant={resolveVariant}
+                  followUpItems={followUpItems}
                   i={i}
                 />
               ),

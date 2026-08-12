@@ -9,7 +9,7 @@ export type {
   Viewers,
 } from "../form";
 export { branded } from "../form";
-export type { MetaDom } from "../recursive-form";
+export type { MetaDom, RecursiveFormItem } from "../recursive-form";
 export type {
   SectionMetaDom,
   SectionWithItems,

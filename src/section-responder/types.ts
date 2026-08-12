@@ -12,6 +12,7 @@ import type {
   ExtraDom,
   MetaDom,
   ParamsDom,
+  RecursiveFormItem,
   Response,
   ResponseSetter,
   SectionDom,
@@ -75,6 +76,14 @@ export type SectionResponderChrome = {
   }) => ReactNode;
   renderClearIcon: (onClear: () => void) => ReactNode;
   renderAppendix: (comment: string) => ReactNode;
+  /**
+   * Host wraps reviewer follow-ups that sit under their origin item
+   * (indent / yellow rail — same placement as review appendix).
+   */
+  renderFollowUpGroup: (args: {
+    originId: string;
+    items: ReactNode;
+  }) => ReactNode;
 };
 
 export type SectionResponderProps<
@@ -101,6 +110,15 @@ export type SectionResponderProps<
   resolveVariant: <K extends TypeNames>(
     item: TypedFormItem<Params, K>,
   ) => Variants[K];
+  /**
+   * Reviewer follow-ups keyed by **origin** item id (same keys as
+   * `AdditionalChanges`). Rendered under each origin — not merged into the
+   * design tree. Empty record when none.
+   */
+  followUpItems: Record<
+    string,
+    RecursiveFormItem<TypeNames, Params, Meta>[]
+  >;
   /** Section ordinal for the title (1-based display when `multiSection`). */
   i: number;
 };

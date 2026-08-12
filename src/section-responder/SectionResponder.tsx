@@ -4,6 +4,9 @@
  * `getUseImpRefViewProps`, aggregates item validators into a section-level
  * `validate` / `update` / `getKeys`.
  *
+ * Reviewer follow-ups (`followUpItems`) render **under their origin item**
+ * (same placement as section-review appendix), not as design-tree siblings.
+ *
  * All presentation is injected via {@link SectionResponderChrome} — this
  * module emits no HTML (see `.cursor/rules/no-html-outside-demo.mdc`).
  */
@@ -36,6 +39,16 @@ import type {
 
 type ViewerExtra = ResponderExtra & { impRef: Ref<ViewerMethods> };
 type HostExtra = ResponderExtra & { impRef: Ref<StrictViewerMethods> };
+
+const idSuffixOf = (id: string): string => {
+  const i = id.lastIndexOf(":");
+  return i >= 0 ? id.slice(i) : "";
+};
+
+const baseIdOf = (id: string): string => {
+  const i = id.lastIndexOf(":");
+  return i >= 0 ? id.slice(0, i) : id;
+};
 
 export const SectionResponderHOC = <
   TypeNames extends string,
@@ -73,8 +86,13 @@ export const SectionResponderHOC = <
     >(),
   );
 
-  const { renderSection, renderItemShell, renderClearIcon, renderAppendix } =
-    chrome;
+  const {
+    renderSection,
+    renderItemShell,
+    renderClearIcon,
+    renderAppendix,
+    renderFollowUpGroup,
+  } = chrome;
 
   return <
     SectionMeta extends SectionMetaDom,
@@ -101,16 +119,94 @@ export const SectionResponderHOC = <
       ctx,
       old,
       resolveVariant,
+      followUpItems,
     } = props;
 
     const validators = useRef<Record<string, StrictViewerMethods | null>>({});
+
+    const followUpsForOrigin = (
+      originId: string,
+    ): RecursiveFormItem<TypeNames, Params, Meta>[] => {
+      const exact = followUpItems[originId];
+      if (exact?.length) return exact;
+      return followUpItems[baseIdOf(originId)] ?? [];
+    };
 
     const renderSlots = (
       slots: RecursiveFormItem<TypeNames, Params, Meta>[][],
       idSuffix: string,
       parentDeleted: boolean,
-    ): ReactNode[] =>
-      slots.map((items, col) => (
+    ): ReactNode[] => {
+      const renderFillItem = (
+        item: RecursiveFormItem<TypeNames, Params, Meta>,
+        index: number,
+        itemParentDeleted: boolean,
+      ): ReactNode => {
+        const q = item.header;
+        const children = item.children;
+        const comment = old?.changes[q.id]?.comment;
+        const oldValue = old?.values[q.id];
+        const value = responses[q.id] || oldValue;
+        const editable = !oldValue || comment != null;
+        const error = getError(q.id);
+        const onActivate =
+          !responses[q.id] && editable && oldValue
+            ? () => setResponse(q.id, emptyResponse())
+            : undefined;
+
+        return renderItemShell({
+          id: q.id,
+          onActivate,
+          children: (
+            <FormItem
+              viewProps={{
+                ctx,
+                formItem: q,
+                variant: resolveVariant(q),
+                extra: branded({
+                  getChild: (suffix: string) => (
+                    <>
+                      {renderSlots(
+                        children,
+                        suffix,
+                        q.deleted || itemParentDeleted,
+                      )}
+                    </>
+                  ),
+                  error:
+                    error || (old && editable && oldValue ? true : null),
+                  parentDeleted: itemParentDeleted,
+                  index,
+                  icon:
+                    oldValue && responses[q.id]
+                      ? renderClearIcon(() => setResponse(q.id, undefined))
+                      : undefined,
+                  response: {
+                    setValue: editable
+                      ? (key, v) => {
+                          setResponse(q.id, {
+                            ...(value ?? emptyResponse()),
+                            [key]: v,
+                          });
+                        }
+                      : null,
+                    value: value || emptyResponse(),
+                  },
+                  appendix: comment ? renderAppendix(comment) : undefined,
+                  impRef: editable
+                    ? (ref) => {
+                        validators.current[q.id] = ref;
+                      }
+                    : null,
+                }),
+              }}
+              renderCard={(view) => view}
+            />
+          ),
+        });
+      };
+
+      return slots.map((items, col) => (
         <Fragment key={col}>
           {items
             .filter(({ header: q }) => {
@@ -126,77 +222,45 @@ export const SectionResponderHOC = <
                     header: { ...q.header, id: q.header.id + idSuffix },
                   },
             )
-            .map(({ header: q, children }, index) => {
-              const comment = old?.changes[q.id]?.comment;
-              const oldValue = old?.values[q.id];
-              const value = responses[q.id] || oldValue;
-              const editable = !oldValue || comment != null;
-              const error = getError(q.id);
-              const onActivate =
-                !responses[q.id] && editable && oldValue
-                  ? () => setResponse(q.id, emptyResponse())
-                  : undefined;
+            .map((item, index) => {
+              const q = item.header;
+              const suffix = idSuffixOf(q.id);
+              const followUps = followUpsForOrigin(q.id).map((fu) =>
+                !suffix
+                  ? fu
+                  : {
+                      ...fu,
+                      header: { ...fu.header, id: fu.header.id + suffix },
+                    },
+              );
 
               return (
                 <Fragment key={q.id}>
-                  {renderItemShell({
-                    id: q.id,
-                    onActivate,
-                    children: (
-                      <FormItem
-                        viewProps={{
-                          ctx,
-                          formItem: q,
-                          variant: resolveVariant(q),
-                          extra: branded({
-                            getChild: (suffix: string) => (
-                              <>
-                                {renderSlots(
-                                  children,
-                                  suffix,
+                  {renderFillItem(item, index, parentDeleted)}
+                  {followUps.length > 0
+                    ? renderFollowUpGroup({
+                        originId: q.id,
+                        items: (
+                          <>
+                            {followUps.map((fu, fuIndex) => (
+                              <Fragment key={fu.header.id}>
+                                {renderFillItem(
+                                  fu,
+                                  fuIndex,
                                   q.deleted || parentDeleted,
                                 )}
-                              </>
-                            ),
-                            error: error || (old && editable && oldValue ? true : null),
-                            parentDeleted,
-                            index,
-                            icon:
-                              oldValue && responses[q.id]
-                                ? renderClearIcon(() =>
-                                    setResponse(q.id, undefined),
-                                  )
-                                : undefined,
-                            response: {
-                              setValue: editable
-                                ? (key, v) => {
-                                    setResponse(q.id, {
-                                      ...(value ?? emptyResponse()),
-                                      [key]: v,
-                                    });
-                                  }
-                                : null,
-                              value: value || emptyResponse(),
-                            },
-                            appendix: comment
-                              ? renderAppendix(comment)
-                              : undefined,
-                            impRef: editable
-                              ? (ref) => {
-                                  validators.current[q.id] = ref;
-                                }
-                              : null,
-                          }),
-                        }}
-                        renderCard={(view) => view}
-                      />
-                    ),
-                  })}
+                              </Fragment>
+                            ))}
+                          </>
+                        ),
+                      })
+                    : null}
                 </Fragment>
               );
             })}
         </Fragment>
       ));
+    };
 
     useImperativeHandle(
       impRef,

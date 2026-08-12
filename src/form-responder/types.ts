@@ -6,6 +6,7 @@ import type { ReactNode, Ref } from "react";
 import type {
   MetaDom,
   ParamsDom,
+  RecursiveFormItem,
   Response,
   ResponderAdditionalChanges,
   SectionMetaDom,
@@ -65,5 +66,13 @@ export type CustomFormResponderProps<
   resolveVariant: <K extends TypeNames>(
     item: TypedFormItem<Params, K>,
   ) => Variants[K];
+  /**
+   * Reviewer follow-ups keyed by origin item id — forwarded to each
+   * `SectionResponder`. Empty record when none.
+   */
+  followUpItems: Record<
+    string,
+    RecursiveFormItem<TypeNames, Params, Meta>[]
+  >;
   children?: ReactNode;
 };
