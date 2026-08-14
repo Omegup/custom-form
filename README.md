@@ -20,24 +20,26 @@ Run tests: `pnpm test`.
 
 Each module has a colocated `*.stories.tsx`. Story titles match folder names, e.g. `form-edit/Edit form`, `form-dialogs/Form dialogs`.
 
+The Storybook sidebar uses this **dependency order** — start at `form`, end at `form-response`.
+
 | Story | Module | What it shows |
 |---|---|---|
 | form/Form | `form/` | Viewers rendering a JSON-driven form |
+| recursive-form/Recursive form | `recursive-form/` | Nested recursive item rendering |
 | response/Response | `response/` | Fill-path foundation (`ResponseSetter` + `getUseImpRefViewProps` validate) |
+| move-actions/Move actions | `move-actions/` | Item list with up/down/clone/remove |
+| form-edit/Edit form | `form-edit/` | Section/field list with move actions only |
+| form-item-editor/Form item editor | `form-item-editor/` | Edit form + per-field edit dialog |
+| section-edit/Section edit | `section-edit/` | Edit form + section edit dialog |
+| side-menu/Side menu | `side-menu/` | Library sidebar + in-slot add (section & nested panels) |
+| section-view/Section view | `section-view/` | `SectionHOC` + `ColumnsEdit` composing viewers + nested panels + add slots (no DnD) |
+| flat-dnd/Flat dnd | `flat-dnd/` | `SectionFormItemHOC` with HTML5 drag-and-drop reorder (`WebRecursiveEdit`, web-only) swapped in for `ColumnsEdit` |
+| form-dialogs/Form dialogs | `form-dialogs/` | `makeUseDialogs` + `useFlatListSession` on the design list |
 | section-responder/Section responder | `section-responder/` | One section of fillable fields + section-level validate |
 | form-responder/Form responder | `form-responder/` | Multi-section fill shell + form-level validate |
 | section-review/Section review | `section-review/` | Design → Response → Follow for one section + JSON per phase |
 | form-review/Form review | `form-review/` | Multi-section review lifecycle + JSON for design/response/follow |
 | form-response/Form response | `form-response/` | FormResponse Send / Save / feedback on the same document |
-| move-actions/Move actions | `move-actions/` | Item list with up/down/clone/remove |
-| form-edit/Edit form | `form-edit/` | Section/field list with move actions only |
-| form-item-editor/Form item editor | `form-item-editor/` | Edit form + per-field edit dialog |
-| side-menu/Side menu | `side-menu/` | Library sidebar + in-slot add (section & nested panels) |
-| section-edit/Section edit | `section-edit/` | Edit form + section edit dialog |
-| section-view/Section view | `section-view/` | `SectionHOC` + `ColumnsEdit` composing viewers + nested panels + add slots (no DnD) |
-| flat-dnd/Flat dnd | `flat-dnd/` | `SectionFormItemHOC` with HTML5 drag-and-drop reorder (`WebRecursiveEdit`, web-only) swapped in for `ColumnsEdit` |
-| form-dialogs/Form dialogs | `form-dialogs/` | `makeUseDialogs` + `useFlatListSession` on the design list |
-| recursive-form/Recursive form | `recursive-form/` | Nested recursive item rendering |
 
 Shared edit-form fixtures: `form-edit/demo/fixtures.ts` (single-type list) and `form-item-editor/demo/fixtures.ts` (multi-type list, reused by the side-menu and form-dialogs stories).
 
