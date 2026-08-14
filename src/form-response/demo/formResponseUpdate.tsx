@@ -5,6 +5,7 @@ import { useState } from "react";
 import { dateFromIso, rememberDate } from "./formResponseDemoHelper";
 import type * as types from "./formResponseDemoTypes.t";
 import { FeedbackBar, UpdateToolbar } from "./formResponseToolbar";
+import { FollowUpDrafts } from "./formResponseFollowUp";
 import {
   FormReview,
   reviewCtx,
@@ -82,7 +83,9 @@ export const UpdatePhase = ({
         setAddition={setAddition}
         deleteCommentId={deleteCommentId}
         setDeleteCommentId={setDeleteCommentId}
-        renderFormItemsEditor={({ fallback }) => fallback}
+        renderFormItemsEditor={({ entries }) => (
+          <FollowUpDrafts entries={entries} />
+        )}
         variants={reviewVariants}
         tCommon={tCommon}
         showDeleted={showDeleted}

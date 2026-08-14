@@ -48,7 +48,7 @@ export type ReviewExtra = lib.ReviewExtra & {
 
 export type FormResponseDoc = lib.FormResponseDoc<TypeNames, Params>;
 
-export type DemoPhase = "fill" | "update";
+export type DemoPhase = "design" | "fill" | "update";
 
 export type StoryArgs = {
   heading: string;

@@ -1,7 +1,7 @@
 /**
- * FormResponse lifecycle — Fill Send + Update Save/feedback.
- * Design editing lives in form-dialogs; fill/review shells in their modules.
+ * FormResponse lifecycle — Design blueprint, Fill Send, Update Save/feedback.
  */
+import { DesignPhase } from "./formResponseDesign";
 import {
   FormContainer,
   PhaseJsonPanels,
@@ -25,6 +25,7 @@ export const FormResponseDemo = ({
       phase={phase}
       onChange={(next) => updateArgs({ phase: next })}
     />
+    {phase === "design" ? <DesignPhase sections={sections} /> : null}
     {phase === "fill" ? (
       <FillPhase
         sections={sections}

@@ -4,6 +4,7 @@
 import type { Ref } from "react";
 import { formChrome } from "../../form-review/demo/formReviewDemoHelper";
 import { FOLLOW_UP_BADGE } from "./formResponseDemoHelper";
+import { FollowUpAdd } from "./formResponseFollowUp";
 import type * as types from "./formResponseDemoTypes.t";
 import * as lib from "./library";
 
@@ -110,13 +111,20 @@ export const reviewVariants: Record<lib.ReviewVariantState, types.Variants> = {
   change: followUpVariants,
 };
 
+const reviewChrome: lib.FormReviewChrome<types.TypeNames, types.Params> = {
+  ...formChrome,
+  renderAddFollowUp: ({ originId, onPick }) => (
+    <FollowUpAdd originId={originId} onPick={onPick} />
+  ),
+};
+
 export const FormReview = lib.CustomFormReviewHOC<
   types.TypeNames,
   types.Params,
   types.Variants,
   lib.SectionReviewContext,
   types.Section
->(viewers, formChrome);
+>(viewers, reviewChrome);
 
 export const reviewCtx = lib.branded<lib.SectionReviewContext, "context">({});
 

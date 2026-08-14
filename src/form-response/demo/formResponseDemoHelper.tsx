@@ -23,16 +23,21 @@ export const dateFromIso = (iso: string): Date =>
 
 const PHASES: { id: types.DemoPhase; label: string; blurb: string }[] = [
   {
+    id: "design",
+    label: "1. Design",
+    blurb: "Form blueprint — field labels only. Editing lives in form-dialogs.",
+  },
+  {
     id: "fill",
-    label: "1. Fill",
+    label: "2. Fill",
     blurb:
       "Student answers then Sends — creates/updates the FormResponse. Send is available when there is no response yet, or status is changesRequested.",
   },
   {
     id: "update",
-    label: "2. Update",
+    label: "3. Update",
     blurb:
-      "Teacher view of the same FormResponse — Save remarks/follow-ups, then Request changes / Approve / Reject.",
+      "Teacher view of the same FormResponse — Save remarks/follow-ups, then Request changes / Approve / Reject. 💬 opens a type dropdown.",
   },
 ];
 

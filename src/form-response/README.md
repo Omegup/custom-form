@@ -25,13 +25,10 @@ supply it (e.g. `rememberDate` in the demo).
 
 ## Demo
 
-`form-response/Form response` (`demo/FormResponseDemo.tsx`) — **Fill → Send**
-creates the FormResponse document; **Update** Save / Request changes / Approve /
-Reject mutate that same record.
-
-Field-only. Fill chrome comes from the form-responder demo; review chrome and
-the follow-up button come from the form-review demo. Design editing is
-[`form-dialogs/`](../form-dialogs/README.md).
+`form-response/Form response` (`demo/FormResponseDemo.tsx`) — **Design**
+blueprint, **Fill → Send** creates the FormResponse document, **Update** Save /
+Request changes / Approve / Reject mutate that same record. 💬 on Update opens
+a follow-up type dropdown (unanswered drafts stay design rows, not empty answers).
 
 Read [`demo/FormResponseDemo.tsx`](./demo/FormResponseDemo.tsx).
 

@@ -92,7 +92,7 @@ export default {
       },
       description: {
         component:
-          "**FormResponse** document lifecycle. Fill → Send creates the record; Update Save / Request changes / Approve / Reject mutate the same document. Draft answers + FormResponse are stored as base64url text args so Storybook URL sync keeps empty `changes: {}` and emails/ISO dates.",
+          "**FormResponse** document lifecycle. Design is the blueprint; Fill → Send creates the record; Update Save / Request changes / Approve / Reject mutate the same document. 💬 on Update opens a follow-up type dropdown.",
       },
     },
   },
@@ -101,7 +101,7 @@ export default {
     heading: { control: "text", table: { category: "Layout" } },
     phase: {
       control: "select",
-      options: ["fill", "update"],
+      options: ["design", "fill", "update"],
       table: { category: "Layout" },
     },
     showDeleted: { control: "boolean", table: { category: "Update" } },
@@ -129,6 +129,10 @@ export default {
 type Story = StoryObj<types.StoryArgs>;
 
 export const Default: Story = {};
+
+export const Design: Story = {
+  args: { phase: "design" },
+};
 
 export const Fill: Story = {
   args: { phase: "fill" },

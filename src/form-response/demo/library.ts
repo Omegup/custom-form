@@ -1,11 +1,6 @@
 /** Demo-only cross-package imports — see src/README.md import rules. */
 export * from "../index";
-export type {
-  TheParams,
-  TheVariants,
-  Children,
-  Viewers,
-} from "../../form";
+export type { Children, SomeFormItem, TheParams, TheVariants, Viewers } from "../../form";
 export { branded } from "../../form";
 export type { MetaDom, RecursiveFormItem } from "../../recursive-form";
 export type {
@@ -40,4 +35,4 @@ export type {
   SectionReviewContext,
   SectionReviewHeader,
 } from "../../form-review";
-export type { ReviewStatus } from "../../section-review";
+export type { ReviewStatus, ReviewFormItemEntry } from "../../section-review";
