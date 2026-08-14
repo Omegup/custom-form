@@ -257,7 +257,8 @@ export const SectionResponderHOC = <
                                 {renderFillItem(
                                   fu,
                                   fuIndex,
-                                  q.deleted || parentDeleted,
+                                  // Follow-ups do not inherit deleted/transparent chrome.
+                                  false,
                                 )}
                               </Fragment>
                             ))}

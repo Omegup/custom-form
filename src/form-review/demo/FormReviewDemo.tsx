@@ -55,6 +55,9 @@ const viewers: lib.Viewers<
       const value = extra.response.value.data.value ?? "";
       const chrome = VARIANT_CHROME[variant];
       const newlyAnswered = extra.status === "highlight";
+      // Mute only this item's chrome — appendix/follow-ups stay opaque
+      // (CSS opacity on a parent cannot be undone by children).
+      const mute = extra.parentDeleted;
       return (
         <div
           style={{
@@ -62,35 +65,43 @@ const viewers: lib.Viewers<
             flexDirection: "column",
             gap: 4,
             fontSize: 14,
-            opacity: extra.parentDeleted ? 0.5 : 1,
           }}
         >
-          <span
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              fontWeight: newlyAnswered ? 700 : 400,
-            }}
-          >
-            {newlyAnswered ? (
-              <strong>{formItem.params.name}</strong>
-            ) : (
-              <span>{formItem.params.name}</span>
-            )}
-            {chrome.badge}
-            {extra.icon}
-          </span>
           <div
             style={{
-              padding: "6px 8px",
-              border: `1px solid ${chrome.border(extra.status)}`,
-              borderRadius: 4,
-              background: chrome.background,
-              fontWeight: newlyAnswered ? 700 : 400,
+              display: "flex",
+              flexDirection: "column",
+              gap: 4,
+              opacity: mute ? 0.5 : 1,
             }}
           >
-            {value || <em style={{ color: "#999", fontWeight: 400 }}>No answer</em>}
+            <span
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                fontWeight: newlyAnswered ? 700 : 400,
+              }}
+            >
+              {newlyAnswered ? (
+                <strong>{formItem.params.name}</strong>
+              ) : (
+                <span>{formItem.params.name}</span>
+              )}
+              {chrome.badge}
+              {extra.icon}
+            </span>
+            <div
+              style={{
+                padding: "6px 8px",
+                border: `1px solid ${chrome.border(extra.status)}`,
+                borderRadius: 4,
+                background: chrome.background,
+                fontWeight: newlyAnswered ? 700 : 400,
+              }}
+            >
+              {value || <em style={{ color: "#999", fontWeight: 400 }}>No answer</em>}
+            </div>
           </div>
           {extra.appendix}
         </div>

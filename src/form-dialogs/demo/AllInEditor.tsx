@@ -367,6 +367,17 @@ const baseIdOf = (id: string): string => {
   return i >= 0 ? id.slice(0, i) : id;
 };
 
+/** Every form-item id in the designed tree (including nested panel children). */
+const collectFormItemIds = (
+  columns: types.ListItem[][],
+): string[] =>
+  columns.flatMap((col) =>
+    col.flatMap((item) => [
+      item.header.id,
+      ...collectFormItemIds(item.children ?? []),
+    ]),
+  );
+
 /**
  * Reviewer follow-ups keyed by origin id — Fill renders them under that item
  * via `SectionResponder` `followUpItems` (same placement as review appendix).
@@ -746,27 +757,31 @@ const FillPhase = ({
     const updated = keys.length > 0 ? ref.update(keyed) : {};
     const sendDate = phases.rememberDate(new Date());
     const nextValues = { ...prior, ...updated };
-
-    const answeredIds = Object.entries(nextValues)
-      .filter(([, r]) => r != null && Object.keys(r.data).length > 0)
-      .map(([id]) => id);
+    // Every designed field participates in the send — including untouched
+    // empty optionals — so Review can mark them "new" with this round.
+    const designIds = sections.flatMap((s) => collectFormItemIds(s.items));
+    const roundIds = [...new Set([...keys, ...designIds])];
+    for (const id of roundIds) {
+      if (nextValues[id] == null) {
+        nextValues[id] = responses[id] ?? prior[id] ?? lib.emptyResponse();
+      }
+    }
 
     let nextChanges: lib.AdditionalChanges<types.TypeNames, types.Params> = {};
     if (!doc) {
-      nextChanges = withAnswerHistory({}, answeredIds, sendDate);
+      nextChanges = withAnswerHistory({}, roundIds, sendDate);
     } else {
-      const toStamp = new Set<string>();
+      // Revise: only unlocked / edited / follow-up ids get a new stamp.
+      const toStamp = new Set<string>(keys);
       for (const [id, entry] of Object.entries(doc.changes)) {
         if (entry.comment != null) toStamp.add(id);
         for (const fi of entry.formItems ?? []) {
           if (!fi.formItem) continue;
-          const res = nextValues[fi.formItem.id];
-          if (res != null && Object.keys(res.data).length > 0) {
+          if (fi.formItem.id in nextValues || keys.includes(fi.formItem.id)) {
             toStamp.add(fi.formItem.id);
           }
         }
       }
-      // Anything the student actually edited this send counts as recent.
       for (const id of Object.keys(updated)) toStamp.add(id);
       nextChanges = withAnswerHistory(doc.changes, toStamp, sendDate);
     }

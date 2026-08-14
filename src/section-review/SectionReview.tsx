@@ -124,6 +124,9 @@ export const SectionReviewHOC = <
 
     const isAnswered = (id: string) => isAnsweredResponse(responses, id);
 
+    /** Unlock remark present — including empty string (school unlock-without-text). */
+    const hasUnlockRemark = (id: string) => changes[id]?.comment != null;
+
     const hasUnansweredFollowUps = (originId: string) =>
       !!changes[originId]?.formItems?.some(
         (e) => e.formItem != null && !isAnswered(e.formItem.id),
@@ -150,11 +153,23 @@ export const SectionReviewHOC = <
       return max;
     })();
 
-    const reviewStatusFor = (id: string, hasComment: boolean): ReviewStatus => {
-      if (hasComment) return "normal";
+    const reviewStatusFor = (id: string, unlocked: boolean): ReviewStatus => {
+      if (unlocked) return "normal";
       const ms = historySec(changes[id]?.history?.at(-1)?.date);
       if (ms == null) {
-        // No stamp yet — treat answered items as recent so the round is visible.
+        // No stamp — empty optional missed on an older send, or never submitted.
+        // If a response row exists and there is only one answer wave among peers,
+        // treat as recent (same first send). Multiple waves → ancient.
+        if (responses[id] !== undefined) {
+          const waveCount = new Set(
+            Object.values(changes).flatMap((entry) =>
+              (entry.history ?? [])
+                .map((h) => historySec(h.date))
+                .filter((s): s is number => s != null),
+            ),
+          ).size;
+          return waveCount <= 1 ? "highlight" : "disabled";
+        }
         return isAnswered(id) ? "highlight" : "disabled";
       }
       // Prefer lastPending when it aligns with an answer wave (student Send).
@@ -186,7 +201,7 @@ export const SectionReviewHOC = <
     ): Variants[K] => {
       const pending =
         isUnansweredFollowUpEntry ||
-        !!changes[item.id]?.comment ||
+        hasUnlockRemark(item.id) ||
         hasUnansweredFollowUps(item.id);
       return pending ? followUpVariants[item.type] : variants[item.type];
     };
@@ -257,10 +272,7 @@ export const SectionReviewHOC = <
       });
     };
 
-    const buildAppendix = (
-      originId: string,
-      parentDeleted: boolean,
-    ): ReactNode[] => {
+    const buildAppendix = (originId: string): ReactNode[] => {
       const change = changes[originId];
       if (!change) return [];
 
@@ -306,10 +318,11 @@ export const SectionReviewHOC = <
           meta: { index: 0, total: 1, sIndex: 0 },
         };
         // Answered follow-ups behave as originals (read + lock/remark/+Follow-up).
+        // Do not inherit the origin's deleted/transparent chrome.
         nodes.push(
           <Fragment key={entry.formItem.id}>
-            {renderReviewableItem(item, 0, parentDeleted, true)}
-          </Fragment>,
+            {renderReviewableItem(item, 0, false, true)}
+          </Fragment>
         );
       }
 
@@ -342,12 +355,12 @@ export const SectionReviewHOC = <
                               {renderSlots(
                                 sq.children ?? [],
                                 suffix,
-                                parentDeleted,
+                                false,
                               )}
                             </>
                           ),
                           error: null,
-                          parentDeleted,
+                          parentDeleted: false,
                           index: subIndex,
                           icon: null,
                           response: {
@@ -419,11 +432,12 @@ export const SectionReviewHOC = <
     ): ReactNode => {
       const q = item.header;
       const children = item.children;
-      const change = changes[q.id];
-      const hasComment = !!change?.comment;
-      const status = reviewStatusFor(q.id, hasComment);
-      const appendixNodes = buildAppendix(q.id, q.deleted || parentDeleted);
+      const unlocked = hasUnlockRemark(q.id);
+      const status = reviewStatusFor(q.id, unlocked);
+      const appendixNodes = buildAppendix(q.id);
       const designingFollowUps = hasUnansweredFollowUps(q.id);
+      const pendingYellow =
+        unlocked || designingFollowUps;
       // Settled answered follow-ups: black like originals (not unanswered design).
       // Pending yellow comes from remark / unanswered children only.
       const variant = resolveVariant(q, false);
@@ -458,9 +472,12 @@ export const SectionReviewHOC = <
                 index,
                 icon: (
                   <>
-                    {fromFollowUpTree ? renderFollowUpMark() : null}
-                    {renderActionIcon(hasComment ? "unlock" : "lock", () => {
-                      if (hasComment) setDeleteCommentId(q.id);
+                    {/* ✚ once: variant badge while yellow; mark when settled. */}
+                    {fromFollowUpTree && !pendingYellow
+                      ? renderFollowUpMark()
+                      : null}
+                    {renderActionIcon(unlocked ? "unlock" : "lock", () => {
+                      if (unlocked) setDeleteCommentId(q.id);
                       else setAddition({ originId: q.id, mode: "comment" });
                     })}
                   </>
