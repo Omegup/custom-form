@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
+import { FollowUpAdd } from "../../section-review/demo/followUpAdd";
 import { flatFromFieldSections } from "../../form-dialogs/demo/formDialogsDemoFlat";
 import formReviewDemoSource from "./FormReviewDemo.tsx?raw";
 import formReviewDemoTypesSource from "./formReviewDemoTypes.t.ts?raw";
@@ -47,7 +48,7 @@ const PHASES: {
     id: "follow",
     label: "3. Follow",
     blurb:
-      "Teacher reviews answers: lock/unlock comments, ask follow-ups, status highlighting.",
+      "Teacher reviews answers: lock/unlock comments, 💬 follow-up dropdown, status highlighting.",
   },
 ];
 
@@ -383,24 +384,7 @@ export const formChrome: lib.FormReviewChrome<types.TypeNames, types.Params> = {
     <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>{nodes}</div>
   ),
   renderAddFollowUp: ({ originId, onPick }) => (
-    <button
-      type="button"
-      aria-label="Ask follow-up"
-      onClick={(e) => {
-        e.stopPropagation();
-        onPick({
-          formItem: {
-            id: `${originId}-followup-${Date.now()}`,
-            type: "field",
-            deleted: false,
-            params: { name: "Follow-up field", required: false },
-          },
-        });
-      }}
-      style={actionButtonStyle}
-    >
-      💬
-    </button>
+    <FollowUpAdd originId={originId} onPick={onPick} />
   ),
   renderActionIcon: (kind, onClick) => {
     const { glyph, label } = ACTION_ICON[kind];

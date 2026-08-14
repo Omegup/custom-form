@@ -69,11 +69,11 @@ under `drag-drop-tree/demo/`.
 
 Module demos compose features via props. `form-dialogs/demo/FormDialogsDemo.tsx`
 wires `SectionFormItemHOC` + `WebRecursiveEdit` + `makeUseDialogs`.
-Design tabs on section-review / form-review / form-response remount that
-same editor (`FormDialogsEditor`). `form-response/demo/FormResponseDemo.tsx`
-wires fill/review HOCs with Send / Save / feedback hooks. The form-dialogs
-demo injects `side-menu`'s `makeUseRenderAddItem` into `section-view`, same as
-school.
+Design tabs on section-responder / form-responder / section-review /
+form-review / form-response remount that same editor (`FormDialogsEditor`).
+`form-response/demo/FormResponseDemo.tsx` wires fill/review HOCs with
+Send / Save / feedback hooks. The form-dialogs demo injects
+`side-menu`'s `makeUseRenderAddItem` into `section-view`, same as school.
 
 ## Import rules
 

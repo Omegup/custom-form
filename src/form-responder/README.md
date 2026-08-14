@@ -28,8 +28,9 @@ host: sections / responses / setResponse / form impRef
 
 ## Demo (`form-responder/Form responder` story)
 
-Two sections (Personal + Notes). **Validate** fails when the required name is
-empty. Toggle `showDeleted` in controls to keep deleted sections visible.
+Two sections (Personal + Notes). **Design** is the form-dialogs editor.
+**Fill** + **Validate** fails when the required name is empty. Toggle
+`showDeleted` in controls to keep deleted sections visible.
 
 ## Dependency rule
 

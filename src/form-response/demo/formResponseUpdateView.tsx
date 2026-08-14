@@ -4,7 +4,7 @@
 import type { Ref } from "react";
 import { formChrome } from "../../form-review/demo/formReviewDemoHelper";
 import { FOLLOW_UP_BADGE } from "./formResponseDemoHelper";
-import { FollowUpAdd } from "./formResponseFollowUp";
+import { FollowUpAdd } from "../../section-review/demo/followUpAdd";
 import type * as types from "./formResponseDemoTypes.t";
 import * as lib from "./library";
 

@@ -33,9 +33,9 @@ Lifecycle walkthrough — **Design → Response → Follow**:
    Headings/panels stay on that list; Response/Follow read field-only `sections`.
 2. **Response** — student answers (summary left empty on purpose); JSON shows
    `responses`.
-3. **Follow** — mounts `CustomFormReviewHOC`: comments, follow-up form items,
-   status highlighting. Toggle **Review round pending** / **showDeleted**.
-   JSON shows live `AdditionalChanges`.
+3. **Follow** — mounts `CustomFormReviewHOC`: comments, follow-up type dropdown
+   (💬), unanswered drafts as design rows, status highlighting. Toggle
+   **Review round pending** / **showDeleted**. JSON shows live `AdditionalChanges`.
 
 All three JSON panels stay visible so you can compare phases while interacting.
 

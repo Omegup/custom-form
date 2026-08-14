@@ -33,8 +33,9 @@ the library picks by fill status (no `resolveVariant`).
 
 ## Demo (`section-responder/Section responder` story)
 
-One section, two `field` items (required name + optional note). **Validate**
-calls the section `impRef`; required name fails when empty.
+One section, two `field` items (required name + optional note). **Design** is
+the form-dialogs editor. **Fill** + **Validate** calls the section `impRef`;
+required name fails when empty.
 
 ## Dependency rule
 

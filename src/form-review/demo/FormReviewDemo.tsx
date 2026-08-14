@@ -6,6 +6,7 @@
 import { useCallback, useState, type Ref } from "react";
 import { FormDialogsEditor } from "../../form-dialogs/demo/FormDialogsDemo";
 import { toFieldSections } from "../../form-dialogs/demo/formDialogsDemoFlat";
+import { FollowUpDrafts } from "../../section-review/demo/followUpAdd";
 import * as demo from "./formReviewDemoHelper";
 import type * as types from "./formReviewDemoTypes.t";
 import * as lib from "./library";
@@ -247,7 +248,9 @@ export const FormReviewDemo = ({
               setAddition={setAddition}
               deleteCommentId={deleteCommentId}
               setDeleteCommentId={setDeleteCommentId}
-              renderFormItemsEditor={({ fallback }) => fallback}
+              renderFormItemsEditor={({ entries }) => (
+                <FollowUpDrafts entries={entries} />
+              )}
               variants={reviewVariants}
               tCommon={tCommon}
               showDeleted={showDeleted}

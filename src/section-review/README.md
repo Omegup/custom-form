@@ -58,10 +58,10 @@ remark).
 ## Demo (`section-review/Section review` story)
 
 Lifecycle walkthrough — **Design → Response → Follow** for one section
-(name / email / note). Design remounts the form-dialogs editor; Follow
-mounts `SectionReviewHOC` on the first section (field-only). Three JSON
-panels stay visible (`section`, `responses`, `AdditionalChanges`). Follow
-is seeded with comments + a follow-up form item; toggle **Review round
+(name / email / note). Design remounts the form-dialogs editor; Follow mounts
+`SectionReviewHOC` on the first section (field-only). 💬 opens a follow-up
+type dropdown; unanswered drafts stay design rows. Three JSON panels stay
+visible (`section`, `responses`, `AdditionalChanges`). Toggle **Review round
 pending** to see `highlight` vs `disabled`.
 
 ## Dependency rule

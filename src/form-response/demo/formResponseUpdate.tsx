@@ -5,7 +5,7 @@ import { useState } from "react";
 import { dateFromIso, rememberDate } from "./formResponseDemoHelper";
 import type * as types from "./formResponseDemoTypes.t";
 import { FeedbackBar, UpdateToolbar } from "./formResponseToolbar";
-import { FollowUpDrafts } from "./formResponseFollowUp";
+import { FollowUpDrafts } from "../../section-review/demo/followUpAdd";
 import {
   FormReview,
   reviewCtx,

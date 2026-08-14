@@ -1,20 +1,29 @@
 /**
- * Follow-up add dropdown (💬) + unanswered drafts as design rows — not "No answer".
+ * 💬 follow-up type dropdown + unanswered drafts as design rows.
+ * Shared by section-review, form-review, and form-response demos.
  */
 import { useState } from "react";
-import type * as types from "./formResponseDemoTypes.t";
 import * as lib from "./library";
 
 const MENU = [{ key: "field", title: "Field", icon: "✎" }] as const;
+
+type FieldItem = {
+  id: string;
+  type: "field";
+  deleted: boolean;
+  params: { name: string; required: boolean };
+};
+
+type FieldDraft = {
+  formItem?: { id: string; params: { name: string; required: boolean } };
+};
 
 export const FollowUpAdd = ({
   originId,
   onPick,
 }: {
   originId: string;
-  onPick: (payload: {
-    formItem: lib.SomeFormItem<types.TypeNames, types.Params>;
-  }) => void;
+  onPick: (payload: { formItem: FieldItem }) => void;
 }) => {
   const [open, setOpen] = useState(false);
   return (
@@ -93,11 +102,7 @@ export const FollowUpAdd = ({
   );
 };
 
-export const FollowUpDrafts = ({
-  entries,
-}: {
-  entries: lib.ReviewFormItemEntry<types.TypeNames, types.Params>[];
-}) => (
+export const FollowUpDrafts = ({ entries }: { entries: FieldDraft[] }) => (
   <div
     style={{
       display: "flex",

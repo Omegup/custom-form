@@ -3,6 +3,8 @@
  * multi-section fill + form-level Validate via `impRef`.
  */
 import { useCallback, useRef, useState, type Ref } from "react";
+import { FormDialogsEditor } from "../../form-dialogs/demo/FormDialogsDemo";
+import { toFieldSections } from "../../form-dialogs/demo/formDialogsDemoFlat";
 import * as demo from "./formResponderDemoHelper";
 import type * as types from "./formResponderDemoTypes.t";
 import * as lib from "./library";
@@ -99,7 +101,9 @@ const responderVariants: Record<lib.ResponderState, types.Variants> = {
 
 export const FormResponderDemo = ({
   heading,
+  phase,
   header,
+  flatItems,
   sections,
   responses,
   showDeleted,
@@ -127,6 +131,21 @@ export const FormResponderDemo = ({
 
   return (
     <demo.FormContainer title={heading}>
+      <demo.PhaseTabs
+        phase={phase}
+        onChange={(next) => updateArgs({ phase: next })}
+      />
+      {phase === "design" ? (
+        <FormDialogsEditor
+          flatItems={flatItems}
+          setFlatItems={(next) =>
+            updateArgs({
+              flatItems: next,
+              sections: toFieldSections(next),
+            })
+          }
+        />
+      ) : (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <FormResponder
           ctx={ctx}
@@ -157,6 +176,7 @@ export const FormResponderDemo = ({
           {JSON.stringify(responses, null, 2)}
         </pre>
       </div>
+      )}
     </demo.FormContainer>
   );
 };

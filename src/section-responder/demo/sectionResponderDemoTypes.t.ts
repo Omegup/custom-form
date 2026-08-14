@@ -3,6 +3,7 @@
  * into `Response.data.value`, wrapped in a single section.
  */
 import type { CSSProperties, ReactNode, Ref } from "react";
+import type { FlatItems as DesignFlatItems } from "../../form-dialogs/demo/formDialogsDemoTypes.t";
 import type * as lib from "./library";
 
 export type TypeNames = "field";
@@ -46,8 +47,12 @@ export type FieldExtra = lib.ResponderExtra & {
   impRef: Ref<lib.ViewerMethods>;
 };
 
+export type DemoPhase = "design" | "fill";
+
 export type StoryArgs = {
   heading: string;
+  phase: DemoPhase;
+  flatItems: DesignFlatItems;
   section: ListSection;
   responses: Record<string, lib.Response>;
 };

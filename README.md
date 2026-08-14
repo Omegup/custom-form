@@ -35,8 +35,8 @@ The Storybook sidebar uses this **dependency order** — start at `form`, end at
 | section-view/Section view | `section-view/` | `SectionHOC` + `ColumnsEdit` composing viewers + nested panels + add slots (no DnD) |
 | flat-dnd/Flat dnd | `flat-dnd/` | `SectionFormItemHOC` with HTML5 drag-and-drop reorder (`WebRecursiveEdit`, web-only) swapped in for `ColumnsEdit` |
 | form-dialogs/Form dialogs | `form-dialogs/` | `makeUseDialogs` + `useFlatListSession` on the design list |
-| section-responder/Section responder | `section-responder/` | One section of fillable fields + section-level validate |
-| form-responder/Form responder | `form-responder/` | Multi-section fill shell + form-level validate |
+| section-responder/Section responder | `section-responder/` | Design editor + one section of fillable fields + validate |
+| form-responder/Form responder | `form-responder/` | Design editor + multi-section fill shell + validate |
 | section-review/Section review | `section-review/` | Design editor + Response + Follow for one section + JSON per phase |
 | form-review/Form review | `form-review/` | Design editor + Response + Follow + JSON per phase |
 | form-response/Form response | `form-response/` | Design editor + FormResponse Send / Save / feedback |

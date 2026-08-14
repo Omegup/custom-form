@@ -3,6 +3,8 @@
  * one section of fillable fields, section-level Validate via `impRef`.
  */
 import { useCallback, useRef, useState, type Ref } from "react";
+import { FormDialogsEditor } from "../../form-dialogs/demo/FormDialogsDemo";
+import { toFieldSections } from "../../form-dialogs/demo/formDialogsDemoFlat";
 import * as demo from "./sectionResponderDemoHelper";
 import type * as types from "./sectionResponderDemoTypes.t";
 import * as lib from "./library";
@@ -93,6 +95,8 @@ const variants = lib.branded<types.Variants, "variants">({
 
 export const SectionResponderDemo = ({
   heading,
+  phase,
+  flatItems,
   section,
   responses,
   updateArgs,
@@ -119,6 +123,22 @@ export const SectionResponderDemo = ({
 
   return (
     <demo.FormContainer title={heading}>
+      <demo.PhaseTabs
+        phase={phase}
+        onChange={(next) => updateArgs({ phase: next })}
+      />
+      {phase === "design" ? (
+        <FormDialogsEditor
+          flatItems={flatItems}
+          setFlatItems={(next) => {
+            const [first] = toFieldSections(next);
+            updateArgs({
+              flatItems: next,
+              ...(first ? { section: first } : {}),
+            });
+          }}
+        />
+      ) : (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <SectionResponder
           ctx={ctx}
@@ -154,6 +174,7 @@ export const SectionResponderDemo = ({
           {JSON.stringify(responses, null, 2)}
         </pre>
       </div>
+      )}
     </demo.FormContainer>
   );
 };
