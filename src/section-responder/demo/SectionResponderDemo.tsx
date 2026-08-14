@@ -7,6 +7,14 @@ import * as demo from "./sectionResponderDemoHelper";
 import type * as types from "./sectionResponderDemoTypes.t";
 import * as lib from "./library";
 
+const defaultFieldVariant: types.FieldVariant = {
+  border: "#ccc",
+  background: "#fff",
+  badge: null,
+  shell: {},
+  errorBorder: "#c00",
+};
+
 const viewers: lib.Viewers<
   types.TypeNames,
   types.Params,
@@ -17,7 +25,7 @@ const viewers: lib.Viewers<
   string
 > = {
   field: {
-    viewer: ({ props: { formItem, extra } }) => {
+    viewer: ({ props: { formItem, extra, variant } }) => {
       const { setDataValue, value } = demo.useFieldMethods(
         extra.impRef,
         extra.response,
@@ -30,11 +38,24 @@ const viewers: lib.Viewers<
           : extra.error
             ? "Invalid"
             : null;
+      const border =
+        extra.error && variant.errorBorder
+          ? variant.errorBorder
+          : variant.border;
       return (
-        <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 14 }}>
+        <label
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+            fontSize: 14,
+            ...variant.shell,
+          }}
+        >
           <span>
             {formItem.params.name}
             {formItem.params.required ? " *" : ""}
+            {variant.badge}
             {extra.icon}
           </span>
           <input
@@ -42,8 +63,9 @@ const viewers: lib.Viewers<
             onChange={(e) => setDataValue(e.target.value)}
             style={{
               padding: "6px 8px",
-              border: extra.error ? "1px solid #c00" : "1px solid #ccc",
+              border: `1px solid ${border}`,
               borderRadius: 4,
+              background: variant.background,
             }}
           />
           {err && <span style={{ color: "#c00", fontSize: 12 }}>{err}</span>}
@@ -65,7 +87,9 @@ const SectionResponder = lib.SectionResponderHOC<
 const ctx = lib.branded<types.Ctx, "context">({
   t: () => "Required",
 });
-const variants = lib.branded<types.Variants, "variants">({ field: "default" });
+const variants = lib.branded<types.Variants, "variants">({
+  field: defaultFieldVariant,
+});
 
 export const SectionResponderDemo = ({
   heading,

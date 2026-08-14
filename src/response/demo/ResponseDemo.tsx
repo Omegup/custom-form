@@ -68,7 +68,7 @@ const FormItem = lib.FormItemHOC<
 );
 
 const ctx = lib.branded<types.Ctx, "context">({});
-const variants = lib.branded<types.Variants, "variants">({ field: "default" });
+const variants = lib.branded<types.Variants, "variants">({ field: {} });
 
 export const ResponseDemo = ({
   heading,

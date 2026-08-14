@@ -1,0 +1,64 @@
+---
+description: Pass variant style objects, not name keys into a chrome map
+globs: **/*.ts,**/*.tsx
+alwaysApply: true
+---
+
+# Variants are values, not lookup keys
+
+Pass the **variant object** (border, background, badge, …) into viewers.
+Do **not** pass a string name and look it up in a shared `VARIANT_CHROME` /
+`VARIANT_MAP`.
+
+```tsx
+// ❌ BAD — key + all-styles-knowing map; viewer depends on the map
+type VariantName = "default" | "followUp";
+const VARIANT_CHROME: Record<VariantName, Chrome> = { … };
+viewer: ({ variant }) => <div style={{ color: VARIANT_CHROME[variant].fg }} />
+<Item variant="followUp" />
+
+// ✅ GOOD — variant is the chrome itself
+type Variant = { fg: string; border: string; background: string; badge: ReactNode };
+viewer: ({ variant }) => <div style={{ color: variant.fg }} />
+<Item variant={followUpChrome} />
+```
+
+## Why
+
+A name-key forces every consumer to share one map that knows every style.
+Passing the value keeps chrome host-owned and removes that dependency.
+
+## Phase bags are dicts of values
+
+Hosts still pass a **dictionary keyed by known states** — the entries are
+Variant **objects**, not names. Viewers/orchestrators pick by status; they
+never consult a second chrome table.
+
+| Phase | Bag shape (per item type) | Pick |
+|---|---|---|
+| Design | one `Variants` bag (often `{}` / minimal chrome) | use `bag[type]` |
+| Responder / review | `Record<ResponderState, Variants>` or dual bags (`variants` / `followUpVariants`) | `bag[status][type]` |
+
+`ResponderState` examples: `default` | `old` | `change` | `error` (host-defined).
+`Variant` stays **per type** (`Variants[K]` can differ across `field` / `heading` / …).
+
+```typescript
+// ✅ Host builds value bags; resolve picks a value
+const fillVariants: Record<"default" | "old" | "change" | "error", Variant> = {
+  default: { fg: "#111", border: "#ccc", background: "#fff", badge: null },
+  old: { … },
+  change: { … },
+  error: { … },
+};
+const variant = fillVariants[status]; // still a Variant object
+
+// ❌ BAD — bag of names + separate chrome map
+const names = { default: "default", change: "followUp" };
+const chrome = VARIANT_CHROME[names[status]];
+```
+
+Storybook controls may still use name keys **at the host boundary** only —
+map `TEXT_VARIANT[controlName]` before passing into viewers.
+
+Picking `bag[status]` is not the anti-pattern: the anti-pattern is a
+**second** map from name → style that viewers must import.

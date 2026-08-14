@@ -1,4 +1,4 @@
-import type { Dispatch, SetStateAction, ReactNode } from "react";
+import type { CSSProperties, Dispatch, SetStateAction, ReactNode } from "react";
 import type * as lib from "./library";
 
 export type TypeNames = "field" | "heading" | "panel";
@@ -14,11 +14,29 @@ export type Params = lib.TheParams<{
   panel: { name: string; multiple: boolean };
 }>;
 
-/** `followUp` — reviewer-added items (yellow chrome); not an error/status flag. */
+/**
+ * Host-owned chrome for one item — the **value** passed as `variant`, not a
+ * name key into a shared map (see `.cursor/rules/variant-values-not-keys.mdc`).
+ */
+export type ItemVariant = {
+  border: string;
+  background: string;
+  badge: ReactNode;
+  shell: CSSProperties;
+  /** Fill: when set, used while `extra.error` is truthy. */
+  errorBorder?: string;
+  /**
+   * Review: apply earlier/new mute + status-colored borders on this item's
+   * own chrome. False for pending follow-up yellow (no ancient mute).
+   */
+  reviewTone: boolean;
+};
+
+/** Per-type chrome objects (bags of values — Design one bag; fill/review pick). */
 export type Variants = lib.TheVariants<{
-  field: "default" | "followUp";
-  heading: "default" | "followUp";
-  panel: "default" | "followUp";
+  field: ItemVariant;
+  heading: ItemVariant;
+  panel: ItemVariant;
 }>;
 
 export type Section = {

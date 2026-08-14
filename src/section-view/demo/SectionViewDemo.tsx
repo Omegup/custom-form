@@ -64,7 +64,7 @@ export const SectionViewTest = ({
     [focused],
   );
   const variants = useMemo(
-    (): types.Variants => lib.branded({ field: "default", panel: "default" }),
+    (): types.Variants => lib.branded({ field: {}, panel: {} }),
     [],
   );
 

@@ -293,12 +293,8 @@ const FollowUpDesignItems = ({
     () => lib.autofocusCtx<lib.ContextDom>(lib.branded({}), focused),
     [focused],
   );
-  // Entire editor is follow-up items — yellow chrome via `followUp` variant.
-  const variants = useMemo(
-    (): types.Variants =>
-      lib.branded({ field: "followUp", heading: "followUp", panel: "followUp" }),
-    [],
-  );
+  // Entire editor is follow-up items — yellow chrome via follow-up variant bag.
+  const variants = phases.followUpVariants;
   const setItems = (items: types.FlatItems, newCtx: types.ListCtx) => {
     if (items !== flatItems) setFlatItems(items);
     setFocused(newCtx.focused);
@@ -408,18 +404,6 @@ const followUpsByOrigin = (
   return map;
 };
 
-const defaultVariants = lib.branded<types.Variants, "variants">({
-  field: "default",
-  heading: "default",
-  panel: "default",
-});
-
-const followUpVariants = lib.branded<types.Variants, "variants">({
-  field: "followUp",
-  heading: "followUp",
-  panel: "followUp",
-});
-
 const FormResponder = lib.CustomFormResponderHOC<
   types.TypeNames,
   types.Params,
@@ -434,7 +418,12 @@ const FormReview = lib.CustomFormReviewHOC<
   types.Variants,
   lib.SectionReviewContext,
   types.Section
->(phases.reviewViewers, defaultVariants, followUpVariants, phases.reviewChrome);
+>(
+  phases.reviewViewers,
+  phases.defaultVariants,
+  phases.followUpVariants,
+  phases.reviewChrome,
+);
 
 const fillCtx = lib.branded<lib.SectionResponderContext, "context">({
   t: (term) => (term === "fieldRequired" ? "This field is required" : term),
@@ -464,11 +453,7 @@ const DesignPhase = ({
     () => lib.autofocusCtx<lib.ContextDom>(lib.branded({}), focused),
     [focused],
   );
-  const variants = useMemo(
-    (): types.Variants =>
-      lib.branded({ field: "default", heading: "default", panel: "default" }),
-    [],
-  );
+  const variants = phases.defaultVariants;
 
   const setItems = (items: types.FlatItems, newCtx: types.ListCtx) => {
     if (items !== flatItems) updateArgs({ flatItems: items });
@@ -666,15 +651,15 @@ const FillPhase = ({
         unansweredFollowUpIds.has(item.id) ||
         unansweredFollowUpIds.has(baseId)
       ) {
-        return followUpVariants[item.type];
+        return phases.followUpVariants[item.type];
       }
       // Origins: yellow only while revising a change-request round with a remark.
       if (doc?.status === "changesRequested") {
         if (unlockedIds.has(item.id) || unlockedIds.has(baseId)) {
-          return followUpVariants[item.type];
+          return phases.followUpVariants[item.type];
         }
       }
-      return defaultVariants[item.type];
+      return phases.defaultVariants[item.type];
     },
     [doc?.status, unansweredFollowUpIds, unlockedIds],
   );

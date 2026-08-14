@@ -106,7 +106,7 @@ export type SectionResponderProps<
   setResponse: (id: string, response?: Response) => void;
   getError: (id: string) => string | null;
   impRef: Ref<SectionValidator>;
-  /** Per-item chrome key — host maps follow-ups to `"followUp"`, design items to `"default"`. */
+  /** Per-item chrome value — host picks from a bag of Variant objects (not name keys). */
   resolveVariant: <K extends TypeNames>(
     item: TypedFormItem<Params, K>,
   ) => Variants[K];

@@ -4,7 +4,7 @@
  * demo-only blueprints so you can compare structure, answers, and reviewer
  * annotations side by side (JSON panels always visible).
  */
-import { useCallback, useState, type ReactNode, type Ref } from "react";
+import { useCallback, useState, type Ref } from "react";
 import * as demo from "./formReviewDemoHelper";
 import type * as types from "./formReviewDemoTypes.t";
 import * as lib from "./library";
@@ -25,20 +25,25 @@ const FOLLOW_UP_BADGE = (
   </span>
 );
 
-const VARIANT_CHROME: Record<
-  types.Variants["field"],
-  { border: (status: lib.ReviewStatus) => string; background: string; badge: ReactNode }
-> = {
-  default: {
-    border: (status) => STATUS_COLOR[status],
-    background: "#fafafa",
-    badge: null,
-  },
-  followUp: {
-    border: () => "#e6b800",
+const defaultFieldVariant: types.FieldVariant = {
+  border: "#ccc",
+  background: "#fafafa",
+  badge: null,
+  shell: {},
+  reviewTone: true,
+};
+
+const followUpFieldVariant: types.FieldVariant = {
+  border: "#e6b800",
+  background: "#fffbeb",
+  badge: FOLLOW_UP_BADGE,
+  shell: {
+    padding: 8,
+    borderRadius: 6,
     background: "#fffbeb",
-    badge: FOLLOW_UP_BADGE,
+    border: "1px solid #e6b800",
   },
+  reviewTone: false,
 };
 
 const viewers: lib.Viewers<
@@ -53,11 +58,13 @@ const viewers: lib.Viewers<
   field: {
     viewer: ({ props: { formItem, extra, variant } }) => {
       const value = extra.response.value.data.value ?? "";
-      const chrome = VARIANT_CHROME[variant];
       const newlyAnswered = extra.status === "highlight";
       // Mute only this item's chrome — appendix/follow-ups stay opaque
       // (CSS opacity on a parent cannot be undone by children).
-      const mute = extra.parentDeleted;
+      const mute = variant.reviewTone && extra.parentDeleted;
+      const border = variant.reviewTone
+        ? STATUS_COLOR[extra.status]
+        : variant.border;
       return (
         <div
           style={{
@@ -73,6 +80,7 @@ const viewers: lib.Viewers<
               flexDirection: "column",
               gap: 4,
               opacity: mute ? 0.5 : 1,
+              ...variant.shell,
             }}
           >
             <span
@@ -88,15 +96,15 @@ const viewers: lib.Viewers<
               ) : (
                 <span>{formItem.params.name}</span>
               )}
-              {chrome.badge}
+              {variant.badge}
               {extra.icon}
             </span>
             <div
               style={{
                 padding: "6px 8px",
-                border: `1px solid ${chrome.border(extra.status)}`,
+                border: `1px solid ${border}`,
                 borderRadius: 4,
-                background: chrome.background,
+                background: variant.background,
                 fontWeight: newlyAnswered ? 700 : 400,
               }}
             >
@@ -110,9 +118,11 @@ const viewers: lib.Viewers<
   },
 };
 
-const variants = lib.branded<types.Variants, "variants">({ field: "default" });
+const variants = lib.branded<types.Variants, "variants">({
+  field: defaultFieldVariant,
+});
 const followUpVariants = lib.branded<types.Variants, "variants">({
-  field: "followUp",
+  field: followUpFieldVariant,
 });
 
 const FormReview = lib.CustomFormReviewHOC<

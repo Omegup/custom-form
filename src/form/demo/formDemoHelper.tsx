@@ -17,8 +17,8 @@ export type { StoryArgs } from "./formDemoTypes.t";
 
 export const DEFAULT_FORM_DEMO: Data = {
   variants: {
-    text: "default",
-    group: "bordered",
+    text: { padding: 8 },
+    group: { showBorder: true },
   },
   values: {
     t: "Alice",
@@ -101,8 +101,21 @@ export const storyArgsToDemoProps = ({
   ...rest
 }: StoryArgs): Omit<Props, "onValueChange"> => ({
   ...rest,
-  variants: { text: textVariant, group: groupVariant },
+  variants: {
+    text: TEXT_VARIANT[textVariant],
+    group: GROUP_VARIANT[groupVariant],
+  },
 });
+
+const TEXT_VARIANT = {
+  default: { padding: 8 },
+  compact: { padding: 4 },
+} as const satisfies Record<"default" | "compact", Variants["text"]>;
+
+const GROUP_VARIANT = {
+  default: { showBorder: false },
+  bordered: { showBorder: true },
+} as const satisfies Record<"default" | "bordered", Variants["group"]>;
 
 // ── Demo helpers (typing lives here, not in FormDemo.tsx) ─────────────────────
 
@@ -131,7 +144,7 @@ export const Label = ({
         display: "flex",
         flexDirection: "column",
         gap: 4,
-        padding: variant === "compact" ? 4 : 8,
+        padding: variant.padding,
         borderLeft: `3px solid ${border}`,
       }}
     >
@@ -153,7 +166,7 @@ export const Group = ({
 }) => (
   <fieldset
     style={{
-      border: variant === "bordered" ? `1px solid ${border}` : "none",
+      border: variant.showBorder ? `1px solid ${border}` : "none",
       borderRadius: 4,
       padding: 8,
     }}
@@ -170,7 +183,11 @@ export const useStoryArgs = () => {
     useArgs<StoryArgs>();
   const ctx = useMemo((): Context => branded({ accent }), [accent]);
   const variants = useMemo(
-    (): Variants => branded({ text: textVariant, group: groupVariant }),
+    (): Variants =>
+      branded({
+        text: TEXT_VARIANT[textVariant],
+        group: GROUP_VARIANT[groupVariant],
+      }),
     [textVariant, groupVariant],
   );
   return { ctx, variants, values, items, updateArgs };

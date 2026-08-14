@@ -99,10 +99,15 @@ export const RecursiveFormDemo = ({
   items,
   updateArgs,
 }: RecursiveFormDemoProps) => {
-  const variants = useMemo(
-    (): Variants => branded({ text: textVariant, group: groupVariant }),
-    [textVariant, groupVariant],
-  );
+  const variants = useMemo((): Variants => {
+    const text =
+      textVariant === "compact" ? { padding: 4 } : { padding: 8 };
+    const group =
+      groupVariant === "bordered"
+        ? { showBorder: true }
+        : { showBorder: false };
+    return branded({ text, group });
+  }, [textVariant, groupVariant]);
   const ctx = useMemo((): Context => branded({ accent }), [accent]);
 
   const onValueChange = useCallback(

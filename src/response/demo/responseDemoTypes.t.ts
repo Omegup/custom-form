@@ -11,7 +11,7 @@ export type Params = lib.TheParams<{
 }>;
 
 export type Variants = lib.TheVariants<{
-  field: "default";
+  field: Record<string, never>;
 }>;
 
 export type Ctx = lib.ContextDom;

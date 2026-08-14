@@ -9,8 +9,8 @@ export type Params = lib.TheParams<{
 }>;
 
 export type Variants = lib.TheVariants<{
-  field: "default";
-  panel: "default";
+  field: Record<string, never>;
+  panel: Record<string, never>;
 }>;
 
 export type Section = {

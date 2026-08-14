@@ -2,7 +2,7 @@
  * Multi-section review domain for `CustomFormReview` — one text field type,
  * walked through Design → Response → Follow phases in the Storybook demo.
  */
-import type { Ref } from "react";
+import type { CSSProperties, ReactNode, Ref } from "react";
 import type * as lib from "./library";
 
 export type TypeNames = "field";
@@ -11,8 +11,16 @@ export type Params = lib.TheParams<{
   field: { name: string; required: boolean };
 }>;
 
+export type FieldVariant = {
+  border: string;
+  background: string;
+  badge: ReactNode;
+  shell: CSSProperties;
+  reviewTone: boolean;
+};
+
 export type Variants = lib.TheVariants<{
-  field: "default" | "followUp";
+  field: FieldVariant;
 }>;
 
 export type Ctx = lib.SectionReviewContext;

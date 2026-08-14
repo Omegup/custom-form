@@ -18,9 +18,12 @@ export type Params = TheParams<{
   group: { title: string };
 }>;
 
+export type TextVariant = { padding: number };
+export type GroupVariant = { showBorder: boolean };
+
 export type Variants = TheVariants<{
-  text: "default" | "compact";
-  group: "default" | "bordered";
+  text: TextVariant;
+  group: GroupVariant;
 }>;
 
 export type Context = ContextDom & { accent: string };
@@ -36,11 +39,11 @@ export type Data = {
   items: Item[];
 };
 
-/** Storybook Controls args — variant dropdowns map to `variants` on RecursiveFormDemo. */
+/** Storybook Controls — name keys map to chrome values at the host boundary. */
 export type StoryArgs = Omit<Data, "variants"> & {
   accent: string;
-  textVariant: Variants["text"];
-  groupVariant: Variants["group"];
+  textVariant: "default" | "compact";
+  groupVariant: "default" | "bordered";
 };
 
 export type ValueExtra = ExtraDom & {

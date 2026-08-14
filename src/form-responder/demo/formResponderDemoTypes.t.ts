@@ -1,7 +1,7 @@
 /**
  * Multi-section fill domain for `CustomFormResponder` — one text field type.
  */
-import type { Ref } from "react";
+import type { CSSProperties, ReactNode, Ref } from "react";
 import type * as lib from "./library";
 
 export type TypeNames = "field";
@@ -10,8 +10,16 @@ export type Params = lib.TheParams<{
   field: { name: string; required: boolean };
 }>;
 
+export type FieldVariant = {
+  border: string;
+  background: string;
+  badge: ReactNode;
+  shell: CSSProperties;
+  errorBorder?: string;
+};
+
 export type Variants = lib.TheVariants<{
-  field: "default" | "followUp";
+  field: FieldVariant;
 }>;
 
 export type Ctx = lib.SectionResponderContext;

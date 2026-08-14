@@ -9,8 +9,8 @@ export type { StoryArgs } from "./recursiveFormDemoTypes.t";
 
 export const DEFAULT_RECURSIVE_FORM_DEMO: Data = {
   variants: {
-    text: "default",
-    group: "bordered",
+    text: { padding: 8 },
+    group: { showBorder: true },
   },
   values: {
     t: "Alice",
@@ -132,7 +132,7 @@ export const Label = ({
       display: "flex",
       flexDirection: "column",
       gap: 4,
-      padding: variant === "compact" ? 4 : 8,
+      padding: variant.padding,
       borderLeft: `3px solid ${border}`,
     }}
   >
@@ -154,7 +154,7 @@ export const Group = ({
 }) => (
   <fieldset
     style={{
-      border: variant === "bordered" ? `1px solid ${border}` : "none",
+      border: variant.showBorder ? `1px solid ${border}` : "none",
       borderRadius: 4,
       padding: 8,
     }}

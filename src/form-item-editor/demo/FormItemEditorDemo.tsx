@@ -15,6 +15,7 @@ import {
 } from "react";
 import * as demo from "./formItemEditorDemoHelper";
 import * as types from "./formItemEditorDemoTypes.t";
+import { defaultVariants } from "./itemVariants";
 import * as lib from "./library";
 
 // ── Editors (domain) ──────────────────────────────────────────────────────────
@@ -177,7 +178,7 @@ export const itemName = (ctx: types.Ctx, header: types.ItemHeader): ReactNode =>
     viewProps={{
       formItem: header,
       ctx,
-      variant: "default",
+      variant: defaultVariants[header.type],
       extra: lib.branded({
         getChild: () => null,
       }),
