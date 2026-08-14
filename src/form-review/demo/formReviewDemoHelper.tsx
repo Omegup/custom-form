@@ -427,6 +427,7 @@ export const formChrome: lib.FormReviewChrome<types.TypeNames, types.Params> = {
         padding: 8,
         background: "#fff3cd",
         borderLeft: "4px solid #ffc107",
+        color: "#856404",
         fontSize: 12,
       }}
     >

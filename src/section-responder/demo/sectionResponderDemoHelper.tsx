@@ -66,7 +66,18 @@ export const sectionChrome: lib.SectionResponderChrome = {
     </button>
   ),
   renderAppendix: (comment) => (
-    <div style={{ marginTop: 4, color: "#c00", fontSize: 12 }}>{comment}</div>
+    <div
+      style={{
+        marginTop: 4,
+        padding: 8,
+        background: "#fff3cd",
+        borderLeft: "4px solid #ffc107",
+        color: "#856404",
+        fontSize: 12,
+      }}
+    >
+      {comment}
+    </div>
   ),
   renderFollowUpGroup: ({ items }) => items,
 };

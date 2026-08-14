@@ -337,6 +337,7 @@ export const sectionChrome: lib.SectionReviewChrome<types.TypeNames, types.Param
         padding: 8,
         background: "#fff3cd",
         borderLeft: "4px solid #ffc107",
+        color: "#856404",
         fontSize: 12,
       }}
     >
