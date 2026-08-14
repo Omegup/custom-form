@@ -72,6 +72,7 @@ const PanelBody = ({
   borderColor,
   readOnly,
   badge,
+  titleColor,
 }: {
   formItem: lib.TypedFormItem<types.Params, "panel">;
   extra: {
@@ -83,6 +84,8 @@ const PanelBody = ({
   borderColor: string;
   readOnly: boolean;
   badge: ReactNode;
+  /** Mute the panel title only — never the nested children (CSS opacity would fade them). */
+  titleColor?: string;
 }) => {
   const multiple = formItem.params.multiple;
   const editable = !readOnly && extra.response.setValue != null;
@@ -112,7 +115,7 @@ const PanelBody = ({
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        <strong style={{ fontSize: 14 }}>
+        <strong style={{ fontSize: 14, color: titleColor }}>
           {formItem.params.name || "(panel)"}
           {multiple ? " · multiple" : ""}
         </strong>
@@ -364,12 +367,19 @@ const STATUS_COLOR: Record<lib.ReviewStatus, string> = {
 
 const STATUS_ANSWER_STYLE: Record<
   lib.ReviewStatus,
-  { opacity: number; fontWeight: number; label: string | null }
+  { fontWeight: number; label: string | null }
 > = {
-  normal: { opacity: 1, fontWeight: 400, label: null },
-  disabled: { opacity: 0.55, fontWeight: 400, label: "earlier" },
-  highlight: { opacity: 1, fontWeight: 700, label: "new" },
+  normal: { fontWeight: 400, label: null },
+  disabled: { fontWeight: 400, label: "earlier" },
+  highlight: { fontWeight: 700, label: "new" },
 };
+
+/** Earlier / deleted mute via color — never CSS opacity (that fades nested follow-ups). */
+const MUTED = {
+  label: "#777",
+  value: "#666",
+  valueBg: "#f0f0f0",
+} as const;
 
 const statusLabelBadge = (label: string | null, ancient: boolean) =>
   label ? (
@@ -433,13 +443,22 @@ export const fillChrome: lib.FormResponderChrome = {
     </div>
   ),
   renderSection: ({ deleted, title, description, i, multiSection, columns }) => (
-    <div style={{ marginBottom: 20, opacity: deleted ? 0.5 : 1 }}>
+    <div style={{ marginBottom: 20 }}>
       <div style={{ marginBottom: 12 }}>
-        <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 600 }}>
+        <h3
+          style={{
+            margin: "0 0 4px",
+            fontSize: 18,
+            fontWeight: 600,
+            color: deleted ? MUTED.label : undefined,
+          }}
+        >
           {multiSection ? `${i + 1}. ${title}` : title}
         </h3>
         {description ? (
-          <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{description}</p>
+          <p style={{ margin: 0, color: deleted ? MUTED.value : "#555", fontSize: 14 }}>
+            {description}
+          </p>
         ) : null}
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -527,13 +546,22 @@ export const reviewChrome: lib.FormReviewChrome<types.TypeNames, types.Params> =
     </div>
   ),
   renderSection: ({ deleted, title, description, i, multiSection, columns }) => (
-    <div style={{ marginBottom: 20, opacity: deleted ? 0.5 : 1 }}>
+    <div style={{ marginBottom: 20 }}>
       <div style={{ marginBottom: 12 }}>
-        <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 600 }}>
+        <h3
+          style={{
+            margin: "0 0 4px",
+            fontSize: 18,
+            fontWeight: 600,
+            color: deleted ? MUTED.label : undefined,
+          }}
+        >
           {multiSection ? `${i + 1}. ${title}` : title}
         </h3>
         {description ? (
-          <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{description}</p>
+          <p style={{ margin: 0, color: deleted ? MUTED.value : "#555", fontSize: 14 }}>
+            {description}
+          </p>
         ) : null}
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -837,8 +865,6 @@ export const reviewViewers: lib.Viewers<
       const tone = STATUS_ANSWER_STYLE[extra.status];
       const newlyAnswered = extra.status === "highlight";
       const ancient = extra.status === "disabled";
-      // Mute only this item's own chrome — appendix/follow-ups stay opaque
-      // (CSS opacity on a parent cannot be undone by children).
       const mute =
         variant.reviewTone && (extra.parentDeleted || ancient);
       const fieldBorder = variant.reviewTone
@@ -858,7 +884,6 @@ export const reviewViewers: lib.Viewers<
               display: "flex",
               flexDirection: "column",
               gap: 4,
-              opacity: mute ? (extra.parentDeleted ? 0.5 : tone.opacity) : 1,
               ...variant.shell,
             }}
           >
@@ -868,7 +893,7 @@ export const reviewViewers: lib.Viewers<
                 alignItems: "center",
                 gap: 6,
                 fontWeight: tone.fontWeight,
-                color: ancient && variant.reviewTone ? "#777" : undefined,
+                color: mute ? MUTED.label : undefined,
               }}
             >
               <span>
@@ -886,11 +911,11 @@ export const reviewViewers: lib.Viewers<
                 borderRadius: 4,
                 background: newlyAnswered
                   ? "#fff"
-                  : ancient && variant.reviewTone
-                    ? "#f0f0f0"
+                  : mute
+                    ? MUTED.valueBg
                     : variant.background,
                 fontWeight: tone.fontWeight,
-                color: ancient && variant.reviewTone ? "#666" : undefined,
+                color: mute ? MUTED.value : undefined,
               }}
             >
               {value || (
@@ -918,7 +943,6 @@ export const reviewViewers: lib.Viewers<
               display: "flex",
               flexDirection: "column",
               gap: 4,
-              opacity: mute ? tone.opacity : 1,
               ...variant.shell,
             }}
           >
@@ -928,7 +952,7 @@ export const reviewViewers: lib.Viewers<
                 alignItems: "center",
                 gap: 6,
                 fontWeight: weight,
-                color: ancient && variant.reviewTone ? "#777" : undefined,
+                color: mute ? MUTED.label : undefined,
               }}
             >
               {formItem.params.name || "(heading)"}
@@ -947,24 +971,19 @@ export const reviewViewers: lib.Viewers<
       const ancient = extra.status === "disabled";
       const mute =
         variant.reviewTone && (extra.parentDeleted || ancient);
-      const tone = STATUS_ANSWER_STYLE[extra.status];
       const border = variant.reviewTone
         ? STATUS_COLOR[extra.status]
         : variant.border;
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          <div
-            style={{
-              opacity: mute ? (extra.parentDeleted ? 0.5 : tone.opacity) : 1,
-              ...variant.shell,
-            }}
-          >
+          <div style={variant.shell}>
             <PanelBody
               formItem={formItem}
               extra={{ ...extra, appendix: undefined }}
               borderColor={border}
               readOnly
               badge={variant.badge}
+              titleColor={mute ? MUTED.label : undefined}
             />
           </div>
           {extra.appendix}

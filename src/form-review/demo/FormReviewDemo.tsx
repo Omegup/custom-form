@@ -59,8 +59,6 @@ const viewers: lib.Viewers<
     viewer: ({ props: { formItem, extra, variant } }) => {
       const value = extra.response.value.data.value ?? "";
       const newlyAnswered = extra.status === "highlight";
-      // Mute only this item's chrome — appendix/follow-ups stay opaque
-      // (CSS opacity on a parent cannot be undone by children).
       const mute = variant.reviewTone && extra.parentDeleted;
       const border = variant.reviewTone
         ? STATUS_COLOR[extra.status]
@@ -79,7 +77,6 @@ const viewers: lib.Viewers<
               display: "flex",
               flexDirection: "column",
               gap: 4,
-              opacity: mute ? 0.5 : 1,
               ...variant.shell,
             }}
           >
@@ -89,6 +86,7 @@ const viewers: lib.Viewers<
                 alignItems: "center",
                 gap: 6,
                 fontWeight: newlyAnswered ? 700 : 400,
+                color: mute ? "#777" : undefined,
               }}
             >
               {newlyAnswered ? (
@@ -104,8 +102,9 @@ const viewers: lib.Viewers<
                 padding: "6px 8px",
                 border: `1px solid ${border}`,
                 borderRadius: 4,
-                background: variant.background,
+                background: mute ? "#f0f0f0" : variant.background,
                 fontWeight: newlyAnswered ? 700 : 400,
+                color: mute ? "#666" : undefined,
               }}
             >
               {value || <em style={{ color: "#999", fontWeight: 400 }}>No answer</em>}
