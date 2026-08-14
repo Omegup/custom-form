@@ -88,6 +88,12 @@ export type Addition<
 export type ReviewStatus = "normal" | "disabled" | "highlight";
 
 /**
+ * Review chrome states — host supplies a Variant **value** bag per state;
+ * the library picks `variants[state][type]` (see variant-values-not-keys).
+ */
+export type ReviewVariantState = "default" | "change";
+
+/**
  * Viewer bag for read-only reviewed items — school `ReviewExtra`. `response`
  * is always read-only (`setValue: null`); host layers `impRef` + `getChild`
  * around this, same as `ResponderExtra`.
@@ -216,9 +222,8 @@ export type SectionReviewProps<
   renderFormItemsEditor: (
     args: ReviewFormItemsEditorArgs<TypeNames, Params>,
   ) => ReactNode;
-  variants: Variants;
-  /** Chrome bag for pending follow-up form items (yellow / host chrome values). */
-  followUpVariants: Variants;
+  /** Chrome values keyed by {@link ReviewVariantState} — library picks pending vs settled. */
+  variants: Record<ReviewVariantState, Variants>;
   tCommon: (term: "add" | "cancel" | "save" | "delete") => string;
   /** Section ordinal for the title (1-based display when `multiSection`). */
   i: number;

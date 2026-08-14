@@ -10,16 +10,12 @@ import {
   type Ref,
 } from "react";
 import {
-  defaultVariants,
   followUpFieldVariant,
-  followUpVariants,
 } from "../../form-item-editor/demo/itemVariants";
 import { MENU_ITEMS, randomId } from "../../side-menu/demo/fixtures";
 import { renderAddFormItem } from "../../side-menu/demo/sideMenuDemoHelper";
 import type * as types from "./allInDemoTypes.t";
 import * as lib from "./library";
-
-export { defaultVariants, followUpVariants };
 
 /** Panel `data.instances` — comma-separated instance ids (`0,1,…`). */
 export const PANEL_INSTANCES_KEY = "instances";

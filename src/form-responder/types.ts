@@ -9,13 +9,13 @@ import type {
   RecursiveFormItem,
   Response,
   ResponderAdditionalChanges,
+  ResponderState,
   SectionMetaDom,
   SectionResponderChrome,
   SectionResponderContext,
   SectionResponderHeader,
   SectionValidator,
   SectionWithItems,
-  TypedFormItem,
   VariantsDom,
 } from "./_deps";
 
@@ -63,9 +63,8 @@ export type CustomFormResponderProps<
   /** Form-level validator — same shape as section (`SectionValidator`). */
   impRef: Ref<SectionValidator>;
   showDeleted: boolean;
-  resolveVariant: <K extends TypeNames>(
-    item: TypedFormItem<Params, K>,
-  ) => Variants[K];
+  /** Chrome values keyed by {@link ResponderState} — library picks by fill status. */
+  variants: Record<ResponderState, Variants>;
   /**
    * Reviewer follow-ups keyed by origin item id — forwarded to each
    * `SectionResponder`. Empty record when none.

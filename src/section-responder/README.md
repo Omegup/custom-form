@@ -12,21 +12,24 @@ appendix chrome is injected via `SectionResponderChrome` (demo owns DOM).
 
 | File | Role |
 |---|---|
-| `types.ts` | `ResponderExtra`, `ResponderAdditionalChanges`, `SectionValidator`, `SectionResponderChrome`, `SectionResponderProps` |
-| `SectionResponder.tsx` | **`SectionResponderHOC(viewers, chrome)`** — `FormItemHOC` + `getUseImpRefViewProps`, recursive slots |
+| `types.ts` | `ResponderState`, `ResponderExtra`, `ResponderAdditionalChanges`, `SectionValidator`, `SectionResponderChrome`, `SectionResponderProps` |
+| `SectionResponder.tsx` | **`SectionResponderHOC(viewers, chrome)`** — `FormItemHOC` + `getUseImpRefViewProps`, recursive slots; picks `variants[state][type]` |
 
 ## How it plugs in
 
 ```
 host: responses / setResponse / getError / section impRef
-  → SectionResponderHOC(viewers)
-  → per item: FormItemHOC(…, getUseImpRefViewProps)
+      + variants: Record<ResponderState, Variants>
+  → SectionResponderHOC(viewers, chrome)
+  → per item: pick state (error / change / old / default) → variants[state][type]
+  → FormItemHOC(…, getUseImpRefViewProps)
   → viewer registers ViewerMethods
   → section impRef.validate aggregates item errors
 ```
 
 `old` (prior answers + reviewer comments) is part of the school API; pass
-`null` when not in a review-revise flow.
+`null` when not in a review-revise flow. The host builds the chrome Record;
+the library picks by fill status (no `resolveVariant`).
 
 ## Demo (`section-responder/Section responder` story)
 

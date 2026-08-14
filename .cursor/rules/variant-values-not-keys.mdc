@@ -30,35 +30,38 @@ Passing the value keeps chrome host-owned and removes that dependency.
 
 ## Phase bags are dicts of values
 
-Hosts still pass a **dictionary keyed by known states** — the entries are
-Variant **objects**, not names. Viewers/orchestrators pick by status; they
-never consult a second chrome table.
+The host **builds** a dictionary of Variant objects. The **library** picks
+`bag[state][type]` and passes that object into the viewer. Hosts do not
+supply `resolveVariant` or dual `variants` / `followUpVariants` bags.
 
-| Phase | Bag shape (per item type) | Pick |
+| Phase | Prop | Library pick |
 |---|---|---|
-| Design | one `Variants` bag (often `{}` / minimal chrome) | use `bag[type]` |
-| Responder / review | `Record<ResponderState, Variants>` or dual bags (`variants` / `followUpVariants`) | `bag[status][type]` |
+| Design | `variants: Variants` | `variants[type]` |
+| Fill | `variants: Record<ResponderState, Variants>` | `variants[state][type]` |
+| Review | `variants: Record<ReviewVariantState, Variants>` | `variants[state][type]` |
 
-`ResponderState` examples: `default` | `old` | `change` | `error` (host-defined).
+`ResponderState`: `default` \| `old` \| `change` \| `error`.
+`ReviewVariantState`: `default` \| `change`.
 `Variant` stays **per type** (`Variants[K]` can differ across `field` / `heading` / …).
 
 ```typescript
-// ✅ Host builds value bags; resolve picks a value
-const fillVariants: Record<"default" | "old" | "change" | "error", Variant> = {
-  default: { fg: "#111", border: "#ccc", background: "#fff", badge: null },
-  old: { … },
-  change: { … },
-  error: { … },
+// ✅ Host constructs the Record; library picks by status
+const responderVariants: Record<ResponderState, Variants> = {
+  default: defaultChrome,
+  old: defaultChrome,
+  change: followUpChrome,
+  error: defaultChrome,
 };
-const variant = fillVariants[status]; // still a Variant object
+<FormResponder variants={responderVariants} />
 
-// ❌ BAD — bag of names + separate chrome map
-const names = { default: "default", change: "followUp" };
-const chrome = VARIANT_CHROME[names[status]];
+// ❌ BAD — host resolver reaching into chrome maps
+resolveVariant={(item) =>
+  pending ? followUpVariants[item.type] : defaultVariants[item.type]
+}
 ```
 
 Storybook controls may still use name keys **at the host boundary** only —
 map `TEXT_VARIANT[controlName]` before passing into viewers.
 
-Picking `bag[status]` is not the anti-pattern: the anti-pattern is a
-**second** map from name → style that viewers must import.
+Picking `bag[status]` inside the library is not the anti-pattern: the
+anti-pattern is a **second** map from name → style that viewers must import.

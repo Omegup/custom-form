@@ -90,9 +90,12 @@ const ctx = lib.branded<types.Ctx, "context">({
 const variants = lib.branded<types.Variants, "variants">({
   field: defaultFieldVariant,
 });
-const resolveVariant = <K extends types.TypeNames>(
-  item: lib.TypedFormItem<types.Params, K>,
-): types.Variants[K] => variants[item.type];
+const responderVariants: Record<lib.ResponderState, types.Variants> = {
+  default: variants,
+  old: variants,
+  change: variants,
+  error: variants,
+};
 
 export const FormResponderDemo = ({
   heading,
@@ -135,7 +138,7 @@ export const FormResponderDemo = ({
           getError={(id) => errors[id] ?? null}
           impRef={formRef}
           showDeleted={showDeleted}
-          resolveVariant={resolveVariant}
+          variants={responderVariants}
           followUpItems={{}}
         />
         <button type="button" onClick={validateForm} style={{ alignSelf: "flex-start" }}>

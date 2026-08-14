@@ -124,6 +124,10 @@ const variants = lib.branded<types.Variants, "variants">({
 const followUpVariants = lib.branded<types.Variants, "variants">({
   field: followUpFieldVariant,
 });
+const reviewVariants: Record<lib.ReviewVariantState, types.Variants> = {
+  default: variants,
+  change: followUpVariants,
+};
 
 const FormReview = lib.CustomFormReviewHOC<
   types.TypeNames,
@@ -131,7 +135,7 @@ const FormReview = lib.CustomFormReviewHOC<
   types.Variants,
   types.Ctx,
   types.Section
->(viewers, variants, followUpVariants, demo.formChrome);
+>(viewers, demo.formChrome);
 
 const ctx = lib.branded<types.Ctx, "context">({});
 const tCommon = (term: "add" | "cancel" | "save" | "delete") =>
@@ -223,6 +227,7 @@ export const FormReviewDemo = ({
               deleteCommentId={deleteCommentId}
               setDeleteCommentId={setDeleteCommentId}
               renderFormItemsEditor={({ fallback }) => fallback}
+              variants={reviewVariants}
               tCommon={tCommon}
               showDeleted={showDeleted}
             />

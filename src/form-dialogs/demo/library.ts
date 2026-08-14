@@ -30,6 +30,7 @@ export { emptyResponse } from "../../response";
 export type {
   ResponderAdditionalChanges,
   ResponderExtra,
+  ResponderState,
   SectionResponderChrome,
   SectionResponderContext,
   SectionValidator,
@@ -44,6 +45,7 @@ export type {
   ReviewFormItemEntry,
   ReviewFormItemsEditorArgs,
   ReviewStatus,
+  ReviewVariantState,
   SectionReviewChrome,
   SectionReviewContext,
 } from "../../section-review";

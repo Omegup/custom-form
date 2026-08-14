@@ -30,6 +30,7 @@ import {
 } from "./_deps";
 import type {
   ResponderExtra,
+  ResponderState,
   SectionResponderChrome,
   SectionResponderContext,
   SectionResponderHeader,
@@ -113,7 +114,7 @@ export const SectionResponderHOC = <
       getError,
       ctx,
       old,
-      resolveVariant,
+      variants,
       followUpItems,
     } = props;
 
@@ -150,10 +151,24 @@ export const SectionResponderHOC = <
       idSuffix: string,
       parentDeleted: boolean,
     ): ReactNode[] => {
+      const responderState = (
+        id: string,
+        isFollowUpTree: boolean,
+      ): ResponderState => {
+        if (getError(id)) return "error";
+        const oldValue = priorValue(id);
+        const remark = unlockComment(id);
+        if (isFollowUpTree && !oldValue) return "change";
+        if (oldValue && remark != null) return "change";
+        if (oldValue) return "old";
+        return "default";
+      };
+
       const renderFillItem = (
         item: RecursiveFormItem<TypeNames, Params, Meta>,
         index: number,
         itemParentDeleted: boolean,
+        isFollowUpTree: boolean,
       ): ReactNode => {
         const q = item.header;
         const children = item.children;
@@ -162,6 +177,7 @@ export const SectionResponderHOC = <
         const value = responses[q.id] ?? oldValue;
         const editable = !oldValue || comment != null;
         const error = getError(q.id);
+        const state = responderState(q.id, isFollowUpTree);
         // Seed the draft from the prior answer so revise Fill keeps it visible.
         const onActivate =
           responses[q.id] == null && editable && oldValue
@@ -180,7 +196,7 @@ export const SectionResponderHOC = <
               viewProps={{
                 ctx,
                 formItem: q,
-                variant: resolveVariant(q),
+                variant: variants[state][q.type],
                 extra: branded({
                   getChild: (suffix: string) => (
                     <>
@@ -246,7 +262,7 @@ export const SectionResponderHOC = <
 
               return (
                 <Fragment key={q.id}>
-                  {renderFillItem(item, index, parentDeleted)}
+                  {renderFillItem(item, index, parentDeleted, false)}
                   {followUps.length > 0
                     ? renderFollowUpGroup({
                         originId: q.id,
@@ -259,6 +275,7 @@ export const SectionResponderHOC = <
                                   fuIndex,
                                   // Follow-ups do not inherit deleted/transparent chrome.
                                   false,
+                                  true,
                                 )}
                               </Fragment>
                             ))}

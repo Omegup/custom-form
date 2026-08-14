@@ -129,7 +129,12 @@ export const SectionResponderDemo = ({
           setResponse={setResponse}
           getError={(id) => errors[id] ?? null}
           impRef={sectionRef}
-          resolveVariant={(item) => variants[item.type]}
+          variants={{
+            default: variants,
+            old: variants,
+            change: variants,
+            error: variants,
+          }}
           followUpItems={{}}
           i={0}
         />

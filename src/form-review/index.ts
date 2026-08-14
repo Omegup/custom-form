@@ -7,6 +7,7 @@ export type {
   AdditionalChanges,
   Addition,
   ReviewExtra,
+  ReviewVariantState,
   SectionReviewChrome,
   SectionReviewContext,
   SectionReviewHeader,

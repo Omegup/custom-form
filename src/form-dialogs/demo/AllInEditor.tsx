@@ -21,6 +21,10 @@ import {
   itemName,
 } from "../../form-item-editor/demo/FormItemEditorDemo";
 import { RemoveAlert } from "../../form-item-editor/demo/formItemEditorDemoHelper";
+import {
+  defaultVariants,
+  followUpVariants,
+} from "../../form-item-editor/demo/itemVariants";
 import { SectionDialog } from "../../section-edit/demo/SectionEditDemo";
 import { MENU_ITEMS, randomId } from "../../side-menu/demo/fixtures";
 import {
@@ -293,8 +297,8 @@ const FollowUpDesignItems = ({
     () => lib.autofocusCtx<lib.ContextDom>(lib.branded({}), focused),
     [focused],
   );
-  // Entire editor is follow-up items — yellow chrome via follow-up variant bag.
-  const variants = phases.followUpVariants;
+  // Entire editor is follow-up items — yellow chrome (Design bag, one value per type).
+  const variants = followUpVariants;
   const setItems = (items: types.FlatItems, newCtx: types.ListCtx) => {
     if (items !== flatItems) setFlatItems(items);
     setFocused(newCtx.focused);
@@ -418,12 +422,19 @@ const FormReview = lib.CustomFormReviewHOC<
   types.Variants,
   lib.SectionReviewContext,
   types.Section
->(
-  phases.reviewViewers,
-  phases.defaultVariants,
-  phases.followUpVariants,
-  phases.reviewChrome,
-);
+>(phases.reviewViewers, phases.reviewChrome);
+
+const responderVariants: Record<lib.ResponderState, types.Variants> = {
+  default: defaultVariants,
+  old: defaultVariants,
+  change: followUpVariants,
+  error: defaultVariants,
+};
+
+const reviewVariants: Record<lib.ReviewVariantState, types.Variants> = {
+  default: defaultVariants,
+  change: followUpVariants,
+};
 
 const fillCtx = lib.branded<lib.SectionResponderContext, "context">({
   t: (term) => (term === "fieldRequired" ? "This field is required" : term),
@@ -453,7 +464,7 @@ const DesignPhase = ({
     () => lib.autofocusCtx<lib.ContextDom>(lib.branded({}), focused),
     [focused],
   );
-  const variants = phases.defaultVariants;
+  const variants = defaultVariants;
 
   const setItems = (items: types.FlatItems, newCtx: types.ListCtx) => {
     if (items !== flatItems) updateArgs({ flatItems: items });
@@ -600,13 +611,6 @@ const FillPhase = ({
     }
     return ids;
   }, [doc, followUpIds]);
-  const unlockedIds = useMemo(() => {
-    const ids = new Set<string>();
-    for (const [id, change] of Object.entries(reviewChanges)) {
-      if (change.comment != null) ids.add(id);
-    }
-    return ids;
-  }, [reviewChanges]);
 
   useEffect(() => {
     if (!optimisticResponse) return;
@@ -634,35 +638,6 @@ const FillPhase = ({
       changes: responderChanges,
     };
   }, [doc]);
-
-  /**
-   * Lifecycle chrome (Fill):
-   * 1. first fill → black
-   * 3. after Request changes → yellow for unlocked origins + unanswered follow-ups
-   * Settled (answered) follow-ups stay default/black like originals.
-   */
-  const resolveVariant = useCallback(
-    <K extends types.TypeNames>(
-      item: lib.TypedFormItem<types.Params, K>,
-    ): types.Variants[K] => {
-      const baseId = baseIdOf(item.id);
-      // Unanswered follow-ups: yellow as soon as they exist (visible under origin).
-      if (
-        unansweredFollowUpIds.has(item.id) ||
-        unansweredFollowUpIds.has(baseId)
-      ) {
-        return phases.followUpVariants[item.type];
-      }
-      // Origins: yellow only while revising a change-request round with a remark.
-      if (doc?.status === "changesRequested") {
-        if (unlockedIds.has(item.id) || unlockedIds.has(baseId)) {
-          return phases.followUpVariants[item.type];
-        }
-      }
-      return phases.defaultVariants[item.type];
-    },
-    [doc?.status, unansweredFollowUpIds, unlockedIds],
-  );
 
   const setResponse = useCallback(
     (id: string, next?: lib.Response) => {
@@ -813,7 +788,7 @@ const FillPhase = ({
         getError={(id) => errors[id] ?? null}
         impRef={formRef}
         showDeleted={false}
-        resolveVariant={resolveVariant}
+        variants={responderVariants}
         followUpItems={followUpItems}
       />
       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -1096,6 +1071,7 @@ const UpdatePhase = ({
             fallback
           )
         }
+        variants={reviewVariants}
         tCommon={tCommon}
         showDeleted={showDeleted}
       />

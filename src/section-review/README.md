@@ -15,15 +15,17 @@ inline (sibling to content), never via `createPortal`.
 
 | File | Role |
 |---|---|
-| `types.ts` | `AdditionalChanges`, `Addition`/`CommentAddition`/`FormItemAddition`, `ReviewExtra`, `SectionReviewChrome`, `SectionReviewProps` |
+| `types.ts` | `AdditionalChanges`, `Addition`/`CommentAddition`/`FormItemAddition`, `ReviewExtra`, `ReviewVariantState`, `SectionReviewChrome`, `SectionReviewProps` |
 | `SectionReview.tsx` | **`SectionReviewHOC(viewers, chrome)`** — `FormItemHOC` + `getUseImpRefViewProps`, recursive slots, status + overlay state |
 
 ## How it plugs in
 
 ```
 host: responses / changes / setChanges / lastPending
+      + variants: Record<ReviewVariantState, Variants>
   → SectionReviewHOC(viewers, chrome)
-  → per item: FormItemHOC(…, getUseImpRefViewProps) — response.setValue always null
+  → per item: pick default | change → variants[state][type]
+  → FormItemHOC(…, getUseImpRefViewProps) — response.setValue always null
   → chrome.renderOverlays: add/edit/delete comment, add/edit follow-up form item
 ```
 

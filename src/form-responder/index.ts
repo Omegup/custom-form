@@ -6,6 +6,7 @@ export type {
 export type {
   ResponderAdditionalChanges,
   ResponderExtra,
+  ResponderState,
   SectionResponderChrome,
   SectionResponderContext,
   SectionResponderHeader,

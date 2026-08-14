@@ -8,6 +8,7 @@ export type {
   ReviewFormItemsEditorArgs,
   ReviewOverlayArgs,
   ReviewStatus,
+  ReviewVariantState,
   SectionReviewChrome,
   SectionReviewContext,
   SectionReviewHeader,

@@ -113,7 +113,6 @@ export const SectionReviewHOC = <
       setChanges,
       lastPending,
       variants,
-      followUpVariants,
       tCommon,
       addition,
       setAddition,
@@ -203,7 +202,8 @@ export const SectionReviewHOC = <
         isUnansweredFollowUpEntry ||
         hasUnlockRemark(item.id) ||
         hasUnansweredFollowUps(item.id);
-      return pending ? followUpVariants[item.type] : variants[item.type];
+      const state = pending ? "change" : "default";
+      return variants[state][item.type];
     };
 
     const submitComment = (text: string) => {

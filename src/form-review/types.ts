@@ -9,12 +9,14 @@ import type {
   MetaDom,
   ParamsDom,
   Response,
+  ReviewVariantState,
   SectionMetaDom,
   SectionReviewChrome,
   SectionReviewContext,
   SectionReviewHeader,
   SectionWithItems,
   ReviewFormItemsEditorArgs,
+  VariantsDom,
 } from "./_deps";
 
 /** Optional form title data — same shape as `form-responder`'s `FormHeader`. */
@@ -39,6 +41,7 @@ export type FormReviewChrome<
 export type CustomFormReviewProps<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
+  Variants extends VariantsDom<TypeNames>,
   Context extends SectionReviewContext,
   SectionConfig extends SectionReviewHeader,
   SectionMeta extends SectionMetaDom,
@@ -58,6 +61,8 @@ export type CustomFormReviewProps<
   renderFormItemsEditor: (
     args: ReviewFormItemsEditorArgs<TypeNames, Params>,
   ) => ReactNode;
+  /** Chrome values keyed by {@link ReviewVariantState} — library picks pending vs settled. */
+  variants: Record<ReviewVariantState, Variants>;
   tCommon: (term: "add" | "cancel" | "save" | "delete") => string;
   showDeleted: boolean;
   children?: ReactNode;

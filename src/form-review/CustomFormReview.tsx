@@ -42,8 +42,6 @@ export const CustomFormReviewHOC = <
     Context,
     string
   >,
-  variants: Variants,
-  followUpVariants: Variants,
   chrome: FormReviewChrome<TypeNames, Params>,
 ) => {
   const { renderHeader, renderForm, ...sectionChrome } = chrome;
@@ -59,6 +57,7 @@ export const CustomFormReviewHOC = <
     props: CustomFormReviewProps<
       TypeNames,
       Params,
+      Variants,
       Context,
       SectionConfig,
       SectionMeta,
@@ -77,6 +76,7 @@ export const CustomFormReviewHOC = <
       deleteCommentId,
       setDeleteCommentId,
       renderFormItemsEditor,
+      variants,
       tCommon,
       showDeleted,
       ctx,
@@ -107,7 +107,6 @@ export const CustomFormReviewHOC = <
                   setDeleteCommentId={setDeleteCommentId}
                   renderFormItemsEditor={renderFormItemsEditor}
                   variants={variants}
-                  followUpVariants={followUpVariants}
                   tCommon={tCommon}
                   i={i}
                 />

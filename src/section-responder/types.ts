@@ -18,9 +18,14 @@ import type {
   SectionDom,
   SectionMetaDom,
   SectionWithItems,
-  TypedFormItem,
   VariantsDom,
 } from "./_deps";
+
+/**
+ * Fill chrome states — host supplies a Variant **value** bag per state;
+ * the library picks `variants[state][type]` (see variant-values-not-keys).
+ */
+export type ResponderState = "default" | "old" | "change" | "error";
 
 /** Teacher/reviewer comments keyed by item id — school `ResponderAdditionalChanges`. */
 export type ResponderAdditionalChanges = Record<string, { comment?: string }>;
@@ -106,10 +111,8 @@ export type SectionResponderProps<
   setResponse: (id: string, response?: Response) => void;
   getError: (id: string) => string | null;
   impRef: Ref<SectionValidator>;
-  /** Per-item chrome value — host picks from a bag of Variant objects (not name keys). */
-  resolveVariant: <K extends TypeNames>(
-    item: TypedFormItem<Params, K>,
-  ) => Variants[K];
+  /** Chrome values keyed by {@link ResponderState} — library picks by fill status. */
+  variants: Record<ResponderState, Variants>;
   /**
    * Reviewer follow-ups keyed by **origin** item id (same keys as
    * `AdditionalChanges`). Rendered under each origin — not merged into the

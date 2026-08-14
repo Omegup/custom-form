@@ -131,6 +131,10 @@ const variants = lib.branded<types.Variants, "variants">({
 const followUpVariants = lib.branded<types.Variants, "variants">({
   field: followUpFieldVariant,
 });
+const reviewVariants: Record<lib.ReviewVariantState, types.Variants> = {
+  default: variants,
+  change: followUpVariants,
+};
 const tCommon = (term: "add" | "cancel" | "save" | "delete") =>
   ({ add: "Add", cancel: "Cancel", save: "Save", delete: "Delete" })[term];
 
@@ -191,8 +195,7 @@ export const SectionReviewDemo = ({
               deleteCommentId={deleteCommentId}
               setDeleteCommentId={setDeleteCommentId}
               renderFormItemsEditor={({ fallback }) => fallback}
-              variants={variants}
-              followUpVariants={followUpVariants}
+              variants={reviewVariants}
               tCommon={tCommon}
               i={0}
             />
