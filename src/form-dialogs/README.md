@@ -69,6 +69,8 @@ as **views** over school’s **two documents**:
 
 JSON panels show CustomForm vs FormResponse (plus fill draft).
 
+Read [`demo/AllInEditor.tsx`](./demo/AllInEditor.tsx) and [`demo/allInDemoTypes.t.ts`](./demo/allInDemoTypes.t.ts) for the composition. Phase HTML, viewers, and chrome live in sibling `allIn*.tsx` files (≤200 LoC each).
+
 Editors, dialog chrome, and fixtures are reused from the `form-item-editor`,
 `section-edit`, and `side-menu` demos (Storybook-only composition).
 

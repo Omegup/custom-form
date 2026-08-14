@@ -1,0 +1,180 @@
+/**
+ * Design-list stack — SectionFormItemHOC + makeUseDialogs + clone.
+ * DesignPhase and FollowUpDesignItems mount this; they own layout.
+ */
+import { createContext, useContext } from "react";
+import { WebRecursiveEdit } from "../../flat-dnd/demo/WebRecursiveEdit";
+import {
+  FormItemEditor,
+  itemName,
+} from "../../form-item-editor/demo/FormItemEditorDemo";
+import { SectionDialog } from "../../section-edit/demo/SectionEditDemo";
+import { MENU_ITEMS, randomId } from "../../side-menu/demo/fixtures";
+import { renderAddFormItem } from "../../side-menu/demo/sideMenuDemoHelper";
+import { columnsChrome } from "../../section-view/demo/sectionViewDemoHelper";
+import * as demo from "./allInDemoHelper";
+import type * as types from "./allInDemoTypes.t";
+import * as lib from "./library";
+
+export const blankSection = (id: string): types.Section => ({
+  id,
+  deleted: false,
+  title: "",
+  description: "",
+});
+
+export type DialogActions = {
+  openItemEdit: (item: types.ListItem) => void;
+  openSectionEdit: (section: types.ListSection) => void;
+};
+
+export const DialogActionsCtx = createContext<DialogActions>({
+  openItemEdit: () => {},
+  openSectionEdit: () => {},
+});
+
+const SectionTitle = (
+  props: lib.SectionProps<
+    types.TypeNames,
+    types.Params,
+    types.Variants,
+    types.Section,
+    types.BaseCtx,
+    types.ListExtra
+  >,
+) => {
+  const { openSectionEdit } = useContext(DialogActionsCtx);
+  const { section } = props;
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+      <strong>{section.header.title}</strong>
+      {!section.header.deleted && (
+        <button type="button" onClick={() => openSectionEdit(section)}>
+          Edit
+        </button>
+      )}
+    </span>
+  );
+};
+
+const useRenderAddItem = lib.makeUseRenderAddItem<
+  types.TypeNames,
+  types.Params
+>(
+  (args) => (
+    <lib.AddFormItem
+      {...args}
+      label="+ Add item"
+      render={renderAddFormItem}
+    />
+  ),
+  () => MENU_ITEMS,
+  randomId,
+);
+
+export const SectionComponent = lib.SectionFormItemHOC<
+  types.TypeNames,
+  types.Params,
+  types.Variants,
+  types.Section,
+  types.BaseCtx,
+  types.ListExtra
+>({
+  viewers: demo.viewers,
+  useRenderAddItem,
+  columnsChrome,
+  renderTitle: (props) => <SectionTitle {...props} />,
+  renderEdit: WebRecursiveEdit,
+});
+
+export const FollowUpSectionComponent = lib.SectionFormItemHOC<
+  types.TypeNames,
+  types.Params,
+  types.Variants,
+  types.Section,
+  types.BaseCtx,
+  types.ListExtra
+>({
+  viewers: demo.viewers,
+  useRenderAddItem,
+  columnsChrome,
+  renderTitle: () => <strong>Follow-up items</strong>,
+  renderEdit: WebRecursiveEdit,
+});
+
+export const cloneFn: lib.Clone<
+  types.TypeNames,
+  types.Params,
+  types.ListCtx,
+  types.Section
+> = (subItems, _, allItems) =>
+  lib.cloneFlatItems(
+    subItems,
+    allItems,
+    (name, n) => `${name} (copy${n})`,
+    randomId,
+    { rename: "first" },
+  );
+
+export const useDialogs = lib.makeUseDialogs<
+  types.TypeNames,
+  types.Params,
+  types.Ctx,
+  types.Section
+>({
+  renderFormItem: ({
+    ctx,
+    session,
+    add,
+    setDraft,
+    setSIndex,
+    sectionOptions,
+    commit,
+    close,
+  }) => (
+    <FormItemEditor
+      ctx={ctx}
+      dialogArgs={lib.branded({
+        title: (
+          <>
+            {session.total === 0 ? "Add" : "Edit"} ·{" "}
+            {itemName(ctx, session.draft.item)}
+          </>
+        ),
+        onCancel: close,
+      })}
+      formItem={session.draft}
+      setFormItem={setDraft}
+      extra={lib.branded<types.ItemExtra, "item-edit-extra">({
+        onCommit: commit,
+        sectionPicker: add
+          ? {
+              sIndex: session.sIndex,
+              sections: sectionOptions.map(({ index, header }) => ({
+                index,
+                title: header.title,
+              })),
+              setSIndex,
+            }
+          : undefined,
+      })}
+    />
+  ),
+  renderSection: ({ session, add, commit, close }) => (
+    <SectionDialog
+      title={add ? "Add section" : undefined}
+      draft={session.draft}
+      onCancel={close}
+      onSave={(form) =>
+        commit(
+          {
+            ...session.draft.header,
+            title: form.title,
+            description: form.description,
+          },
+          form.cols,
+        )
+      }
+    />
+  ),
+});

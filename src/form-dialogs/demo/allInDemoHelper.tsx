@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { FieldRow } from "../../form-edit/demo/editFormDemoHelper";
 import allInEditorSource from "./AllInEditor.tsx?raw";
 import allInDemoTypesSource from "./allInDemoTypes.t.ts?raw";
-import allInPhasesSource from "./allInPhases.tsx?raw";
 import type * as types from "./allInDemoTypes.t";
 import * as lib from "./library";
 
@@ -11,8 +10,6 @@ const withFileHeader = (path: string, source: string) =>
 
 export const ALL_IN_DEMO_SOURCE = [
   withFileHeader("allInDemoTypes.t.ts", allInDemoTypesSource),
-  "",
-  withFileHeader("allInPhases.tsx", allInPhasesSource),
   "",
   withFileHeader("AllInEditor.tsx", allInEditorSource),
 ].join("\n");
