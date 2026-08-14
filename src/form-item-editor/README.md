@@ -59,16 +59,16 @@ The pure part of school `react-packages/form-edit-react/useDialog.tsx` lives in
 ### Orchestrator now in **`form-dialogs`** (`makeUseDialogs`)
 
 School home: `react-packages/form-edit-react/useDialog.tsx` (`makeUseDialogs`) —
-ported as `form-dialogs/makeUseDialogs`. The composed `form-dialogs/All-in`
+ported as `form-dialogs/makeUseDialogs`. The `form-dialogs/Form dialogs`
 story runs this demo's editors through it; this demo keeps its own minimal
 hand-wiring so the focused story stays a one-package showcase.
 
 | Demo code | School equivalent | Library home |
 |---|---|---|
 | `session` state + `commitDraft` / `setFormItem` wiring | `makeUseDialogs` React state, `setEditFormItem(item, cols)` via `extra` | `form-dialogs` (`useDialogs` sessions + `commit`) |
-| `FormItemEditorDemo` shell | `DialogUi` + `CustomFormEditor` | `form-dialogs/demo/AllInEditor.tsx` (Storybook composition) |
+| `FormItemEditorDemo` shell | `DialogUi` + `CustomFormEditor` | `form-dialogs/demo/FormDialogsDemo.tsx` (Storybook composition) |
 
-### Stays in demo until **`form-edit`** story integration (or `form-dialogs` All-in)
+### Stays in demo until **`form-edit`** story integration (or `form-dialogs`)
 
 | Demo code | Package | Notes |
 |---|---|---|

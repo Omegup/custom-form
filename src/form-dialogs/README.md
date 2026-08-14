@@ -1,8 +1,7 @@
 # form-dialogs
 
 **Dialog orchestrator** — owns the item / section edit sessions and their
-commit wiring, and renders the dialogs through host callbacks. The composed
-"All-in" Storybook story lives here.
+commit wiring, and renders the dialogs through host callbacks.
 
 Migrated from `school/components/custom-form` → `react-packages/form-edit-react`
 (`makeUseDialogs` in `useDialog.tsx`); the pure mutations were already extracted
@@ -50,29 +49,20 @@ section: commit(header, cols)  → updateSectionInFlat(flatItems, session, heade
 
 ## Demo
 
-`form-dialogs/All-in` story (`demo/AllInEditor.tsx`) — **Design → Fill → Update**
-as **views** over school’s **two documents**:
+`form-dialogs/Form dialogs` (`demo/FormDialogsDemo.tsx`) — **`makeUseDialogs`**
+plus **`useFlatListSession`** on the design list.
 
-| Document | Story args | Role |
-|---|---|---|
-| **CustomForm** | `flatItems` | Design (sections / items) |
-| **FormResponse** | `formResponse` | Answers + `changes` + `feedbackHistory` + `status` — null until Send |
+The new idea vs the side-menu demo is the orchestrator: item/section sessions
+and commits live in the hook, not local `useState` + `applyFlatFormItem`.
 
-1. **Design** — edit the CustomForm via **`SectionFormItemHOC`** + DnD + Library
-   + `useDialogs`.
-2. **Fill** — **`CustomFormResponderHOC`**; **Send** creates/updates
-   `formResponse` (school `addFormResponse`). Draft answers live in `responses`
-   until Send. A prior FormResponse becomes `old` for revise.
-3. **Update** — teacher view of the **same** `formResponse` via
-   **`CustomFormReviewHOC`**: Save (`addAdditionalQuestions`), Request changes /
-   Approve / Reject (`addFeedback`). Not a third document.
+Side, `SectionFormItemHOC`, `WebRecursiveEdit`, `FormItemEditor`, and
+`SectionDialog` were taught in earlier stories; this one only plugs them into
+`useDialogs`.
 
-JSON panels show CustomForm vs FormResponse (plus fill draft).
+Read [`demo/FormDialogsDemo.tsx`](./demo/FormDialogsDemo.tsx) and
+[`demo/formDialogsDemoTypes.t.ts`](./demo/formDialogsDemoTypes.t.ts).
 
-Read [`demo/AllInEditor.tsx`](./demo/AllInEditor.tsx) and [`demo/allInDemoTypes.t.ts`](./demo/allInDemoTypes.t.ts) for the composition. Phase HTML, viewers, and chrome live in sibling `allIn*.tsx` files (≤200 LoC each).
-
-Editors, dialog chrome, and fixtures are reused from the `form-item-editor`,
-`section-edit`, and `side-menu` demos (Storybook-only composition).
+Fill / Send / FormResponse live in [`form-response/`](../form-response/README.md).
 
 ## Dependency rule
 
@@ -81,5 +71,4 @@ Imports from: `form`, `recursive-form`, `form-edit`, `section-edit`, `move-actio
 Does **not** import: `form-item-editor`, `side-menu`, `section-view`, `flat-dnd`.
 The demo composes those packages for Storybook only (`section-view` for the
 list shell, `flat-dnd/demo/WebRecursiveEdit` for DnD, `side-menu` for catalog /
-add slots, `form-item-editor` / `section-edit` for dialog chrome,
-`form-response` for Send / Save / feedback).
+add slots, `form-item-editor` / `section-edit` for dialog chrome).

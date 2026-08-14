@@ -48,7 +48,7 @@ SectionHOC(args)(props)
        render: { addItem, node: renderFormItem(props) },
     })
 renderEdit = createColumnsEdit(columnsChrome) (default, no HTML)
-            | WebRecursiveEdit (flat-dnd / All-in)
+            | WebRecursiveEdit (flat-dnd / form-dialogs)
 ```
 
 ```mermaid
@@ -81,9 +81,9 @@ nested columns with their own "+ Add" slot. Item add/edit commits immediately
 via `form-edit`'s `applyFlatFormItem` (no dialog) — this story's job is
 `section-view` composition alone.
 
-The full editor with dialogs (`form-dialogs/All-in`) also uses
-`SectionFormItemHOC` as its list shell (with `WebRecursiveEdit` for DnD),
-display-only viewers, and Edit opening `makeUseDialogs` sessions.
+The form-dialogs story also uses `SectionFormItemHOC` as its list shell
+(with `WebRecursiveEdit` for DnD), display-only viewers, and Edit opening
+`makeUseDialogs` sessions.
 
 ## Dependency rule
 

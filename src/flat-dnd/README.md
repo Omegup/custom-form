@@ -34,7 +34,7 @@ host wants that look without reinventing it.
 
 `section-view`'s `SectionFormItemHOC` is composed in the demo with
 `renderEdit: WebRecursiveEdit` — the same plug-in seam as `ColumnsEdit`.
-`form-dialogs/All-in` reuses the same `WebRecursiveEdit` for the full editor.
+`form-dialogs` reuses the same `WebRecursiveEdit` for the design list.
 
 ## Scope: one section at a time
 

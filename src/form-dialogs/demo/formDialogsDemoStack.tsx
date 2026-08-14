@@ -1,6 +1,6 @@
 /**
  * Design-list stack — SectionFormItemHOC + makeUseDialogs + clone.
- * DesignPhase and FollowUpDesignItems mount this; they own layout.
+ * FormDialogsDemo mounts this; it owns layout.
  */
 import { createContext, useContext } from "react";
 import { WebRecursiveEdit } from "../../flat-dnd/demo/WebRecursiveEdit";
@@ -12,8 +12,8 @@ import { SectionDialog } from "../../section-edit/demo/SectionEditDemo";
 import { MENU_ITEMS, randomId } from "../../side-menu/demo/fixtures";
 import { renderAddFormItem } from "../../side-menu/demo/sideMenuDemoHelper";
 import { columnsChrome } from "../../section-view/demo/sectionViewDemoHelper";
-import * as demo from "./allInDemoHelper";
-import type * as types from "./allInDemoTypes.t";
+import * as demo from "./formDialogsDemoHelper";
+import type * as types from "./formDialogsDemoTypes.t";
 import * as lib from "./library";
 
 export const blankSection = (id: string): types.Section => ({
@@ -84,21 +84,6 @@ export const SectionComponent = lib.SectionFormItemHOC<
   useRenderAddItem,
   columnsChrome,
   renderTitle: (props) => <SectionTitle {...props} />,
-  renderEdit: WebRecursiveEdit,
-});
-
-export const FollowUpSectionComponent = lib.SectionFormItemHOC<
-  types.TypeNames,
-  types.Params,
-  types.Variants,
-  types.Section,
-  types.BaseCtx,
-  types.ListExtra
->({
-  viewers: demo.viewers,
-  useRenderAddItem,
-  columnsChrome,
-  renderTitle: () => <strong>Follow-up items</strong>,
   renderEdit: WebRecursiveEdit,
 });
 

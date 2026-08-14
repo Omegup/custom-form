@@ -14,7 +14,7 @@ src/
 ├── section-edit/            Section edit types + flat save
 ├── section-view/            SectionHOC + ColumnsEdit (section list rendering, no DnD)
 ├── flat-dnd/                SectionNodes ↔ drag-drop-tree (lib); demo wires headless DnD + HTML
-├── form-dialogs/            Dialog orchestrator (makeUseDialogs) + All-in demo
+├── form-dialogs/            Dialog orchestrator (makeUseDialogs)
 ├── section-responder/       Section fill shell (SectionResponderHOC)
 ├── form-responder/          Multi-section fill shell (CustomFormResponderHOC)
 ├── section-review/          Section review shell (SectionReviewHOC)
@@ -22,7 +22,7 @@ src/
 └── form-response/           FormResponse document + Send / Save / feedback
 ```
 
-Each module owns its **Storybook story** (`*.stories.tsx` with args/controls) and a **playground component** (`*Playground.tsx`), except logic-only packages such as [`form-response/`](./form-response/README.md) (All-in is the host). Vitest tests live in `*.test.ts`.
+Each module owns its **Storybook story** (`*.stories.tsx` with args/controls) and a **playground component** (`*Playground.tsx`). Vitest tests live in `*.test.ts`.
 
 ## Dependency graph
 
@@ -67,8 +67,10 @@ wires the headless React engine (`DnDTreeCore`, `RecursiveTreeNode`) and owns
 HTML chrome — see `demo/WebRecursiveEdit.tsx`. Stock school widgets also live
 under `drag-drop-tree/demo/`.
 
-Module demos compose features via props or, for the all-in editor, in `form-dialogs/demo/AllInEditor.tsx`
-(`SectionFormItemHOC` + `WebRecursiveEdit` + `makeUseDialogs` + `form-response` hooks). The demo injects
+Module demos compose features via props. `form-dialogs/demo/FormDialogsDemo.tsx`
+wires `SectionFormItemHOC` + `WebRecursiveEdit` + `makeUseDialogs`.
+`form-response/demo/FormResponseDemo.tsx` wires fill/review HOCs with
+Send / Save / feedback hooks. The form-dialogs demo injects
 `side-menu`'s `makeUseRenderAddItem` into `section-view`, same as school.
 
 ## Import rules

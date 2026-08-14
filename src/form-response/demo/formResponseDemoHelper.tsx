@@ -1,9 +1,15 @@
-/**
- * All-in walkthrough chrome — Design / Fill / Update tabs + document JSON.
- */
-import type { CSSProperties } from "react";
-import type * as types from "./allInDemoTypes.t";
+import type { CSSProperties, ReactNode } from "react";
+import {
+  INITIAL_HEADER,
+  INITIAL_SECTIONS,
+} from "../../form-review/demo/formReviewDemoHelper";
+import { FormContainer } from "../../form-review/demo/formReviewDemoHelper";
+import formResponseDemoSource from "./FormResponseDemo.tsx?raw";
+import formResponseDemoTypesSource from "./formResponseDemoTypes.t.ts?raw";
+import type * as types from "./formResponseDemoTypes.t";
 import * as lib from "./library";
+
+export { FormContainer, INITIAL_HEADER, INITIAL_SECTIONS };
 
 const datesByIso = new Map<string, Date>();
 
@@ -17,20 +23,14 @@ export const dateFromIso = (iso: string): Date =>
 
 const PHASES: { id: types.DemoPhase; label: string; blurb: string }[] = [
   {
-    id: "design",
-    label: "1. Design",
-    blurb:
-      "Author the form — sections, fields, panels, drag-and-drop, Library sidebar.",
-  },
-  {
     id: "fill",
-    label: "2. Fill",
+    label: "1. Fill",
     blurb:
       "Student answers then Sends — creates/updates the FormResponse. Send is available when there is no response yet, or status is changesRequested.",
   },
   {
     id: "update",
-    label: "3. Update",
+    label: "2. Update",
     blurb:
       "Teacher view of the same FormResponse — Save remarks/follow-ups, then Request changes / Approve / Reject.",
   },
@@ -45,17 +45,10 @@ export const PhaseTabs = ({
 }) => {
   const current = PHASES.find((p) => p.id === phase)!;
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 10,
-        marginBottom: 8,
-      }}
-    >
+    <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 8 }}>
       <div
         role="tablist"
-        aria-label="Lifecycle phase"
+        aria-label="FormResponse phase"
         style={{ display: "flex", gap: 0, borderBottom: "1px solid #ddd" }}
       >
         {PHASES.map((p) => {
@@ -107,25 +100,22 @@ const jsonPanelStyle = (active: boolean): CSSProperties => ({
 
 export const PhaseJsonPanels = ({
   phase,
-  flatItems,
   responses,
   formResponse,
 }: {
   phase: types.DemoPhase;
-  flatItems: types.FlatItems;
   responses: Record<string, lib.Response>;
   formResponse: types.FormResponseDoc | null;
 }) => {
   const panels: { title: string; active: boolean; value: unknown }[] = [
-    { title: "CustomForm · design", active: phase === "design", value: flatItems },
     {
       title: "FormResponse",
-      active: phase === "fill" || phase === "update",
+      active: true,
       value: formResponse,
     },
   ];
   if (phase === "fill") {
-    panels.push({ title: "Fill draft (formik)", active: true, value: responses });
+    panels.push({ title: "Fill draft", active: true, value: responses });
   }
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 16 }}>
@@ -138,7 +128,7 @@ export const PhaseJsonPanels = ({
           textTransform: "uppercase",
         }}
       >
-        Documents (school: CustomForm + FormResponse)
+        Document
       </div>
       <div
         style={{
@@ -157,7 +147,6 @@ export const PhaseJsonPanels = ({
               }}
             >
               {p.title}
-              {p.active ? " · active view" : ""}
             </div>
             <pre style={jsonPanelStyle(p.active)}>
               {JSON.stringify(p.value, null, 2)}
@@ -168,3 +157,22 @@ export const PhaseJsonPanels = ({
     </div>
   );
 };
+
+const withFileHeader = (path: string, source: string) =>
+  `// ── ${path} ──\n${source.trimEnd()}`;
+
+export const FORM_RESPONSE_DEMO_SOURCE = [
+  withFileHeader("formResponseDemoTypes.t.ts", formResponseDemoTypesSource),
+  "",
+  withFileHeader("FormResponseDemo.tsx", formResponseDemoSource),
+].join("\n");
+
+export const FOLLOW_UP_BADGE: ReactNode = (
+  <span
+    title="Added follow-up"
+    aria-label="Added follow-up"
+    style={{ color: "#b45309", fontSize: 12, fontWeight: 700 }}
+  >
+    ✚
+  </span>
+);

@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import type * as types from "./allInDemoTypes.t";
+import type * as types from "./formResponseDemoTypes.t";
 import type * as lib from "./library";
 
 type Review = {
@@ -42,11 +42,6 @@ export const UpdateToolbar = ({
         onNote("FormResponse.changes saved.");
       }}
       disabled={!review.dirty}
-      title={
-        formResponse.status === "answered"
-          ? "Commit remarks/follow-ups and move status answered → draft (school addAdditionalQuestions)."
-          : "Commit remarks/follow-ups on FormResponse.changes (school addAdditionalQuestions)."
-      }
     >
       Save changes
     </button>
@@ -119,7 +114,7 @@ export const FeedbackBar = ({
           feedbackComment.trim() || undefined,
         );
         setFeedbackComment("");
-        onNote("Changes requested on FormResponse — student revises on Fill → Send.");
+        onNote("Changes requested — student revises on Fill → Send.");
       }}
       disabled={formResponse.status === "changesRequested"}
     >

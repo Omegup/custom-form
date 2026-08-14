@@ -1,17 +1,17 @@
 import type { ReactNode } from "react";
 import { FieldRow } from "../../form-edit/demo/editFormDemoHelper";
-import allInEditorSource from "./AllInEditor.tsx?raw";
-import allInDemoTypesSource from "./allInDemoTypes.t.ts?raw";
-import type * as types from "./allInDemoTypes.t";
+import formDialogsDemoSource from "./FormDialogsDemo.tsx?raw";
+import formDialogsDemoTypesSource from "./formDialogsDemoTypes.t.ts?raw";
+import type * as types from "./formDialogsDemoTypes.t";
 import * as lib from "./library";
 
 const withFileHeader = (path: string, source: string) =>
   `// ── ${path} ──\n${source.trimEnd()}`;
 
-export const ALL_IN_DEMO_SOURCE = [
-  withFileHeader("allInDemoTypes.t.ts", allInDemoTypesSource),
+export const FORM_DIALOGS_DEMO_SOURCE = [
+  withFileHeader("formDialogsDemoTypes.t.ts", formDialogsDemoTypesSource),
   "",
-  withFileHeader("AllInEditor.tsx", allInEditorSource),
+  withFileHeader("FormDialogsDemo.tsx", formDialogsDemoSource),
 ].join("\n");
 
 type CardExtra = types.ListExtra & lib.EditExtra & lib.Children;
@@ -43,7 +43,6 @@ export const viewers: lib.Viewers<
     viewer: ({ props: { formItem } }) => (
       <span style={{ fontWeight: 600 }}>{formItem.params.name}</span>
     ),
-    /** One slot — column flex already built into `getChild` by the `renderEdit`. */
     repeatChildren: () => [""],
   },
 };

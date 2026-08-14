@@ -1,46 +1,25 @@
 /**
- * Update phase — useFormResponseReview + CustomFormReviewHOC.
- * Follow-ups render through Design's list stack.
+ * Update — useFormResponseReview + CustomFormReviewHOC.
  */
 import { useState } from "react";
+import { dateFromIso, rememberDate } from "./formResponseDemoHelper";
+import type * as types from "./formResponseDemoTypes.t";
+import { FeedbackBar, UpdateToolbar } from "./formResponseToolbar";
 import {
-  defaultVariants,
-  followUpVariants,
-} from "../../form-item-editor/demo/itemVariants";
-import { FollowUpDesignItems } from "./allInFollowUp";
-import { FeedbackBar, UpdateToolbar } from "./allInFeedbackBar";
-import { dateFromIso, rememberDate } from "./allInLifecycle";
-import { reviewChrome } from "./allInReviewChrome";
-import { reviewViewers } from "./allInReviewViewers";
-import type * as types from "./allInDemoTypes.t";
+  FormReview,
+  reviewCtx,
+  reviewVariants,
+  tCommon,
+} from "./formResponseUpdateView";
 import * as lib from "./library";
-
-const FormReview = lib.CustomFormReviewHOC<
-  types.TypeNames,
-  types.Params,
-  types.Variants,
-  lib.SectionReviewContext,
-  types.Section
->(reviewViewers, reviewChrome);
-
-const reviewVariants: Record<lib.ReviewVariantState, types.Variants> = {
-  default: defaultVariants,
-  change: followUpVariants,
-};
-
-const reviewCtx = lib.branded<lib.SectionReviewContext, "context">({});
-const tCommon = (term: "add" | "cancel" | "save" | "delete") =>
-  ({ add: "Add", cancel: "Cancel", save: "Save", delete: "Delete" })[term];
 
 export const UpdatePhase = ({
   sections,
-  flatItems,
   formResponse,
   showDeleted,
   updateArgs,
 }: {
   sections: types.ListSection[];
-  flatItems: types.FlatItems;
   formResponse: types.FormResponseDoc | null;
   showDeleted: boolean;
   updateArgs: types.DemoProps["updateArgs"];
@@ -103,17 +82,7 @@ export const UpdatePhase = ({
         setAddition={setAddition}
         deleteCommentId={deleteCommentId}
         setDeleteCommentId={setDeleteCommentId}
-        renderFormItemsEditor={({ entries, setEntries, fallback }) =>
-          entries.some((entry) => entry.formItem) ? (
-            <FollowUpDesignItems
-              entries={entries}
-              designFlatItems={flatItems}
-              setEntries={setEntries}
-            />
-          ) : (
-            fallback
-          )
-        }
+        renderFormItemsEditor={({ fallback }) => fallback}
         variants={reviewVariants}
         tCommon={tCommon}
         showDeleted={showDeleted}

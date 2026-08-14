@@ -1,35 +1,15 @@
 /**
- * Fill phase — useFormResponseSend + CustomFormResponderHOC.
- * Optimistic Send write-through is Storybook `updateArgs` (ISO round-trip).
+ * Fill — useFormResponseSend + CustomFormResponderHOC.
  */
 import { useEffect, useRef, useState } from "react";
+import { rememberDate } from "./formResponseDemoHelper";
+import type * as types from "./formResponseDemoTypes.t";
 import {
-  defaultVariants,
-  followUpVariants,
-} from "../../form-item-editor/demo/itemVariants";
-import { fillChrome, fillViewers } from "./allInFillUi";
-import { rememberDate } from "./allInLifecycle";
-import type * as types from "./allInDemoTypes.t";
+  FormResponder,
+  fillCtx,
+  responderVariants,
+} from "./formResponseFillView";
 import * as lib from "./library";
-
-const FormResponder = lib.CustomFormResponderHOC<
-  types.TypeNames,
-  types.Params,
-  types.Variants,
-  lib.SectionResponderContext,
-  types.Section
->(fillViewers, fillChrome);
-
-const responderVariants: Record<lib.ResponderState, types.Variants> = {
-  default: defaultVariants,
-  old: defaultVariants,
-  change: followUpVariants,
-  error: defaultVariants,
-};
-
-const fillCtx = lib.branded<lib.SectionResponderContext, "context">({
-  t: (term) => (term === "fieldRequired" ? "This field is required" : term),
-});
 
 const fillDescription = (
   fill: { old: unknown; unansweredFollowUpIds: Set<string> },
@@ -37,15 +17,15 @@ const fillDescription = (
 ): string => {
   if (fill.unansweredFollowUpIds.size > 0) {
     return doc?.status === "changesRequested"
-      ? `Answer ${fill.unansweredFollowUpIds.size} follow-up field(s) (yellow, under related answers), then Send.`
-      : `Follow-up questions are under related answers — Request changes on Update to unlock Send (and yellow revise chrome).`;
+      ? `Answer ${fill.unansweredFollowUpIds.size} follow-up field(s), then Send.`
+      : "Follow-up questions are under related answers — Request changes on Update to unlock Send.";
   }
   if (fill.old) {
     return doc?.status === "changesRequested"
-      ? "Changes requested — edit remarked fields if you want, then Send again (resend is allowed with no edits)."
+      ? "Changes requested — edit remarked fields if you want, then Send again."
       : "Waiting for the teacher to request changes before you can Send again.";
   }
-  return "Send creates the FormResponse document (school addFormResponse).";
+  return "Send creates the FormResponse document.";
 };
 
 export const FillPhase = ({

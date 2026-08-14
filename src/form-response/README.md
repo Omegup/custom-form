@@ -21,7 +21,19 @@ Not `response/` (per-item `{ meta, data }` values).
 | `useFormResponseReview.ts` | Headless Update save / revert / feedback hook (no HTML) |
 
 Library functions take `now: Date`. Hosts that need Storybook Date identity
-supply it (e.g. `rememberDate`).
+supply it (e.g. `rememberDate` in the demo).
+
+## Demo
+
+`form-response/Form response` (`demo/FormResponseDemo.tsx`) — **Fill → Send**
+creates the FormResponse document; **Update** Save / Request changes / Approve /
+Reject mutate that same record.
+
+Field-only. Fill chrome comes from the form-responder demo; review chrome and
+the follow-up button come from the form-review demo. Design editing is
+[`form-dialogs/`](../form-dialogs/README.md).
+
+Read [`demo/FormResponseDemo.tsx`](./demo/FormResponseDemo.tsx).
 
 ## Dependency rule
 
@@ -31,5 +43,6 @@ response / recursive-form / form-edit / section-review
   form-response
 ```
 
-Does **not** import `form-responder` / `form-review` HOCs. Fill `old.changes`
-is a structural `{ comment?: string }` record (`remarkOnlyChanges`).
+Library does **not** import `form-responder` / `form-review` HOCs. The demo
+may compose those shells. Fill `old.changes` is a structural
+`{ comment?: string }` record (`remarkOnlyChanges`).
