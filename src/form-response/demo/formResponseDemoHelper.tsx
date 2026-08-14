@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import {
+  INITIAL_FLAT,
   INITIAL_HEADER,
-  INITIAL_SECTIONS,
 } from "../../form-review/demo/formReviewDemoHelper";
 import { FormContainer } from "../../form-review/demo/formReviewDemoHelper";
 import formResponseDemoSource from "./FormResponseDemo.tsx?raw";
@@ -9,7 +9,7 @@ import formResponseDemoTypesSource from "./formResponseDemoTypes.t.ts?raw";
 import type * as types from "./formResponseDemoTypes.t";
 import * as lib from "./library";
 
-export { FormContainer, INITIAL_HEADER, INITIAL_SECTIONS };
+export { FormContainer, INITIAL_FLAT, INITIAL_HEADER };
 
 const datesByIso = new Map<string, Date>();
 
@@ -25,7 +25,7 @@ const PHASES: { id: types.DemoPhase; label: string; blurb: string }[] = [
   {
     id: "design",
     label: "1. Design",
-    blurb: "Form blueprint — field labels only. Editing lives in form-dialogs.",
+    blurb: "Same editor as form-dialogs — library, add/edit, drag-and-drop. Fill/Update stay field-only.",
   },
   {
     id: "fill",

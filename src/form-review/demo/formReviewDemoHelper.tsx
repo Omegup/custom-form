@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
+import { flatFromFieldSections } from "../../form-dialogs/demo/formDialogsDemoFlat";
 import formReviewDemoSource from "./FormReviewDemo.tsx?raw";
 import formReviewDemoTypesSource from "./formReviewDemoTypes.t.ts?raw";
 import type * as types from "./formReviewDemoTypes.t";
@@ -14,7 +15,7 @@ export const FormContainer = ({
   <div
     style={{
       fontFamily: "system-ui, sans-serif",
-      maxWidth: 920,
+      maxWidth: 1120,
       margin: "0 auto",
       color: "#1a1a1a",
     }}
@@ -35,7 +36,7 @@ const PHASES: {
   {
     id: "design",
     label: "1. Design",
-    blurb: "Author builds the form — sections and fields only. No answers yet.",
+    blurb: "Same editor as form-dialogs — library, add/edit, drag-and-drop. Fill/review below stay field-only.",
   },
   {
     id: "response",
@@ -185,81 +186,6 @@ const fieldRowStyle: CSSProperties = {
   borderRadius: 4,
   background: "#fff",
 };
-
-/** Read-only blueprint of the form (Design phase) — demo chrome only. */
-export const DesignView = ({
-  header,
-  sections,
-}: {
-  header: lib.FormHeader;
-  sections: types.ListSection[];
-}) => (
-  <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-    <div>
-      <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 600 }}>{header.title}</h2>
-      {header.description ? (
-        <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{header.description}</p>
-      ) : null}
-      <p
-        style={{
-          margin: "8px 0 0",
-          fontSize: 12,
-          color: "#888",
-          fontStyle: "italic",
-        }}
-      >
-        Design blueprint — field labels and required flags only.
-      </p>
-    </div>
-    {sections.map((section, i) => (
-      <div
-        key={section.header.id}
-        style={{
-          opacity: section.header.deleted ? 0.5 : 1,
-          display: "flex",
-          flexDirection: "column",
-          gap: 10,
-        }}
-      >
-        <div>
-          <h3 style={{ margin: "0 0 4px", fontSize: 17, fontWeight: 600 }}>
-            {i + 1}. {section.header.title}
-            {section.header.deleted ? " (deleted)" : ""}
-          </h3>
-          {section.header.description ? (
-            <p style={{ margin: 0, color: "#555", fontSize: 13 }}>
-              {section.header.description}
-            </p>
-          ) : null}
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {section.items.flat().map(({ header: q }) => (
-            <div key={q.id} style={fieldRowStyle}>
-              <span style={{ fontSize: 14, fontWeight: 600 }}>
-                {q.params.name}
-                {q.params.required ? (
-                  <span style={{ color: "#b00020", marginLeft: 4 }}>*</span>
-                ) : null}
-              </span>
-              <span style={{ fontSize: 12, color: "#888" }}>
-                id: {q.id}
-                {q.deleted ? " · deleted" : ""} · type: {q.type}
-              </span>
-              <div
-                style={{
-                  height: 28,
-                  borderRadius: 3,
-                  border: "1px dashed #ccc",
-                  background: "#fafafa",
-                }}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-    ))}
-  </div>
-);
 
 /** Read-only filled form (Response phase) — demo chrome only. */
 export const ResponseView = ({
@@ -671,6 +597,8 @@ export const INITIAL_SECTIONS: types.ListSection[] = [
     items: [[field("legacy", "Legacy note", false)]],
   },
 ];
+
+export const INITIAL_FLAT = flatFromFieldSections(INITIAL_SECTIONS);
 
 export const INITIAL_RESPONSES: Record<string, lib.Response> = {
   name: { meta: {}, data: { value: "Ada Lovelace" } },

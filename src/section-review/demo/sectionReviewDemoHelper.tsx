@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
+import { flatFromFieldSections } from "../../form-dialogs/demo/formDialogsDemoFlat";
 import sectionReviewDemoSource from "./SectionReviewDemo.tsx?raw";
 import sectionReviewDemoTypesSource from "./sectionReviewDemoTypes.t.ts?raw";
 import type * as types from "./sectionReviewDemoTypes.t";
@@ -14,7 +15,7 @@ export const FormContainer = ({
   <div
     style={{
       fontFamily: "system-ui, sans-serif",
-      maxWidth: 920,
+      maxWidth: 1120,
       margin: "0 auto",
       color: "#1a1a1a",
     }}
@@ -35,7 +36,7 @@ const PHASES: {
   {
     id: "design",
     label: "1. Design",
-    blurb: "Author builds this section — field labels and required flags only.",
+    blurb: "Same editor as form-dialogs — library, add/edit, drag-and-drop. This story reviews the first section.",
   },
   {
     id: "response",
@@ -179,47 +180,6 @@ const fieldRowStyle: CSSProperties = {
   borderRadius: 4,
   background: "#fff",
 };
-
-export const DesignView = ({ section }: { section: types.ListSection }) => (
-  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-    <div>
-      <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 600 }}>
-        {section.header.title}
-      </h3>
-      {section.header.description ? (
-        <p style={{ margin: 0, color: "#555", fontSize: 14 }}>
-          {section.header.description}
-        </p>
-      ) : null}
-      <p style={{ margin: "8px 0 0", fontSize: 12, color: "#888", fontStyle: "italic" }}>
-        Design blueprint — field labels and required flags only.
-      </p>
-    </div>
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      {section.items.flat().map(({ header: q }) => (
-        <div key={q.id} style={fieldRowStyle}>
-          <span style={{ fontSize: 14, fontWeight: 600 }}>
-            {q.params.name}
-            {q.params.required ? (
-              <span style={{ color: "#b00020", marginLeft: 4 }}>*</span>
-            ) : null}
-          </span>
-          <span style={{ fontSize: 12, color: "#888" }}>
-            id: {q.id} · type: {q.type}
-          </span>
-          <div
-            style={{
-              height: 28,
-              borderRadius: 3,
-              border: "1px dashed #ccc",
-              background: "#fafafa",
-            }}
-          />
-        </div>
-      ))}
-    </div>
-  </div>
-);
 
 export const ResponseView = ({
   section,
@@ -555,6 +515,8 @@ export const INITIAL_SECTION: types.ListSection = {
     ],
   ],
 };
+
+export const INITIAL_FLAT = flatFromFieldSections([INITIAL_SECTION]);
 
 export const INITIAL_RESPONSES: Record<string, lib.Response> = {
   name: { meta: {}, data: { value: "Ada Lovelace" } },

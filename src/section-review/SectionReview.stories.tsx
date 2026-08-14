@@ -3,6 +3,7 @@ import { useArgs } from "storybook/preview-api";
 import { SectionReviewDemo } from "./demo/SectionReviewDemo";
 import {
   INITIAL_CHANGES,
+  INITIAL_FLAT,
   INITIAL_RESPONSES,
   INITIAL_SECTION,
   SECTION_REVIEW_DEMO_SOURCE,
@@ -10,12 +11,13 @@ import {
 import type * as types from "./demo/sectionReviewDemoTypes.t";
 
 const SectionReviewStory = () => {
-  const [{ heading, phase, section, responses, changes, reviewPending }, updateArgs] =
+  const [{ heading, phase, flatItems, section, responses, changes, reviewPending }, updateArgs] =
     useArgs<types.StoryArgs>();
   return (
     <SectionReviewDemo
       heading={heading}
       phase={phase}
+      flatItems={flatItems}
       section={section}
       responses={responses}
       changes={changes}
@@ -37,7 +39,7 @@ export default {
       },
       description: {
         component:
-          "Lifecycle demo for **`SectionReviewHOC`**. Switch **Design → Response → Follow** to see the section blueprint, student answers, and teacher review. Three JSON panels stay visible for `section`, `responses`, and `AdditionalChanges`.",
+          "Lifecycle demo for **`SectionReviewHOC`**. **Design** is the form-dialogs editor. **Response** / **Follow** review the first section (field-only). Three JSON panels stay visible for `section`, `responses`, and `AdditionalChanges`.",
       },
     },
   },
@@ -50,6 +52,7 @@ export default {
       table: { category: "Layout" },
     },
     section: { control: "object", table: { category: "Form data" } },
+    flatItems: { control: "object", table: { category: "Form data" } },
     responses: { control: "object", table: { category: "Form data" } },
     changes: { control: "object", table: { category: "Form data" } },
     reviewPending: { control: "boolean", table: { category: "Follow" } },
@@ -57,6 +60,7 @@ export default {
   args: {
     heading: "Section review lifecycle",
     phase: "follow",
+    flatItems: INITIAL_FLAT,
     section: INITIAL_SECTION,
     responses: INITIAL_RESPONSES,
     changes: INITIAL_CHANGES,

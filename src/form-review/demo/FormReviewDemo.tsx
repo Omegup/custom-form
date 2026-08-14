@@ -1,10 +1,11 @@
 /**
  * `form-review` showcase — Design → Response → Follow walkthrough.
- * Only the Follow phase mounts `CustomFormReviewHOC`; earlier phases are
- * demo-only blueprints so you can compare structure, answers, and reviewer
- * annotations side by side (JSON panels always visible).
+ * Design remounts the form-dialogs editor. Only Follow mounts
+ * `CustomFormReviewHOC`; Response is a demo blueprint of answers.
  */
 import { useCallback, useState, type Ref } from "react";
+import { FormDialogsEditor } from "../../form-dialogs/demo/FormDialogsDemo";
+import { toFieldSections } from "../../form-dialogs/demo/formDialogsDemoFlat";
 import * as demo from "./formReviewDemoHelper";
 import type * as types from "./formReviewDemoTypes.t";
 import * as lib from "./library";
@@ -144,6 +145,7 @@ export const FormReviewDemo = ({
   heading,
   phase,
   header,
+  flatItems,
   sections,
   responses,
   changes,
@@ -171,7 +173,27 @@ export const FormReviewDemo = ({
         />
 
         {phase === "design" ? (
-          <demo.DesignView header={header} sections={sections} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div>
+              <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 600 }}>
+                {header.title}
+              </h2>
+              {header.description ? (
+                <p style={{ margin: 0, color: "#555", fontSize: 14 }}>
+                  {header.description}
+                </p>
+              ) : null}
+            </div>
+            <FormDialogsEditor
+              flatItems={flatItems}
+              setFlatItems={(next) =>
+                updateArgs({
+                  flatItems: next,
+                  sections: toFieldSections(next),
+                })
+              }
+            />
+          </div>
         ) : null}
 
         {phase === "response" ? (

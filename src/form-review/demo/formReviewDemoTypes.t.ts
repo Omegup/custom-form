@@ -3,6 +3,7 @@
  * walked through Design → Response → Follow phases in the Storybook demo.
  */
 import type { CSSProperties, ReactNode, Ref } from "react";
+import type { FlatItems as DesignFlatItems } from "../../form-dialogs/demo/formDialogsDemoTypes.t";
 import type * as lib from "./library";
 
 export type TypeNames = "field";
@@ -51,6 +52,7 @@ export type StoryArgs = {
   heading: string;
   phase: DemoPhase;
   header: lib.FormHeader;
+  flatItems: DesignFlatItems;
   sections: ListSection[];
   responses: Record<string, lib.Response>;
   changes: lib.AdditionalChanges<TypeNames, Params>;

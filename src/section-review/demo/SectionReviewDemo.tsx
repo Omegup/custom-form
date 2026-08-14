@@ -1,8 +1,10 @@
 /**
  * `section-review` showcase — Design → Response → Follow for one section.
- * Only Follow mounts `SectionReviewHOC`; earlier phases are demo blueprints.
+ * Design remounts the form-dialogs editor. Only Follow mounts `SectionReviewHOC`.
  */
 import { useCallback, useState, type Ref } from "react";
+import { FormDialogsEditor } from "../../form-dialogs/demo/FormDialogsDemo";
+import { toFieldSections } from "../../form-dialogs/demo/formDialogsDemoFlat";
 import * as demo from "./sectionReviewDemoHelper";
 import type * as types from "./sectionReviewDemoTypes.t";
 import * as lib from "./library";
@@ -140,6 +142,7 @@ const tCommon = (term: "add" | "cancel" | "save" | "delete") =>
 export const SectionReviewDemo = ({
   heading,
   phase,
+  flatItems,
   section,
   responses,
   changes,
@@ -165,7 +168,18 @@ export const SectionReviewDemo = ({
           onChange={(next) => updateArgs({ phase: next })}
         />
 
-        {phase === "design" ? <demo.DesignView section={section} /> : null}
+        {phase === "design" ? (
+          <FormDialogsEditor
+            flatItems={flatItems}
+            setFlatItems={(next) => {
+              const [first] = toFieldSections(next);
+              updateArgs({
+                flatItems: next,
+                ...(first ? { section: first } : {}),
+              });
+            }}
+          />
+        ) : null}
 
         {phase === "response" ? (
           <demo.ResponseView section={section} responses={responses} />

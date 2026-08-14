@@ -50,7 +50,8 @@ section: commit(header, cols)  → updateSectionInFlat(flatItems, session, heade
 ## Demo
 
 `form-dialogs/Form dialogs` (`demo/FormDialogsDemo.tsx`) — **`makeUseDialogs`**
-plus **`useFlatListSession`** on the design list.
+plus **`useFlatListSession`** on the design list. `FormDialogsEditor` is the
+same stack without the page title, reused by Design tabs on later stories.
 
 The new idea vs the side-menu demo is the orchestrator: item/section sessions
 and commits live in the hook, not local `useState` + `applyFlatFormItem`.

@@ -4,7 +4,7 @@ import { useArgs } from "storybook/preview-api";
 import { FormResponseDemo } from "./demo/FormResponseDemo";
 import {
   FORM_RESPONSE_DEMO_SOURCE,
-  INITIAL_SECTIONS,
+  INITIAL_FLAT,
 } from "./demo/formResponseDemoHelper";
 import type * as types from "./demo/formResponseDemoTypes.t";
 import type { Response } from "./demo/library";
@@ -39,7 +39,7 @@ const EMPTY_RESPONSES_TEXT = encodeArgText({});
 
 const FormResponseStory = () => {
   const [
-    { heading, phase, showDeleted, responsesText, formResponseText },
+    { heading, phase, showDeleted, flatItems, responsesText, formResponseText },
     updateArgs,
   ] = useArgs<types.StoryArgs>();
 
@@ -54,6 +54,7 @@ const FormResponseStory = () => {
       if (patch.heading !== undefined) next.heading = patch.heading;
       if (patch.phase !== undefined) next.phase = patch.phase;
       if (patch.showDeleted !== undefined) next.showDeleted = patch.showDeleted;
+      if (patch.flatItems !== undefined) next.flatItems = patch.flatItems;
       if (patch.responses !== undefined) {
         next.responsesText = encodeArgText(patch.responses);
       }
@@ -71,7 +72,7 @@ const FormResponseStory = () => {
     <FormResponseDemo
       heading={heading}
       phase={phase}
-      sections={INITIAL_SECTIONS}
+      flatItems={flatItems}
       responses={responses}
       formResponse={formResponse}
       showDeleted={showDeleted}
@@ -92,7 +93,7 @@ export default {
       },
       description: {
         component:
-          "**FormResponse** document lifecycle. Design is the blueprint; Fill → Send creates the record; Update Save / Request changes / Approve / Reject mutate the same document. 💬 on Update opens a follow-up type dropdown.",
+          "**FormResponse** document lifecycle. **Design** is the form-dialogs editor. Fill → Send creates the record; Update Save / Request changes / Approve / Reject mutate the same document. 💬 on Update opens a follow-up type dropdown.",
       },
     },
   },
@@ -105,6 +106,11 @@ export default {
       table: { category: "Layout" },
     },
     showDeleted: { control: "boolean", table: { category: "Update" } },
+    flatItems: {
+      control: "object",
+      description: "Design list — Fill/Update read the field-only projection.",
+      table: { category: "Form data" },
+    },
     responsesText: {
       control: "text",
       description: "Fill draft — base64url(JSON of Record<id, Response>).",
@@ -121,6 +127,7 @@ export default {
     heading: "Form response",
     phase: "fill",
     showDeleted: false,
+    flatItems: INITIAL_FLAT,
     responsesText: EMPTY_RESPONSES_TEXT,
     formResponseText: "",
   },

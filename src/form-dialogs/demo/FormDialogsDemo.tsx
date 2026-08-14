@@ -25,13 +25,15 @@ import {
 } from "./formDialogsDemoStack";
 import * as lib from "./library";
 
-export const FormDialogsDemo = ({
-  heading,
+/** Nestable design editor — host owns the page title (`FormContainer`). */
+export const FormDialogsEditor = ({
   flatItems,
-  updateArgs,
-}: types.DemoProps) => {
+  setFlatItems,
+}: {
+  flatItems: types.FlatItems;
+  setFlatItems: (items: types.FlatItems) => void;
+}) => {
   const dialogCtx: types.Ctx = lib.branded({ flatItems });
-  const setFlatItems = (items: types.FlatItems) => updateArgs({ flatItems: items });
   const dialogs = useDialogs({ flatItems, setFlatItems, ctx: dialogCtx });
   const session = lib.useFlatListSession({
     flatItems,
@@ -57,63 +59,74 @@ export const FormDialogsDemo = ({
   const toRemove = session.toRemove;
 
   return (
-    <FormContainer title={heading}>
-      <DialogActionsCtx.Provider value={dialogActions}>
-        {dialogs.formItemDialog}
-        {dialogs.sectionDialog}
-        <LayoutWithSidebar
-          main={
-            <>
-              {toRemove ? (
-                <RemoveAlert
-                  pending={{
-                    ...toRemove,
-                    label:
-                      "item" in toRemove.item
-                        ? itemName(dialogCtx, toRemove.item.item)
-                        : undefined,
-                  }}
-                  onConfirm={() => {
-                    toRemove.rm();
-                    session.setToRemove(null);
-                  }}
-                  onCancel={() => session.setToRemove(null)}
+    <DialogActionsCtx.Provider value={dialogActions}>
+      {dialogs.formItemDialog}
+      {dialogs.sectionDialog}
+      <LayoutWithSidebar
+        main={
+          <>
+            {toRemove ? (
+              <RemoveAlert
+                pending={{
+                  ...toRemove,
+                  label:
+                    "item" in toRemove.item
+                      ? itemName(dialogCtx, toRemove.item.item)
+                      : undefined,
+                }}
+                onConfirm={() => {
+                  toRemove.rm();
+                  session.setToRemove(null);
+                }}
+                onCancel={() => session.setToRemove(null)}
+              />
+            ) : null}
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {session.sections.map((section, sIndex) => (
+                <SectionComponent
+                  key={section.header.id}
+                  ctx={session.listCtx}
+                  variants={defaultVariants}
+                  itemExtra={itemExtra}
+                  renderCard={demo.renderCard}
+                  args={session.args}
+                  clone={cloneFn}
+                  section={section}
+                  sIndex={sIndex}
+                  jump
+                  setAddItem={dialogs.setItemSession}
                 />
-              ) : null}
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {session.sections.map((section, sIndex) => (
-                  <SectionComponent
-                    key={section.header.id}
-                    ctx={session.listCtx}
-                    variants={defaultVariants}
-                    itemExtra={itemExtra}
-                    renderCard={demo.renderCard}
-                    args={session.args}
-                    clone={cloneFn}
-                    section={section}
-                    sIndex={sIndex}
-                    jump
-                    setAddItem={dialogs.setItemSession}
-                  />
-                ))}
-              </div>
-            </>
-          }
-          sidebar={
-            <lib.Side<types.TypeNames, types.Params, types.Section>
-              title="Library"
-              addSectionLabel="+ Add section"
-              menuItems={MENU_ITEMS}
-              random={randomId}
-              blankSection={blankSection}
-              render={renderSide}
-              renderMenuItem={renderMenuItem}
-              setAddFormItem={(item) => dialogs.openItemInsert(item)}
-              setAddSection={dialogs.openSectionAdd}
-            />
-          }
-        />
-      </DialogActionsCtx.Provider>
-    </FormContainer>
+              ))}
+            </div>
+          </>
+        }
+        sidebar={
+          <lib.Side<types.TypeNames, types.Params, types.Section>
+            title="Library"
+            addSectionLabel="+ Add section"
+            menuItems={MENU_ITEMS}
+            random={randomId}
+            blankSection={blankSection}
+            render={renderSide}
+            renderMenuItem={renderMenuItem}
+            setAddFormItem={(item) => dialogs.openItemInsert(item)}
+            setAddSection={dialogs.openSectionAdd}
+          />
+        }
+      />
+    </DialogActionsCtx.Provider>
   );
 };
+
+export const FormDialogsDemo = ({
+  heading,
+  flatItems,
+  updateArgs,
+}: types.DemoProps) => (
+  <FormContainer title={heading}>
+    <FormDialogsEditor
+      flatItems={flatItems}
+      setFlatItems={(items) => updateArgs({ flatItems: items })}
+    />
+  </FormContainer>
+);

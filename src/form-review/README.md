@@ -29,8 +29,8 @@ host: sections / responses / changes / setChanges / lastPending
 
 Lifecycle walkthrough — **Design → Response → Follow**:
 
-1. **Design** — form blueprint (Personal + Experience + a deleted Archived
-   section); JSON shows `sections`.
+1. **Design** — same editor as form-dialogs (library, add/edit dialogs, DnD).
+   Headings/panels stay on that list; Response/Follow read field-only `sections`.
 2. **Response** — student answers (summary left empty on purpose); JSON shows
    `responses`.
 3. **Follow** — mounts `CustomFormReviewHOC`: comments, follow-up form items,

@@ -2,6 +2,7 @@
  * Field-only domain — same shape as form-responder / form-review demos.
  */
 import type { CSSProperties, ReactNode, Ref } from "react";
+import type { FlatItems as DesignFlatItems } from "../../form-dialogs/demo/formDialogsDemoTypes.t";
 import type * as lib from "./library";
 
 export type TypeNames = "field";
@@ -54,6 +55,7 @@ export type StoryArgs = {
   heading: string;
   phase: DemoPhase;
   showDeleted: boolean;
+  flatItems: DesignFlatItems;
   responsesText: string;
   formResponseText: string;
 };
@@ -62,7 +64,7 @@ export type DemoProps = {
   heading: string;
   phase: DemoPhase;
   showDeleted: boolean;
-  sections: ListSection[];
+  flatItems: DesignFlatItems;
   responses: Record<string, lib.Response>;
   formResponse: FormResponseDoc | null;
   updateArgs: (
@@ -70,6 +72,7 @@ export type DemoProps = {
       heading: string;
       phase: DemoPhase;
       showDeleted: boolean;
+      flatItems: DesignFlatItems;
       responses: Record<string, lib.Response>;
       formResponse: FormResponseDoc | null;
     }>,

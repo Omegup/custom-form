@@ -3,6 +3,7 @@
  * section (same phases as the form-review demo, narrowed to a single section).
  */
 import type { CSSProperties, ReactNode, Ref } from "react";
+import type { FlatItems as DesignFlatItems } from "../../form-dialogs/demo/formDialogsDemoTypes.t";
 import type * as lib from "./library";
 
 export type TypeNames = "field";
@@ -51,6 +52,7 @@ export type DemoPhase = "design" | "response" | "follow";
 export type StoryArgs = {
   heading: string;
   phase: DemoPhase;
+  flatItems: DesignFlatItems;
   section: ListSection;
   responses: Record<string, lib.Response>;
   changes: lib.AdditionalChanges<TypeNames, Params>;

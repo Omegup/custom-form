@@ -4,6 +4,7 @@ import { FormReviewDemo } from "./demo/FormReviewDemo";
 import {
   FORM_REVIEW_DEMO_SOURCE,
   INITIAL_CHANGES,
+  INITIAL_FLAT,
   INITIAL_HEADER,
   INITIAL_RESPONSES,
   INITIAL_SECTIONS,
@@ -16,6 +17,7 @@ const FormReviewStory = () => {
       heading,
       phase,
       header,
+      flatItems,
       sections,
       responses,
       changes,
@@ -29,6 +31,7 @@ const FormReviewStory = () => {
       heading={heading}
       phase={phase}
       header={header}
+      flatItems={flatItems}
       sections={sections}
       responses={responses}
       changes={changes}
@@ -51,7 +54,7 @@ export default {
       },
       description: {
         component:
-          "Lifecycle demo for **`CustomFormReviewHOC`**. Switch **Design → Response → Follow** to see the form blueprint, student answers, and teacher review (comments / follow-ups / status). Three JSON panels stay visible so you can compare `sections`, `responses`, and `AdditionalChanges` at every step.",
+          "Lifecycle demo for **`CustomFormReviewHOC`**. **Design** is the form-dialogs editor (library, add/edit, DnD). **Response** / **Follow** stay field-only. Three JSON panels stay visible so you can compare `sections`, `responses`, and `AdditionalChanges`.",
       },
     },
   },
@@ -64,6 +67,7 @@ export default {
       table: { category: "Layout" },
     },
     header: { control: "object", table: { category: "Form data" } },
+    flatItems: { control: "object", table: { category: "Form data" } },
     sections: { control: "object", table: { category: "Form data" } },
     responses: { control: "object", table: { category: "Form data" } },
     changes: { control: "object", table: { category: "Form data" } },
@@ -74,6 +78,7 @@ export default {
     heading: "Form review lifecycle",
     phase: "follow",
     header: INITIAL_HEADER,
+    flatItems: INITIAL_FLAT,
     sections: INITIAL_SECTIONS,
     responses: INITIAL_RESPONSES,
     changes: INITIAL_CHANGES,
