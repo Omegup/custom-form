@@ -17,6 +17,7 @@ inline (sibling to content), never via `createPortal`.
 |---|---|
 | `types.ts` | `AdditionalChanges`, `Addition`/`CommentAddition`/`FormItemAddition`, `ReviewExtra`, `ReviewVariantState`, `SectionReviewChrome`, `SectionReviewProps` |
 | `SectionReview.tsx` | **`SectionReviewHOC(viewers, chrome)`** — `FormItemHOC` + `getUseImpRefViewProps`, recursive slots, status + overlay state |
+| `followUpEntriesFlat.ts` | `followUpEntriesToFlat` / `syncFollowUpEntriesFromFlat` — entries ↔ synthetic flat section |
 
 ## How it plugs in
 

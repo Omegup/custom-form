@@ -17,47 +17,12 @@ import { renderAddFormItem } from "../../side-menu/demo/sideMenuDemoHelper";
 import type * as types from "./allInDemoTypes.t";
 import * as lib from "./library";
 
-/** Panel `data.instances` — comma-separated instance ids (`0,1,…`). */
-export const PANEL_INSTANCES_KEY = "instances";
-
-const parsePanelInstanceIds = (response: lib.Response): string[] => {
-  const raw = response.data[PANEL_INSTANCES_KEY];
-  if (!raw) return ["0"];
-  const ids = raw.split(",").filter((s) => s.length > 0);
-  return ids.length ? ids : ["0"];
-};
-
-/** Suffixes passed to `getChild` / `renderSlots` (`:0`, `:1`, …). */
-export const panelInstanceSuffixes = (
-  multiple: boolean,
-  response: lib.Response,
-): string[] => {
-  if (!multiple) return [""];
-  return parsePanelInstanceIds(response).map((id) => `:${id}`);
-};
-
-const nextPanelInstanceId = (response: lib.Response): string => {
-  const ids = parsePanelInstanceIds(response);
-  const max = ids.reduce((m, id) => Math.max(m, Number(id) || 0), 0);
-  return String(max + 1);
-};
-
-const withPanelInstances = (
-  response: lib.Response,
-  ids: string[],
-): lib.Response => ({
-  ...response,
-  data: {
-    ...response.data,
-    [PANEL_INSTANCES_KEY]: ids.join(","),
-  },
-});
-
 const panelRepeatChildren = (
   formItem: lib.TypedFormItem<types.Params, "panel">,
   extra: { response: lib.ResponseSetter },
 ): string[] =>
-  panelInstanceSuffixes(formItem.params.multiple, extra.response.value);
+  lib.panelInstanceSuffixes(formItem.params.multiple, extra.response.value);
+
 
 const panelShellStyle = (borderColor: string): CSSProperties => ({
   display: "flex",
@@ -89,26 +54,28 @@ const PanelBody = ({
 }) => {
   const multiple = formItem.params.multiple;
   const editable = !readOnly && extra.response.setValue != null;
-  const suffixes = panelInstanceSuffixes(multiple, extra.response.value);
+  const suffixes = lib.panelInstanceSuffixes(multiple, extra.response.value);
 
   const addInstance = () => {
     if (!extra.response.setValue) return;
-    const ids = parsePanelInstanceIds(extra.response.value);
+    const ids = lib.parsePanelInstanceIds(extra.response.value);
     extra.response.setValue(
       "data",
-      withPanelInstances(extra.response.value, [...ids, nextPanelInstanceId(extra.response.value)])
-        .data,
+      lib.withPanelInstances(extra.response.value, [
+        ...ids,
+        lib.nextPanelInstanceId(extra.response.value),
+      ]).data,
     );
   };
 
   const removeInstance = (instanceId: string) => {
     if (!extra.response.setValue) return;
-    const ids = parsePanelInstanceIds(extra.response.value).filter(
+    const ids = lib.parsePanelInstanceIds(extra.response.value).filter(
       (id) => id !== instanceId,
     );
     extra.response.setValue(
       "data",
-      withPanelInstances(extra.response.value, ids.length ? ids : ["0"]).data,
+      lib.withPanelInstances(extra.response.value, ids.length ? ids : ["0"]).data,
     );
   };
 
@@ -125,7 +92,7 @@ const PanelBody = ({
       {multiple ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {extra.children.map((child, i) => {
-            const instanceId = parsePanelInstanceIds(extra.response.value)[i] ?? String(i);
+            const instanceId = lib.parsePanelInstanceIds(extra.response.value)[i] ?? String(i);
             return (
               <div key={suffixes[i] ?? i} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 <div
@@ -179,21 +146,6 @@ export const rememberDate = (date: Date): Date => {
 
 export const dateFromIso = (iso: string): Date =>
   datesByIso.get(iso) ?? rememberDate(new Date(iso));
-
-/** Map FormResponse.responses[] → Record for fill/review UIs. */
-export const formResponseValues = (
-  doc: types.FormResponseDoc,
-): Record<string, lib.Response> =>
-  Object.fromEntries(doc.responses.map((r) => [r.formItemId, r.response]));
-
-/** Submit payload → persisted `FormResponse.responses` array. */
-export const toFormResponseEntries = (
-  values: Record<string, lib.Response>,
-): types.FormResponseEntry[] =>
-  Object.entries(values).map(([formItemId, response]) => ({
-    formItemId,
-    response,
-  }));
 
 /** @deprecated Prefer `dateFromIso` / live feedbackHistory — kept for older demos. */
 export const PENDING_DATE = rememberDate(new Date("2024-01-15T00:00:00Z"));

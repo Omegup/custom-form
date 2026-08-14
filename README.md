@@ -63,6 +63,7 @@ section-responder              ← section fill shell (SectionResponderHOC)
 form-responder                 ← multi-section fill shell (CustomFormResponderHOC)
 section-review                 ← section review shell (SectionReviewHOC)
 form-review                    ← multi-section review shell (CustomFormReviewHOC)
+form-response                  ← FormResponse document lifecycle (Send / Save / feedback)
 ```
 
 **Canonical edit state** is the **flat list** (`FlatFormItems`): an array of `{ section }`, `{ item, n }`, and `{ end: null }` markers. The tree is rebuilt on demand via `consolidateSections`.
@@ -88,6 +89,7 @@ Original packages live under `school/components/custom-form/src/`:
 | `form-responder/` | `ui-packages/form-responder-ui` (`CustomFormResponderHOC`) |
 | `section-review/` | `ui-packages/section-review-ui` (`SectionReviewHOC`) |
 | `form-review/` | `ui-packages/form-response-ui` (`CustomFormResponsesHOC`) |
+| `form-response/` | school `FormResponse` document + `addFormResponse` / `addAdditionalQuestions` / `addFeedback` |
 | `form-edit/` | `ts-packages/form-edit` |
 | `form-item-editor/` | `react-packages/form-item-edit-react` |
 | `side-menu/` | `react-packages/form-edit-react` (`useSide`, `MenuItemDefinition`, `makeUseRenderAddItem`) + `section-edit-ui` (`FormMenuItem`, `AddFormItem`) |

@@ -15,6 +15,8 @@ School's `form-react/getUseImpRefViewProps` lives in [`form/`](../form/)
 |---|---|
 | `types.ts` | `Response`, `ResponseSetter`, `ViewerMethods`, `StrictViewerMethods` |
 | `emptyResponse.ts` | `{ meta: {}, data: {} }` — school default when a slot has no answer |
+| `itemIdBase.ts` | Strip panel-instance suffix (`id:0` → `id`) |
+| `panelInstances.ts` | Pure `data.instances` parse / suffix / next / with (optional import) |
 
 ## How it plugs into `form`
 
@@ -37,7 +39,7 @@ when empty). JSON dump shows the live `responses` map.
 
 ## Dependency rule
 
-Leaf package — no `_deps.ts`. Pure types + `emptyResponse` only.
+Leaf package — no `_deps.ts`. Pure types + `emptyResponse` + optional id/instance helpers.
 
 Does **not** import `form` / React. Hosts that need the impRef bridge import
 `getUseImpRefViewProps` from `form`. Section aggregation lives in

@@ -5,17 +5,23 @@ export type {
   FlatFormItem,
   FlatFormItems,
   FlatFormItemEditSession,
+  FlatNestedItem,
   Indexed,
   SectionDom,
   SectionMetaDom,
   SectionWithItems,
   SIndexed,
+  Clone,
 } from "../form-edit";
 export {
   applyFlatFormItem,
+  buildItemSectionDict,
   consolidateSections,
+  getFormItemMoveActions,
   openFormItemEditSession,
   openFormItemInsertSession,
 } from "../form-edit";
+export type { AutoFocus, AutoFocusState } from "../move-actions";
+export { autofocusCtx } from "../move-actions";
 export type { FlatSectionEditSession } from "../section-edit";
 export { openSectionEditSession, updateSectionInFlat } from "../section-edit";

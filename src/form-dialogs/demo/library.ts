@@ -26,7 +26,41 @@ export type {
   StrictViewerMethods,
   ViewerMethods,
 } from "../../response";
-export { emptyResponse } from "../../response";
+export { emptyResponse, itemIdBase } from "../../response";
+export {
+  PANEL_INSTANCES_KEY,
+  parsePanelInstanceIds,
+  panelInstanceSuffixes,
+  nextPanelInstanceId,
+  withPanelInstances,
+} from "../../response";
+export {
+  followUpEntriesToFlat,
+  syncFollowUpEntriesFromFlat,
+} from "../../section-review";
+export {
+  appendFeedback,
+  buildSend,
+  canSend,
+  formResponseValues,
+  lastAnsweredAt,
+  remarkOnlyChanges,
+  saveAdditionalQuestions,
+  stampAnswerHistory,
+  toFormResponseEntries,
+  unansweredFollowUpIds,
+  useFormResponseReview,
+  useFormResponseSend,
+  followUpsByOrigin,
+  withoutUnlockComments,
+} from "../../form-response";
+export type {
+  FeedbackHistoryItem,
+  FeedbackStatus,
+  FormResponseDoc,
+  FormResponseEntry,
+  FormResponseValidator,
+} from "../../form-response";
 export type {
   ResponderAdditionalChanges,
   ResponderExtra,

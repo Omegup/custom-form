@@ -45,41 +45,13 @@ export type ListExtra = lib.ExtraDom & {
 /** Design → Fill → Update walkthrough stage (UI only — not a document). */
 export type DemoPhase = "design" | "fill" | "update";
 
-/** Teacher / student round statuses — school `FormResponseStatus`. */
-export type FeedbackStatus =
-  | "answered"
-  | "draft"
-  | "changesRequested"
-  | "approved"
-  | "rejected";
-
-export type FeedbackHistoryItem = {
-  status: FeedbackStatus;
-  comment?: string;
-  /** ISO string in the document (JSON-serializable). */
-  date: string;
-};
-
-/**
- * School `FormResponse` — answers + teacher follow-up live on **one** document.
- * Created by Fill → Send (`customForms.addFormResponse`); Update / feedback
- * methods mutate this same record (`addAdditionalQuestions`, `addFeedback`).
- *
- * Shape mirrors school `FormResponse`, with slot-tree naming: `responses` is
- * an array of `{ formItemId, response }` (not a Record). First insert uses
- * `changes: {}`.
- */
-export type FormResponseEntry = {
-  formItemId: string;
-  response: lib.Response;
-};
-
-export type FormResponseDoc = {
-  responses: FormResponseEntry[];
-  changes: lib.AdditionalChanges<itemTypes.TypeNames, itemTypes.Params>;
-  feedbackHistory: FeedbackHistoryItem[];
-  status: FeedbackStatus;
-};
+export type FeedbackStatus = lib.FeedbackStatus;
+export type FeedbackHistoryItem = lib.FeedbackHistoryItem;
+export type FormResponseEntry = lib.FormResponseEntry;
+export type FormResponseDoc = lib.FormResponseDoc<
+  itemTypes.TypeNames,
+  itemTypes.Params
+>;
 
 /** Props for `AllInEditor` — domain documents, not Storybook wire format. */
 export type DemoProps = {

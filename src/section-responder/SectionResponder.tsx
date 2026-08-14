@@ -27,6 +27,7 @@ import {
   emptyResponse,
   FormItemHOC,
   getUseImpRefViewProps,
+  itemIdBase,
 } from "./_deps";
 import type {
   ResponderExtra,
@@ -40,11 +41,6 @@ import type {
 
 type ViewerExtra = ResponderExtra & { impRef: Ref<ViewerMethods> };
 type HostExtra = ResponderExtra & { impRef: Ref<StrictViewerMethods> };
-
-const baseIdOf = (id: string): string => {
-  const i = id.lastIndexOf(":");
-  return i >= 0 ? id.slice(0, i) : id;
-};
 
 export const SectionResponderHOC = <
   TypeNames extends string,
@@ -131,20 +127,20 @@ export const SectionResponderHOC = <
     ): RecursiveFormItem<TypeNames, Params, Meta>[] => {
       const exact = followUpItems[originId];
       if (exact?.length) return exact;
-      const base = baseIdOf(originId);
+      const base = itemIdBase(originId);
       const byBase = followUpItems[base];
       if (byBase?.length) return byBase;
       for (const [key, items] of Object.entries(followUpItems)) {
-        if (items?.length && baseIdOf(key) === base) return items;
+        if (items?.length && itemIdBase(key) === base) return items;
       }
       return [];
     };
 
     const unlockComment = (id: string): string | undefined =>
-      old?.changes[id]?.comment ?? old?.changes[baseIdOf(id)]?.comment;
+      old?.changes[id]?.comment ?? old?.changes[itemIdBase(id)]?.comment;
 
     const priorValue = (id: string) =>
-      old?.values[id] ?? old?.values[baseIdOf(id)];
+      old?.values[id] ?? old?.values[itemIdBase(id)];
 
     const renderSlots = (
       slots: RecursiveFormItem<TypeNames, Params, Meta>[][],

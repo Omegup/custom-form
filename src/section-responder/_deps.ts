@@ -27,4 +27,4 @@ export type {
   StrictViewerMethods,
   ViewerMethods,
 } from "../response";
-export { emptyResponse } from "../response";
+export { emptyResponse, itemIdBase } from "../response";

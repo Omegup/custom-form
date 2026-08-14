@@ -15,3 +15,8 @@ export type {
   SectionReviewProps,
 } from "./types";
 export { SectionReviewHOC } from "./SectionReview";
+export {
+  followUpEntriesToFlat,
+  syncFollowUpEntriesFromFlat,
+} from "./followUpEntriesFlat";
+

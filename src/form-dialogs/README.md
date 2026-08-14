@@ -17,6 +17,7 @@ package is only the React state + save glue on top of them.
 | File | Role |
 |---|---|
 | `makeUseDialogs.ts` | **`makeUseDialogs({ renderFormItem, renderSection })`** → `useDialogs({ flatItems, setFlatItems, ctx })` — sessions, open helpers, commits, dialog nodes |
+| `useFlatListSession.ts` | Autofocus ctx + consolidate + move actions + pending-remove (no HTML) |
 
 The hook returns:
 
@@ -73,9 +74,10 @@ Editors, dialog chrome, and fixtures are reused from the `form-item-editor`,
 
 ## Dependency rule
 
-Imports from: `form`, `recursive-form`, `form-edit`, `section-edit` (via `_deps`).
+Imports from: `form`, `recursive-form`, `form-edit`, `section-edit`, `move-actions` (via `_deps`).
 
 Does **not** import: `form-item-editor`, `side-menu`, `section-view`, `flat-dnd`.
 The demo composes those packages for Storybook only (`section-view` for the
 list shell, `flat-dnd/demo/WebRecursiveEdit` for DnD, `side-menu` for catalog /
-add slots, `form-item-editor` / `section-edit` for dialog chrome).
+add slots, `form-item-editor` / `section-edit` for dialog chrome,
+`form-response` for Send / Save / feedback).
