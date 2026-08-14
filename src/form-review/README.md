@@ -30,9 +30,9 @@ host: sections / responses / changes / setChanges / lastPending
 Lifecycle walkthrough — **Design → Response → Follow**:
 
 1. **Design** — same editor as form-dialogs (library, add/edit dialogs, DnD).
-   Headings/panels stay on that list; Response/Follow read field-only `sections`.
-2. **Response** — student answers (summary left empty on purpose); JSON shows
-   `responses`.
+   Headings and panels stay on the fill/review tree (`multiple` panels get **+ Add**).
+2. **Response** — student fills via `CustomFormResponderHOC` (inputs + panel instances);
+   JSON shows `responses`.
 3. **Follow** — mounts `CustomFormReviewHOC`: comments, follow-up type dropdown
    (💬), unanswered drafts as design rows, status highlighting. Toggle
    **Review round pending** / **showDeleted**. JSON shows live `AdditionalChanges`.

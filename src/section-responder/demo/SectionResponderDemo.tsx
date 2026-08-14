@@ -4,7 +4,13 @@
  */
 import { useCallback, useRef, useState, type Ref } from "react";
 import { FormDialogsEditor } from "../../form-dialogs/demo/FormDialogsDemo";
-import { toFieldSections } from "../../form-dialogs/demo/formDialogsDemoFlat";
+import { sectionsFromFlat } from "../../form-dialogs/demo/formDialogsDemoFlat";
+import {
+  allTypeChrome,
+  headingView,
+  panelRepeatChildren,
+  panelView,
+} from "../../response/demo/nestedItems";
 import * as demo from "./sectionResponderDemoHelper";
 import type * as types from "./sectionResponderDemoTypes.t";
 import * as lib from "./library";
@@ -76,9 +82,17 @@ const viewers: lib.Viewers<
       );
     },
   },
+  heading: {
+    viewer: headingView,
+    repeatChildren: () => [""],
+  },
+  panel: {
+    viewer: panelView,
+    repeatChildren: panelRepeatChildren,
+  },
 };
 
-const SectionResponder = lib.SectionResponderHOC<
+export const SectionResponder = lib.SectionResponderHOC<
   types.TypeNames,
   types.Params,
   types.Variants,
@@ -89,9 +103,17 @@ const SectionResponder = lib.SectionResponderHOC<
 const ctx = lib.branded<types.Ctx, "context">({
   t: () => "Required",
 });
-const variants = lib.branded<types.Variants, "variants">({
-  field: defaultFieldVariant,
-});
+const variants = lib.branded<types.Variants, "variants">(
+  allTypeChrome(defaultFieldVariant),
+);
+export const sectionResponderCtx = ctx;
+export const sectionResponderVariants: Record<lib.ResponderState, types.Variants> =
+  {
+    default: variants,
+    old: variants,
+    change: variants,
+    error: variants,
+  };
 
 export const SectionResponderDemo = ({
   heading,
@@ -102,6 +124,7 @@ export const SectionResponderDemo = ({
   updateArgs,
 }: types.DemoProps) => {
   const sectionRef = useRef<lib.SectionValidator | null>(null);
+  const liveSection = sectionsFromFlat(flatItems)[0] ?? section;
   const [errors, setErrors] = useState<Record<string, string | null>>({});
 
   const setResponse = useCallback(
@@ -131,7 +154,7 @@ export const SectionResponderDemo = ({
         <FormDialogsEditor
           flatItems={flatItems}
           setFlatItems={(next) => {
-            const [first] = toFieldSections(next);
+            const [first] = sectionsFromFlat(next);
             updateArgs({
               flatItems: next,
               ...(first ? { section: first } : {}),
@@ -143,18 +166,13 @@ export const SectionResponderDemo = ({
         <SectionResponder
           ctx={ctx}
           multiSection={false}
-          section={section}
+          section={liveSection}
           responses={responses}
           old={null}
           setResponse={setResponse}
           getError={(id) => errors[id] ?? null}
           impRef={sectionRef}
-          variants={{
-            default: variants,
-            old: variants,
-            change: variants,
-            error: variants,
-          }}
+          variants={sectionResponderVariants}
           followUpItems={{}}
           i={0}
         />

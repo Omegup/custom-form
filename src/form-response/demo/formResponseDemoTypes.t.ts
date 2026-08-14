@@ -1,14 +1,17 @@
 /**
- * Field-only domain — same shape as form-responder / form-review demos.
+ * FormResponse lifecycle domain — same item types as the design editor
+ * (`field` / `heading` / `panel`).
  */
 import type { CSSProperties, ReactNode, Ref } from "react";
 import type { FlatItems as DesignFlatItems } from "../../form-dialogs/demo/formDialogsDemoTypes.t";
 import type * as lib from "./library";
 
-export type TypeNames = "field";
+export type TypeNames = "field" | "heading" | "panel";
 
 export type Params = lib.TheParams<{
   field: { name: string; required: boolean };
+  heading: { name: string };
+  panel: { name: string; multiple: boolean };
 }>;
 
 export type FieldVariant = {
@@ -22,6 +25,8 @@ export type FieldVariant = {
 
 export type Variants = lib.TheVariants<{
   field: FieldVariant;
+  heading: FieldVariant;
+  panel: FieldVariant;
 }>;
 
 export type Section = lib.SectionReviewHeader;

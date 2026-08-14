@@ -1,10 +1,23 @@
 /**
  * `section-review` showcase — Design → Response → Follow for one section.
- * Design remounts the form-dialogs editor. Only Follow mounts `SectionReviewHOC`.
+ * Design remounts the form-dialogs editor. Response mounts the fill shell;
+ * Follow mounts `SectionReviewHOC`.
  */
-import { useCallback, useState, type Ref } from "react";
+import { useCallback, useRef, useState, type Ref } from "react";
 import { FormDialogsEditor } from "../../form-dialogs/demo/FormDialogsDemo";
-import { toFieldSections } from "../../form-dialogs/demo/formDialogsDemoFlat";
+import { sectionsFromFlat } from "../../form-dialogs/demo/formDialogsDemoFlat";
+import {
+  SectionResponder,
+  sectionResponderCtx,
+  sectionResponderVariants,
+} from "../../section-responder/demo/SectionResponderDemo";
+import type { SectionValidator } from "../../section-responder";
+import {
+  allTypeChrome,
+  headingView,
+  panelRepeatChildren,
+  panelView,
+} from "../../response/demo/nestedItems";
 import { FollowUpDrafts } from "./followUpAdd";
 import * as demo from "./sectionReviewDemoHelper";
 import type * as types from "./sectionReviewDemoTypes.t";
@@ -116,6 +129,14 @@ const viewers: lib.Viewers<
       );
     },
   },
+  heading: {
+    viewer: headingView,
+    repeatChildren: () => [""],
+  },
+  panel: {
+    viewer: panelView,
+    repeatChildren: panelRepeatChildren,
+  },
 };
 
 const SectionReview = lib.SectionReviewHOC<
@@ -127,12 +148,12 @@ const SectionReview = lib.SectionReviewHOC<
 >(viewers, demo.sectionChrome);
 
 const ctx = lib.branded<types.Ctx, "context">({});
-const variants = lib.branded<types.Variants, "variants">({
-  field: defaultFieldVariant,
-});
-const followUpVariants = lib.branded<types.Variants, "variants">({
-  field: followUpFieldVariant,
-});
+const variants = lib.branded<types.Variants, "variants">(
+  allTypeChrome(defaultFieldVariant),
+);
+const followUpVariants = lib.branded<types.Variants, "variants">(
+  allTypeChrome(followUpFieldVariant),
+);
 const reviewVariants: Record<lib.ReviewVariantState, types.Variants> = {
   default: variants,
   change: followUpVariants,
@@ -150,10 +171,24 @@ export const SectionReviewDemo = ({
   reviewPending,
   updateArgs,
 }: types.DemoProps) => {
+  const fillRef = useRef<SectionValidator | null>(null);
   const [addition, setAddition] = useState<
     lib.Addition<types.TypeNames, types.Params> | null
   >(null);
   const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
+  const liveSection = sectionsFromFlat(flatItems)[0] ?? section;
+
+  const setResponse = useCallback(
+    (id: string, next?: lib.Response) => {
+      if (next === undefined) {
+        const { [id]: _, ...rest } = responses;
+        updateArgs({ responses: rest });
+        return;
+      }
+      updateArgs({ responses: { ...responses, [id]: next } });
+    },
+    [responses, updateArgs],
+  );
 
   const setChanges = useCallback(
     (next: lib.AdditionalChanges<types.TypeNames, types.Params>) =>
@@ -173,7 +208,7 @@ export const SectionReviewDemo = ({
           <FormDialogsEditor
             flatItems={flatItems}
             setFlatItems={(next) => {
-              const [first] = toFieldSections(next);
+              const [first] = sectionsFromFlat(next);
               updateArgs({
                 flatItems: next,
                 ...(first ? { section: first } : {}),
@@ -183,7 +218,19 @@ export const SectionReviewDemo = ({
         ) : null}
 
         {phase === "response" ? (
-          <demo.ResponseView section={section} responses={responses} />
+          <SectionResponder
+            ctx={sectionResponderCtx}
+            multiSection={false}
+            section={liveSection}
+            responses={responses}
+            old={null}
+            setResponse={setResponse}
+            getError={() => null}
+            impRef={fillRef}
+            variants={sectionResponderVariants}
+            followUpItems={{}}
+            i={0}
+          />
         ) : null}
 
         {phase === "follow" ? (
@@ -199,7 +246,7 @@ export const SectionReviewDemo = ({
             <SectionReview
               ctx={ctx}
               multiSection={false}
-              section={section}
+              section={liveSection}
               responses={responses}
               lastPending={reviewPending ? demo.PENDING_DATE : null}
               changes={changes}
@@ -220,7 +267,7 @@ export const SectionReviewDemo = ({
 
         <demo.PhaseJsonPanels
           phase={phase}
-          section={section}
+          section={liveSection}
           responses={responses}
           changes={changes}
         />

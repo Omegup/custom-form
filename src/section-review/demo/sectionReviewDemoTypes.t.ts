@@ -6,10 +6,12 @@ import type { CSSProperties, ReactNode, Ref } from "react";
 import type { FlatItems as DesignFlatItems } from "../../form-dialogs/demo/formDialogsDemoTypes.t";
 import type * as lib from "./library";
 
-export type TypeNames = "field";
+export type TypeNames = "field" | "heading" | "panel";
 
 export type Params = lib.TheParams<{
   field: { name: string; required: boolean };
+  heading: { name: string };
+  panel: { name: string; multiple: boolean };
 }>;
 
 export type FieldVariant = {
@@ -22,13 +24,15 @@ export type FieldVariant = {
 
 export type Variants = lib.TheVariants<{
   field: FieldVariant;
+  heading: FieldVariant;
+  panel: FieldVariant;
 }>;
 
 export type Ctx = lib.SectionReviewContext;
 
 export type Section = lib.SectionReviewHeader;
 
-export type ItemMeta = lib.MetaDom<Record<string, never>>;
+export type ItemMeta = lib.MetaDom<lib.SIndexed | Record<string, never>>;
 export type SectionMeta = lib.SectionMetaDom<lib.Indexed>;
 
 export type ListItem = lib.RecursiveFormItem<TypeNames, Params, ItemMeta>;

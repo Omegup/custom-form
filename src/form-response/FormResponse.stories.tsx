@@ -108,7 +108,7 @@ export default {
     showDeleted: { control: "boolean", table: { category: "Update" } },
     flatItems: {
       control: "object",
-      description: "Design list — Fill/Update read the field-only projection.",
+      description: "Design list — Fill/Update keep headings and panels.",
       table: { category: "Form data" },
     },
     responsesText: {

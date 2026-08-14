@@ -9,6 +9,7 @@ export type {
   SectionMetaDom,
   SectionWithItems,
 } from "../../form-edit";
+export { consolidateSections } from "../../form-edit";
 export type {
   Response,
   ResponseSetter,

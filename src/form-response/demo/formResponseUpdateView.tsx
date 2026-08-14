@@ -5,6 +5,12 @@ import type { Ref } from "react";
 import { formChrome } from "../../form-review/demo/formReviewDemoHelper";
 import { FOLLOW_UP_BADGE } from "./formResponseDemoHelper";
 import { FollowUpAdd } from "../../section-review/demo/followUpAdd";
+import {
+  allTypeChrome,
+  headingView,
+  panelRepeatChildren,
+  panelView,
+} from "../../response/demo/nestedItems";
 import type * as types from "./formResponseDemoTypes.t";
 import * as lib from "./library";
 
@@ -99,12 +105,22 @@ const viewers: lib.Viewers<
       );
     },
   },
+  heading: {
+    viewer: headingView,
+    repeatChildren: () => [""],
+  },
+  panel: {
+    viewer: panelView,
+    repeatChildren: panelRepeatChildren,
+  },
 };
 
-const variants = lib.branded<types.Variants, "variants">({ field: defaultVariant });
-const followUpVariants = lib.branded<types.Variants, "variants">({
-  field: followUpVariant,
-});
+const variants = lib.branded<types.Variants, "variants">(
+  allTypeChrome(defaultVariant),
+);
+const followUpVariants = lib.branded<types.Variants, "variants">(
+  allTypeChrome(followUpVariant),
+);
 
 export const reviewVariants: Record<lib.ReviewVariantState, types.Variants> = {
   default: variants,

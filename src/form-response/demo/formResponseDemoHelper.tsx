@@ -25,7 +25,7 @@ const PHASES: { id: types.DemoPhase; label: string; blurb: string }[] = [
   {
     id: "design",
     label: "1. Design",
-    blurb: "Same editor as form-dialogs — library, add/edit, drag-and-drop. Fill/Update stay field-only.",
+    blurb: "Same editor as form-dialogs — library, add/edit, drag-and-drop.",
   },
   {
     id: "fill",

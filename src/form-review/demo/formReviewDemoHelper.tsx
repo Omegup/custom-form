@@ -37,12 +37,12 @@ const PHASES: {
   {
     id: "design",
     label: "1. Design",
-    blurb: "Same editor as form-dialogs — library, add/edit, drag-and-drop. Fill/review below stay field-only.",
+    blurb: "Same editor as form-dialogs — library, add/edit, drag-and-drop.",
   },
   {
     id: "response",
     label: "2. Response",
-    blurb: "Student fills answers. Reviewer comments are not applied yet.",
+    blurb: "Student fills answers (multiple panels get + Add). Reviewer comments are not applied yet.",
   },
   {
     id: "follow",
@@ -177,96 +177,6 @@ export const PhaseJsonPanels = ({
     </div>
   );
 };
-
-const fieldRowStyle: CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 4,
-  padding: "8px 10px",
-  border: "1px solid #e5e5e5",
-  borderRadius: 4,
-  background: "#fff",
-};
-
-/** Read-only filled form (Response phase) — demo chrome only. */
-export const ResponseView = ({
-  header,
-  sections,
-  responses,
-}: {
-  header: lib.FormHeader;
-  sections: types.ListSection[];
-  responses: Record<string, lib.Response>;
-}) => (
-  <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-    <div>
-      <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 600 }}>{header.title}</h2>
-      {header.description ? (
-        <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{header.description}</p>
-      ) : null}
-      <p
-        style={{
-          margin: "8px 0 0",
-          fontSize: 12,
-          color: "#888",
-          fontStyle: "italic",
-        }}
-      >
-        Student response — answers only; no reviewer annotations yet.
-      </p>
-    </div>
-    {sections.map((section, i) => (
-      <div
-        key={section.header.id}
-        style={{
-          opacity: section.header.deleted ? 0.5 : 1,
-          display: "flex",
-          flexDirection: "column",
-          gap: 10,
-        }}
-      >
-        <div>
-          <h3 style={{ margin: "0 0 4px", fontSize: 17, fontWeight: 600 }}>
-            {i + 1}. {section.header.title}
-          </h3>
-          {section.header.description ? (
-            <p style={{ margin: 0, color: "#555", fontSize: 13 }}>
-              {section.header.description}
-            </p>
-          ) : null}
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {section.items.flat().map(({ header: q }) => {
-            const raw = responses[q.id]?.data.value;
-            const value = typeof raw === "string" ? raw : raw != null ? String(raw) : "";
-            return (
-              <div key={q.id} style={fieldRowStyle}>
-                <span style={{ fontSize: 14, fontWeight: 600 }}>
-                  {q.params.name}
-                  {q.params.required ? (
-                    <span style={{ color: "#b00020", marginLeft: 4 }}>*</span>
-                  ) : null}
-                </span>
-                <div
-                  style={{
-                    padding: "6px 8px",
-                    borderRadius: 3,
-                    border: "1px solid #c8d4e0",
-                    background: value ? "#f3f8fc" : "#fafafa",
-                    fontSize: 14,
-                    minHeight: 28,
-                  }}
-                >
-                  {value || <em style={{ color: "#999" }}>No answer</em>}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    ))}
-  </div>
-);
 
 const overlayBox: CSSProperties = {
   marginTop: 16,
@@ -497,15 +407,16 @@ export const formChrome: lib.FormReviewChrome<types.TypeNames, types.Params> = {
               <span>Field label</span>
               <input
                 value={formItem.params.name}
-                onChange={(e) =>
+                onChange={(e) => {
+                  if (formItem.type !== "field") return;
                   setAddition({
                     ...addition,
                     formItem: {
                       ...formItem,
                       params: { ...formItem.params, name: e.target.value },
                     },
-                  })
-                }
+                  });
+                }}
               />
             </label>
           ) : null}

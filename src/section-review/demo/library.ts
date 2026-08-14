@@ -14,9 +14,11 @@ export { branded } from "../../form";
 export type { MetaDom, RecursiveFormItem } from "../../recursive-form";
 export type {
   Indexed,
+  SIndexed,
   SectionMetaDom,
   SectionWithItems,
 } from "../../form-edit";
+export { consolidateSections } from "../../form-edit";
 export type {
   Response,
   ResponseSetter,

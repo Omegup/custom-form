@@ -2,7 +2,7 @@
  * FormResponse lifecycle — Design editor, Fill Send, Update Save/feedback.
  */
 import { FormDialogsEditor } from "../../form-dialogs/demo/FormDialogsDemo";
-import { toFieldSections } from "../../form-dialogs/demo/formDialogsDemoFlat";
+import { sectionsFromFlat } from "../../form-dialogs/demo/formDialogsDemoFlat";
 import {
   FormContainer,
   PhaseJsonPanels,
@@ -21,7 +21,7 @@ export const FormResponseDemo = ({
   showDeleted,
   updateArgs,
 }: types.DemoProps) => {
-  const sections = toFieldSections(flatItems);
+  const sections = sectionsFromFlat(flatItems);
   return (
     <FormContainer title={heading}>
       <PhaseTabs

@@ -15,7 +15,7 @@ type FieldItem = {
 };
 
 type FieldDraft = {
-  formItem?: { id: string; params: { name: string; required: boolean } };
+  formItem?: { id: string; params: { name: string; required?: boolean } };
 };
 
 export const FollowUpAdd = ({

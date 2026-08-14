@@ -1,11 +1,23 @@
 /**
  * `form-review` showcase — Design → Response → Follow walkthrough.
- * Design remounts the form-dialogs editor. Only Follow mounts
- * `CustomFormReviewHOC`; Response is a demo blueprint of answers.
+ * Design remounts the form-dialogs editor. Response mounts the fill shell;
+ * Follow mounts `CustomFormReviewHOC`.
  */
-import { useCallback, useState, type Ref } from "react";
+import { useCallback, useRef, useState, type Ref } from "react";
 import { FormDialogsEditor } from "../../form-dialogs/demo/FormDialogsDemo";
-import { toFieldSections } from "../../form-dialogs/demo/formDialogsDemoFlat";
+import { sectionsFromFlat } from "../../form-dialogs/demo/formDialogsDemoFlat";
+import {
+  FormResponder,
+  formResponderCtx,
+  responderVariants,
+} from "../../form-responder/demo/FormResponderDemo";
+import type { SectionValidator } from "../../form-responder";
+import {
+  allTypeChrome,
+  headingView,
+  panelRepeatChildren,
+  panelView,
+} from "../../response/demo/nestedItems";
 import { FollowUpDrafts } from "../../section-review/demo/followUpAdd";
 import * as demo from "./formReviewDemoHelper";
 import type * as types from "./formReviewDemoTypes.t";
@@ -117,14 +129,22 @@ const viewers: lib.Viewers<
       );
     },
   },
+  heading: {
+    viewer: headingView,
+    repeatChildren: () => [""],
+  },
+  panel: {
+    viewer: panelView,
+    repeatChildren: panelRepeatChildren,
+  },
 };
 
-const variants = lib.branded<types.Variants, "variants">({
-  field: defaultFieldVariant,
-});
-const followUpVariants = lib.branded<types.Variants, "variants">({
-  field: followUpFieldVariant,
-});
+const variants = lib.branded<types.Variants, "variants">(
+  allTypeChrome(defaultFieldVariant),
+);
+const followUpVariants = lib.branded<types.Variants, "variants">(
+  allTypeChrome(followUpFieldVariant),
+);
 const reviewVariants: Record<lib.ReviewVariantState, types.Variants> = {
   default: variants,
   change: followUpVariants,
@@ -147,17 +167,30 @@ export const FormReviewDemo = ({
   phase,
   header,
   flatItems,
-  sections,
   responses,
   changes,
   reviewPending,
   showDeleted,
   updateArgs,
 }: types.DemoProps) => {
+  const fillRef = useRef<SectionValidator | null>(null);
   const [addition, setAddition] = useState<
     lib.Addition<types.TypeNames, types.Params> | null
   >(null);
   const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
+  const liveSections = sectionsFromFlat(flatItems);
+
+  const setResponse = useCallback(
+    (id: string, next?: lib.Response) => {
+      if (next === undefined) {
+        const { [id]: _, ...rest } = responses;
+        updateArgs({ responses: rest });
+        return;
+      }
+      updateArgs({ responses: { ...responses, [id]: next } });
+    },
+    [responses, updateArgs],
+  );
 
   const setChanges = useCallback(
     (next: lib.AdditionalChanges<types.TypeNames, types.Params>) =>
@@ -190,7 +223,7 @@ export const FormReviewDemo = ({
               setFlatItems={(next) =>
                 updateArgs({
                   flatItems: next,
-                  sections: toFieldSections(next),
+                  sections: sectionsFromFlat(next),
                 })
               }
             />
@@ -198,10 +231,18 @@ export const FormReviewDemo = ({
         ) : null}
 
         {phase === "response" ? (
-          <demo.ResponseView
+          <FormResponder
+            ctx={formResponderCtx}
             header={header}
-            sections={sections}
+            sections={liveSections}
             responses={responses}
+            old={null}
+            setResponse={setResponse}
+            getError={() => null}
+            impRef={fillRef}
+            showDeleted={showDeleted}
+            variants={responderVariants}
+            followUpItems={{}}
           />
         ) : null}
 
@@ -239,7 +280,7 @@ export const FormReviewDemo = ({
             <FormReview
               ctx={ctx}
               header={header}
-              sections={sections}
+              sections={liveSections}
               responses={responses}
               lastPending={reviewPending ? demo.PENDING_DATE : null}
               changes={changes}
@@ -260,7 +301,7 @@ export const FormReviewDemo = ({
 
         <demo.PhaseJsonPanels
           phase={phase}
-          sections={sections}
+          sections={liveSections}
           responses={responses}
           changes={changes}
         />

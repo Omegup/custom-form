@@ -42,7 +42,7 @@ const PHASES: {
   {
     id: "response",
     label: "2. Response",
-    blurb: "Student answers. No reviewer comments yet.",
+    blurb: "Student answers this section (multiple panels get + Add). No reviewer comments yet.",
   },
   {
     id: "follow",
@@ -171,68 +171,6 @@ export const PhaseJsonPanels = ({
     </div>
   );
 };
-
-const fieldRowStyle: CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 4,
-  padding: "8px 10px",
-  border: "1px solid #e5e5e5",
-  borderRadius: 4,
-  background: "#fff",
-};
-
-export const ResponseView = ({
-  section,
-  responses,
-}: {
-  section: types.ListSection;
-  responses: Record<string, lib.Response>;
-}) => (
-  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-    <div>
-      <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 600 }}>
-        {section.header.title}
-      </h3>
-      {section.header.description ? (
-        <p style={{ margin: 0, color: "#555", fontSize: 14 }}>
-          {section.header.description}
-        </p>
-      ) : null}
-      <p style={{ margin: "8px 0 0", fontSize: 12, color: "#888", fontStyle: "italic" }}>
-        Student response — answers only; no reviewer annotations yet.
-      </p>
-    </div>
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      {section.items.flat().map(({ header: q }) => {
-        const raw = responses[q.id]?.data.value;
-        const value = typeof raw === "string" ? raw : raw != null ? String(raw) : "";
-        return (
-          <div key={q.id} style={fieldRowStyle}>
-            <span style={{ fontSize: 14, fontWeight: 600 }}>
-              {q.params.name}
-              {q.params.required ? (
-                <span style={{ color: "#b00020", marginLeft: 4 }}>*</span>
-              ) : null}
-            </span>
-            <div
-              style={{
-                padding: "6px 8px",
-                borderRadius: 3,
-                border: "1px solid #c8d4e0",
-                background: value ? "#f3f8fc" : "#fafafa",
-                fontSize: 14,
-                minHeight: 28,
-              }}
-            >
-              {value || <em style={{ color: "#999" }}>No answer</em>}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  </div>
-);
 
 const overlayBox: CSSProperties = {
   marginTop: 16,
@@ -441,15 +379,16 @@ export const sectionChrome: lib.SectionReviewChrome<types.TypeNames, types.Param
               <span>Field label</span>
               <input
                 value={formItem.params.name}
-                onChange={(e) =>
+                onChange={(e) => {
+                  if (formItem.type !== "field") return;
                   setAddition({
                     ...addition,
                     formItem: {
                       ...formItem,
                       params: { ...formItem.params, name: e.target.value },
                     },
-                  })
-                }
+                  });
+                }}
               />
             </label>
           ) : null}

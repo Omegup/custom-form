@@ -4,7 +4,13 @@
  */
 import { useCallback, useRef, useState, type Ref } from "react";
 import { FormDialogsEditor } from "../../form-dialogs/demo/FormDialogsDemo";
-import { toFieldSections } from "../../form-dialogs/demo/formDialogsDemoFlat";
+import { sectionsFromFlat } from "../../form-dialogs/demo/formDialogsDemoFlat";
+import {
+  allTypeChrome,
+  headingView,
+  panelRepeatChildren,
+  panelView,
+} from "../../response/demo/nestedItems";
 import * as demo from "./formResponderDemoHelper";
 import type * as types from "./formResponderDemoTypes.t";
 import * as lib from "./library";
@@ -76,9 +82,17 @@ const viewers: lib.Viewers<
       );
     },
   },
+  heading: {
+    viewer: headingView,
+    repeatChildren: () => [""],
+  },
+  panel: {
+    viewer: panelView,
+    repeatChildren: panelRepeatChildren,
+  },
 };
 
-const FormResponder = lib.CustomFormResponderHOC<
+export const FormResponder = lib.CustomFormResponderHOC<
   types.TypeNames,
   types.Params,
   types.Variants,
@@ -89,10 +103,11 @@ const FormResponder = lib.CustomFormResponderHOC<
 const ctx = lib.branded<types.Ctx, "context">({
   t: () => "Required",
 });
-const variants = lib.branded<types.Variants, "variants">({
-  field: defaultFieldVariant,
-});
-const responderVariants: Record<lib.ResponderState, types.Variants> = {
+export const formResponderCtx = ctx;
+const variants = lib.branded<types.Variants, "variants">(
+  allTypeChrome(defaultFieldVariant),
+);
+export const responderVariants: Record<lib.ResponderState, types.Variants> = {
   default: variants,
   old: variants,
   change: variants,
@@ -104,13 +119,13 @@ export const FormResponderDemo = ({
   phase,
   header,
   flatItems,
-  sections,
   responses,
   showDeleted,
   updateArgs,
 }: types.DemoProps) => {
   const formRef = useRef<lib.SectionValidator | null>(null);
   const [errors, setErrors] = useState<Record<string, string | null>>({});
+  const liveSections = sectionsFromFlat(flatItems);
 
   const setResponse = useCallback(
     (id: string, next?: lib.Response) => {
@@ -141,7 +156,7 @@ export const FormResponderDemo = ({
           setFlatItems={(next) =>
             updateArgs({
               flatItems: next,
-              sections: toFieldSections(next),
+              sections: sectionsFromFlat(next),
             })
           }
         />
@@ -150,7 +165,7 @@ export const FormResponderDemo = ({
         <FormResponder
           ctx={ctx}
           header={header}
-          sections={sections}
+          sections={liveSections}
           responses={responses}
           old={null}
           setResponse={setResponse}

@@ -4,6 +4,12 @@
 import type { Ref } from "react";
 import { formChrome } from "../../form-responder/demo/formResponderDemoHelper";
 import { useFieldMethods } from "../../form-responder/demo/formResponderDemoHelper";
+import {
+  allTypeChrome,
+  headingView,
+  panelRepeatChildren,
+  panelView,
+} from "../../response/demo/nestedItems";
 import { FOLLOW_UP_BADGE } from "./formResponseDemoHelper";
 import type * as types from "./formResponseDemoTypes.t";
 import * as lib from "./library";
@@ -31,10 +37,12 @@ const followUpVariant: types.FieldVariant = {
   reviewTone: false,
 };
 
-const variants = lib.branded<types.Variants, "variants">({ field: defaultVariant });
-const followUpVariants = lib.branded<types.Variants, "variants">({
-  field: followUpVariant,
-});
+const variants = lib.branded<types.Variants, "variants">(
+  allTypeChrome(defaultVariant),
+);
+const followUpVariants = lib.branded<types.Variants, "variants">(
+  allTypeChrome(followUpVariant),
+);
 
 export const responderVariants: Record<lib.ResponderState, types.Variants> = {
   default: variants,
@@ -127,6 +135,14 @@ const viewers: lib.Viewers<
         </label>
       );
     },
+  },
+  heading: {
+    viewer: headingView,
+    repeatChildren: () => [""],
+  },
+  panel: {
+    viewer: panelView,
+    repeatChildren: panelRepeatChildren,
   },
 };
 
