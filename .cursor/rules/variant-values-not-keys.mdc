@@ -28,21 +28,37 @@ viewer: ({ variant }) => <div style={{ color: variant.fg }} />
 A name-key forces every consumer to share one map that knows every style.
 Passing the value keeps chrome host-owned and removes that dependency.
 
+## Shared like Extra — not keyed by item type
+
+`VariantsDom` is a branded bag with **no `TypeNames`**. Every viewer receives
+the same `variant` object. Hosts do not build `{ field, heading, panel }`
+chrome maps.
+
+```typescript
+// ❌ BAD — per-type bag; adding a type means another key
+type Variants = TheVariants<{ field: Chrome; heading: Chrome; panel: Chrome }>;
+variant: variants[item.type]
+
+// ✅ GOOD — one chrome value, like Extra
+type Variants = TheVariants<Chrome>;
+variant: variants
+```
+
 ## Phase bags are dicts of values
 
-The host **builds** a dictionary of Variant objects. The **library** picks
-`bag[state][type]` and passes that object into the viewer. Hosts do not
-supply `resolveVariant` or dual `variants` / `followUpVariants` bags.
+The host **builds** a dictionary of Variant objects **by fill/review state**.
+The **library** picks `bag[state]` and passes that object into the viewer.
+Hosts do not supply `resolveVariant` or dual `variants` / `followUpVariants`
+bags keyed by type.
 
 | Phase | Prop | Library pick |
 |---|---|---|
-| Design | `variants: Variants` | `variants[type]` |
-| Fill | `variants: Record<ResponderState, Variants>` | `variants[state][type]` |
-| Review | `variants: Record<ReviewVariantState, Variants>` | `variants[state][type]` |
+| Design | `variants: Variants` | `variants` |
+| Fill | `variants: Record<ResponderState, Variants>` | `variants[state]` |
+| Review | `variants: Record<ReviewVariantState, Variants>` | `variants[state]` |
 
 `ResponderState`: `default` \| `old` \| `change` \| `error`.
 `ReviewVariantState`: `default` \| `change`.
-`Variant` stays **per type** (`Variants[K]` can differ across `field` / `heading` / …).
 
 ```typescript
 // ✅ Host constructs the Record; library picks by status
@@ -54,14 +70,15 @@ const responderVariants: Record<ResponderState, Variants> = {
 };
 <FormResponder variants={responderVariants} />
 
-// ❌ BAD — host resolver reaching into chrome maps
+// ❌ BAD — host resolver reaching into a per-type chrome map
 resolveVariant={(item) =>
   pending ? followUpVariants[item.type] : defaultVariants[item.type]
 }
 ```
 
 Storybook controls may still use name keys **at the host boundary** only —
-map `TEXT_VARIANT[controlName]` before passing into viewers.
+map `TEXT_VARIANT[controlName]` into the shared chrome object before passing
+into viewers.
 
 Picking `bag[status]` inside the library is not the anti-pattern: the
 anti-pattern is a **second** map from name → style that viewers must import.

@@ -23,7 +23,7 @@ import type {
 
 /**
  * Fill chrome states — host supplies a Variant **value** bag per state;
- * the library picks `variants[state][type]` (see variant-values-not-keys).
+ * the library picks `variants[state]` (see variant-values-not-keys).
  */
 export type ResponderState = "default" | "old" | "change" | "error";
 
@@ -94,7 +94,7 @@ export type SectionResponderChrome = {
 export type SectionResponderProps<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Variants extends VariantsDom<TypeNames>,
+  Variants extends VariantsDom,
   Context extends SectionResponderContext,
   SectionConfig extends SectionResponderHeader,
   SectionMeta extends SectionMetaDom,

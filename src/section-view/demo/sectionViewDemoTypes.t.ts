@@ -8,10 +8,7 @@ export type Params = lib.TheParams<{
   panel: { name: string };
 }>;
 
-export type Variants = lib.TheVariants<{
-  field: Record<string, never>;
-  panel: Record<string, never>;
-}>;
+export type Variants = lib.TheVariants<Record<string, never>>;
 
 export type Section = {
   id: string;

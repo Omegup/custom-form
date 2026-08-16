@@ -25,7 +25,7 @@ inline (sibling to content), never via `createPortal`.
 host: responses / changes / setChanges / lastPending
       + variants: Record<ReviewVariantState, Variants>
   → SectionReviewHOC(viewers, chrome)
-  → per item: pick default | change → variants[state][type]
+  → per item: pick default | change → variants[state]
   → FormItemHOC(…, getUseImpRefViewProps) — response.setValue always null
   → chrome.renderOverlays: add/edit/delete comment, add/edit follow-up form item
 ```

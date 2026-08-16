@@ -16,10 +16,7 @@ export type { StoryArgs } from "./formDemoTypes.t";
 // ── Fixture ───────────────────────────────────────────────────────────────────
 
 export const DEFAULT_FORM_DEMO: Data = {
-  variants: {
-    text: { padding: 8 },
-    group: { showBorder: true },
-  },
+  variants: branded({ padding: 8, showBorder: true }),
   values: {
     t: "Alice",
     g: "1,2",
@@ -101,21 +98,21 @@ export const storyArgsToDemoProps = ({
   ...rest
 }: StoryArgs): Omit<Props, "onValueChange"> => ({
   ...rest,
-  variants: {
-    text: TEXT_VARIANT[textVariant],
-    group: GROUP_VARIANT[groupVariant],
-  },
+  variants: branded({
+    ...TEXT_VARIANT[textVariant],
+    ...GROUP_VARIANT[groupVariant],
+  }),
 });
 
 const TEXT_VARIANT = {
   default: { padding: 8 },
   compact: { padding: 4 },
-} as const satisfies Record<"default" | "compact", Variants["text"]>;
+} as const satisfies Record<"default" | "compact", { padding: number }>;
 
 const GROUP_VARIANT = {
   default: { showBorder: false },
   bordered: { showBorder: true },
-} as const satisfies Record<"default" | "bordered", Variants["group"]>;
+} as const satisfies Record<"default" | "bordered", { showBorder: boolean }>;
 
 // ── Demo helpers (typing lives here, not in FormDemo.tsx) ─────────────────────
 
@@ -132,7 +129,7 @@ export const Label = ({
   border,
   children: [label, ...children],
 }: {
-  variant: Variants["text"];
+  variant: Variants;
   border: Context["accent"];
   children: ReactNode[];
 }) =>
@@ -159,7 +156,7 @@ export const Group = ({
   title,
   children,
 }: {
-  variant: Variants["group"];
+  variant: Variants;
   border: Context["accent"];
   title: string;
   children: ReactNode;
@@ -185,8 +182,8 @@ export const useStoryArgs = () => {
   const variants = useMemo(
     (): Variants =>
       branded({
-        text: TEXT_VARIANT[textVariant],
-        group: GROUP_VARIANT[groupVariant],
+        ...TEXT_VARIANT[textVariant],
+        ...GROUP_VARIANT[groupVariant],
       }),
     [textVariant, groupVariant],
   );

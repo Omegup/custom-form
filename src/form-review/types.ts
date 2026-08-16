@@ -41,7 +41,7 @@ export type FormReviewChrome<
 export type CustomFormReviewProps<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Variants extends VariantsDom<TypeNames>,
+  Variants extends VariantsDom,
   Context extends SectionReviewContext,
   SectionConfig extends SectionReviewHeader,
   SectionMeta extends SectionMetaDom,

@@ -1,7 +1,7 @@
 /**
- * Concrete ItemVariant values for field / heading / panel demos.
- * Hosts pass these objects (or bags of them) — viewers read `variant.border`,
- * never `VARIANT_CHROME[name]`.
+ * Shared ItemVariant values for field / heading / panel demos.
+ * One chrome object for every type — viewers read `variant.border`, never
+ * a per-type bag.
  */
 import type { ItemVariant, Variants } from "./formItemEditorDemoTypes.t";
 import { branded } from "./library";
@@ -24,7 +24,7 @@ const followUpShell = {
 } as const;
 
 /** Black / neutral chrome — design items and settled answers. */
-export const defaultFieldVariant: ItemVariant = {
+export const defaultVariant: ItemVariant = {
   border: "#ccc",
   background: "#fafafa",
   badge: null,
@@ -33,24 +33,8 @@ export const defaultFieldVariant: ItemVariant = {
   reviewTone: true,
 };
 
-export const defaultHeadingVariant: ItemVariant = {
-  border: "#ccc",
-  background: "#fafafa",
-  badge: null,
-  shell: {},
-  reviewTone: true,
-};
-
-export const defaultPanelVariant: ItemVariant = {
-  border: "#b8d4f0",
-  background: "#fafafa",
-  badge: null,
-  shell: {},
-  reviewTone: true,
-};
-
 /** Yellow pending follow-up chrome. */
-export const followUpFieldVariant: ItemVariant = {
+export const followUpVariant: ItemVariant = {
   border: "#e6b800",
   background: "#fffbeb",
   badge: FOLLOW_UP_BADGE,
@@ -58,30 +42,5 @@ export const followUpFieldVariant: ItemVariant = {
   reviewTone: false,
 };
 
-export const followUpHeadingVariant: ItemVariant = {
-  border: "#e6b800",
-  background: "#fffbeb",
-  badge: FOLLOW_UP_BADGE,
-  shell: followUpShell,
-  reviewTone: false,
-};
-
-export const followUpPanelVariant: ItemVariant = {
-  border: "#e6b800",
-  background: "#fffbeb",
-  badge: FOLLOW_UP_BADGE,
-  shell: followUpShell,
-  reviewTone: false,
-};
-
-export const defaultVariants = branded<Variants, "variants">({
-  field: defaultFieldVariant,
-  heading: defaultHeadingVariant,
-  panel: defaultPanelVariant,
-});
-
-export const followUpVariants = branded<Variants, "variants">({
-  field: followUpFieldVariant,
-  heading: followUpHeadingVariant,
-  panel: followUpPanelVariant,
-});
+export const defaultVariants = branded<Variants, "variants">(defaultVariant);
+export const followUpVariants = branded<Variants, "variants">(followUpVariant);

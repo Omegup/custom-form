@@ -38,7 +38,7 @@ export type FormResponderChrome = SectionResponderChrome & {
 export type CustomFormResponderProps<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Variants extends VariantsDom<TypeNames>,
+  Variants extends VariantsDom,
   Context extends SectionResponderContext,
   SectionConfig extends SectionResponderHeader,
   SectionMeta extends SectionMetaDom,

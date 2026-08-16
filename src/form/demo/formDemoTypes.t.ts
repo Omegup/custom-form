@@ -19,12 +19,9 @@ export type Params = TheParams<{
   };
 }>;
 
-export type TextVariant = { padding: number };
-export type GroupVariant = { showBorder: boolean };
-
 export type Variants = TheVariants<{
-  text: TextVariant;
-  group: GroupVariant;
+  padding: number;
+  showBorder: boolean;
 }>;
 
 export type Context = ContextDom & { accent: string };
@@ -32,10 +29,7 @@ export type Context = ContextDom & { accent: string };
 export type Item = SomeFormItem<TypeNames, Params>;
 
 export type Data = {
-  variants: {
-    text: Variants["text"];
-    group: Variants["group"];
-  };
+  variants: Variants;
   values: Record<string, string>;
   items: SomeFormItem<TypeNames, Params>[];
 };

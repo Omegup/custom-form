@@ -34,7 +34,7 @@ type HostExtra = ResponderExtra & { impRef: Ref<StrictViewerMethods> };
 export const CustomFormResponderHOC = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Variants extends VariantsDom<TypeNames>,
+  Variants extends VariantsDom,
   Context extends SectionResponderContext,
   SectionConfig extends SectionResponderHeader,
 >(

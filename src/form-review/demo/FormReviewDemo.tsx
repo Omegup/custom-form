@@ -13,7 +13,6 @@ import {
 } from "../../form-responder/demo/FormResponderDemo";
 import type { SectionValidator } from "../../form-responder";
 import {
-  allTypeChrome,
   headingView,
   panelRepeatChildren,
   panelView,
@@ -139,11 +138,9 @@ const viewers: lib.Viewers<
   },
 };
 
-const variants = lib.branded<types.Variants, "variants">(
-  allTypeChrome(defaultFieldVariant),
-);
+const variants = lib.branded<types.Variants, "variants">(defaultFieldVariant);
 const followUpVariants = lib.branded<types.Variants, "variants">(
-  allTypeChrome(followUpFieldVariant),
+  followUpFieldVariant,
 );
 const reviewVariants: Record<lib.ReviewVariantState, types.Variants> = {
   default: variants,

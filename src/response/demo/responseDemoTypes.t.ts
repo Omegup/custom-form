@@ -10,9 +10,7 @@ export type Params = lib.TheParams<{
   field: { name: string; required: boolean };
 }>;
 
-export type Variants = lib.TheVariants<{
-  field: Record<string, never>;
-}>;
+export type Variants = lib.TheVariants<Record<string, never>>;
 
 export type Ctx = lib.ContextDom;
 

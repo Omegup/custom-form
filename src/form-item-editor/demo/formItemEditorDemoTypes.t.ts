@@ -15,8 +15,8 @@ export type Params = lib.TheParams<{
 }>;
 
 /**
- * Host-owned chrome for one item — the **value** passed as `variant`, not a
- * name key into a shared map (see `.cursor/rules/variant-values-not-keys.mdc`).
+ * Host-owned chrome for every item type — the **value** passed as `variant`,
+ * not a name key and not a per-type bag (see variant-values-not-keys).
  */
 export type ItemVariant = {
   border: string;
@@ -32,12 +32,8 @@ export type ItemVariant = {
   reviewTone: boolean;
 };
 
-/** Per-type chrome objects (bags of values — Design one bag; fill/review pick). */
-export type Variants = lib.TheVariants<{
-  field: ItemVariant;
-  heading: ItemVariant;
-  panel: ItemVariant;
-}>;
+/** Shared chrome — one value for every item type (like Extra). */
+export type Variants = lib.TheVariants<ItemVariant>;
 
 export type Section = {
   id: string;

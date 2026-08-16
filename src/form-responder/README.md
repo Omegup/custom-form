@@ -22,7 +22,7 @@ directly (no theme/portal rebuild).
 host: sections / responses / setResponse / form impRef
       + variants: Record<ResponderState, Variants>
   → CustomFormResponderHOC(viewers, chrome)
-  → per section: SectionResponderHOC (library picks variants[state][type])
+  → per section: SectionResponderHOC (library picks variants[state])
   → form impRef.validate merges section errors (skips deleted)
 ```
 

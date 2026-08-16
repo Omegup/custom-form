@@ -13,7 +13,7 @@ appendix chrome is injected via `SectionResponderChrome` (demo owns DOM).
 | File | Role |
 |---|---|
 | `types.ts` | `ResponderState`, `ResponderExtra`, `ResponderAdditionalChanges`, `SectionValidator`, `SectionResponderChrome`, `SectionResponderProps` |
-| `SectionResponder.tsx` | **`SectionResponderHOC(viewers, chrome)`** — `FormItemHOC` + `getUseImpRefViewProps`, recursive slots; picks `variants[state][type]` |
+| `SectionResponder.tsx` | **`SectionResponderHOC(viewers, chrome)`** — `FormItemHOC` + `getUseImpRefViewProps`, recursive slots; picks `variants[state]` |
 
 ## How it plugs in
 
@@ -21,7 +21,7 @@ appendix chrome is injected via `SectionResponderChrome` (demo owns DOM).
 host: responses / setResponse / getError / section impRef
       + variants: Record<ResponderState, Variants>
   → SectionResponderHOC(viewers, chrome)
-  → per item: pick state (error / change / old / default) → variants[state][type]
+  → per item: pick state (error / change / old / default) → variants[state]
   → FormItemHOC(…, getUseImpRefViewProps)
   → viewer registers ViewerMethods
   → section impRef.validate aggregates item errors

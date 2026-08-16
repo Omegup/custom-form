@@ -89,7 +89,7 @@ export type ReviewStatus = "normal" | "disabled" | "highlight";
 
 /**
  * Review chrome states — host supplies a Variant **value** bag per state;
- * the library picks `variants[state][type]` (see variant-values-not-keys).
+ * the library picks `variants[state]` (see variant-values-not-keys).
  */
 export type ReviewVariantState = "default" | "change";
 
@@ -195,7 +195,7 @@ export type SectionReviewChrome<
 export type SectionReviewProps<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Variants extends VariantsDom<TypeNames>,
+  Variants extends VariantsDom,
   Context extends SectionReviewContext,
   SectionConfig extends SectionReviewHeader,
   SectionMeta extends SectionMetaDom,

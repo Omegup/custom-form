@@ -13,7 +13,6 @@ import {
 } from "../../section-responder/demo/SectionResponderDemo";
 import type { SectionValidator } from "../../section-responder";
 import {
-  allTypeChrome,
   headingView,
   panelRepeatChildren,
   panelView,
@@ -148,11 +147,9 @@ const SectionReview = lib.SectionReviewHOC<
 >(viewers, demo.sectionChrome);
 
 const ctx = lib.branded<types.Ctx, "context">({});
-const variants = lib.branded<types.Variants, "variants">(
-  allTypeChrome(defaultFieldVariant),
-);
+const variants = lib.branded<types.Variants, "variants">(defaultFieldVariant);
 const followUpVariants = lib.branded<types.Variants, "variants">(
-  allTypeChrome(followUpFieldVariant),
+  followUpFieldVariant,
 );
 const reviewVariants: Record<lib.ReviewVariantState, types.Variants> = {
   default: variants,

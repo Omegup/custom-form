@@ -23,11 +23,7 @@ export type FieldVariant = {
   reviewTone: boolean;
 };
 
-export type Variants = lib.TheVariants<{
-  field: FieldVariant;
-  heading: FieldVariant;
-  panel: FieldVariant;
-}>;
+export type Variants = lib.TheVariants<FieldVariant>;
 
 export type Section = lib.SectionReviewHeader;
 

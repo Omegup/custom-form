@@ -22,7 +22,7 @@ directly (no theme/portal rebuild).
 host: sections / responses / changes / setChanges / lastPending
       + variants: Record<ReviewVariantState, Variants>
   → CustomFormReviewHOC(viewers, chrome)
-  → per section: SectionReviewHOC (library picks variants[state][type])
+  → per section: SectionReviewHOC (library picks variants[state])
 ```
 
 ## Demo (`form-review/Form review` story)

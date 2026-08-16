@@ -23,6 +23,11 @@ Migrated from `school/components/custom-form` → `form-react`, `form-model`.
 type Params = TheParams<{ field: { name: string }; group: { title: string } }>;
 ```
 
+**VariantsDom** — shared chrome bag (like Extra), **not** keyed by item type:
+```typescript
+type Variants = TheVariants<{ padding: number; showBorder: boolean }>;
+```
+
 **Viewer** — React component `( { props: ViewerProps }) => ReactNode` looked up by `formItem.type`.
 
 **FormItemHOC(viewers, useUpdatedViewProps)** — returns a `FormItem` component that picks the right viewer and wraps output in `renderCard`.

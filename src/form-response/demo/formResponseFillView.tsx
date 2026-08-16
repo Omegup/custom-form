@@ -5,7 +5,6 @@ import type { Ref } from "react";
 import { formChrome } from "../../form-responder/demo/formResponderDemoHelper";
 import { useFieldMethods } from "../../form-responder/demo/formResponderDemoHelper";
 import {
-  allTypeChrome,
   headingView,
   panelRepeatChildren,
   panelView,
@@ -37,12 +36,8 @@ const followUpVariant: types.FieldVariant = {
   reviewTone: false,
 };
 
-const variants = lib.branded<types.Variants, "variants">(
-  allTypeChrome(defaultVariant),
-);
-const followUpVariants = lib.branded<types.Variants, "variants">(
-  allTypeChrome(followUpVariant),
-);
+const variants = lib.branded<types.Variants, "variants">(defaultVariant);
+const followUpVariants = lib.branded<types.Variants, "variants">(followUpVariant);
 
 export const responderVariants: Record<lib.ResponderState, types.Variants> = {
   default: variants,

@@ -6,7 +6,6 @@ import { formChrome } from "../../form-review/demo/formReviewDemoHelper";
 import { FOLLOW_UP_BADGE } from "./formResponseDemoHelper";
 import { FollowUpAdd } from "../../section-review/demo/followUpAdd";
 import {
-  allTypeChrome,
   headingView,
   panelRepeatChildren,
   panelView,
@@ -115,12 +114,8 @@ const viewers: lib.Viewers<
   },
 };
 
-const variants = lib.branded<types.Variants, "variants">(
-  allTypeChrome(defaultVariant),
-);
-const followUpVariants = lib.branded<types.Variants, "variants">(
-  allTypeChrome(followUpVariant),
-);
+const variants = lib.branded<types.Variants, "variants">(defaultVariant);
+const followUpVariants = lib.branded<types.Variants, "variants">(followUpVariant);
 
 export const reviewVariants: Record<lib.ReviewVariantState, types.Variants> = {
   default: variants,

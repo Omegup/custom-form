@@ -45,7 +45,7 @@ type HostExtra = ResponderExtra & { impRef: Ref<StrictViewerMethods> };
 export const SectionResponderHOC = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Variants extends VariantsDom<TypeNames>,
+  Variants extends VariantsDom,
   Context extends SectionResponderContext,
   SectionConfig extends SectionResponderHeader,
 >(
@@ -192,7 +192,7 @@ export const SectionResponderHOC = <
               viewProps={{
                 ctx,
                 formItem: q,
-                variant: variants[state][q.type],
+                variant: variants[state],
                 extra: branded({
                   getChild: (suffix: string) => (
                     <>

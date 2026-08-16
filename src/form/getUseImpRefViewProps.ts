@@ -21,7 +21,7 @@ export const getUseImpRefViewProps =
   <
     TypeNames extends string,
     Params extends ParamsDom<TypeNames>,
-    Variants extends VariantsDom<TypeNames>,
+    Variants extends VariantsDom,
     Extra extends ExtraDom,
     Context extends ContextDom,
   >() =>

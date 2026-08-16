@@ -68,7 +68,7 @@ const FormItem = lib.FormItemHOC<
 );
 
 const ctx = lib.branded<types.Ctx, "context">({});
-const variants = lib.branded<types.Variants, "variants">({ field: {} });
+const variants = lib.branded<types.Variants, "variants">({});
 
 export const ResponseDemo = ({
   heading,
@@ -106,7 +106,7 @@ export const ResponseDemo = ({
               viewProps={{
                 formItem: item,
                 ctx,
-                variant: variants.field,
+                variant: variants,
                 extra: lib.branded({
                   error: errors[item.id] ?? null,
                   response: {

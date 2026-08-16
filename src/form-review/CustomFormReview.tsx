@@ -29,7 +29,7 @@ type HostExtra = ReviewExtra & { impRef: Ref<StrictViewerMethods> };
 export const CustomFormReviewHOC = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Variants extends VariantsDom<TypeNames>,
+  Variants extends VariantsDom,
   Context extends SectionReviewContext,
   SectionConfig extends SectionReviewHeader,
 >(

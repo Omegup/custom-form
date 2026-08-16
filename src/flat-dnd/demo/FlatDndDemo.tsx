@@ -60,7 +60,7 @@ export const FlatDndTest = ({ flatItems, updateArgs, renderLayout }: types.ListP
     [focused],
   );
   const variants = useMemo(
-    (): types.Variants => lib.branded({ field: {}, panel: {} }),
+    (): types.Variants => lib.branded({}),
     [],
   );
 

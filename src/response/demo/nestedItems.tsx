@@ -57,10 +57,3 @@ export const panelRepeatChildren = (
   formItem: { params: { multiple: boolean } },
   extra: { response: ResponseSetter },
 ) => panelInstanceSuffixes(formItem.params.multiple, extra.response.value);
-
-/** Same chrome object on every item type — host still owns the value. */
-export const allTypeChrome = <V,>(v: V) => ({
-  field: v,
-  heading: v,
-  panel: v,
-});

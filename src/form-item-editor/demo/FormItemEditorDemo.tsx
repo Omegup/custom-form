@@ -178,7 +178,7 @@ export const itemName = (ctx: types.Ctx, header: types.ItemHeader): ReactNode =>
     viewProps={{
       formItem: header,
       ctx,
-      variant: defaultVariants[header.type],
+      variant: defaultVariants,
       extra: lib.branded({
         getChild: () => null,
       }),

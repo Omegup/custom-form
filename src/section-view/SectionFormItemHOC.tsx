@@ -27,7 +27,7 @@ import type { EditExtra, NodeIndex, RecursiveEditProps, SectionProps } from "./t
 export const SectionFormItemHOC = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Variants extends VariantsDom<TypeNames>,
+  Variants extends VariantsDom,
   SectionConfig extends SectionDom,
   Context extends ContextDom,
   Extra extends ExtraDom,

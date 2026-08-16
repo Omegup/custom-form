@@ -6,7 +6,6 @@ import { useCallback, useRef, useState, type Ref } from "react";
 import { FormDialogsEditor } from "../../form-dialogs/demo/FormDialogsDemo";
 import { sectionsFromFlat } from "../../form-dialogs/demo/formDialogsDemoFlat";
 import {
-  allTypeChrome,
   headingView,
   panelRepeatChildren,
   panelView,
@@ -103,9 +102,7 @@ export const SectionResponder = lib.SectionResponderHOC<
 const ctx = lib.branded<types.Ctx, "context">({
   t: () => "Required",
 });
-const variants = lib.branded<types.Variants, "variants">(
-  allTypeChrome(defaultFieldVariant),
-);
+const variants = lib.branded<types.Variants, "variants">(defaultFieldVariant);
 export const sectionResponderCtx = ctx;
 export const sectionResponderVariants: Record<lib.ResponderState, types.Variants> =
   {

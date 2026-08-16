@@ -30,7 +30,6 @@ import type {
   SIndexed,
   SomeFormItem,
   StrictViewerMethods,
-  TypedFormItem,
   VariantsDom,
   ViewerMethods,
   Viewers,
@@ -60,7 +59,7 @@ const isAnsweredResponse = (
 export const SectionReviewHOC = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Variants extends VariantsDom<TypeNames>,
+  Variants extends VariantsDom,
   Context extends SectionReviewContext,
   SectionConfig extends SectionReviewHeader,
 >(
@@ -194,16 +193,16 @@ export const SectionReviewHOC = <
      * answered → default/black. Answered follow-ups still use full review
      * chrome (lock / remark / +Follow-up) via `renderReviewableItem`.
      */
-    const resolveVariant = <K extends TypeNames>(
-      item: TypedFormItem<Params, K>,
+    const resolveVariant = (
+      item: { id: string },
       isUnansweredFollowUpEntry: boolean,
-    ): Variants[K] => {
+    ): Variants => {
       const pending =
         isUnansweredFollowUpEntry ||
         hasUnlockRemark(item.id) ||
         hasUnansweredFollowUps(item.id);
       const state = pending ? "change" : "default";
-      return variants[state][item.type];
+      return variants[state];
     };
 
     const submitComment = (text: string) => {

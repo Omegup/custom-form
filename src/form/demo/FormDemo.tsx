@@ -53,7 +53,7 @@ export const FormDemo = () => {
         viewProps={{
           formItem: { ...item, id },
           ctx,
-          variant: variants[item.type],
+          variant: variants,
           extra: branded({
             value: values[id] ?? "",
             onChange: (value) => onValueChange(id, value),

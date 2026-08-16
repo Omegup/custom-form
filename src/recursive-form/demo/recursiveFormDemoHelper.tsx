@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { branded } from "./library";
 import recursiveFormDemoSource from "./RecursiveFormDemo.tsx?raw";
 import recursiveFormDemoTypesSource from "./recursiveFormDemoTypes.t.ts?raw";
 import type { Context, Data, Variants } from "./recursiveFormDemoTypes.t";
@@ -8,10 +9,10 @@ export type { StoryArgs } from "./recursiveFormDemoTypes.t";
 // ── Fixture ───────────────────────────────────────────────────────────────────
 
 export const DEFAULT_RECURSIVE_FORM_DEMO: Data = {
-  variants: {
-    text: { padding: 8 },
-    group: { showBorder: true },
-  },
+  variants: branded<Variants, "variants">({
+    padding: 8,
+    showBorder: true,
+  }),
   values: {
     t: "Alice",
     g: "1,2,3",
@@ -122,7 +123,7 @@ export const Label = ({
   label,
   children,
 }: {
-  variant: Variants["text"];
+  variant: Variants;
   border: Context["accent"];
   label: string;
   children: ReactNode;
@@ -147,7 +148,7 @@ export const Group = ({
   title,
   children,
 }: {
-  variant: Variants["group"];
+  variant: Variants;
   border: Context["accent"];
   title: string;
   children: ReactNode;

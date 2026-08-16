@@ -4,7 +4,7 @@ import type { ContextDom, ExtraDom, ParamsDom, SomeFormItem, VariantsDom } from 
 export const createFormItemByChildren = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Variants extends VariantsDom<TypeNames>,
+  Variants extends VariantsDom,
   ExtraView extends ExtraDom,
   ExtraViewer extends ExtraDom,
   ExtraRepeat extends ExtraDom,

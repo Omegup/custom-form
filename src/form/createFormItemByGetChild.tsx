@@ -23,7 +23,7 @@ type GetChild = { getChild: (suffix: string, index: number) => ReactNode };
 export const createFormItemByGetChild = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Variants extends VariantsDom<TypeNames>,
+  Variants extends VariantsDom,
   Extra extends ExtraDom,
   Context extends ContextDom,
   ExtraView extends ExtraDom = Extra,
@@ -98,7 +98,7 @@ export const createFormItemByGetChild = <
 export const createFormItemByGetChildPlain = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Variants extends VariantsDom<TypeNames>,
+  Variants extends VariantsDom,
   Extra extends ExtraDom,
   Context extends ContextDom,
 >(

@@ -81,7 +81,7 @@ const renderItem: RenderItem = (formItem, variants, ctx, FormItem, extra) => {
       viewProps={{
         formItem: item.header,
         ctx,
-        variant: variants[item.header.type],
+        variant: variants,
         extra: extra(item, render, suffix),
       }}
       renderCard={(view) => <demo.Card>{view}</demo.Card>}
@@ -100,13 +100,10 @@ export const RecursiveFormDemo = ({
   updateArgs,
 }: RecursiveFormDemoProps) => {
   const variants = useMemo((): Variants => {
-    const text =
-      textVariant === "compact" ? { padding: 4 } : { padding: 8 };
-    const group =
-      groupVariant === "bordered"
-        ? { showBorder: true }
-        : { showBorder: false };
-    return branded({ text, group });
+    return branded({
+      padding: textVariant === "compact" ? 4 : 8,
+      showBorder: groupVariant === "bordered",
+    });
   }, [textVariant, groupVariant]);
   const ctx = useMemo((): Context => branded({ accent }), [accent]);
 
