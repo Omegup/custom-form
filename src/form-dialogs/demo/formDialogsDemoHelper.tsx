@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { FieldRow } from "../../form-edit/demo/editFormDemoHelper";
+import { FieldRow, NestedSlot } from "../../form-edit/demo/editFormDemoHelper";
 import formDialogsDemoSource from "./FormDialogsDemo.tsx?raw";
 import formDialogsDemoTypesSource from "./formDialogsDemoTypes.t.ts?raw";
 import type * as types from "./formDialogsDemoTypes.t";
@@ -46,23 +46,6 @@ export const viewers: lib.Viewers<
     repeatChildren: () => [""],
   },
 };
-
-const NestedSlot = ({ children }: { children: ReactNode }) => (
-  <div
-    style={{
-      display: "flex",
-      flexDirection: "row",
-      gap: 6,
-      marginLeft: 12,
-      marginTop: 4,
-      paddingLeft: 8,
-      borderLeft: "2px solid #b8d4f0",
-      minWidth: 0,
-    }}
-  >
-    {children}
-  </div>
-);
 
 export const renderCard = (
   view: ReactNode,

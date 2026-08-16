@@ -2,14 +2,14 @@
  * `SectionFormItemHOC` (same shape as the `section-view` demo); the DnD
  * engine lives in `drag-drop-tree`; this demo only wires it via `WebRecursiveEdit.tsx`. */
 import type { ReactNode } from "react";
-import { FieldRow, FormContainer } from "../../form-edit/demo/editFormDemoHelper";
+import { FieldRow, FormContainer, NestedSlot, SectionsList } from "../../form-edit/demo/editFormDemoHelper";
 import flatDndDemoSource from "./FlatDndDemo.tsx?raw";
 import flatDndDemoTypesSource from "./flatDndDemoTypes.t.ts?raw";
 import webRecursiveEditSource from "./WebRecursiveEdit.tsx?raw";
 import * as types from "./flatDndDemoTypes.t";
 import * as lib from "./library";
 
-export { FormContainer };
+export { FormContainer, SectionsList };
 
 const withFileHeader = (path: string, source: string) =>
   `// ── ${path} ──\n${source.trimEnd()}`;
@@ -67,38 +67,24 @@ export const viewers: lib.Viewers<
   },
 };
 
-const NestedSlot = ({ children }: { children: ReactNode }) => (
-  <div
-    style={{
-      display: "flex",
-      flexDirection: "row",
-      gap: 6,
-      marginLeft: 12,
-      marginTop: 4,
-      paddingLeft: 8,
-      borderLeft: "2px solid #b8d4f0",
-      minWidth: 0,
-    }}
-  >
-    {children}
-  </div>
-);
-
 export const renderCard = (
   view: ReactNode,
   viewProps: lib.ViewerProps<types.Params, types.Variants, types.TypeNames, CardExtra, types.Ctx>,
-) => (
-  <div>
-    <FieldRow
-      name={view}
-      focused={null}
-      actions={viewProps.extra.actions}
-      extra={[]}
-      parentDeleted={viewProps.extra.parentDeleted}
-    />
-    {viewProps.extra.children.length > 0 && <NestedSlot>{viewProps.extra.children}</NestedSlot>}
-  </div>
-);
+) => {
+  const { extra, ctx, formItem } = viewProps;
+  return (
+    <div>
+      <FieldRow
+        name={view}
+        focused={ctx.autoFocused(formItem.id)}
+        actions={extra.actions}
+        extra={[]}
+        parentDeleted={extra.parentDeleted}
+      />
+      {extra.children.length > 0 && <NestedSlot>{extra.children}</NestedSlot>}
+    </div>
+  );
+};
 
 export const buildItemExtraMap = (
   sections: lib.SectionWithItems<

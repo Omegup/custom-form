@@ -5,6 +5,7 @@
 import { useMemo } from "react";
 import { itemName } from "../../form-item-editor/demo/FormItemEditorDemo";
 import { RemoveAlert } from "../../form-item-editor/demo/formItemEditorDemoHelper";
+import { SectionsList } from "../../form-edit/demo/editFormDemoHelper";
 import { defaultVariants } from "../../form-item-editor/demo/itemVariants";
 import { MENU_ITEMS, randomId } from "../../side-menu/demo/fixtures";
 import {
@@ -81,7 +82,7 @@ export const FormDialogsEditor = ({
                 onCancel={() => session.setToRemove(null)}
               />
             ) : null}
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <SectionsList>
               {session.sections.map((section, sIndex) => (
                 <SectionComponent
                   key={section.header.id}
@@ -97,7 +98,7 @@ export const FormDialogsEditor = ({
                   setAddItem={dialogs.setItemSession}
                 />
               ))}
-            </div>
+            </SectionsList>
           </>
         }
         sidebar={

@@ -37,11 +37,11 @@ export type ColumnsEditChrome = {
     deleted: boolean;
     title: ReactNode;
     actions: MoveActions;
-    /** Flex row of columns (already wrapped by `renderColumn`). */
-    body: ReactNode;
+    /** One node per column (items + add slot) — host wraps the row. */
+    columns: ReactNode[];
   }) => ReactNode;
+  /** Nested panel columns (section columns are wrapped by `renderSection`). */
   renderColumn: (args: { children: ReactNode }) => ReactNode;
-  renderMoveActions: (actions: MoveActions) => ReactNode;
 };
 
 const renderNode = <
@@ -72,6 +72,28 @@ const renderNode = <
   );
 };
 
+const columnContents = <
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames>,
+>(
+  columns: RecursiveFormItem<TypeNames, Params, MetaDom<SIndexed>>[][],
+  parentIndex: number,
+  sIndex: number,
+  parentDeleted: boolean,
+  render: Render<TypeNames, Params>,
+  chrome: ColumnsEditChrome,
+): ReactNode[] =>
+  columns.map((column, colIndex) => (
+    <>
+      {column.map((item) => renderNode(item, parentDeleted, render, chrome))}
+      {!parentDeleted &&
+        render.addItem({
+          index: getFlatInsertionIndex(parentIndex, columns, colIndex),
+          sIndex,
+        })}
+    </>
+  ));
+
 const renderColumns = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
@@ -84,23 +106,15 @@ const renderColumns = <
   chrome: ColumnsEditChrome,
 ): ReactNode => (
   <>
-    {columns.map((column, colIndex) => (
-      <Fragment key={colIndex}>
-        {chrome.renderColumn({
-          children: (
-            <>
-              {column.map((item) =>
-                renderNode(item, parentDeleted, render, chrome),
-              )}
-              {!parentDeleted &&
-                render.addItem({
-                  index: getFlatInsertionIndex(parentIndex, columns, colIndex),
-                  sIndex,
-                })}
-            </>
-          ),
-        })}
-      </Fragment>
+    {columnContents(
+      columns,
+      parentIndex,
+      sIndex,
+      parentDeleted,
+      render,
+      chrome,
+    ).map((children, colIndex) => (
+      <Fragment key={colIndex}>{chrome.renderColumn({ children })}</Fragment>
     ))}
   </>
 );
@@ -121,7 +135,7 @@ export const createColumnsEdit =
       deleted: item.deleted,
       title,
       actions,
-      body: renderColumns(
+      columns: columnContents(
         nodes.children,
         nodes.index,
         nodes.sIndex,

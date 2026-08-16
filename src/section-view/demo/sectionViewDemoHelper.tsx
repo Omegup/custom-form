@@ -1,11 +1,18 @@
 import type { ReactNode } from "react";
-import { FieldRow, FormContainer, MoveBar } from "../../form-edit/demo/editFormDemoHelper";
+import {
+  FieldRow,
+  FormContainer,
+  NestedSlot,
+  SectionColumn,
+  SectionPanel,
+  SectionsList,
+} from "../../form-edit/demo/editFormDemoHelper";
 import sectionViewDemoSource from "./SectionViewDemo.tsx?raw";
 import sectionViewDemoTypesSource from "./sectionViewDemoTypes.t.ts?raw";
 import * as types from "./sectionViewDemoTypes.t";
 import * as lib from "./library";
 
-export { FormContainer };
+export { FormContainer, SectionsList };
 
 // ── Storybook docs (`?raw` of types + integration) ────────────────────────────
 
@@ -67,23 +74,6 @@ export const viewers: lib.Viewers<
   },
 };
 
-const NestedSlot = ({ children }: { children: ReactNode }) => (
-  <div
-    style={{
-      display: "flex",
-      flexDirection: "row",
-      gap: 6,
-      marginLeft: 12,
-      marginTop: 4,
-      paddingLeft: 8,
-      borderLeft: "2px solid #b8d4f0",
-      minWidth: 0,
-    }}
-  >
-    {children}
-  </div>
-);
-
 // ── Item chrome (`renderCard` — school `HandledCard`) ─────────────────────────
 
 export const renderCard = (
@@ -111,48 +101,29 @@ export const renderCard = (
   );
 };
 
-// ── ColumnsEdit chrome (demo HTML — not part of the library) ─────────────────
+// ── ColumnsEdit chrome — same `SectionPanel` / `SectionColumn` as form-edit ──
 
-export const columnsChrome: lib.ColumnsEditChrome = {
-  renderMoveActions: (actions) => <MoveBar actions={actions} extra={[]} />,
-  renderColumn: ({ children }) => (
-    <div
-      style={{
-        flex: 1,
-        display: "flex",
-        flexDirection: "column",
-        gap: 6,
-        minWidth: 0,
-      }}
-    >
-      {children}
-    </div>
-  ),
-  renderSection: ({ deleted, title, actions, body }) => (
-    <section
-      style={{
-        opacity: deleted ? 0.6 : 1,
-        border: "1px solid #ddd",
-        borderRadius: 6,
-        padding: 12,
-        marginBottom: 12,
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 8,
-        }}
-      >
-        <div>{title}</div>
-        {columnsChrome.renderMoveActions(actions)}
-      </div>
-      <div style={{ display: "flex", gap: 12, marginTop: 8 }}>{body}</div>
-    </section>
-  ),
-};
+// ── Non-DnD `renderEdit` — host reads `edit.autofocus` (not a library chrome field)
+
+export const columnsEdit = <
+  TypeNames extends string,
+  Params extends lib.ParamsDom<TypeNames>,
+  SectionConfig extends lib.SectionDom,
+>(
+  props: lib.RecursiveEditProps<TypeNames, Params, SectionConfig>,
+) =>
+  lib.createColumnsEdit({
+    renderColumn: ({ children }) => <SectionColumn>{children}</SectionColumn>,
+    renderSection: ({ title, actions, columns }) => (
+      <SectionPanel
+        title={title}
+        focused={props.edit.autofocus}
+        sectionActions={actions}
+        sectionExtra={[]}
+        columns={columns}
+      />
+    ),
+  })(props);
 
 // ── Per-item extra: live name binding + move actions, keyed by id ─────────────
 

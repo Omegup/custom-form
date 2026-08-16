@@ -46,7 +46,7 @@ const SectionComponent = lib.SectionFormItemHOC<
 >({
   viewers: demo.viewers,
   useRenderAddItem,
-  renderTitle: (props) => <strong>{props.section.header.title}</strong>,
+  renderTitle: (props) => props.section.header.title,
   renderEdit: WebRecursiveEdit,
 });
 
@@ -117,7 +117,7 @@ export const FlatDndTest = ({ flatItems, updateArgs, renderLayout }: types.ListP
     });
 
   const list = (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+    <demo.SectionsList>
       {sections.map((section, sIndex) => (
         <SectionComponent
           key={section.header.id}
@@ -133,7 +133,7 @@ export const FlatDndTest = ({ flatItems, updateArgs, renderLayout }: types.ListP
           setAddItem={setAddItem}
         />
       ))}
-    </div>
+    </demo.SectionsList>
   );
 
   if (renderLayout) return renderLayout({ list, toolbar: null });

@@ -48,8 +48,8 @@ const SectionComponent = lib.SectionFormItemHOC<
 >({
   viewers: demo.viewers,
   useRenderAddItem,
-  renderTitle: (props) => <strong>{props.section.header.title}</strong>,
-  renderEdit: lib.createColumnsEdit(demo.columnsChrome),
+  renderTitle: (props) => props.section.header.title,
+  renderEdit: demo.columnsEdit,
 });
 
 export const SectionViewTest = ({
@@ -125,7 +125,7 @@ export const SectionViewTest = ({
     });
 
   const list = (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+    <demo.SectionsList>
       {sections.map((section, sIndex) => (
         <SectionComponent
           key={section.header.id}
@@ -141,7 +141,7 @@ export const SectionViewTest = ({
           setAddItem={setAddItem}
         />
       ))}
-    </div>
+    </demo.SectionsList>
   );
 
   if (renderLayout) return renderLayout({ list, sidebar: null });

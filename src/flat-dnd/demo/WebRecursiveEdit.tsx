@@ -5,7 +5,7 @@
  */
 import { useMemo, useRef, useState, type CSSProperties } from "react";
 import { DnDTreeCore, RecursiveTreeNode, type Handlers } from "../../drag-drop-tree";
-import { MoveBar } from "../../form-edit/demo/editFormDemoHelper";
+import { SectionColumn, SectionPanel } from "../../form-edit/demo/editFormDemoHelper";
 import * as lib from "./library";
 
 type Ctx = Record<string, never>;
@@ -60,31 +60,24 @@ export const WebRecursiveEdit = <
   };
 
   return (
-    <section
-      style={{
-        opacity: item.deleted ? 0.6 : 1,
-        border: "1px solid #ddd",
-        borderRadius: 6,
-        padding: 12,
-        marginBottom: 12,
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-        <div>{title}</div>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <label style={{ fontSize: 11, color: "#666", display: "inline-flex", gap: 4, alignItems: "center" }}>
-            <input
-              type="checkbox"
-              checked={showDeleted}
-              onChange={(e) => setShowDeleted(e.target.checked)}
-            />
-            Show deleted
-          </label>
-          <MoveBar actions={actions} extra={[]} />
-        </div>
-      </div>
-      <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+    <SectionPanel
+      title={title}
+      focused={edit.autofocus}
+      sectionActions={actions}
+      sectionExtra={[]}
+      headerExtra={
+        <label style={{ fontSize: 11, color: "#666", display: "inline-flex", gap: 4, alignItems: "center" }}>
+          <input
+            type="checkbox"
+            checked={showDeleted}
+            onChange={(e) => setShowDeleted(e.target.checked)}
+          />
+          Show deleted
+        </label>
+      }
+      columns={[
         <DnDTreeCore<lib.DndNodeValue<TypeNames, Params>>
+          key={item.id}
           nodes={tree}
           setNodes={setTree}
           handlersRef={handlersRef}
@@ -127,18 +120,10 @@ export const WebRecursiveEdit = <
                 if (node.type === "column") {
                   if (node.children.length > 0)
                     return (
-                      <div
-                        style={{
-                          flex: 1,
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 6,
-                          minWidth: 0,
-                        }}
-                      >
+                      <SectionColumn>
                         {children}
                         {render.addItem(node)}
-                      </div>
+                      </SectionColumn>
                     );
                   return (
                     <div
@@ -167,8 +152,8 @@ export const WebRecursiveEdit = <
               }}
             />
           )}
-        />
-      </div>
-    </section>
+        />,
+      ]}
+    />
   );
 };

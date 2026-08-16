@@ -95,6 +95,38 @@ export const RemoveAlert = ({
   </div>
 );
 
+export const NestedSlot = ({ children }: { children: ReactNode }) => (
+  <div
+    style={{
+      display: "flex",
+      flexDirection: "row",
+      gap: 6,
+      marginLeft: 12,
+      marginTop: 4,
+      paddingLeft: 8,
+      borderLeft: "2px solid #b8d4f0",
+      minWidth: 0,
+    }}
+  >
+    {children}
+  </div>
+);
+
+export const SectionColumn = ({ children }: { children: ReactNode }) => (
+  <div
+    style={{
+      padding: "6px 10px",
+      display: "flex",
+      flexDirection: "column",
+      gap: 4,
+      flex: 1,
+      minWidth: 0,
+    }}
+  >
+    {children}
+  </div>
+);
+
 export const FieldRow = ({
   name,
   focused,
@@ -145,12 +177,14 @@ export const SectionPanel = ({
   focused,
   sectionActions,
   sectionExtra,
+  headerExtra,
   columns,
 }: {
-  title: string;
+  title: ReactNode;
   focused: boolean | null;
   sectionActions: lib.MoveActions;
   sectionExtra: types.ExtraAction[];
+  headerExtra?: ReactNode;
   columns: ReactNode[];
 }) => {
   const deleted = sectionActions.isDeleted;
@@ -182,8 +216,11 @@ export const SectionPanel = ({
         >
           {title}
         </strong>
-        {/* Keep Restore at full opacity — school does not fade clickable endActions. */}
-        <MoveBar actions={sectionActions} extra={sectionExtra} />
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+          {headerExtra}
+          {/* Keep Restore at full opacity — school does not fade clickable endActions. */}
+          <MoveBar actions={sectionActions} extra={sectionExtra} />
+        </span>
       </div>
       <div
         style={{
@@ -194,18 +231,7 @@ export const SectionPanel = ({
         }}
       >
         {columns.map((column, i) => (
-          <div
-            key={i}
-            style={{
-              padding: "6px 10px",
-              display: "flex",
-              flexDirection: "column",
-              gap: 4,
-              flex: 1,
-            }}
-          >
-            {column}
-          </div>
+          <SectionColumn key={i}>{column}</SectionColumn>
         ))}
       </div>
     </div>

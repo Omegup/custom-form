@@ -47,7 +47,8 @@ SectionHOC(args)(props)
        title: renderTitle(props),
        render: { addItem, node: renderFormItem(props) },
     })
-renderEdit = createColumnsEdit(columnsChrome)  // section-view demo
+renderEdit = demo.columnsEdit            // section-view demo (`edit.autofocus` stays host-side)
+            | WebRecursiveEdit           // flat-dnd / form-dialogs
             | WebRecursiveEdit                 // flat-dnd / form-dialogs
 ```
 
