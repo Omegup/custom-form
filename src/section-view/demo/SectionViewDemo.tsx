@@ -49,7 +49,7 @@ const SectionComponent = lib.SectionFormItemHOC<
   viewers: demo.viewers,
   useRenderAddItem,
   renderTitle: (props) => props.section.header.title,
-  renderEdit: demo.columnsEdit,
+  renderEdit: lib.createColumnsEdit(demo.columnsChrome),
 });
 
 export const SectionViewTest = ({

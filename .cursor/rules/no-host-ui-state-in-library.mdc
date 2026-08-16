@@ -31,4 +31,9 @@ renderEdit: (props) =>
 it is not a library argument. Do not alias `edit.autofocus` as `focused` on
 chrome bags.
 
+Do **not** “fix” that by wrapping layout chrome in a new function that closes
+over `props.edit.autofocus` (`columnsEdit`). That couples column walk to
+autofocus without a host decision. Reuse `SectionPanel` / `FieldRow` as
+static chrome; leave `focused={null}` unless the user asks to wire pulse.
+
 Related: `no-html-outside-demo.mdc`, `no-optional-defaults.mdc`.

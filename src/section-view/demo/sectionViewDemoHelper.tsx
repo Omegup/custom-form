@@ -101,29 +101,21 @@ export const renderCard = (
   );
 };
 
-// ── ColumnsEdit chrome — same `SectionPanel` / `SectionColumn` as form-edit ──
+// ── ColumnsEdit chrome — same `SectionPanel` / `SectionColumn` as form-edit.
+// Does not read autofocus; that stays with the caller that owns `ctx`.
 
-// ── Non-DnD `renderEdit` — host reads `edit.autofocus` (not a library chrome field)
-
-export const columnsEdit = <
-  TypeNames extends string,
-  Params extends lib.ParamsDom<TypeNames>,
-  SectionConfig extends lib.SectionDom,
->(
-  props: lib.RecursiveEditProps<TypeNames, Params, SectionConfig>,
-) =>
-  lib.createColumnsEdit({
-    renderColumn: ({ children }) => <SectionColumn>{children}</SectionColumn>,
-    renderSection: ({ title, actions, columns }) => (
-      <SectionPanel
-        title={title}
-        focused={props.edit.autofocus}
-        sectionActions={actions}
-        sectionExtra={[]}
-        columns={columns}
-      />
-    ),
-  })(props);
+export const columnsChrome: lib.ColumnsEditChrome = {
+  renderColumn: ({ children }) => <SectionColumn>{children}</SectionColumn>,
+  renderSection: ({ title, actions, columns }) => (
+    <SectionPanel
+      title={title}
+      focused={null}
+      sectionActions={actions}
+      sectionExtra={[]}
+      columns={columns}
+    />
+  ),
+};
 
 // ── Per-item extra: live name binding + move actions, keyed by id ─────────────
 
