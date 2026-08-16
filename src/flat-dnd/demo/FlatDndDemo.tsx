@@ -5,7 +5,6 @@
  * reorder within a column or into a nested panel column.
  */
 import { useMemo, useState } from "react";
-import { columnsChrome } from "../../section-view/demo/sectionViewDemoHelper";
 import { renderAddFormItem } from "../../side-menu/demo/sideMenuDemoHelper";
 import * as demo from "./flatDndDemoHelper";
 import * as types from "./flatDndDemoTypes.t";
@@ -47,7 +46,6 @@ const SectionComponent = lib.SectionFormItemHOC<
 >({
   viewers: demo.viewers,
   useRenderAddItem,
-  columnsChrome,
   renderTitle: (props) => <strong>{props.section.header.title}</strong>,
   renderEdit: WebRecursiveEdit,
 });

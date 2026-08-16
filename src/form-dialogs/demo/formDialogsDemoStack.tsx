@@ -11,7 +11,6 @@ import {
 import { SectionDialog } from "../../section-edit/demo/SectionEditDemo";
 import { MENU_ITEMS, randomId } from "../../side-menu/demo/fixtures";
 import { renderAddFormItem } from "../../side-menu/demo/sideMenuDemoHelper";
-import { columnsChrome } from "../../section-view/demo/sectionViewDemoHelper";
 import * as demo from "./formDialogsDemoHelper";
 import type * as types from "./formDialogsDemoTypes.t";
 import * as lib from "./library";
@@ -82,7 +81,6 @@ export const SectionComponent = lib.SectionFormItemHOC<
 >({
   viewers: demo.viewers,
   useRenderAddItem,
-  columnsChrome,
   renderTitle: (props) => <SectionTitle {...props} />,
   renderEdit: WebRecursiveEdit,
 });

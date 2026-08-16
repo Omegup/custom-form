@@ -95,20 +95,21 @@ export const renderCard = (
     CardExtra,
     types.Ctx
   >,
-) => (
-  <div>
-    <FieldRow
-      name={view}
-      focused={null}
-      actions={viewProps.extra.actions}
-      extra={[]}
-      parentDeleted={viewProps.extra.parentDeleted}
-    />
-    {viewProps.extra.children.length > 0 && (
-      <NestedSlot>{viewProps.extra.children}</NestedSlot>
-    )}
-  </div>
-);
+) => {
+  const { extra, ctx, formItem } = viewProps;
+  return (
+    <div>
+      <FieldRow
+        name={view}
+        focused={ctx.autoFocused(formItem.id)}
+        actions={extra.actions}
+        extra={[]}
+        parentDeleted={extra.parentDeleted}
+      />
+      {extra.children.length > 0 && <NestedSlot>{extra.children}</NestedSlot>}
+    </div>
+  );
+};
 
 // ── ColumnsEdit chrome (demo HTML — not part of the library) ─────────────────
 

@@ -2,7 +2,8 @@
  * Thin compose — school `SectionFormItemHOC` equivalent: wires viewers
  * (`createRenderEditFormItem`) and an injected `useRenderAddItem` (e.g.
  * `side-menu`'s `makeUseRenderAddItem(...)`, composed by the caller) into
- * `SectionHOC`. Default layout is `createColumnsEdit(columnsChrome)`.
+ * `SectionHOC`. Layout is always host-owned `renderEdit` (same seam as
+ * `SectionHOC` — no default `ColumnsEdit`).
  */
 import type { ReactNode } from "react";
 import type {
@@ -16,10 +17,6 @@ import type {
   VariantsDom,
   Viewers,
 } from "./_deps";
-import {
-  createColumnsEdit,
-  type ColumnsEditChrome,
-} from "./ColumnsEdit";
 import { createRenderEditFormItem } from "./createRenderEditFormItem";
 import { SectionHOC } from "./SectionHOC";
 import type { EditExtra, NodeIndex, RecursiveEditProps, SectionProps } from "./types";
@@ -47,18 +44,12 @@ export const SectionFormItemHOC = <
   renderTitle: (
     props: SectionProps<TypeNames, Params, Variants, SectionConfig, Context, Extra>,
   ) => ReactNode;
-  /**
-   * Host chrome for the default non-DnD layout. Ignored when `renderEdit` is
-   * provided (e.g. a future DnD `renderEdit`).
-   */
-  columnsChrome: ColumnsEditChrome;
-  /** Override layout entirely (defaults to `createColumnsEdit(columnsChrome)`). */
-  renderEdit?: (
+  renderEdit: (
     props: RecursiveEditProps<TypeNames, Params, SectionConfig>,
   ) => ReactNode;
 }) =>
   SectionHOC<TypeNames, Params, Variants, SectionConfig, Context, Extra>({
-    renderEdit: args.renderEdit ?? createColumnsEdit(args.columnsChrome),
+    renderEdit: args.renderEdit,
     useRenderAddItem: args.useRenderAddItem,
     renderTitle: args.renderTitle,
     renderFormItem: createRenderEditFormItem<TypeNames, Params, Variants, Extra, Context>(
