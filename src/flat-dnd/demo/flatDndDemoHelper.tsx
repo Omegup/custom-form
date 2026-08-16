@@ -41,26 +41,11 @@ export const viewers: lib.Viewers<
   string
 > = {
   field: {
-    viewer: ({ props: { extra } }) => (
-      <input
-        value={extra.value}
-        onChange={(e) => extra.onChange(e.target.value)}
-        style={{ padding: "4px 6px", border: "1px solid #ccc", borderRadius: 4 }}
-      />
-    ),
+    viewer: ({ props: { formItem } }) => <span>{formItem.params.name}</span>,
   },
   panel: {
-    viewer: ({ props: { extra } }) => (
-      <input
-        value={extra.value}
-        onChange={(e) => extra.onChange(e.target.value)}
-        style={{
-          padding: "4px 6px",
-          border: "1px solid #ccc",
-          borderRadius: 4,
-          fontWeight: 600,
-        }}
-      />
+    viewer: ({ props: { formItem } }) => (
+      <span style={{ fontWeight: 600 }}>{formItem.params.name}</span>
     ),
     /** One slot — the DnD tree already builds the full column flex into `getChild`. */
     repeatChildren: () => [""],
@@ -95,7 +80,6 @@ export const buildItemExtraMap = (
     types.ItemMeta
   >[],
   itemActions: (item: types.ListItem) => lib.MoveActions,
-  onChange: (id: string, value: string) => void,
 ): Map<string, types.ItemExtra> => {
   const map = new Map<string, types.ItemExtra>();
   const walk = (columns: types.ListItem[][]) => {
@@ -104,8 +88,6 @@ export const buildItemExtraMap = (
         map.set(
           item.header.id,
           lib.branded<types.ItemExtra, "viewer-extra">({
-            value: item.header.params.name,
-            onChange: (value) => onChange(item.header.id, value),
             actions: itemActions(item),
           }),
         );

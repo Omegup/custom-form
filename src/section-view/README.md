@@ -76,9 +76,9 @@ flowchart TB
 ## Demo
 
 `section-view/Section view` story: `SectionFormItemHOC` composing `field` +
-`panel` viewers (name binding via `createFormItemByGetChild`, per-item move
+`panel` viewers (display labels via `createFormItemByGetChild`, per-item move
 actions via `renderCard`) into a multi-section list. Panels recurse into
-nested columns with their own "+ Add" slot. Item add/edit commits immediately
+nested columns with their own "+ Add" slot. Item add commits immediately
 via `form-edit`'s `applyFlatFormItem` (no dialog) — this story's job is
 `section-view` composition alone.
 

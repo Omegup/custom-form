@@ -36,7 +36,7 @@ export const MENU_ITEMS: lib.MenuItemDefinition<types.TypeNames, types.Params>[]
 
 type CardExtra = types.ItemExtra & lib.EditExtra & lib.Children;
 
-// ── Viewers — labels/inputs only; nested columns are placed by `renderCard` ──
+// ── Viewers — labels only; nested columns are placed by `renderCard` ──
 
 export const viewers: lib.Viewers<
   types.TypeNames,
@@ -48,26 +48,11 @@ export const viewers: lib.Viewers<
   string
 > = {
   field: {
-    viewer: ({ props: { extra } }) => (
-      <input
-        value={extra.value}
-        onChange={(e) => extra.onChange(e.target.value)}
-        style={{ padding: "4px 6px", border: "1px solid #ccc", borderRadius: 4 }}
-      />
-    ),
+    viewer: ({ props: { formItem } }) => <span>{formItem.params.name}</span>,
   },
   panel: {
-    viewer: ({ props: { extra } }) => (
-      <input
-        value={extra.value}
-        onChange={(e) => extra.onChange(e.target.value)}
-        style={{
-          padding: "4px 6px",
-          border: "1px solid #ccc",
-          borderRadius: 4,
-          fontWeight: 600,
-        }}
-      />
+    viewer: ({ props: { formItem } }) => (
+      <span style={{ fontWeight: 600 }}>{formItem.params.name}</span>
     ),
     /** One slot — `ColumnsEdit` already built the full column flex into `getChild`. */
     repeatChildren: () => [""],
@@ -117,7 +102,7 @@ export const columnsChrome: lib.ColumnsEditChrome = {
   ),
 };
 
-// ── Per-item extra: live name binding + move actions, keyed by id ─────────────
+// ── Per-item extra: move actions, keyed by id ─────────────────────────────────
 
 export const buildItemExtraMap = (
   sections: lib.SectionWithItems<
@@ -128,7 +113,6 @@ export const buildItemExtraMap = (
     types.ItemMeta
   >[],
   itemActions: (item: types.ListItem) => lib.MoveActions,
-  onChange: (id: string, value: string) => void,
 ): Map<string, types.ItemExtra> => {
   const map = new Map<string, types.ItemExtra>();
   const walk = (columns: types.ListItem[][]) => {
@@ -137,8 +121,6 @@ export const buildItemExtraMap = (
         map.set(
           item.header.id,
           lib.branded<types.ItemExtra, "viewer-extra">({
-            value: item.header.params.name,
-            onChange: (value) => onChange(item.header.id, value),
             actions: itemActions(item),
           }),
         );

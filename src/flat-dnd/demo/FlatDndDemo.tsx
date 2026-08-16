@@ -80,22 +80,10 @@ export const FlatDndTest = ({ flatItems, updateArgs, renderLayout }: types.ListP
   };
   const itemActions = lib.getFormItemMoveActions(args, cloneFn, jump);
 
-  const renameItem = (id: string, value: string) =>
-    setItems(
-      flatItems.map((entry) =>
-        "item" in entry && entry.item.id === id
-          ? { ...entry, item: { ...entry.item, params: { ...entry.item.params, name: value } } }
-          : entry,
-      ),
-      ctx,
-    );
-
-  const itemExtraMap = demo.buildItemExtraMap(sections, itemActions, renameItem);
+  const itemExtraMap = demo.buildItemExtraMap(sections, itemActions);
   const itemExtra = (id: string): types.ItemExtra =>
     itemExtraMap.get(id) ??
     lib.branded<types.ItemExtra, "viewer-extra">({
-      value: "",
-      onChange: () => {},
       actions: {
         up: null,
         down: null,

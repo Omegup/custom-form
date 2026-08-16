@@ -24,7 +24,7 @@ export default {
       },
       description: {
         component:
-          "`SectionFormItemHOC` (viewers + `createRenderEditFormItem` + `ColumnsEdit`) rendering a multi-section, multi-type list — no FlatDnd. Each section owns its move actions (`getSectionEdit`); each item gets live name binding + move actions via `renderCard`. Panels recurse into nested columns with their own \"+ Add\" slot (`getFlatInsertionIndex`). Item add/edit commits immediately via `applyFlatFormItem` — this story proves `section-view` composition, not a second item-edit dialog.",
+          "`SectionFormItemHOC` (viewers + `createRenderEditFormItem` + `ColumnsEdit`) rendering a multi-section, multi-type list — no FlatDnd. Each section owns its move actions (`getSectionEdit`); each item is a display label + move actions via `renderCard` (same list chrome as side-menu / form-dialogs). Panels recurse into nested columns with their own \"+ Add\" slot (`getFlatInsertionIndex`). Item add commits immediately via `applyFlatFormItem` — this story proves `section-view` composition, not a second item-edit dialog.",
       },
     },
   },

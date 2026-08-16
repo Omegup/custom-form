@@ -4,7 +4,7 @@
  * the library handles nested panel columns and add-item slots without any
  * FlatDnd/drag-and-drop.
  *
- * Item edits commit immediately (no dialog) — this story's job is
+ * Item add commits immediately via `applyFlatFormItem` — this story's job is
  * `section-view` composition, not a second `form-item-editor`/`form-dialogs`.
  */
 import { useMemo, useState } from "react";
@@ -86,24 +86,10 @@ export const SectionViewTest = ({
   };
   const itemActions = lib.getFormItemMoveActions(args, cloneFn, jump);
 
-  const renameItem = (id: string, value: string) =>
-    setItems(
-      flatItems.map((entry) =>
-        "item" in entry && entry.item.id === id
-          ? { ...entry, item: { ...entry.item, params: { ...entry.item.params, name: value } } }
-          : entry,
-      ),
-      ctx,
-    );
-
-  // Rebuilt every render (cheap, demo-only) — avoids memoizing against
-  // `itemActions`/`renameItem`, which are fresh closures each render anyway.
-  const itemExtraMap = demo.buildItemExtraMap(sections, itemActions, renameItem);
+  const itemExtraMap = demo.buildItemExtraMap(sections, itemActions);
   const itemExtra = (id: string): types.ItemExtra =>
     itemExtraMap.get(id) ??
     lib.branded<types.ItemExtra, "viewer-extra">({
-      value: "",
-      onChange: () => {},
       actions: {
         up: null,
         down: null,
