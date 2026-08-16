@@ -172,6 +172,40 @@ export const FieldRow = ({
   </div>
 );
 
+/** List name chrome — same labels as side-menu `itemName`. */
+export const FieldLabel = ({ name }: { name: string }) => <span>{name}</span>;
+
+export const HeadingLabel = ({ name }: { name: string }) => (
+  <span>{`§ ${name}`}</span>
+);
+
+export const PanelLabel = ({ name }: { name: string }) => (
+  <span>{`▦ ${name}`}</span>
+);
+
+/** `FieldRow` + nested-panel slot — shared `renderCard` body for list demos. */
+export const renderListCard = (
+  view: ReactNode,
+  args: {
+    focused: boolean | null;
+    actions: lib.MoveActions;
+    parentDeleted: boolean;
+    nested: ReactNode | null;
+    extra: types.ExtraAction[];
+  },
+) => (
+  <div>
+    <FieldRow
+      name={view}
+      focused={args.focused}
+      actions={args.actions}
+      extra={args.extra}
+      parentDeleted={args.parentDeleted}
+    />
+    {args.nested != null ? <NestedSlot>{args.nested}</NestedSlot> : null}
+  </div>
+);
+
 export const SectionPanel = ({
   title,
   focused,

@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
 import {
-  FieldRow,
+  FieldLabel,
   FormContainer,
-  NestedSlot,
+  PanelLabel,
   SectionColumn,
   SectionPanel,
   SectionsList,
+  renderListCard,
 } from "../../form-edit/demo/editFormDemoHelper";
 import sectionViewDemoSource from "./SectionViewDemo.tsx?raw";
 import sectionViewDemoTypesSource from "./sectionViewDemoTypes.t.ts?raw";
@@ -48,11 +49,13 @@ export const viewers: lib.Viewers<
   string
 > = {
   field: {
-    viewer: ({ props: { formItem } }) => <span>{formItem.params.name}</span>,
+    viewer: ({ props: { formItem } }) => (
+      <FieldLabel name={formItem.params.name} />
+    ),
   },
   panel: {
     viewer: ({ props: { formItem } }) => (
-      <span style={{ fontWeight: 600 }}>{formItem.params.name}</span>
+      <PanelLabel name={formItem.params.name} />
     ),
     /** One slot — `ColumnsEdit` already built the full column flex into `getChild`. */
     repeatChildren: () => [""],
@@ -72,18 +75,13 @@ export const renderCard = (
   >,
 ) => {
   const { extra, ctx, formItem } = viewProps;
-  return (
-    <div>
-      <FieldRow
-        name={view}
-        focused={ctx.autoFocused(formItem.id)}
-        actions={extra.actions}
-        extra={[]}
-        parentDeleted={extra.parentDeleted}
-      />
-      {extra.children.length > 0 && <NestedSlot>{extra.children}</NestedSlot>}
-    </div>
-  );
+  return renderListCard(view, {
+    focused: ctx.autoFocused(formItem.id),
+    actions: extra.actions,
+    parentDeleted: extra.parentDeleted,
+    nested: extra.children.length > 0 ? extra.children : null,
+    extra: [],
+  });
 };
 
 // ── ColumnsEdit chrome — same `SectionPanel` / `SectionColumn` as form-edit.

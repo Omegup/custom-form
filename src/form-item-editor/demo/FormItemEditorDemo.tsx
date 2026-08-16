@@ -13,6 +13,11 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import {
+  FieldLabel,
+  HeadingLabel,
+  PanelLabel,
+} from "../../form-edit/demo/editFormDemoHelper";
 import * as demo from "./formItemEditorDemoHelper";
 import * as types from "./formItemEditorDemoTypes.t";
 import { defaultVariants } from "./itemVariants";
@@ -157,16 +162,20 @@ const nameViewers: types.NameViewers = {
   field: {
     viewer: ({ props: { formItem } }) => (
       <>
-        {formItem.params.name}
+        <FieldLabel name={formItem.params.name} />
         {formItem.params.required ? " *" : ""}
       </>
     ),
   },
   heading: {
-    viewer: ({ props: { formItem } }) => `§ ${formItem.params.name}`,
+    viewer: ({ props: { formItem } }) => (
+      <HeadingLabel name={formItem.params.name} />
+    ),
   },
   panel: {
-    viewer: ({ props: { formItem } }) => `▦ ${formItem.params.name}`,
+    viewer: ({ props: { formItem } }) => (
+      <PanelLabel name={formItem.params.name} />
+    ),
   },
 };
 

@@ -1,5 +1,10 @@
 import type { ReactNode } from "react";
-import { FieldRow, NestedSlot } from "../../form-edit/demo/editFormDemoHelper";
+import {
+  FieldLabel,
+  HeadingLabel,
+  PanelLabel,
+  renderListCard,
+} from "../../form-edit/demo/editFormDemoHelper";
 import formDialogsDemoSource from "./FormDialogsDemo.tsx?raw";
 import formDialogsDemoTypesSource from "./formDialogsDemoTypes.t.ts?raw";
 import type * as types from "./formDialogsDemoTypes.t";
@@ -28,20 +33,20 @@ export const viewers: lib.Viewers<
 > = {
   field: {
     viewer: ({ props: { formItem } }) => (
-      <span>
-        {formItem.params.name}
+      <>
+        <FieldLabel name={formItem.params.name} />
         {formItem.params.required ? " *" : ""}
-      </span>
+      </>
     ),
   },
   heading: {
     viewer: ({ props: { formItem } }) => (
-      <strong style={{ fontSize: 15 }}>{formItem.params.name}</strong>
+      <HeadingLabel name={formItem.params.name} />
     ),
   },
   panel: {
     viewer: ({ props: { formItem } }) => (
-      <span style={{ fontWeight: 600 }}>{formItem.params.name}</span>
+      <PanelLabel name={formItem.params.name} />
     ),
     repeatChildren: () => [""],
   },
@@ -60,19 +65,21 @@ export const renderCard = (
   const { extra, ctx, formItem, variant } = viewProps;
   return (
     <div style={variant.shell}>
-      <FieldRow
-        name={
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-            {view}
-            {variant.badge}
-          </span>
-        }
-        focused={ctx.autoFocused(formItem.id)}
-        actions={extra.actions}
-        extra={extra.parentDeleted ? [] : [{ label: "Edit", onClick: extra.onEdit }]}
-        parentDeleted={extra.parentDeleted}
-      />
-      {extra.children.length > 0 && <NestedSlot>{extra.children}</NestedSlot>}
+      {renderListCard(
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+          {view}
+          {variant.badge}
+        </span>,
+        {
+          focused: ctx.autoFocused(formItem.id),
+          actions: extra.actions,
+          parentDeleted: extra.parentDeleted,
+          nested: extra.children.length > 0 ? extra.children : null,
+          extra: extra.parentDeleted
+            ? []
+            : [{ label: "Edit", onClick: extra.onEdit }],
+        },
+      )}
     </div>
   );
 };
