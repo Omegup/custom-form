@@ -4,6 +4,7 @@
 import type { Ref } from "react";
 import { formChrome } from "../../form-responder/demo/formResponderDemoHelper";
 import { useFieldMethods } from "../../form-responder/demo/formResponderDemoHelper";
+import { RequiredMark } from "../../form-edit/demo/editFormDemoHelper";
 import {
   headingView,
   panelRepeatChildren,
@@ -119,7 +120,7 @@ const viewers: lib.Viewers<
         >
           <span>
             {formItem.params.name}
-            {formItem.params.required ? " *" : ""}
+            <RequiredMark required={formItem.params.required} />
             {variant.badge}
             {extra.icon}
           </span>

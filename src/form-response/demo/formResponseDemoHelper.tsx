@@ -41,7 +41,7 @@ export const PHASES: PhaseTab<types.DemoPhase>[] = [
     id: "update",
     label: "3. Update",
     blurb:
-      "Teacher view of the same FormResponse — Save remarks/follow-ups, then Request changes / Approve / Reject. 💬 opens a type dropdown.",
+      "Teacher view of the same FormResponse — Save remarks/follow-ups, then Request changes / Approve / Reject. Follow-up is a nested Design list under the origin.",
   },
 ];
 

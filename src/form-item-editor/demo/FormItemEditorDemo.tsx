@@ -7,9 +7,7 @@
  */
 import {
   useCallback,
-  useEffect,
   useImperativeHandle,
-  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -17,6 +15,7 @@ import {
   FieldLabel,
   HeadingLabel,
   PanelLabel,
+  RequiredMark,
 } from "../../form-edit/demo/editFormDemoHelper";
 import * as demo from "./formItemEditorDemoHelper";
 import * as types from "./formItemEditorDemoTypes.t";
@@ -163,7 +162,7 @@ const nameViewers: types.NameViewers = {
     viewer: ({ props: { formItem } }) => (
       <>
         <FieldLabel name={formItem.params.name} />
-        {formItem.params.required ? " *" : ""}
+        <RequiredMark required={formItem.params.required} />
       </>
     ),
   },
@@ -322,210 +321,6 @@ export const FormItemEditor = lib.createFormItemEditorWrapper<
   useItemEditor,
   renderDialog,
 );
-
-/** Review follow-up — same `FormItemEditor` stack as Design (field / heading / panel). */
-export const FollowUpFormItemEditor = ({
-  formItem,
-  initialComment = "",
-  initialChildren = [],
-  flatItems,
-  panelN,
-  menuItems,
-  randomId,
-  renderAddFormItemSlot,
-  onSubmit,
-  onCancel,
-}: {
-  formItem: lib.SomeFormItem<types.TypeNames, types.Params>;
-  initialComment?: string;
-  initialChildren?: types.ListItem[][];
-  flatItems: types.FlatItems;
-  panelN: number;
-  menuItems: lib.MenuItemDefinition<types.TypeNames, types.Params>[];
-  randomId: () => string;
-  renderAddFormItemSlot: (
-    args: lib.AddFormItemSlotArgs<types.TypeNames, types.Params> & { label: string },
-  ) => ReactNode;
-  onSubmit: (payload: {
-    comment?: string;
-    formItem: lib.SomeFormItem<types.TypeNames, types.Params>;
-    children?: types.ListItem[][];
-  }) => void;
-  onCancel: () => void;
-}) => {
-  const [comment, setComment] = useState(initialComment);
-  const [session, setSession] = useState<{
-    draft: lib.FlatFormItem<types.TypeNames, types.Params>;
-    children: types.ListItem[][];
-  }>(() => ({
-    draft: { item: formItem, n: formItem.type === "panel" ? panelN : 0 },
-    children: lib.resizeColumns(
-      formItem.type === "panel" ? panelN : 0,
-      initialChildren,
-    ),
-  }));
-  const [childSession, setChildSession] =
-    useState<lib.FlatFormItemEditSession<types.TypeNames, types.Params> | null>(
-      null,
-    );
-  const sessionRef = useRef(session);
-  sessionRef.current = session;
-
-  useEffect(() => {
-    const n = formItem.type === "panel" ? panelN : 0;
-    setSession({
-      draft: { item: formItem, n },
-      children: lib.resizeColumns(n, initialChildren),
-    });
-    setComment(initialComment);
-    setChildSession(null);
-  }, [formItem, panelN, initialChildren, initialComment]);
-
-  const ctx = lib.branded<types.Ctx, "context">({ flatItems });
-  const { draft, children } = session;
-
-  const commitChild = (
-    next: lib.FlatFormItem<types.TypeNames, types.Params>,
-    editing: lib.FlatFormItemEditSession<types.TypeNames, types.Params>,
-  ) => {
-    const col = editing.sIndex;
-    const listItem: types.ListItem = {
-      header: next.item,
-      children:
-        next.item.type === "panel"
-          ? lib.resizeColumns(next.n, editing.children)
-          : [],
-      meta: lib.branded({ index: 0, total: 0, sIndex: col }),
-    };
-    setSession((prev) => {
-      const cols = lib.resizeColumns(prev.draft.n, prev.children);
-      const column = [...(cols[col] ?? [])];
-      if (editing.total === 0) {
-        column.push({
-          ...listItem,
-          meta: lib.branded({
-            index: column.length,
-            total: 0,
-            sIndex: col,
-          }),
-        });
-      } else {
-        column[editing.index] = listItem;
-      }
-      cols[col] = column;
-      return { ...prev, children: cols };
-    });
-    setChildSession(null);
-  };
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-      <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 14 }}>
-        <span>Follow-up comment</span>
-        <textarea
-          rows={2}
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-        />
-      </label>
-      <FormItemEditor
-        ctx={ctx}
-        dialogArgs={lib.branded({
-          title: <>Follow-up · {itemName(ctx, draft.item)}</>,
-          onCancel,
-        })}
-        formItem={draft}
-        setFormItem={(updater) =>
-          setSession((prev) => {
-            const nextDraft =
-              typeof updater === "function" ? updater(prev.draft) : updater;
-            return {
-              draft: nextDraft,
-              children: lib.resizeColumns(nextDraft.n, prev.children),
-            };
-          })
-        }
-        extra={lib.branded<types.ItemExtra, "item-edit-extra">({
-          onCommit: () =>
-            onSubmit({
-              comment: comment.trim() || undefined,
-              formItem: sessionRef.current.draft.item,
-              children:
-                sessionRef.current.draft.item.type === "panel"
-                  ? sessionRef.current.children
-                  : undefined,
-            }),
-        })}
-      />
-      {draft.item.type === "panel" ? (
-        <div style={{ display: "flex", gap: 12, marginTop: 4 }}>
-          {Array.from({ length: draft.n }, (_, col) => (
-            <div
-              key={col}
-              style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                gap: 6,
-                minWidth: 0,
-                padding: 8,
-                border: "1px dashed #ccc",
-                borderRadius: 4,
-              }}
-            >
-              <span style={{ fontSize: 12, fontWeight: 600, color: "#666" }}>
-                Column {col + 1}
-              </span>
-              {(children[col] ?? []).map((item) => (
-                <div key={item.header.id} style={{ fontSize: 13 }}>
-                  {itemName(ctx, item.header)}
-                </div>
-              ))}
-              {renderAddFormItemSlot({
-                span: { index: -1, sIndex: col },
-                menuItems,
-                random: randomId,
-                label: "+ Add item",
-                setAddItem: setChildSession,
-              })}
-            </div>
-          ))}
-        </div>
-      ) : null}
-      {childSession ? (
-        <FormItemEditor
-          ctx={ctx}
-          dialogArgs={lib.branded({
-            title: (
-              <>
-                {childSession.total === 0 ? "Add" : "Edit"} ·{" "}
-                {itemName(ctx, childSession.draft.item)}
-              </>
-            ),
-            onCancel: () => setChildSession(null),
-          })}
-          formItem={childSession.draft}
-          setFormItem={(updater) =>
-            setChildSession((prev) => {
-              if (!prev) return prev;
-              const nextDraft =
-                typeof updater === "function" ? updater(prev.draft) : updater;
-              return { ...prev, draft: nextDraft };
-            })
-          }
-          extra={lib.branded<types.ItemExtra, "item-edit-extra">({
-            onCommit: (next) =>
-              setChildSession((editing) => {
-                if (!editing) return null;
-                commitChild(next, editing);
-                return null;
-              }),
-          })}
-        />
-      ) : null}
-    </div>
-  );
-};
 
 // ── Story integration ─────────────────────────────────────────────────────────
 

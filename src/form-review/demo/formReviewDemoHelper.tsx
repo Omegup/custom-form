@@ -33,7 +33,7 @@ export const PHASES: PhaseTab<types.DemoPhase>[] = [
     id: "follow",
     label: "3. Follow",
     blurb:
-      "Teacher reviews answers: lock/unlock comments, 💬 follow-up dropdown, status highlighting.",
+      "Teacher reviews answers: lock/unlock comments, nested Design list under the origin (add/edit/move follow-ups), status highlighting.",
   },
 ];
 

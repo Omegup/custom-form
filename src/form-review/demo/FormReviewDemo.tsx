@@ -6,6 +6,7 @@
 import { useCallback, useRef, useState, type Ref } from "react";
 import { FormDialogsEditor } from "../../form-dialogs/demo/FormDialogsDemo";
 import { sectionsFromFlat } from "../../form-dialogs/demo/formDialogsDemoFlat";
+import { RequiredMark } from "../../form-edit/demo/editFormDemoHelper";
 import {
   FormResponder,
   formResponderCtx,
@@ -108,6 +109,7 @@ const viewers: lib.Viewers<
               ) : (
                 <span>{formItem.params.name}</span>
               )}
+              <RequiredMark required={formItem.params.required} />
               {variant.badge}
               {extra.icon}
             </span>
@@ -216,6 +218,7 @@ export const FormReviewDemo = ({
               ) : null}
             </div>
             <FormDialogsEditor
+              embedded={false}
               flatItems={flatItems}
               setFlatItems={(next) =>
                 updateArgs({
@@ -285,8 +288,8 @@ export const FormReviewDemo = ({
               setChanges={setChanges}
               setAddition={setAddition}
               setDeleteCommentId={setDeleteCommentId}
-              renderFormItemsEditor={({ entries }) => (
-                <FollowUpDrafts entries={entries} />
+              renderFormItemsEditor={({ entries, setEntries }) => (
+                <FollowUpDrafts entries={entries} setEntries={setEntries} />
               )}
               variants={reviewVariants}
               showDeleted={showDeleted}

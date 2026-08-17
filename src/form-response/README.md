@@ -28,8 +28,9 @@ supply it (e.g. `rememberDate` in the demo).
 `form-response/Form response` (`demo/FormResponseDemo.tsx`) — **Design** is
 the form-dialogs editor; **Fill → Send** creates the FormResponse document;
 **Update** Save / Request changes / Approve / Reject mutate that same record.
-💬 on Update opens a follow-up type dropdown (unanswered drafts stay design
-rows, not empty answers). Fill/Update keep headings and multiple-panel **+ Add**.
+Follow-up is a nested Design list under the origin (`FormDialogsEditor`
+embedded — add, edit, move). Fill/Update keep headings and
+multiple-panel **+ Add**.
 
 Read [`demo/FormResponseDemo.tsx`](./demo/FormResponseDemo.tsx).
 

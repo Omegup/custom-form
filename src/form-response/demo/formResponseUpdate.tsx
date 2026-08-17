@@ -80,8 +80,8 @@ export const UpdatePhase = ({
         setChanges={review.setChanges}
         setAddition={setAddition}
         setDeleteCommentId={setDeleteCommentId}
-        renderFormItemsEditor={({ entries }) => (
-          <FollowUpDrafts entries={entries} />
+        renderFormItemsEditor={({ entries, setEntries }) => (
+          <FollowUpDrafts entries={entries} setEntries={setEntries} />
         )}
         variants={reviewVariants}
         showDeleted={showDeleted}

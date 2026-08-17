@@ -32,7 +32,7 @@ export const PHASES: PhaseTab<types.DemoPhase>[] = [
     id: "follow",
     label: "3. Follow",
     blurb:
-      "Teacher reviews: lock/unlock comments, 💬 follow-up dropdown, status highlighting.",
+      "Teacher reviews: lock/unlock comments, nested Design list under the origin (add/edit/move follow-ups), status highlighting.",
   },
 ];
 
@@ -147,9 +147,9 @@ export const sectionChrome: lib.SectionReviewChrome<types.TypeNames, types.Param
     />
   ),
   renderItemShell: ({ children, action }) => (
-    <div style={{ position: "relative", padding: "4px 28px 4px 0" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       {children}
-      {action ? <span style={{ position: "absolute", top: 0, right: 0 }}>{action}</span> : null}
+      {action}
     </div>
   ),
   renderComment: ({ text, onEdit }) => (

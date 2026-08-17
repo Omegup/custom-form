@@ -3,6 +3,7 @@ import {
   FieldLabel,
   HeadingLabel,
   PanelLabel,
+  RequiredMark,
   renderListCard,
 } from "../../form-edit/demo/editFormDemoHelper";
 import formDialogsDemoSource from "./FormDialogsDemo.tsx?raw";
@@ -35,7 +36,7 @@ export const viewers: lib.Viewers<
     viewer: ({ props: { formItem } }) => (
       <>
         <FieldLabel name={formItem.params.name} />
-        {formItem.params.required ? " *" : ""}
+        <RequiredMark required={formItem.params.required} />
       </>
     ),
   },

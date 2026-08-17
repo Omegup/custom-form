@@ -175,6 +175,10 @@ export const FieldRow = ({
 /** List name chrome — same labels as side-menu `itemName`. */
 export const FieldLabel = ({ name }: { name: string }) => <span>{name}</span>;
 
+/** Field-viewer required mark — compose in the field viewer, not list chrome. */
+export const RequiredMark = ({ required }: { required: boolean }) =>
+  required ? " *" : null;
+
 export const HeadingLabel = ({ name }: { name: string }) => (
   <span>{`§ ${name}`}</span>
 );

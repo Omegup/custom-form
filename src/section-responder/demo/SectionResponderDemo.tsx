@@ -5,6 +5,7 @@
 import { useCallback, useRef, useState, type Ref } from "react";
 import { FormDialogsEditor } from "../../form-dialogs/demo/FormDialogsDemo";
 import { sectionsFromFlat } from "../../form-dialogs/demo/formDialogsDemoFlat";
+import { RequiredMark } from "../../form-edit/demo/editFormDemoHelper";
 import {
   headingView,
   panelRepeatChildren,
@@ -61,7 +62,7 @@ const viewers: lib.Viewers<
         >
           <span>
             {formItem.params.name}
-            {formItem.params.required ? " *" : ""}
+            <RequiredMark required={formItem.params.required} />
             {variant.badge}
             {extra.icon}
           </span>
@@ -149,6 +150,7 @@ export const SectionResponderDemo = ({
       />
       {phase === "design" ? (
         <FormDialogsEditor
+          embedded={false}
           flatItems={flatItems}
           setFlatItems={(next) => {
             const [first] = sectionsFromFlat(next);

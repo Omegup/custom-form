@@ -24,12 +24,12 @@ export const blankSection = (id: string): types.Section => ({
 
 export type DialogActions = {
   openItemEdit: (item: types.ListItem) => void;
-  openSectionEdit: (section: types.ListSection) => void;
+  openSectionEdit: ((section: types.ListSection) => void) | null;
 };
 
 export const DialogActionsCtx = createContext<DialogActions>({
   openItemEdit: () => {},
-  openSectionEdit: () => {},
+  openSectionEdit: null,
 });
 
 const SectionTitle = (
@@ -47,7 +47,7 @@ const SectionTitle = (
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
       <strong>{section.header.title}</strong>
-      {!section.header.deleted && (
+      {openSectionEdit && !section.header.deleted && (
         <button type="button" onClick={() => openSectionEdit(section)}>
           Edit
         </button>

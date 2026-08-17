@@ -54,7 +54,7 @@ export default {
       },
       description: {
         component:
-          "Lifecycle demo for **`CustomFormReviewHOC`**. **Design** is the form-dialogs editor (library, add/edit, DnD). **Follow** 💬 opens a follow-up type dropdown. Three JSON panels stay visible so you can compare `sections`, `responses`, and `AdditionalChanges`.",
+          "Lifecycle demo for **`CustomFormReviewHOC`**. **Design** is the form-dialogs editor (library, add/edit, DnD). **Follow** nests that same list editor under the origin (add, edit, move). Three JSON panels stay visible so you can compare `sections`, `responses`, and `AdditionalChanges`.",
       },
     },
   },

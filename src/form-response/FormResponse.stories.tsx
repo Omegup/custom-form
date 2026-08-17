@@ -93,7 +93,7 @@ export default {
       },
       description: {
         component:
-          "**FormResponse** document lifecycle. **Design** is the form-dialogs editor. Fill → Send creates the record; Update Save / Request changes / Approve / Reject mutate the same document. 💬 on Update opens a follow-up type dropdown.",
+          "**FormResponse** document lifecycle. **Design** is the form-dialogs editor. Fill → Send creates the record; Update Save / Request changes / Approve / Reject mutate the same document. Update follow-up is a nested Design list under the origin (add, edit, move).",
       },
     },
   },

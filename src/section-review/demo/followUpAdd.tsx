@@ -1,113 +1,106 @@
 /**
- * 💬 follow-up type dropdown + unanswered drafts as design rows.
+ * Review follow-up — Design's `AddFormItem` + nested `FormDialogsEditor`.
  * Shared by section-review, form-review, and form-response demos.
  */
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { FormDialogsEditor } from "../../form-dialogs/demo/FormDialogsDemo";
+import type * as dialogTypes from "../../form-dialogs/demo/formDialogsDemoTypes.t";
+import {
+  FormItemEditor,
+  itemName,
+} from "../../form-item-editor/demo/FormItemEditorDemo";
+import type * as editorTypes from "../../form-item-editor/demo/formItemEditorDemoTypes.t";
+import * as editorLib from "../../form-item-editor/demo/library";
+import { AddFormItem } from "../../side-menu";
+import { MENU_ITEMS, randomId } from "../../side-menu/demo/fixtures";
+import { renderAddFormItem } from "../../side-menu/demo/sideMenuDemoHelper";
+import type { ReviewFollowUpPick, ReviewFormItemEntry } from "../types";
 import * as lib from "./library";
+import type * as types from "./sectionReviewDemoTypes.t";
 
-const MENU = [{ key: "field", title: "Field", icon: "✎" }] as const;
+const FOLLOW_UP_SPAN = { index: -1, sIndex: -1 };
 
-type FieldItem = {
-  id: string;
-  type: "field";
-  deleted: boolean;
-  params: { name: string; required: boolean };
-};
-
-type FieldDraft = {
-  formItem: { id: string; params: { name: string; required?: boolean } } | null;
+const FOLLOW_UP_SECTION: dialogTypes.Section = {
+  id: "follow-up",
+  deleted: false,
+  title: "Follow-up",
+  description: "",
 };
 
 export const FollowUpAdd = ({
   onPick,
 }: {
-  onPick: (payload: {
-    comment: string | null;
-    formItem: FieldItem;
-    children: null;
-  }) => void;
+  onPick: (payload: ReviewFollowUpPick<types.TypeNames, types.Params>) => void;
 }) => {
-  const [open, setOpen] = useState(false);
+  const [session, setSession] = useState<editorTypes.EditingSession | null>(
+    null,
+  );
+  const sessionRef = useRef(session);
+  sessionRef.current = session;
+  const ctx = editorLib.branded<editorTypes.Ctx, "context">({
+    flatItems: [],
+  });
+
   return (
-    <div style={{ position: "relative" }}>
-      <button
-        type="button"
-        aria-label="Ask follow-up"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-        style={{
-          border: "none",
-          background: "transparent",
-          cursor: "pointer",
-          fontSize: 14,
-          lineHeight: 1,
-        }}
-      >
-        💬
-      </button>
-      {open ? (
-        <div
-          style={{
-            position: "absolute",
-            right: 0,
-            zIndex: 2,
-            display: "flex",
-            flexDirection: "column",
-            gap: 4,
-            minWidth: 140,
-            padding: 6,
-            background: "#fff",
-            border: "1px solid #ddd",
-            borderRadius: 4,
-            boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-          }}
-        >
-          {MENU.map((item) => (
-            <button
-              key={item.key}
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                onPick({
-                  comment: null,
-                  formItem: lib.branded({
-                    id: `followup-${Date.now()}`,
-                    type: "field",
-                    deleted: false,
-                    params: { name: "Follow-up field", required: false },
-                  }),
-                  children: null,
-                });
-              }}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "6px 10px",
-                fontSize: 13,
-                textAlign: "left",
-                background: "white",
-                border: "1px solid #eee",
-                borderRadius: 4,
-                cursor: "pointer",
-              }}
-            >
-              <span>{item.icon}</span>
-              {item.title}
-            </button>
-          ))}
-        </div>
+    <>
+      <AddFormItem
+        span={FOLLOW_UP_SPAN}
+        menuItems={MENU_ITEMS}
+        random={randomId}
+        label="+ Add item"
+        render={renderAddFormItem}
+        setAddItem={setSession}
+      />
+      {session ? (
+        <FormItemEditor
+          ctx={ctx}
+          dialogArgs={editorLib.branded({
+            title: <>Add · {itemName(ctx, session.draft.item)}</>,
+            onCancel: () => setSession(null),
+          })}
+          formItem={session.draft}
+          setFormItem={(updater) =>
+            setSession((prev) => {
+              if (!prev) return prev;
+              const nextDraft =
+                typeof updater === "function" ? updater(prev.draft) : updater;
+              return {
+                ...prev,
+                draft: nextDraft,
+                children: editorLib.resizeColumns(nextDraft.n, prev.children),
+              };
+            })
+          }
+          extra={editorLib.branded<editorTypes.ItemExtra, "item-edit-extra">({
+            onCommit: () => {
+              const current = sessionRef.current;
+              if (!current) return;
+              onPick({
+                comment: null,
+                formItem: current.draft.item,
+                children:
+                  current.children.length > 0 ? current.children : null,
+              });
+              setSession(null);
+            },
+          })}
+        />
       ) : null}
-    </div>
+    </>
   );
 };
 
-export const FollowUpDrafts = ({ entries }: { entries: FieldDraft[] }) => (
+export const FollowUpDrafts = ({
+  entries,
+  setEntries,
+}: {
+  entries: ReviewFormItemEntry<types.TypeNames, types.Params>[];
+  setEntries: (
+    entries: ReviewFormItemEntry<types.TypeNames, types.Params>[],
+  ) => void;
+}) => (
   <div
     style={{
-      display: "flex",
-      flexDirection: "column",
-      gap: 8,
       marginTop: 8,
       marginLeft: 8,
       padding: "8px 8px 8px 12px",
@@ -116,49 +109,14 @@ export const FollowUpDrafts = ({ entries }: { entries: FieldDraft[] }) => (
       borderRadius: "0 6px 6px 0",
     }}
   >
-    <div
-      style={{
-        fontSize: 11,
-        fontWeight: 700,
-        letterSpacing: "0.04em",
-        textTransform: "uppercase",
-        color: "#b45309",
+    <FormDialogsEditor
+      embedded={true}
+      flatItems={lib.followUpEntriesToFlat(entries, FOLLOW_UP_SECTION)}
+      setFlatItems={(next) => {
+        const synced = lib.syncFollowUpEntriesFromFlat(next, entries);
+        if (synced == null) return;
+        setEntries(synced);
       }}
-    >
-      Follow-up
-    </div>
-    {entries.map((entry) => {
-      const item = entry.formItem;
-      if (!item) return null;
-      return (
-        <div
-          key={item.id}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 4,
-            padding: 8,
-            background: "#fff",
-            borderRadius: 4,
-            border: "1px dashed #e6b800",
-          }}
-        >
-          <span style={{ fontSize: 14, fontWeight: 600 }}>
-            {item.params.name}
-            {item.params.required ? (
-              <span style={{ color: "#b00020", marginLeft: 4 }}>*</span>
-            ) : null}
-          </span>
-          <div
-            style={{
-              height: 28,
-              borderRadius: 3,
-              border: "1px dashed #ccc",
-              background: "#fafafa",
-            }}
-          />
-        </div>
-      );
-    })}
+    />
   </div>
 );

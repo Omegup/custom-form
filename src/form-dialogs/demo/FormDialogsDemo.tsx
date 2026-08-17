@@ -30,9 +30,12 @@ import * as lib from "./library";
 export const FormDialogsEditor = ({
   flatItems,
   setFlatItems,
+  embedded,
 }: {
   flatItems: types.FlatItems;
   setFlatItems: (items: types.FlatItems) => void;
+  /** No library sidebar or section-edit — nested follow-up list under a field. */
+  embedded: boolean;
 }) => {
   const dialogCtx: types.Ctx = lib.branded({ flatItems });
   const dialogs = useDialogs({ flatItems, setFlatItems, ctx: dialogCtx });
@@ -46,9 +49,9 @@ export const FormDialogsEditor = ({
   const dialogActions = useMemo(
     (): DialogActions => ({
       openItemEdit: dialogs.openItemEdit,
-      openSectionEdit: dialogs.openSectionEdit,
+      openSectionEdit: embedded ? null : dialogs.openSectionEdit,
     }),
-    [dialogs.openItemEdit, dialogs.openSectionEdit],
+    [dialogs.openItemEdit, dialogs.openSectionEdit, embedded],
   );
   const listExtraMap = demo.buildListExtraMap(
     session.sections,
@@ -59,62 +62,68 @@ export const FormDialogsEditor = ({
     listExtraMap.get(id) ?? demo.emptyListExtra();
   const toRemove = session.toRemove;
 
+  const list = (
+    <>
+      {toRemove ? (
+        <RemoveAlert
+          pending={{
+            ...toRemove,
+            label:
+              "item" in toRemove.item
+                ? itemName(dialogCtx, toRemove.item.item)
+                : undefined,
+          }}
+          onConfirm={() => {
+            toRemove.rm();
+            session.setToRemove(null);
+          }}
+          onCancel={() => session.setToRemove(null)}
+        />
+      ) : null}
+      <SectionsList>
+        {session.sections.map((section, sIndex) => (
+          <SectionComponent
+            key={section.header.id}
+            ctx={session.listCtx}
+            variants={defaultVariants}
+            itemExtra={itemExtra}
+            renderCard={demo.renderCard}
+            args={session.args}
+            clone={cloneFn}
+            section={section}
+            sIndex={sIndex}
+            jump
+            setAddItem={dialogs.setItemSession}
+          />
+        ))}
+      </SectionsList>
+    </>
+  );
+
   return (
     <DialogActionsCtx.Provider value={dialogActions}>
       {dialogs.formItemDialog}
-      {dialogs.sectionDialog}
-      <LayoutWithSidebar
-        main={
-          <>
-            {toRemove ? (
-              <RemoveAlert
-                pending={{
-                  ...toRemove,
-                  label:
-                    "item" in toRemove.item
-                      ? itemName(dialogCtx, toRemove.item.item)
-                      : undefined,
-                }}
-                onConfirm={() => {
-                  toRemove.rm();
-                  session.setToRemove(null);
-                }}
-                onCancel={() => session.setToRemove(null)}
-              />
-            ) : null}
-            <SectionsList>
-              {session.sections.map((section, sIndex) => (
-                <SectionComponent
-                  key={section.header.id}
-                  ctx={session.listCtx}
-                  variants={defaultVariants}
-                  itemExtra={itemExtra}
-                  renderCard={demo.renderCard}
-                  args={session.args}
-                  clone={cloneFn}
-                  section={section}
-                  sIndex={sIndex}
-                  jump
-                  setAddItem={dialogs.setItemSession}
-                />
-              ))}
-            </SectionsList>
-          </>
-        }
-        sidebar={
-          <lib.Side<types.TypeNames, types.Params, types.Section>
-            title="Library"
-            addSectionLabel="+ Add section"
-            menuItems={MENU_ITEMS}
-            random={randomId}
-            blankSection={blankSection}
-            render={renderSide}
-            renderMenuItem={renderMenuItem}
-            setAddFormItem={(item) => dialogs.openItemInsert(item)}
-            setAddSection={dialogs.openSectionAdd}
-          />
-        }
-      />
+      {embedded ? null : dialogs.sectionDialog}
+      {embedded ? (
+        list
+      ) : (
+        <LayoutWithSidebar
+          main={list}
+          sidebar={
+            <lib.Side<types.TypeNames, types.Params, types.Section>
+              title="Library"
+              addSectionLabel="+ Add section"
+              menuItems={MENU_ITEMS}
+              random={randomId}
+              blankSection={blankSection}
+              render={renderSide}
+              renderMenuItem={renderMenuItem}
+              setAddFormItem={(item) => dialogs.openItemInsert(item)}
+              setAddSection={dialogs.openSectionAdd}
+            />
+          }
+        />
+      )}
     </DialogActionsCtx.Provider>
   );
 };
@@ -126,6 +135,7 @@ export const FormDialogsDemo = ({
 }: types.DemoProps) => (
   <FormContainer title={heading}>
     <FormDialogsEditor
+      embedded={false}
       flatItems={flatItems}
       setFlatItems={(items) => updateArgs({ flatItems: items })}
     />

@@ -73,8 +73,8 @@ remark).
 Lifecycle walkthrough — **Design → Response → Follow** for one section
 (name / email / note). Design remounts the form-dialogs editor; Response mounts
 the fill shell (`SectionResponderHOC` — **+ Add** on multiple panels); Follow
-mounts `SectionReviewHOC`. 💬 opens a follow-up
-type dropdown; unanswered drafts stay design rows. Three JSON panels stay
+mounts `SectionReviewHOC`. Follow-up is a nested Design list under the origin
+(`FormDialogsEditor` embedded — add, edit, move). Three JSON panels stay
 visible (`section`, `responses`, `AdditionalChanges`). Toggle **Review round
 pending** to see `highlight` vs `disabled`.
 

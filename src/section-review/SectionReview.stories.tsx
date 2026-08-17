@@ -39,7 +39,7 @@ export default {
       },
       description: {
         component:
-          "Lifecycle demo for **`SectionReviewHOC`**. **Design** is the form-dialogs editor. **Follow** 💬 opens a follow-up type dropdown. Three JSON panels stay visible for `section`, `responses`, and `AdditionalChanges`.",
+          "Lifecycle demo for **`SectionReviewHOC`**. **Design** is the form-dialogs editor. **Follow** nests that same list editor under the origin (add, edit, move). Three JSON panels stay visible for `section`, `responses`, and `AdditionalChanges`.",
       },
     },
   },

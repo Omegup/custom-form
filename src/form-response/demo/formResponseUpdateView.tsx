@@ -3,8 +3,8 @@
  */
 import type { Ref } from "react";
 import { formChrome } from "../../form-review/demo/formReviewDemoHelper";
+import { RequiredMark } from "../../form-edit/demo/editFormDemoHelper";
 import { FOLLOW_UP_BADGE } from "./formResponseDemoHelper";
-import { FollowUpAdd } from "../../section-review/demo/followUpAdd";
 import {
   headingView,
   panelRepeatChildren,
@@ -81,6 +81,7 @@ const viewers: lib.Viewers<
               ) : (
                 <span>{formItem.params.name}</span>
               )}
+              <RequiredMark required={formItem.params.required} />
               {variant.badge}
               {extra.icon}
             </span>
@@ -122,18 +123,13 @@ export const reviewVariants: Record<lib.ReviewVariantState, types.Variants> = {
   change: followUpVariants,
 };
 
-const reviewChrome: lib.FormReviewChrome<types.TypeNames, types.Params> = {
-  ...formChrome,
-  renderAddFollowUp: ({ onPick }) => <FollowUpAdd onPick={onPick} />,
-};
-
 export const FormReview = lib.CustomFormReviewHOC<
   types.TypeNames,
   types.Params,
   types.Variants,
   lib.SectionReviewContext,
   types.Section
->(viewers, reviewChrome);
+>(viewers, formChrome);
 
 export const reviewCtx = lib.branded<lib.SectionReviewContext, "context">({});
 

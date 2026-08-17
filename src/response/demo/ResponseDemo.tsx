@@ -4,6 +4,7 @@
  * Each field writes `data.value`; Validate runs every `impRef.validate`.
  */
 import { useCallback, useRef, useState } from "react";
+import { RequiredMark } from "../../form-edit/demo/editFormDemoHelper";
 import * as demo from "./responseDemoHelper";
 import type * as types from "./responseDemoTypes.t";
 import * as lib from "./library";
@@ -29,7 +30,7 @@ const viewers: lib.Viewers<
         <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 14 }}>
           <span>
             {formItem.params.name}
-            {formItem.params.required ? " *" : ""}
+            <RequiredMark required={formItem.params.required} />
           </span>
           <input
             value={value}

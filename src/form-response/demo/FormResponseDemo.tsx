@@ -32,6 +32,7 @@ export const FormResponseDemo = ({
       />
       {phase === "design" ? (
         <FormDialogsEditor
+          embedded={false}
           flatItems={flatItems}
           setFlatItems={(next) => updateArgs({ flatItems: next })}
         />
