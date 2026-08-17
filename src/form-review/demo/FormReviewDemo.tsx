@@ -200,6 +200,7 @@ export const FormReviewDemo = ({
         <demo.PhaseTabs
           phase={phase}
           onChange={(next) => updateArgs({ phase: next })}
+          phases={demo.PHASES}
         />
 
         {phase === "design" ? (

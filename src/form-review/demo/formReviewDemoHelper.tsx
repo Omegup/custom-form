@@ -1,39 +1,23 @@
-import type { CSSProperties, ReactNode } from "react";
-import { FollowUpAdd } from "../../section-review/demo/followUpAdd";
+import type { CSSProperties } from "react";
 import { flatFromFieldSections } from "../../form-dialogs/demo/formDialogsDemoFlat";
+import {
+  FormContainer,
+  PENDING_DATE,
+  ReviewSection,
+  sectionChrome,
+} from "../../section-review/demo/sectionReviewDemoHelper";
+import {
+  PhaseTabs,
+  type PhaseTab,
+} from "../../section-responder/demo/sectionResponderDemoHelper";
 import formReviewDemoSource from "./FormReviewDemo.tsx?raw";
 import formReviewDemoTypesSource from "./formReviewDemoTypes.t.ts?raw";
 import type * as types from "./formReviewDemoTypes.t";
 import * as lib from "./library";
 
-export const FormContainer = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) => (
-  <div
-    style={{
-      fontFamily: "system-ui, sans-serif",
-      maxWidth: 1120,
-      margin: "0 auto",
-      color: "#1a1a1a",
-    }}
-  >
-    <h2 style={{ marginTop: 0, marginBottom: 4 }}>{title}</h2>
-    {children}
-  </div>
-);
+export { FormContainer, PENDING_DATE, PhaseTabs };
 
-/** Stable reference so `lastPending === history.at(-1).date` can match by identity. */
-export const PENDING_DATE = new Date("2024-01-15T00:00:00Z");
-
-const PHASES: {
-  id: types.DemoPhase;
-  label: string;
-  blurb: string;
-}[] = [
+export const PHASES: PhaseTab<types.DemoPhase>[] = [
   {
     id: "design",
     label: "1. Design",
@@ -51,55 +35,6 @@ const PHASES: {
       "Teacher reviews answers: lock/unlock comments, 💬 follow-up dropdown, status highlighting.",
   },
 ];
-
-/** Module-scope phase switcher — never define this inside a render callback. */
-export const PhaseTabs = ({
-  phase,
-  onChange,
-}: {
-  phase: types.DemoPhase;
-  onChange: (phase: types.DemoPhase) => void;
-}) => {
-  const current = PHASES.find((p) => p.id === phase)!;
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <div
-        role="tablist"
-        aria-label="Lifecycle phase"
-        style={{ display: "flex", gap: 0, borderBottom: "1px solid #ddd" }}
-      >
-        {PHASES.map((p) => {
-          const active = p.id === phase;
-          return (
-            <button
-              key={p.id}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              onClick={() => onChange(p.id)}
-              style={{
-                flex: 1,
-                padding: "10px 12px",
-                border: "none",
-                borderBottom: active ? "2px solid #1a5fb4" : "2px solid transparent",
-                background: active ? "#f0f5fb" : "transparent",
-                color: active ? "#1a5fb4" : "#555",
-                fontWeight: active ? 600 : 500,
-                fontSize: 14,
-                cursor: "pointer",
-              }}
-            >
-              {p.label}
-            </button>
-          );
-        })}
-      </div>
-      <p style={{ margin: 0, fontSize: 13, color: "#555", lineHeight: 1.4 }}>
-        {current.blurb}
-      </p>
-    </div>
-  );
-};
 
 const jsonPanelStyle = (active: boolean): CSSProperties => ({
   flex: 1,
@@ -178,25 +113,9 @@ export const PhaseJsonPanels = ({
   );
 };
 
-const actionButtonStyle: CSSProperties = {
-  border: "none",
-  background: "transparent",
-  cursor: "pointer",
-  fontSize: 14,
-  lineHeight: 1,
-};
-
-const ACTION_ICON: Record<
-  "lock" | "unlock",
-  { glyph: string; label: string }
-> = {
-  // Remark unlocks revise — lock = no remark yet; unlock = remark present.
-  lock: { glyph: "🔒", label: "Locked — add remark to unlock" },
-  unlock: { glyph: "🔓", label: "Unlocked by remark — remove remark" },
-};
-
-/** Demo HTML chrome for `CustomFormReviewHOC` — not part of the library. */
+/** Demo HTML chrome for `CustomFormReviewHOC` — item slots come from `sectionChrome`. */
 export const formChrome: lib.FormReviewChrome<types.TypeNames, types.Params> = {
+  ...sectionChrome,
   renderHeader: (header) => (
     <div style={{ marginBottom: 4 }}>
       <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 600 }}>{header.title}</h2>
@@ -223,81 +142,7 @@ export const formChrome: lib.FormReviewChrome<types.TypeNames, types.Params> = {
       {children}
     </div>
   ),
-  renderSection: ({ deleted, title, description, i, multiSection, columns }) => (
-    <div style={{ marginBottom: 20, opacity: deleted ? 0.5 : 1 }}>
-      <div style={{ marginBottom: 12 }}>
-        <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 600 }}>
-          {multiSection ? `${i + 1}. ${title}` : title}
-        </h3>
-        {description ? (
-          <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{description}</p>
-        ) : null}
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        {columns.map((col, idx) => (
-          <div key={idx} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {col}
-          </div>
-        ))}
-      </div>
-    </div>
-  ),
-  renderItemShell: ({ children, action }) => (
-    <div style={{ position: "relative", padding: "4px 28px 4px 0" }}>
-      {children}
-      {action ? <span style={{ position: "absolute", top: 0, right: 0 }}>{action}</span> : null}
-    </div>
-  ),
-  renderComment: ({ text, onEdit }) => (
-    <div
-      style={{
-        marginTop: 4,
-        padding: 8,
-        background: "#e7f1ff",
-        borderLeft: "4px solid #4285f4",
-        fontSize: 13,
-        display: "flex",
-        justifyContent: "space-between",
-        gap: 8,
-      }}
-    >
-      <span>💬 {text}</span>
-      <button type="button" aria-label="Edit comment" onClick={onEdit} style={actionButtonStyle}>
-        ✎
-      </button>
-    </div>
-  ),
-  renderFormItemAppendix: (nodes) => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>{nodes}</div>
-  ),
-  renderAddFollowUp: ({ originId, onPick }) => (
-    <FollowUpAdd originId={originId} onPick={onPick} />
-  ),
-  renderActionIcon: (kind, onClick) => {
-    const { glyph, label } = ACTION_ICON[kind];
-    return (
-      <button
-        type="button"
-        aria-label={label}
-        onClick={(e) => {
-          e.stopPropagation();
-          onClick();
-        }}
-        style={actionButtonStyle}
-      >
-        {glyph}
-      </button>
-    );
-  },
-  renderFollowUpMark: () => (
-    <span
-      title="Answered follow-up"
-      aria-label="Answered follow-up"
-      style={{ color: "#b45309", fontSize: 12, fontWeight: 700, lineHeight: 1 }}
-    >
-      ✚
-    </span>
-  ),
+  renderSection: (args) => <ReviewSection {...args} note={null} />,
 };
 
 const field = (id: string, name: string, required: boolean): types.ListItem => ({

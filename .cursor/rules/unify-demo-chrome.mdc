@@ -1,0 +1,35 @@
+---
+description: Reuse demo UI widgets; do not copy the same HTML chrome between demos
+globs: **/*.ts,**/*.tsx
+alwaysApply: true
+---
+
+# Unify demo UI components
+
+Demo HTML that is the same widget must be **one component**, imported.
+Do not paste the same JSX into a second `*DemoHelper`.
+
+Demos may cross-import (see `src/README.md`). Upper-layer demos reuse
+lower-layer chrome: `formChrome = { ...sectionChrome, renderHeader, renderForm }`.
+
+```tsx
+// ❌ BAD — identical appendix in two helpers
+// sectionResponderDemoHelper.tsx
+renderAppendix: (comment) => <div style={yellow}>{comment}</div>
+// formResponderDemoHelper.tsx
+renderAppendix: (comment) => <div style={yellow}>{comment}</div>
+
+// ✅ GOOD — one chrome bag; the form shell adds only form-level slots
+export const formChrome = {
+  ...sectionChrome,
+  renderHeader,
+  renderForm,
+};
+```
+
+Same for `FormContainer`, `PhaseTabs`, lock icons, remark cards, `useFieldMethods`.
+Copy-paste is not a variant. If blurbs or fixtures differ, pass them as
+**required** props — do not duplicate the widget.
+
+Related: `no-html-outside-demo.mdc` (HTML stays in demos),
+`no-optional-defaults.mdc` (host/demo still passes copy).

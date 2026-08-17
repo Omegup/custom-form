@@ -5,6 +5,7 @@ import { FormDialogsEditor } from "../../form-dialogs/demo/FormDialogsDemo";
 import { sectionsFromFlat } from "../../form-dialogs/demo/formDialogsDemoFlat";
 import {
   FormContainer,
+  PHASES,
   PhaseJsonPanels,
   PhaseTabs,
 } from "./formResponseDemoHelper";
@@ -27,6 +28,7 @@ export const FormResponseDemo = ({
       <PhaseTabs
         phase={phase}
         onChange={(next) => updateArgs({ phase: next })}
+        phases={PHASES}
       />
       {phase === "design" ? (
         <FormDialogsEditor

@@ -1,9 +1,12 @@
-import { useImperativeHandle, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { flatFromFieldSections } from "../../form-dialogs/demo/formDialogsDemoFlat";
+import { useFieldMethods } from "../../response/demo/responseDemoHelper";
 import sectionResponderDemoSource from "./SectionResponderDemo.tsx?raw";
 import sectionResponderDemoTypesSource from "./sectionResponderDemoTypes.t.ts?raw";
 import type * as types from "./sectionResponderDemoTypes.t";
 import * as lib from "./library";
+
+export { useFieldMethods };
 
 export const FormContainer = ({
   title,
@@ -18,7 +21,13 @@ export const FormContainer = ({
   </div>
 );
 
-const PHASES: { id: types.DemoPhase; label: string; blurb: string }[] = [
+export type PhaseTab<Id extends string> = {
+  id: Id;
+  label: string;
+  blurb: string;
+};
+
+export const PHASES: PhaseTab<types.DemoPhase>[] = [
   {
     id: "design",
     label: "1. Design",
@@ -31,14 +40,16 @@ const PHASES: { id: types.DemoPhase; label: string; blurb: string }[] = [
   },
 ];
 
-export const PhaseTabs = ({
+export const PhaseTabs = <Id extends string>({
   phase,
   onChange,
+  phases,
 }: {
-  phase: types.DemoPhase;
-  onChange: (phase: types.DemoPhase) => void;
+  phase: Id;
+  onChange: (phase: Id) => void;
+  phases: readonly PhaseTab<Id>[];
 }) => {
-  const current = PHASES.find((p) => p.id === phase)!;
+  const current = phases.find((p) => p.id === phase)!;
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 8 }}>
       <div
@@ -46,7 +57,7 @@ export const PhaseTabs = ({
         aria-label="Lifecycle phase"
         style={{ display: "flex", gap: 0, borderBottom: "1px solid #ddd" }}
       >
-        {PHASES.map((p) => {
+        {phases.map((p) => {
           const active = p.id === phase;
           return (
             <button
@@ -80,67 +91,87 @@ export const PhaseTabs = ({
 };
 
 /** Demo HTML chrome for `SectionResponderHOC` — not part of the library. */
-export const sectionChrome: lib.SectionResponderChrome = {
-  renderSection: ({ deleted, title, description, i, multiSection, columns }) => (
-    <div style={{ marginBottom: 20, opacity: deleted ? 0.5 : 1 }}>
-      <div style={{ marginBottom: 12 }}>
-        <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 600 }}>
-          {multiSection ? `${i + 1}. ${title}` : title}
-        </h3>
-        {description ? (
-          <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{description}</p>
-        ) : null}
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        {columns.map((col, idx) => (
-          <div
-            key={idx}
-            style={{ display: "flex", flexDirection: "column", gap: 12 }}
-          >
-            {col}
-          </div>
-        ))}
-      </div>
+const FillSection = ({
+  deleted,
+  title,
+  description,
+  i,
+  multiSection,
+  columns,
+}: {
+  deleted: boolean;
+  title: string;
+  description: string;
+  i: number;
+  multiSection: boolean;
+  columns: ReactNode[];
+}) => (
+  <div style={{ marginBottom: 20, opacity: deleted ? 0.5 : 1 }}>
+    <div style={{ marginBottom: 12 }}>
+      <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 600 }}>
+        {multiSection ? `${i + 1}. ${title}` : title}
+      </h3>
+      {description ? (
+        <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{description}</p>
+      ) : null}
     </div>
-  ),
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {columns.map((col, idx) => (
+        <div
+          key={idx}
+          style={{ display: "flex", flexDirection: "column", gap: 12 }}
+        >
+          {col}
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const ClearAnswer = ({ onClear }: { onClear: () => void }) => (
+  <button
+    type="button"
+    aria-label="Clear draft answer"
+    onClick={(e) => {
+      e.stopPropagation();
+      onClear();
+    }}
+    style={{
+      margin: "0 4px",
+      border: "none",
+      background: "transparent",
+      cursor: "pointer",
+      color: "#666",
+      fontSize: 16,
+      lineHeight: 1,
+    }}
+  >
+    ×
+  </button>
+);
+
+const RemarkAppendix = ({ comment }: { comment: string }) => (
+  <div
+    style={{
+      marginTop: 4,
+      padding: 8,
+      background: "#fff3cd",
+      borderLeft: "4px solid #ffc107",
+      color: "#856404",
+      fontSize: 12,
+    }}
+  >
+    {comment}
+  </div>
+);
+
+export const sectionChrome: lib.SectionResponderChrome = {
+  renderSection: (args) => <FillSection {...args} />,
   renderItemShell: ({ children, onActivate }) => (
     <div onClick={onActivate}>{children}</div>
   ),
-  renderClearIcon: (onClear) => (
-    <button
-      type="button"
-      aria-label="Clear draft answer"
-      onClick={(e) => {
-        e.stopPropagation();
-        onClear();
-      }}
-      style={{
-        margin: "0 4px",
-        border: "none",
-        background: "transparent",
-        cursor: "pointer",
-        color: "#666",
-        fontSize: 16,
-        lineHeight: 1,
-      }}
-    >
-      ×
-    </button>
-  ),
-  renderAppendix: (comment) => (
-    <div
-      style={{
-        marginTop: 4,
-        padding: 8,
-        background: "#fff3cd",
-        borderLeft: "4px solid #ffc107",
-        color: "#856404",
-        fontSize: 12,
-      }}
-    >
-      {comment}
-    </div>
-  ),
+  renderClearIcon: (onClear) => <ClearAnswer onClear={onClear} />,
+  renderAppendix: (comment) => <RemarkAppendix comment={comment} />,
   renderFollowUpGroup: ({ items }) => items,
 };
 
@@ -187,25 +218,3 @@ export const SECTION_RESPONDER_DEMO_SOURCE = [
     sectionResponderDemoSource,
   ),
 ].join("\n\n");
-
-export const useFieldMethods = (
-  impRef: types.FieldExtra["impRef"],
-  response: lib.ResponseSetter,
-  required: boolean,
-  label: string,
-) => {
-  useImperativeHandle(impRef, () => ({
-    validate: (value) => {
-      const text = value.data.value?.trim() ?? "";
-      if (required && !text) return `${label} is required`;
-      return null;
-    },
-    update: (value) => value ?? lib.emptyResponse(),
-  }));
-
-  const setDataValue = (text: string) => {
-    response.setValue?.("data", { ...response.value.data, value: text });
-  };
-
-  return { setDataValue, value: response.value.data.value ?? "" };
-};

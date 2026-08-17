@@ -4,12 +4,16 @@ import {
   INITIAL_HEADER,
 } from "../../form-review/demo/formReviewDemoHelper";
 import { FormContainer } from "../../form-review/demo/formReviewDemoHelper";
+import {
+  PhaseTabs,
+  type PhaseTab,
+} from "../../section-responder/demo/sectionResponderDemoHelper";
 import formResponseDemoSource from "./FormResponseDemo.tsx?raw";
 import formResponseDemoTypesSource from "./formResponseDemoTypes.t.ts?raw";
 import type * as types from "./formResponseDemoTypes.t";
 import * as lib from "./library";
 
-export { FormContainer, INITIAL_FLAT, INITIAL_HEADER };
+export { FormContainer, INITIAL_FLAT, INITIAL_HEADER, PhaseTabs };
 
 const datesByIso = new Map<string, Date>();
 
@@ -21,7 +25,7 @@ export const rememberDate = (date: Date): Date => {
 export const dateFromIso = (iso: string): Date =>
   datesByIso.get(iso) ?? rememberDate(new Date(iso));
 
-const PHASES: { id: types.DemoPhase; label: string; blurb: string }[] = [
+export const PHASES: PhaseTab<types.DemoPhase>[] = [
   {
     id: "design",
     label: "1. Design",
@@ -40,56 +44,6 @@ const PHASES: { id: types.DemoPhase; label: string; blurb: string }[] = [
       "Teacher view of the same FormResponse — Save remarks/follow-ups, then Request changes / Approve / Reject. 💬 opens a type dropdown.",
   },
 ];
-
-export const PhaseTabs = ({
-  phase,
-  onChange,
-}: {
-  phase: types.DemoPhase;
-  onChange: (phase: types.DemoPhase) => void;
-}) => {
-  const current = PHASES.find((p) => p.id === phase)!;
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 8 }}>
-      <div
-        role="tablist"
-        aria-label="FormResponse phase"
-        style={{ display: "flex", gap: 0, borderBottom: "1px solid #ddd" }}
-      >
-        {PHASES.map((p) => {
-          const active = p.id === phase;
-          return (
-            <button
-              key={p.id}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              onClick={() => onChange(p.id)}
-              style={{
-                flex: 1,
-                padding: "10px 12px",
-                border: "none",
-                borderBottom: active
-                  ? "2px solid #1a5fb4"
-                  : "2px solid transparent",
-                background: active ? "#f0f5fb" : "transparent",
-                color: active ? "#1a5fb4" : "#555",
-                fontWeight: active ? 600 : 500,
-                fontSize: 14,
-                cursor: "pointer",
-              }}
-            >
-              {p.label}
-            </button>
-          );
-        })}
-      </div>
-      <p style={{ margin: 0, fontSize: 13, color: "#555", lineHeight: 1.4 }}>
-        {current.blurb}
-      </p>
-    </div>
-  );
-};
 
 const jsonPanelStyle = (active: boolean): CSSProperties => ({
   margin: 0,

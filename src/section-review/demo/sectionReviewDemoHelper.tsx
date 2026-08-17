@@ -1,10 +1,16 @@
 import type { CSSProperties, ReactNode } from "react";
 import { FollowUpAdd } from "./followUpAdd";
 import { flatFromFieldSections } from "../../form-dialogs/demo/formDialogsDemoFlat";
+import {
+  PhaseTabs,
+  type PhaseTab,
+} from "../../section-responder/demo/sectionResponderDemoHelper";
 import sectionReviewDemoSource from "./SectionReviewDemo.tsx?raw";
 import sectionReviewDemoTypesSource from "./sectionReviewDemoTypes.t.ts?raw";
 import type * as types from "./sectionReviewDemoTypes.t";
 import * as lib from "./library";
+
+export { PhaseTabs };
 
 export const FormContainer = ({
   title,
@@ -29,11 +35,7 @@ export const FormContainer = ({
 /** Stable reference so `lastPending === history.at(-1).date` can match by identity. */
 export const PENDING_DATE = new Date("2024-01-15T00:00:00Z");
 
-const PHASES: {
-  id: types.DemoPhase;
-  label: string;
-  blurb: string;
-}[] = [
+export const PHASES: PhaseTab<types.DemoPhase>[] = [
   {
     id: "design",
     label: "1. Design",
@@ -51,54 +53,6 @@ const PHASES: {
       "Teacher reviews: lock/unlock comments, 💬 follow-up dropdown, status highlighting.",
   },
 ];
-
-export const PhaseTabs = ({
-  phase,
-  onChange,
-}: {
-  phase: types.DemoPhase;
-  onChange: (phase: types.DemoPhase) => void;
-}) => {
-  const current = PHASES.find((p) => p.id === phase)!;
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <div
-        role="tablist"
-        aria-label="Lifecycle phase"
-        style={{ display: "flex", gap: 0, borderBottom: "1px solid #ddd" }}
-      >
-        {PHASES.map((p) => {
-          const active = p.id === phase;
-          return (
-            <button
-              key={p.id}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              onClick={() => onChange(p.id)}
-              style={{
-                flex: 1,
-                padding: "10px 12px",
-                border: "none",
-                borderBottom: active ? "2px solid #1a5fb4" : "2px solid transparent",
-                background: active ? "#f0f5fb" : "transparent",
-                color: active ? "#1a5fb4" : "#555",
-                fontWeight: active ? 600 : 500,
-                fontSize: 14,
-                cursor: "pointer",
-              }}
-            >
-              {p.label}
-            </button>
-          );
-        })}
-      </div>
-      <p style={{ margin: 0, fontSize: 13, color: "#555", lineHeight: 1.4 }}>
-        {current.blurb}
-      </p>
-    </div>
-  );
-};
 
 const jsonPanelStyle = (active: boolean): CSSProperties => ({
   flex: 1,
@@ -197,30 +151,55 @@ const ACTION_ICON: Record<
   unlock: { glyph: "🔓", label: "Unlocked by remark — remove remark" },
 };
 
+export const ReviewSection = ({
+  deleted,
+  title,
+  description,
+  i,
+  multiSection,
+  columns,
+  note,
+}: {
+  deleted: boolean;
+  title: string;
+  description: string;
+  i: number;
+  multiSection: boolean;
+  columns: ReactNode[];
+  note: ReactNode;
+}) => (
+  <div style={{ marginBottom: 20, opacity: deleted ? 0.5 : 1 }}>
+    <div style={{ marginBottom: 12 }}>
+      <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 600 }}>
+        {multiSection ? `${i + 1}. ${title}` : title}
+      </h3>
+      {description ? (
+        <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{description}</p>
+      ) : null}
+      {note}
+    </div>
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {columns.map((col, idx) => (
+        <div key={idx} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {col}
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 /** Demo HTML chrome for `SectionReviewHOC` — not part of the library. */
 export const sectionChrome: lib.SectionReviewChrome<types.TypeNames, types.Params> = {
-  renderSection: ({ deleted, title, description, i, multiSection, columns }) => (
-    <div style={{ marginBottom: 20, opacity: deleted ? 0.5 : 1 }}>
-      <div style={{ marginBottom: 12 }}>
-        <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 600 }}>
-          {multiSection ? `${i + 1}. ${title}` : title}
-        </h3>
-        {description ? (
-          <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{description}</p>
-        ) : null}
+  renderSection: (args) => (
+    <ReviewSection
+      {...args}
+      note={
         <p style={{ margin: "8px 0 0", fontSize: 12, color: "#888", fontStyle: "italic" }}>
           Follow / review — status border: green = commented, amber = needs attention, grey =
           idle.
         </p>
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        {columns.map((col, idx) => (
-          <div key={idx} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {col}
-          </div>
-        ))}
-      </div>
-    </div>
+      }
+    />
   ),
   renderItemShell: ({ children, action }) => (
     <div style={{ position: "relative", padding: "4px 28px 4px 0" }}>
