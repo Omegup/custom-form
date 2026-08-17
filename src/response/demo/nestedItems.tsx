@@ -2,9 +2,10 @@
  * Heading + multiple-panel chrome for fill/review demos.
  * Add instance is host-owned; shown only while `response.setValue` is live.
  */
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode, Ref } from "react";
 import { HeadingName, PanelBlock } from "../../demo-utils";
-import type { ResponseSetter } from "./library";
+import { FillFieldViewer } from "./FillFieldViewer";
+import type { ResponseSetter, ViewerMethods } from "./library";
 import {
   nextPanelInstanceId,
   parsePanelInstanceIds,
@@ -57,3 +58,45 @@ export const panelRepeatChildren = (
   formItem: { params: { multiple: boolean } },
   extra: { response: ResponseSetter },
 ) => panelInstanceSuffixes(formItem.params.multiple, extra.response.value);
+
+type FillFieldProps = {
+  formItem: { params: { name: string; required: boolean } };
+  extra: {
+    impRef: Ref<ViewerMethods>;
+    response: ResponseSetter;
+    error: string | boolean | null;
+    icon: ReactNode | null;
+    appendix: ReactNode | null;
+  };
+  variant: {
+    border: string;
+    background: string;
+    badge: ReactNode;
+    shell: CSSProperties;
+    errorBorder?: string;
+  };
+};
+
+export const fillFieldView = ({ props }: { props: FillFieldProps }) => (
+  <FillFieldViewer
+    name={props.formItem.params.name}
+    required={props.formItem.params.required}
+    extra={props.extra}
+    variant={{
+      ...props.variant,
+      errorBorder: props.variant.errorBorder ?? null,
+    }}
+  />
+);
+
+export const fillViewers = {
+  field: { viewer: fillFieldView },
+  heading: {
+    viewer: headingView,
+    repeatChildren: () => [""],
+  },
+  panel: {
+    viewer: panelView,
+    repeatChildren: panelRepeatChildren,
+  },
+};

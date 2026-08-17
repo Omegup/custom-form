@@ -38,6 +38,9 @@ field: {
 }
 ```
 
+That field/heading/panel bag is **one** `listViewers` import. Do not
+paste it into a second demo helper (`unify-demo-chrome.mdc`).
+
 `wrapWithRequired` is the **editor** toggle, not the star. Unanswered follow-up
 rows go through Design’s list viewers (`FormDialogsEditor` `sidebar={null}`) so each
 field viewer can show its own star.

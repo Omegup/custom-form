@@ -63,6 +63,12 @@ The required star is field-viewer chrome (`RequiredMark` in `src/demo-utils/`),
 not draft/list HTML. If several field viewers show it, they compose the same
 mark.
 
+Design list viewers (field + star, heading, panel) are **one bag** —
+`listViewers` in `form-item-editor/demo`. Do not paste `FieldLabel` /
+`HeadingLabel` / `PanelLabel` into a second helper. Fill/review viewers
+are **one bag** each (`fillViewers` / `reviewViewers`); they compose
+`FillFieldViewer` / `ReviewFieldViewer` plus nested heading/panel.
+
 Related: `no-html-outside-demo.mdc` (no HTML in library),
 `no-optional-defaults.mdc` (library still does not invent copy;
 demo-utils named controls bake theirs),

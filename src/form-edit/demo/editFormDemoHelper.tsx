@@ -45,17 +45,6 @@ export const pendingRemoveCopy = <Item, Section extends { title: string }>(
   return null;
 };
 
-/** List name chrome — same labels as side-menu `itemName`. */
-export const FieldLabel = ({ name }: { name: string }) => <span>{name}</span>;
-
-export const HeadingLabel = ({ name }: { name: string }) => (
-  <span>{`§ ${name}`}</span>
-);
-
-export const PanelLabel = ({ name }: { name: string }) => (
-  <span>{`▦ ${name}`}</span>
-);
-
 /** `FieldRow` + nested-panel slot — shared `renderCard` body for list demos. */
 export const renderListCard = (
   view: ReactNode,

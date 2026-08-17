@@ -2,52 +2,16 @@
  * `section-responder` showcase — school `SectionResponderHOC`:
  * one section of fillable fields, section-level Validate via `impRef`.
  */
-import { useCallback, useRef, useState, type Ref } from "react";
+import { useCallback, useRef, useState } from "react";
 import { DemoPage, PhaseJsonPanels, PhaseTabs, ValidateBlock } from "../../demo-utils";
 import { FormDialogsEditor, designSidebar } from "../../form-dialogs/demo/FormDialogsDemo";
-import { FillFieldViewer, defaultFillVariant } from "../../response/demo/FillFieldViewer";
-import {
-  headingView,
-  panelRepeatChildren,
-  panelView,
-} from "../../response/demo/nestedItems";
+import { defaultFillVariant } from "../../response/demo/FillFieldViewer";
+import { fillViewers } from "../../response/demo/nestedItems";
 import * as demo from "./sectionResponderDemoHelper";
 import type * as types from "./sectionResponderDemoTypes.t";
 import * as lib from "./library";
 
 const defaultFieldVariant: types.FieldVariant = defaultFillVariant;
-
-const viewers: lib.Viewers<
-  types.TypeNames,
-  types.Params,
-  types.Variants,
-  types.FieldExtra & lib.Children,
-  lib.ResponderExtra & { impRef: Ref<lib.StrictViewerMethods> },
-  types.Ctx,
-  string
-> = {
-  field: {
-    viewer: ({ props: { formItem, extra, variant } }) => (
-      <FillFieldViewer
-        name={formItem.params.name}
-        required={formItem.params.required}
-        extra={extra}
-        variant={{
-          ...variant,
-          errorBorder: variant.errorBorder ?? null,
-        }}
-      />
-    ),
-  },
-  heading: {
-    viewer: headingView,
-    repeatChildren: () => [""],
-  },
-  panel: {
-    viewer: panelView,
-    repeatChildren: panelRepeatChildren,
-  },
-};
 
 export const SectionResponder = lib.SectionResponderHOC<
   types.TypeNames,
@@ -55,7 +19,7 @@ export const SectionResponder = lib.SectionResponderHOC<
   types.Variants,
   types.Ctx,
   types.Section
->(viewers, demo.sectionChrome);
+>(fillViewers, demo.sectionChrome);
 
 const ctx = lib.branded<types.Ctx, "context">({
   t: () => "Required",

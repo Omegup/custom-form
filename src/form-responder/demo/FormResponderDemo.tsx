@@ -2,52 +2,16 @@
  * `form-responder` showcase — school `CustomFormResponderHOC`:
  * multi-section fill + form-level Validate via `impRef`.
  */
-import { useCallback, useRef, useState, type Ref } from "react";
+import { useCallback, useRef, useState } from "react";
 import { DemoPage, PhaseJsonPanels, PhaseTabs, ValidateBlock } from "../../demo-utils";
 import { FormDialogsEditor, designSidebar } from "../../form-dialogs/demo/FormDialogsDemo";
-import { FillFieldViewer, defaultFillVariant } from "../../response/demo/FillFieldViewer";
-import {
-  headingView,
-  panelRepeatChildren,
-  panelView,
-} from "../../response/demo/nestedItems";
+import { defaultFillVariant } from "../../response/demo/FillFieldViewer";
+import { fillViewers } from "../../response/demo/nestedItems";
 import * as demo from "./formResponderDemoHelper";
 import type * as types from "./formResponderDemoTypes.t";
 import * as lib from "./library";
 
 const defaultFieldVariant: types.FieldVariant = defaultFillVariant;
-
-const viewers: lib.Viewers<
-  types.TypeNames,
-  types.Params,
-  types.Variants,
-  types.FieldExtra & lib.Children,
-  lib.ResponderExtra & { impRef: Ref<lib.StrictViewerMethods> },
-  types.Ctx,
-  string
-> = {
-  field: {
-    viewer: ({ props: { formItem, extra, variant } }) => (
-      <FillFieldViewer
-        name={formItem.params.name}
-        required={formItem.params.required}
-        extra={extra}
-        variant={{
-          ...variant,
-          errorBorder: variant.errorBorder ?? null,
-        }}
-      />
-    ),
-  },
-  heading: {
-    viewer: headingView,
-    repeatChildren: () => [""],
-  },
-  panel: {
-    viewer: panelView,
-    repeatChildren: panelRepeatChildren,
-  },
-};
 
 export const FormResponder = lib.CustomFormResponderHOC<
   types.TypeNames,
@@ -55,7 +19,7 @@ export const FormResponder = lib.CustomFormResponderHOC<
   types.Variants,
   types.Ctx,
   types.Section
->(viewers, demo.formChrome);
+>(fillViewers, demo.formChrome);
 
 const ctx = lib.branded<types.Ctx, "context">({
   t: () => "Required",

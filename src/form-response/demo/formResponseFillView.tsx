@@ -1,16 +1,11 @@
 /**
  * Fill viewers + responder chrome. Field methods come from the form-responder demo.
  */
-import type { Ref } from "react";
 import { FollowUpRail } from "../../demo-utils";
 import { followUpVariant as followUpItemVariant } from "../../form-item-editor/demo/itemVariants";
 import { formChrome } from "../../form-responder/demo/formResponderDemoHelper";
-import { FillFieldViewer, defaultFillVariant } from "../../response/demo/FillFieldViewer";
-import {
-  headingView,
-  panelRepeatChildren,
-  panelView,
-} from "../../response/demo/nestedItems";
+import { defaultFillVariant } from "../../response/demo/FillFieldViewer";
+import { fillViewers } from "../../response/demo/nestedItems";
 import { PRIOR_BADGE } from "./formResponseDemoHelper";
 import type * as types from "./formResponseDemoTypes.t";
 import * as lib from "./library";
@@ -57,45 +52,13 @@ const fillChrome: lib.FormResponderChrome = {
   ),
 };
 
-const viewers: lib.Viewers<
-  types.TypeNames,
-  types.Params,
-  types.Variants,
-  types.FillExtra & lib.Children,
-  lib.ResponderExtra & { impRef: Ref<lib.StrictViewerMethods> },
-  lib.SectionResponderContext,
-  string
-> = {
-  field: {
-    viewer: ({ props: { formItem, extra, variant } }) => (
-      <FillFieldViewer
-        name={formItem.params.name}
-        required={formItem.params.required}
-        extra={extra}
-        variant={{
-          ...variant,
-          errorBorder: variant.errorBorder ?? null,
-        }}
-      />
-    ),
-  },
-  heading: {
-    viewer: headingView,
-    repeatChildren: () => [""],
-  },
-  panel: {
-    viewer: panelView,
-    repeatChildren: panelRepeatChildren,
-  },
-};
-
 export const FormResponder = lib.CustomFormResponderHOC<
   types.TypeNames,
   types.Params,
   types.Variants,
   lib.SectionResponderContext,
   types.Section
->(viewers, fillChrome);
+>(fillViewers, fillChrome);
 
 export const fillCtx = lib.branded<lib.SectionResponderContext, "context">({
   t: (term) => (term === "fieldRequired" ? "This field is required" : term),

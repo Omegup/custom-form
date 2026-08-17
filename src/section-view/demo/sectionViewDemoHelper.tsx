@@ -1,8 +1,7 @@
 import type { ReactNode } from "react";
+import { FieldLabel, PanelLabel } from "../../demo-utils";
 import {
-  FieldLabel,
   FormContainer,
-  PanelLabel,
   SectionColumn,
   SectionPanel,
   SectionsList,

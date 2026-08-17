@@ -3,58 +3,24 @@
  * Design remounts the form-dialogs editor. Response mounts the fill shell;
  * Follow mounts `SectionReviewHOC`.
  */
-import { useCallback, useRef, useState, type Ref } from "react";
+import { useCallback, useRef, useState } from "react";
 import { BlockStack, DemoPage, FollowControls, PhaseBody, PhaseJsonPanels, PhaseTabs } from "../../demo-utils";
 import { FormDialogsEditor, designSidebar } from "../../form-dialogs/demo/FormDialogsDemo";
 import {
   defaultVariant,
   followUpVariant,
 } from "../../form-item-editor/demo/itemVariants";
-import { ReviewFieldViewer } from "./ReviewFieldViewer";
 import {
   SectionResponder,
   sectionResponderCtx,
   sectionResponderVariants,
 } from "../../section-responder/demo/SectionResponderDemo";
 import type { SectionValidator } from "../../section-responder";
-import {
-  headingView,
-  panelRepeatChildren,
-  panelView,
-} from "../../response/demo/nestedItems";
 import { FollowUpDrafts } from "./followUpAdd";
+import { reviewViewers } from "./reviewViewers";
 import * as demo from "./sectionReviewDemoHelper";
 import type * as types from "./sectionReviewDemoTypes.t";
 import * as lib from "./library";
-
-const viewers: lib.Viewers<
-  types.TypeNames,
-  types.Params,
-  types.Variants,
-  types.FieldExtra & lib.Children,
-  lib.ReviewExtra & { impRef: Ref<lib.StrictViewerMethods> },
-  types.Ctx,
-  string
-> = {
-  field: {
-    viewer: ({ props: { formItem, extra, variant } }) => (
-      <ReviewFieldViewer
-        name={formItem.params.name}
-        required={formItem.params.required}
-        extra={extra}
-        variant={variant}
-      />
-    ),
-  },
-  heading: {
-    viewer: headingView,
-    repeatChildren: () => [""],
-  },
-  panel: {
-    viewer: panelView,
-    repeatChildren: panelRepeatChildren,
-  },
-};
 
 const SectionReview = lib.SectionReviewHOC<
   types.TypeNames,
@@ -62,7 +28,7 @@ const SectionReview = lib.SectionReviewHOC<
   types.Variants,
   types.Ctx,
   types.Section
->(viewers, demo.sectionChrome);
+>(reviewViewers, demo.sectionChrome);
 
 const ctx = lib.branded<types.Ctx, "context">({});
 const variants = lib.branded<types.Variants, "variants">(defaultVariant);

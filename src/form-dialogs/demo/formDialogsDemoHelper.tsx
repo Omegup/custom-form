@@ -1,11 +1,6 @@
 import type { ReactNode } from "react";
-import { ItemCaption, RequiredMark, VariantShell } from "../../demo-utils";
-import {
-  FieldLabel,
-  HeadingLabel,
-  PanelLabel,
-  renderListCard,
-} from "../../form-edit/demo/editFormDemoHelper";
+import { ItemCaption, VariantShell } from "../../demo-utils";
+import { renderListCard } from "../../form-edit/demo/editFormDemoHelper";
 import formDialogsDemoSource from "./FormDialogsDemo.tsx?raw";
 import formDialogsDemoTypesSource from "./formDialogsDemoTypes.t.ts?raw";
 import type * as types from "./formDialogsDemoTypes.t";
@@ -21,37 +16,6 @@ export const FORM_DIALOGS_DEMO_SOURCE = [
 ].join("\n");
 
 type CardExtra = types.ListExtra & lib.EditExtra & lib.Children;
-
-/** List viewers — labels only; nested columns are placed by `renderCard`. */
-export const viewers: lib.Viewers<
-  types.TypeNames,
-  types.Params,
-  types.Variants,
-  CardExtra,
-  types.ListExtra & lib.EditExtra,
-  types.ListCtx,
-  string
-> = {
-  field: {
-    viewer: ({ props: { formItem } }) => (
-      <>
-        <FieldLabel name={formItem.params.name} />
-        <RequiredMark required={formItem.params.required} />
-      </>
-    ),
-  },
-  heading: {
-    viewer: ({ props: { formItem } }) => (
-      <HeadingLabel name={formItem.params.name} />
-    ),
-  },
-  panel: {
-    viewer: ({ props: { formItem } }) => (
-      <PanelLabel name={formItem.params.name} />
-    ),
-    repeatChildren: () => [""],
-  },
-};
 
 export const renderCard = (
   view: ReactNode,

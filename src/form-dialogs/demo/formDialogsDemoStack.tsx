@@ -9,6 +9,7 @@ import {
   FormItemEditor,
   itemName,
 } from "../../form-item-editor/demo/FormItemEditorDemo";
+import { listViewers } from "../../form-item-editor/demo/listViewers";
 import { SectionDialog } from "../../section-edit/demo/SectionEditDemo";
 import { MENU_ITEMS, randomId } from "../../side-menu/demo/fixtures";
 import {
@@ -16,7 +17,6 @@ import {
   renderMenuItem,
   renderSide,
 } from "../../side-menu/demo/sideMenuDemoHelper";
-import * as demo from "./formDialogsDemoHelper";
 import type * as types from "./formDialogsDemoTypes.t";
 import * as lib from "./library";
 
@@ -77,7 +77,7 @@ export const SectionComponent = lib.SectionFormItemHOC<
   types.BaseCtx,
   types.ListExtra
 >({
-  viewers: demo.viewers,
+  viewers: listViewers,
   useRenderAddItem,
   renderTitle: (props) => <SectionTitle {...props} />,
   renderEdit: WebRecursiveEdit,

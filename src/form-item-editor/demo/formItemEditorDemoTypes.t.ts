@@ -123,18 +123,6 @@ export type DialogArgs = lib.DialogArgsDom<{
   onCancel: () => void;
 }>;
 
-export type NameExtra = lib.ExtraDom;
-
-export type NameViewers = lib.Viewers<
-  TypeNames,
-  Params,
-  Variants,
-  NameExtra & lib.Children,
-  NameExtra,
-  Ctx,
-  string
->;
-
 export type Validate<K extends TypeNames> = lib.FormItemEditorValidate<
   TypeNames,
   Params,

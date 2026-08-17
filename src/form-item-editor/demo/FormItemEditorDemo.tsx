@@ -11,13 +11,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { DemoPage, RequiredMark, SelectColumns } from "../../demo-utils";
-import {
-  FieldLabel,
-  HeadingLabel,
-  PanelLabel,
-} from "../../form-edit/demo/editFormDemoHelper";
+import { DemoPage, SelectColumns } from "../../demo-utils";
 import * as demo from "./formItemEditorDemoHelper";
+import { listViewers } from "./listViewers";
 import * as types from "./formItemEditorDemoTypes.t";
 import { defaultVariants } from "./itemVariants";
 import * as lib from "./library";
@@ -159,30 +155,13 @@ const PanelEditor = ({
   );
 };
 
-// ── Name viewers (like FormDemo `viewers`) ────────────────────────────────────
-
-const nameViewers: types.NameViewers = {
-  field: {
-    viewer: ({ props: { formItem } }) => (
-      <>
-        <FieldLabel name={formItem.params.name} />
-        <RequiredMark required={formItem.params.required} />
-      </>
-    ),
-  },
-  heading: {
-    viewer: ({ props: { formItem } }) => (
-      <HeadingLabel name={formItem.params.name} />
-    ),
-  },
-  panel: {
-    viewer: ({ props: { formItem } }) => (
-      <PanelLabel name={formItem.params.name} />
-    ),
-  },
-};
-
-const ItemName = lib.createFormItemByGetChildPlain(nameViewers);
+const ItemName = lib.createFormItemByGetChildPlain<
+  types.TypeNames,
+  types.Params,
+  types.Variants,
+  lib.ExtraDom,
+  types.Ctx
+>(listViewers);
 
 /** Exported for the side-menu demo (same editor stack). */
 export const itemName = (ctx: types.Ctx, header: types.ItemHeader): ReactNode => (

@@ -3,59 +3,25 @@
  * Design remounts the form-dialogs editor. Response mounts the fill shell;
  * Follow mounts `CustomFormReviewHOC`.
  */
-import { useCallback, useRef, useState, type Ref } from "react";
+import { useCallback, useRef, useState } from "react";
 import { BlockStack, DemoPage, FollowControls, FormTitle, PhaseBody, PhaseJsonPanels, PhaseTabs } from "../../demo-utils";
 import { FormDialogsEditor, designSidebar } from "../../form-dialogs/demo/FormDialogsDemo";
 import {
   defaultVariant,
   followUpVariant,
 } from "../../form-item-editor/demo/itemVariants";
-import { ReviewFieldViewer } from "../../section-review/demo/ReviewFieldViewer";
 import {
   FormResponder,
   formResponderCtx,
   responderVariants,
 } from "../../form-responder/demo/FormResponderDemo";
 import type { SectionValidator } from "../../form-responder";
-import {
-  headingView,
-  panelRepeatChildren,
-  panelView,
-} from "../../response/demo/nestedItems";
 import { FollowUpDrafts } from "../../section-review/demo/followUpAdd";
+import { reviewViewers } from "../../section-review/demo/reviewViewers";
 import { renderReviewOverlays } from "../../section-review/demo/sectionReviewDemoHelper";
 import * as demo from "./formReviewDemoHelper";
 import type * as types from "./formReviewDemoTypes.t";
 import * as lib from "./library";
-
-const viewers: lib.Viewers<
-  types.TypeNames,
-  types.Params,
-  types.Variants,
-  types.FieldExtra & lib.Children,
-  lib.ReviewExtra & { impRef: Ref<lib.StrictViewerMethods> },
-  types.Ctx,
-  string
-> = {
-  field: {
-    viewer: ({ props: { formItem, extra, variant } }) => (
-      <ReviewFieldViewer
-        name={formItem.params.name}
-        required={formItem.params.required}
-        extra={extra}
-        variant={variant}
-      />
-    ),
-  },
-  heading: {
-    viewer: headingView,
-    repeatChildren: () => [""],
-  },
-  panel: {
-    viewer: panelView,
-    repeatChildren: panelRepeatChildren,
-  },
-};
 
 const variants = lib.branded<types.Variants, "variants">(defaultVariant);
 const followUpVariants = lib.branded<types.Variants, "variants">(
@@ -72,7 +38,7 @@ const FormReview = lib.CustomFormReviewHOC<
   types.Variants,
   types.Ctx,
   types.Section
->(viewers, demo.formChrome);
+>(reviewViewers, demo.formChrome);
 
 const ctx = lib.branded<types.Ctx, "context">({});
 const tCommon = (term: "cancel" | "save" | "delete") =>

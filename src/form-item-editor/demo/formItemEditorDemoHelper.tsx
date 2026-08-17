@@ -1,13 +1,11 @@
 import type { ReactNode } from "react";
-import { ConfirmBanner, EditorDialog, LengthHint, RequiredMark, RequiredToggle, MultipleToggle, SelectField, TextField } from "../../demo-utils";
+import { ConfirmBanner, EditorDialog, LengthHint, RequiredToggle, MultipleToggle, SelectField, TextField } from "../../demo-utils";
 import {
-  FieldLabel,
-  HeadingLabel,
-  PanelLabel,
   SectionsList,
   pendingRemoveCopy,
   renderListCard,
 } from "../../form-edit/demo/editFormDemoHelper";
+import { listViewers } from "./listViewers";
 import { MENU_ITEMS, randomId } from "../../side-menu/demo/fixtures";
 import { renderAddFormItem } from "../../side-menu/demo/sideMenuDemoHelper";
 import { columnsChrome } from "../../section-view/demo/sectionViewDemoHelper";
@@ -189,36 +187,6 @@ const useRenderAddItem = lib.makeUseRenderAddItem<types.TypeNames, types.Params>
   randomId,
 );
 
-const viewers: lib.Viewers<
-  types.TypeNames,
-  types.Params,
-  types.Variants,
-  CardExtra,
-  types.ListExtra & lib.EditExtra,
-  types.ListCtx,
-  string
-> = {
-  field: {
-    viewer: ({ props: { formItem } }) => (
-      <>
-        <FieldLabel name={formItem.params.name} />
-        <RequiredMark required={formItem.params.required} />
-      </>
-    ),
-  },
-  heading: {
-    viewer: ({ props: { formItem } }) => (
-      <HeadingLabel name={formItem.params.name} />
-    ),
-  },
-  panel: {
-    viewer: ({ props: { formItem } }) => (
-      <PanelLabel name={formItem.params.name} />
-    ),
-    repeatChildren: () => [""],
-  },
-};
-
 const renderCard = (
   view: ReactNode,
   viewProps: lib.ViewerProps<
@@ -247,7 +215,7 @@ const SectionComponent = lib.SectionFormItemHOC<
   types.ListBaseCtx,
   types.ListExtra
 >({
-  viewers,
+  viewers: listViewers,
   useRenderAddItem,
   renderTitle: (props) => props.section.header.title,
   renderEdit: lib.createColumnsEdit(columnsChrome),
