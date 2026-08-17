@@ -4,12 +4,9 @@
  * Follow mounts `SectionReviewHOC`.
  */
 import { useCallback, useRef, useState } from "react";
+import { patchResponse } from "../../response/demo/patchResponse";
 import { BlockStack, DemoPage, FollowControls, PhaseBody, PhaseJsonPanels, PhaseTabs } from "../../demo-utils";
 import { FormDialogsEditor, designSidebar } from "../../form-dialogs/demo/FormDialogsDemo";
-import {
-  defaultVariant,
-  followUpVariant,
-} from "../../form-item-editor/demo/itemVariants";
 import {
   SectionResponder,
   sectionResponderCtx,
@@ -17,7 +14,7 @@ import {
 } from "../../section-responder/demo/SectionResponderDemo";
 import type { SectionValidator } from "../../section-responder";
 import { FollowUpDrafts } from "./followUpAdd";
-import { reviewViewers } from "./reviewViewers";
+import { reviewVariants, reviewViewers } from "./reviewViewers";
 import * as demo from "./sectionReviewDemoHelper";
 import type * as types from "./sectionReviewDemoTypes.t";
 import * as lib from "./library";
@@ -31,16 +28,6 @@ const SectionReview = lib.SectionReviewHOC<
 >(reviewViewers, demo.sectionChrome);
 
 const ctx = lib.branded<types.Ctx, "context">({});
-const variants = lib.branded<types.Variants, "variants">(defaultVariant);
-const followUpVariants = lib.branded<types.Variants, "variants">(
-  followUpVariant,
-);
-const reviewVariants: Record<lib.ReviewVariantState, types.Variants> = {
-  default: variants,
-  change: followUpVariants,
-};
-const tCommon = (term: "cancel" | "save" | "delete") =>
-  ({ cancel: "Cancel", save: "Save", delete: "Delete" })[term];
 
 export const SectionReviewDemo = ({
   heading,
@@ -59,12 +46,7 @@ export const SectionReviewDemo = ({
 
   const setResponse = useCallback(
     (id: string, next?: lib.Response) => {
-      if (next === undefined) {
-        const { [id]: _, ...rest } = responses;
-        updateArgs({ responses: rest });
-        return;
-      }
-      updateArgs({ responses: { ...responses, [id]: next } });
+      updateArgs({ responses: patchResponse(responses, id, next) });
     },
     [responses, updateArgs],
   );
@@ -149,7 +131,7 @@ export const SectionReviewDemo = ({
                 setAddition,
                 setDeleteCommentId,
               }),
-              tCommon,
+              tCommon: demo.tCommon,
             })}
           </BlockStack>
         ) : null}

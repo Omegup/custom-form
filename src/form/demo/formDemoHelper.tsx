@@ -1,6 +1,6 @@
 import { useMemo, type ReactNode } from "react";
 import { useArgs } from "storybook/preview-api";
-import { AccentField, FieldsetGroup, MutedWell } from "../../demo-utils";
+import { withFileHeader, AccentField, FieldsetGroup, MutedWell } from "../../demo-utils";
 import { branded } from "../branded";
 import formDemoSource from "./FormDemo.tsx?raw";
 import type {
@@ -82,8 +82,6 @@ export const DEFAULT_FORM_DEMO: Data = {
 
 // ── Storybook docs (`?raw` of types + integration) ────────────────────────────
 
-const withFileHeader = (path: string, source: string) =>
-  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const FORM_DEMO_SOURCE = [
   withFileHeader("formDemoTypes.t.ts", formDemoTypesSource),

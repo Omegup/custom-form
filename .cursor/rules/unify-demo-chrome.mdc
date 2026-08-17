@@ -68,6 +68,8 @@ Design list viewers (field + star, heading, panel) are **one bag** —
 `HeadingLabel` / `PanelLabel` into a second helper. Fill/review viewers
 are **one bag** each (`fillViewers` / `reviewViewers`); they compose
 `FillFieldViewer` / `ReviewFieldViewer` plus nested heading/panel.
+Review overlay copy is `tCommon` next to `renderReviewOverlays`.
+Review fill/follow chrome bags are `reviewVariants` next to `reviewViewers`.
 
 Related: `no-html-outside-demo.mdc` (no HTML in library),
 `no-optional-defaults.mdc` (library still does not invent copy;

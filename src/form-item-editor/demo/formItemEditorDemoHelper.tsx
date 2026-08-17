@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ConfirmBanner, EditorDialog, LengthHint, RequiredToggle, MultipleToggle, SelectField, TextField } from "../../demo-utils";
+import { withFileHeader, ConfirmBanner, EditorDialog, RequiredToggle, MultipleToggle, SelectField, TextField } from "../../demo-utils";
 import {
   SectionsList,
   pendingRemoveCopy,
@@ -19,9 +19,6 @@ export type { StoryArgs } from "./formItemEditorDemoTypes.t";
 export { EditorDialog, TextField };
 
 // ── Storybook docs (`?raw` of types + integration) ────────────────────────────
-
-const withFileHeader = (path: string, source: string) =>
-  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const FORM_ITEM_EDITOR_DEMO_SOURCE = [
   withFileHeader("formItemEditorDemoTypes.t.ts", formItemEditorDemoTypesSource),
@@ -91,30 +88,9 @@ export const wrapWithMultiple =
 
 const MAX_NAME_LEN = 10;
 
-export const NameLengthHint = ({ name }: { name: string }) => (
-  <LengthHint
-    current={name.length}
-    limit={MAX_NAME_LEN}
-    emphasize={name.length > MAX_NAME_LEN}
-  >
-    characters{name.length > MAX_NAME_LEN ? " — too long" : ""}
-  </LengthHint>
-);
-
 export { MAX_NAME_LEN };
 
 const MIN_HEADING_LEN = 3;
-
-export const HeadingLengthHint = ({ text }: { text: string }) => (
-  <LengthHint
-    current={text.trim().length}
-    limit={MIN_HEADING_LEN}
-    emphasize={text.trim().length < MIN_HEADING_LEN}
-  >
-    characters minimum
-    {text.trim().length < MIN_HEADING_LEN ? " — too short" : ""}
-  </LengthHint>
-);
 
 export { MIN_HEADING_LEN };
 
@@ -143,17 +119,6 @@ export const SelectSection = ({
 );
 
 const MIN_PANEL_TITLE_LEN = 2;
-
-export const PanelTitleHint = ({ title }: { title: string }) => (
-  <LengthHint
-    current={title.trim().length}
-    limit={MIN_PANEL_TITLE_LEN}
-    emphasize={title.trim().length < MIN_PANEL_TITLE_LEN}
-  >
-    characters minimum
-    {title.trim().length < MIN_PANEL_TITLE_LEN ? " — too short" : ""}
-  </LengthHint>
-);
 
 export { MIN_PANEL_TITLE_LEN };
 

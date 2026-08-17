@@ -1,4 +1,5 @@
 import {
+  withFileHeader,
   AppendixStack,
   CommentCard,
   CommentComposer,
@@ -18,6 +19,9 @@ import type * as types from "./sectionReviewDemoTypes.t";
 import * as lib from "./library";
 
 export { SectionFrame };
+
+export const tCommon = (term: "cancel" | "save" | "delete") =>
+  ({ cancel: "Cancel", save: "Save", delete: "Delete" })[term];
 
 /** Stable reference so `lastPending === history.at(-1).date` can match by identity. */
 export const PENDING_DATE = new Date("2024-01-15T00:00:00Z");
@@ -165,8 +169,6 @@ export const INITIAL_CHANGES: lib.AdditionalChanges<types.TypeNames, types.Param
   },
 };
 
-const withFileHeader = (path: string, source: string) =>
-  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const SECTION_REVIEW_DEMO_SOURCE = [
   withFileHeader(

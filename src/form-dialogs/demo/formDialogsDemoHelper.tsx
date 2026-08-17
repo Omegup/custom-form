@@ -1,13 +1,11 @@
 import type { ReactNode } from "react";
-import { ItemCaption, VariantShell } from "../../demo-utils";
+import { withFileHeader, ItemCaption, VariantShell } from "../../demo-utils";
 import { renderListCard } from "../../form-edit/demo/editFormDemoHelper";
 import formDialogsDemoSource from "./FormDialogsDemo.tsx?raw";
 import formDialogsDemoTypesSource from "./formDialogsDemoTypes.t.ts?raw";
 import type * as types from "./formDialogsDemoTypes.t";
 import * as lib from "./library";
 
-const withFileHeader = (path: string, source: string) =>
-  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const FORM_DIALOGS_DEMO_SOURCE = [
   withFileHeader("formDialogsDemoTypes.t.ts", formDialogsDemoTypesSource),

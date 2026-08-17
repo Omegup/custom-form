@@ -1,4 +1,4 @@
-import { ClearIcon, type PhaseTab, RemarkCard, SectionFrame } from "../../demo-utils";
+import { withFileHeader, ClearIcon, type PhaseTab, RemarkCard, SectionFrame } from "../../demo-utils";
 import sectionResponderDemoSource from "./SectionResponderDemo.tsx?raw";
 import sectionResponderDemoTypesSource from "./sectionResponderDemoTypes.t.ts?raw";
 import type * as types from "./sectionResponderDemoTypes.t";
@@ -56,8 +56,6 @@ export const INITIAL_FLAT = lib.flattenSections([INITIAL_SECTION]);
 
 export const INITIAL_RESPONSES: Record<string, lib.Response> = {};
 
-const withFileHeader = (path: string, source: string) =>
-  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const SECTION_RESPONDER_DEMO_SOURCE = [
   withFileHeader(

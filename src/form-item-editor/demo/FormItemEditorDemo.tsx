@@ -11,7 +11,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { DemoPage, SelectColumns } from "../../demo-utils";
+import { DemoPage, SelectColumns, TooLongHint, TooShortHint } from "../../demo-utils";
 import * as demo from "./formItemEditorDemoHelper";
 import { listViewers } from "./listViewers";
 import * as types from "./formItemEditorDemoTypes.t";
@@ -72,7 +72,10 @@ const FieldEditor = ({
         error={hookResult.state.errors.header?.params.name ?? null}
         onChange={(name) => setFormItemParam(() => ["name", name])}
       />
-      <demo.NameLengthHint name={formItem.item.params.name} />
+      <TooLongHint
+        current={formItem.item.params.name.length}
+        limit={demo.MAX_NAME_LEN}
+      />
     </>
   );
 };
@@ -105,7 +108,10 @@ const HeadingEditor = ({
         multiline={false}
         onChange={(name) => setFormItemParam(() => ["name", name])}
       />
-      <demo.HeadingLengthHint text={formItem.item.params.name} />
+      <TooShortHint
+        current={formItem.item.params.name.trim().length}
+        limit={demo.MIN_HEADING_LEN}
+      />
     </>
   );
 };
@@ -142,7 +148,10 @@ const PanelEditor = ({
         multiline={false}
         onChange={(name) => setFormItemParam(() => ["name", name])}
       />
-      <demo.PanelTitleHint title={formItem.item.params.name} />
+      <TooShortHint
+        current={formItem.item.params.name.trim().length}
+        limit={demo.MIN_PANEL_TITLE_LEN}
+      />
       <SelectColumns
         cols={formItem.n}
         onChange={(n) =>

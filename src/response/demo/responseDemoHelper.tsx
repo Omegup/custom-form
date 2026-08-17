@@ -1,4 +1,5 @@
 import { useImperativeHandle } from "react";
+import { withFileHeader } from "../../demo-utils";
 import responseDemoSource from "./ResponseDemo.tsx?raw";
 import responseDemoTypesSource from "./responseDemoTypes.t.ts?raw";
 import type * as types from "./responseDemoTypes.t";
@@ -21,8 +22,6 @@ export const INITIAL_ITEMS: types.Item[] = [
 
 export const INITIAL_RESPONSES: Record<string, lib.Response> = {};
 
-const withFileHeader = (path: string, source: string) =>
-  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const RESPONSE_DEMO_SOURCE = [
   withFileHeader("response/demo/responseDemoTypes.t.ts", responseDemoTypesSource),

@@ -1,4 +1,4 @@
-import { type PhaseTab, FormColumn, FormTitle } from "../../demo-utils";
+import { withFileHeader, type PhaseTab, FormColumn, FormTitle } from "../../demo-utils";
 import {
   sectionChrome,
 } from "../../section-responder/demo/sectionResponderDemoHelper";
@@ -82,8 +82,6 @@ export const INITIAL_HEADER: lib.FormHeader = {
   description: "Fill every section, then Validate.",
 };
 
-const withFileHeader = (path: string, source: string) =>
-  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const FORM_RESPONDER_DEMO_SOURCE = [
   withFileHeader(

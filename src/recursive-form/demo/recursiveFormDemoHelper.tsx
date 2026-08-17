@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import {
+  withFileHeader,
   AccentField,
   FieldsetGroup,
   InsetFrame,
@@ -114,8 +115,6 @@ export const DEFAULT_RECURSIVE_FORM_DEMO: Data = {
 
 // ── Storybook docs (`?raw` of types + integration) ────────────────────────────
 
-const withFileHeader = (path: string, source: string) =>
-  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const RECURSIVE_FORM_DEMO_SOURCE = [
   withFileHeader("recursiveFormDemoTypes.t.ts", recursiveFormDemoTypesSource),

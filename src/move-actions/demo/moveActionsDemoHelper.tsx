@@ -1,6 +1,7 @@
 export type { StoryArgs } from "./moveActionsDemoTypes.t";
 import type { MoveActions } from "../MoveActions.t";
 import {
+  withFileHeader,
   DeletedModeBar,
   MoveActionsPage,
   MoveItemRow,
@@ -19,8 +20,6 @@ export const MULTIPLE_ITEMS_DEMO: Data = {
   items: ["Alpha", "Beta", "Gamma"].map((name) => ({ del: false, name })),
 };
 
-const withFileHeader = (path: string, source: string) =>
-  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const MOVE_ACTIONS_DEMO_SOURCE = [
   withFileHeader("moveActionsDemoTypes.t.ts", moveActionsDemoTypesSource),

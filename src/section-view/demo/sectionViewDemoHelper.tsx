@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { FieldLabel, PanelLabel } from "../../demo-utils";
+import { withFileHeader, FieldLabel, PanelLabel } from "../../demo-utils";
 import {
   FormContainer,
   SectionColumn,
@@ -16,8 +16,6 @@ export { FormContainer, SectionsList };
 
 // ── Storybook docs (`?raw` of types + integration) ────────────────────────────
 
-const withFileHeader = (path: string, source: string) =>
-  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const SECTION_VIEW_DEMO_SOURCE = [
   withFileHeader("sectionViewDemoTypes.t.ts", sectionViewDemoTypesSource),

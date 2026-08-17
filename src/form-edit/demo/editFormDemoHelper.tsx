@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { FieldRow, NestedSlot } from "../../demo-utils";
+import { withFileHeader, FieldRow, NestedSlot } from "../../demo-utils";
 import * as lib from "./library";
 import * as types from "./editFormDemoTypes.t";
 import editFormDemoSource from "./EditFormDemo.tsx?raw";
@@ -17,8 +17,6 @@ export { DemoPage as FormContainer } from "../../demo-utils";
 
 // ── Storybook docs (`?raw` of types + integration) ────────────────────────────
 
-const withFileHeader = (path: string, source: string) =>
-  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const EDIT_FORM_DEMO_SOURCE = [
   withFileHeader("editFormDemoTypes.t.ts", editFormDemoTypesSource),

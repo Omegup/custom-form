@@ -3,7 +3,7 @@
  * Dialog/field styling mirrors the form-item-editor demo helpers; the
  * column selector allows up to 3 columns (sections, unlike panels).
  */
-import { EditorDialog, SelectColumns, TextField } from "../../demo-utils";
+import { withFileHeader, EditorDialog, SelectColumns, TextField } from "../../demo-utils";
 import { FormContainer } from "../../form-edit/demo/editFormDemoHelper";
 import sectionEditDemoSource from "./SectionEditDemo.tsx?raw";
 import sectionEditDemoTypesSource from "./sectionEditDemoTypes.t.ts?raw";
@@ -12,8 +12,6 @@ export { FormContainer, EditorDialog, TextField, SelectColumns };
 
 // ── Storybook docs (`?raw` of types + integration) ────────────────────────────
 
-const withFileHeader = (path: string, source: string) =>
-  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const SECTION_EDIT_DEMO_SOURCE = [
   withFileHeader("sectionEditDemoTypes.t.ts", sectionEditDemoTypesSource),

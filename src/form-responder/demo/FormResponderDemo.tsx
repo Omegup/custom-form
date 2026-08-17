@@ -7,6 +7,7 @@ import { DemoPage, PhaseJsonPanels, PhaseTabs, ValidateBlock } from "../../demo-
 import { FormDialogsEditor, designSidebar } from "../../form-dialogs/demo/FormDialogsDemo";
 import { defaultFillVariant } from "../../response/demo/FillFieldViewer";
 import { fillViewers } from "../../response/demo/nestedItems";
+import { patchResponse } from "../../response/demo/patchResponse";
 import * as demo from "./formResponderDemoHelper";
 import type * as types from "./formResponderDemoTypes.t";
 import * as lib from "./library";
@@ -47,12 +48,7 @@ export const FormResponderDemo = ({
 
   const setResponse = useCallback(
     (id: string, next?: lib.Response) => {
-      if (next === undefined) {
-        const { [id]: _, ...rest } = responses;
-        updateArgs({ responses: rest });
-        return;
-      }
-      updateArgs({ responses: { ...responses, [id]: next } });
+      updateArgs({ responses: patchResponse(responses, id, next) });
     },
     [responses, updateArgs],
   );

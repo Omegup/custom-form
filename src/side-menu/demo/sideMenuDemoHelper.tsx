@@ -1,6 +1,7 @@
 /** Layout + catalog chrome for the side-menu demo + Storybook docs source. */
 import { Fragment } from "react";
 import {
+  withFileHeader,
   CatalogButton,
   DemoPage as FormContainer,
   DropdownMenu,
@@ -19,8 +20,6 @@ export { FormContainer };
 
 // ── Storybook docs (`?raw` of types + integration) ────────────────────────────
 
-const withFileHeader = (path: string, source: string) =>
-  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const SIDE_MENU_DEMO_SOURCE = [
   withFileHeader("sideMenuDemoTypes.t.ts", sideMenuDemoTypesSource),

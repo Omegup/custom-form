@@ -1,10 +1,16 @@
 import type { CSSProperties, ReactNode } from "react";
 import {
+  defaultVariant,
+  followUpVariant,
+} from "../../form-item-editor/demo/itemVariants";
+import {
   headingView,
   panelRepeatChildren,
   panelView,
 } from "../../response/demo/nestedItems";
 import type { ResponseSetter, ReviewStatus } from "./library";
+import { branded } from "./library";
+import type * as types from "./sectionReviewDemoTypes.t";
 import { ReviewFieldViewer } from "./ReviewFieldViewer";
 
 type ReviewFieldProps = {
@@ -44,4 +50,12 @@ export const reviewViewers = {
     viewer: panelView,
     repeatChildren: panelRepeatChildren,
   },
+};
+
+const variants = branded<types.Variants, "variants">(defaultVariant);
+const followUpVariants = branded<types.Variants, "variants">(followUpVariant);
+
+export const reviewVariants: Record<"default" | "change", types.Variants> = {
+  default: variants,
+  change: followUpVariants,
 };

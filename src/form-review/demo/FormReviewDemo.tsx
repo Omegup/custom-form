@@ -4,12 +4,9 @@
  * Follow mounts `CustomFormReviewHOC`.
  */
 import { useCallback, useRef, useState } from "react";
+import { patchResponse } from "../../response/demo/patchResponse";
 import { BlockStack, DemoPage, FollowControls, FormTitle, PhaseBody, PhaseJsonPanels, PhaseTabs } from "../../demo-utils";
 import { FormDialogsEditor, designSidebar } from "../../form-dialogs/demo/FormDialogsDemo";
-import {
-  defaultVariant,
-  followUpVariant,
-} from "../../form-item-editor/demo/itemVariants";
 import {
   FormResponder,
   formResponderCtx,
@@ -17,20 +14,11 @@ import {
 } from "../../form-responder/demo/FormResponderDemo";
 import type { SectionValidator } from "../../form-responder";
 import { FollowUpDrafts } from "../../section-review/demo/followUpAdd";
-import { reviewViewers } from "../../section-review/demo/reviewViewers";
-import { renderReviewOverlays } from "../../section-review/demo/sectionReviewDemoHelper";
+import { reviewVariants, reviewViewers } from "../../section-review/demo/reviewViewers";
+import { renderReviewOverlays, tCommon } from "../../section-review/demo/sectionReviewDemoHelper";
 import * as demo from "./formReviewDemoHelper";
 import type * as types from "./formReviewDemoTypes.t";
 import * as lib from "./library";
-
-const variants = lib.branded<types.Variants, "variants">(defaultVariant);
-const followUpVariants = lib.branded<types.Variants, "variants">(
-  followUpVariant,
-);
-const reviewVariants: Record<lib.ReviewVariantState, types.Variants> = {
-  default: variants,
-  change: followUpVariants,
-};
 
 const FormReview = lib.CustomFormReviewHOC<
   types.TypeNames,
@@ -41,8 +29,6 @@ const FormReview = lib.CustomFormReviewHOC<
 >(reviewViewers, demo.formChrome);
 
 const ctx = lib.branded<types.Ctx, "context">({});
-const tCommon = (term: "cancel" | "save" | "delete") =>
-  ({ cancel: "Cancel", save: "Save", delete: "Delete" })[term];
 
 export const FormReviewDemo = ({
   heading,
@@ -62,12 +48,7 @@ export const FormReviewDemo = ({
 
   const setResponse = useCallback(
     (id: string, next?: lib.Response) => {
-      if (next === undefined) {
-        const { [id]: _, ...rest } = responses;
-        updateArgs({ responses: rest });
-        return;
-      }
-      updateArgs({ responses: { ...responses, [id]: next } });
+      updateArgs({ responses: patchResponse(responses, id, next) });
     },
     [responses, updateArgs],
   );

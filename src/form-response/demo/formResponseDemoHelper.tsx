@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { PriorBadge, type PhaseTab } from "../../demo-utils";
+import { withFileHeader, PriorBadge, type PhaseTab } from "../../demo-utils";
 import {
   INITIAL_FLAT,
   INITIAL_HEADER,
@@ -40,8 +40,6 @@ export const PHASES: PhaseTab<types.DemoPhase>[] = [
   },
 ];
 
-const withFileHeader = (path: string, source: string) =>
-  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const FORM_RESPONSE_DEMO_SOURCE = [
   withFileHeader("formResponseDemoTypes.t.ts", formResponseDemoTypesSource),

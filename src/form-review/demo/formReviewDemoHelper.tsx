@@ -1,4 +1,4 @@
-import { FormTitle, PhaseBody, type PhaseTab, ReviewStatusNote } from "../../demo-utils";
+import { withFileHeader, FormTitle, PhaseBody, type PhaseTab, ReviewStatusNote } from "../../demo-utils";
 import {
   PENDING_DATE,
   SectionFrame,
@@ -143,8 +143,6 @@ export const INITIAL_HEADER: lib.FormHeader = {
   description: "Design the form, collect answers, then follow up in review.",
 };
 
-const withFileHeader = (path: string, source: string) =>
-  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const FORM_REVIEW_DEMO_SOURCE = [
   withFileHeader("form-review/demo/formReviewDemoTypes.t.ts", formReviewDemoTypesSource),
