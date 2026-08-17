@@ -22,7 +22,10 @@ are mounted by the **call site**, not this HOC.
 | `reviewChanges.ts` | `withComment` / `withoutComment` / `withFormItemEntry` / `withUnansweredFormItems` — writes into `AdditionalChanges` |
 | `followUpPartition.ts` | `partitionFollowUpEntries` / `followUpEntryAsItem` — answered tree rows vs unanswered editor |
 | `reviewOverlayActions.ts` | overlay submit (`withComment` / `withoutComment`) for the host-mounted remark editor |
-| `reviewRender.tsx` | `renderReviewColumns` — slot walk; unanswered rows go to the host editor |
+| `reviewWalk.t.ts` | Walk ctx (`ReviewChrome`, `ReviewLive`, `ReviewWalk`, `ReviewItemExtra`) |
+| `reviewVisibleItems.ts` | `usefulForReview` (membership) and `withIdSuffix` (panel-instance ids) — composed at the slot walk |
+| `reviewItemChrome.tsx` | Add-follow-up, lock/unlock, follow-up mark, read-only extra bag |
+| `reviewRender.tsx` | Recursive walk (`renderReviewItem` ↔ appendix ↔ slots) + `renderReviewColumns` |
 | `SectionReview.tsx` | **`SectionReviewHOC(viewers, chrome)`** — `FormItemHOC` + `renderSection`; opens overlays via setters |
 | `followUpEntriesFlat.ts` | `followUpEntriesToFlat` / `syncFollowUpEntriesFromFlat` — entries ↔ synthetic flat section |
 
