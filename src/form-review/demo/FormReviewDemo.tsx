@@ -4,7 +4,7 @@
  * Follow mounts `CustomFormReviewHOC`.
  */
 import { useCallback, useRef, useState, type Ref } from "react";
-import { FormDialogsEditor } from "../../form-dialogs/demo/FormDialogsDemo";
+import { FormDialogsEditor, designSidebar } from "../../form-dialogs/demo/FormDialogsDemo";
 import { sectionsFromFlat } from "../../form-dialogs/demo/formDialogsDemoFlat";
 import { RequiredMark } from "../../form-edit/demo/editFormDemoHelper";
 import {
@@ -218,7 +218,7 @@ export const FormReviewDemo = ({
               ) : null}
             </div>
             <FormDialogsEditor
-              embedded={false}
+              sidebar={designSidebar}
               flatItems={flatItems}
               setFlatItems={(next) =>
                 updateArgs({

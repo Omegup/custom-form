@@ -85,30 +85,6 @@ export const renderCard = (
   );
 };
 
-export const buildListExtraMap = (
-  sections: types.ListSection[],
-  itemActions: (item: types.ListItem) => lib.MoveActions,
-  onEdit: (item: types.ListItem) => void,
-): Map<string, types.ListExtra> => {
-  const map = new Map<string, types.ListExtra>();
-  const walk = (columns: types.ListItem[][]) => {
-    for (const column of columns) {
-      for (const item of column) {
-        map.set(
-          item.header.id,
-          lib.branded<types.ListExtra, "viewer-extra">({
-            actions: itemActions(item),
-            onEdit: () => onEdit(item),
-          }),
-        );
-        walk(item.children);
-      }
-    }
-  };
-  for (const section of sections) walk(section.items);
-  return map;
-};
-
 export const emptyListExtra = (): types.ListExtra =>
   lib.branded<types.ListExtra, "viewer-extra">({
     actions: {

@@ -5,12 +5,11 @@ export type { AutoFocusState } from "../../move-actions";
 export { autofocusCtx } from "../../move-actions";
 export {
   applyFlatFormItem,
-  buildItemSectionDict,
   cloneFlatItems,
-  consolidateSections,
-  getFormItemMoveActions,
+  extrasByItemId,
 } from "../../form-edit";
-export type { Clone, FlatFormItemEditSession, GetActionsArgs } from "../../form-edit";
+export type { Clone, FlatFormItemEditSession } from "../../form-edit";
+export { useFlatListSession } from "../../form-dialogs";
 export type { MenuItemDefinition } from "../../side-menu";
 export { AddFormItem, makeUseRenderAddItem } from "../../side-menu";
 export type { ColumnsEditChrome } from "../index";

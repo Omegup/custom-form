@@ -100,32 +100,14 @@ export const columnsChrome: lib.ColumnsEditChrome = {
   ),
 };
 
-// ── Per-item extra: move actions, keyed by id ─────────────────────────────────
-
-export const buildItemExtraMap = (
-  sections: lib.SectionWithItems<
-    types.TypeNames,
-    types.Params,
-    types.Section,
-    lib.SectionMetaDom<lib.Indexed>,
-    types.ItemMeta
-  >[],
-  itemActions: (item: types.ListItem) => lib.MoveActions,
-): Map<string, types.ItemExtra> => {
-  const map = new Map<string, types.ItemExtra>();
-  const walk = (columns: types.ListItem[][]) => {
-    for (const column of columns) {
-      for (const item of column) {
-        map.set(
-          item.header.id,
-          lib.branded<types.ItemExtra, "viewer-extra">({
-            actions: itemActions(item),
-          }),
-        );
-        walk(item.children);
-      }
-    }
-  };
-  for (const section of sections) walk(section.items);
-  return map;
-};
+export const emptyItemExtra = (): types.ItemExtra =>
+  lib.branded<types.ItemExtra, "viewer-extra">({
+    actions: {
+      up: null,
+      down: null,
+      clone: null,
+      remove: null,
+      restore: null,
+      isDeleted: false,
+    },
+  });

@@ -27,14 +27,16 @@ export const formChrome = {
 };
 ```
 
-Same for `FormContainer`, `PhaseTabs`, lock icons, remark cards, `useFieldMethods`.
-Copy-paste is not a variant. If blurbs or fixtures differ, pass them as
-**required** props — do not duplicate the widget.
+Same for lock icons, remark cards, `useFieldMethods`. Generic shells
+(`DemoPage`, `SidebarLayout`, `ConfirmBanner`, `DropdownMenu`) live in
+`src/demo-utils/` — see `demos-are-wiring.mdc`. Copy-paste is not a variant.
+If blurbs or fixtures differ, pass them as **required** props — do not
+duplicate the widget.
 
 Review follow-up is a nested Design list under the origin item —
-`FormDialogsEditor` (`embedded`) plus `followUpEntriesToFlat` /
-`syncFollowUpEntriesFromFlat`. Same `AddFormItem`, `FormItemEditor`, Edit, and
-move as Design. Do not invent a label-only draft list or a second item editor.
+`FormDialogsEditor` (`sidebar={null}`) plus `followUpDraftsList`. Same
+`AddFormItem`, `FormItemEditor`, Edit, and move as Design. Do not invent a
+label-only draft list or a second item editor.
 
 Empty follow-up (no items yet) uses a **top icon** trigger for `AddFormItem`
 (same Field / Heading / Panel catalog). `+ Add item` is the list slot, shown

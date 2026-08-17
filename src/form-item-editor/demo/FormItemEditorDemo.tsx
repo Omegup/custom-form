@@ -11,6 +11,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { DemoPage } from "../../demo-utils";
 import {
   FieldLabel,
   HeadingLabel,
@@ -350,7 +351,7 @@ export const FormItemEditorDemo = ({
   );
 
   return (
-    <demo.FormContainer title={heading}>
+    <DemoPage title={heading}>
       {draft && session && (
         <FormItemEditor
           ctx={ctx}
@@ -378,6 +379,6 @@ export const FormItemEditorDemo = ({
           },
         ]}
       />
-    </demo.FormContainer>
+    </DemoPage>
   );
 };

@@ -1,10 +1,12 @@
 import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { ConfirmBanner } from "../../demo-utils";
 import {
   FieldRow,
   FormContainer,
   SectionPanel,
   SectionsList,
+  pendingRemoveCopy,
 } from "../../form-edit/demo/editFormDemoHelper";
 import type * as types from "./formItemEditorDemoTypes.t";
 import formItemEditorDemoSource from "./FormItemEditorDemo.tsx?raw";
@@ -81,54 +83,6 @@ export const EditorDialog = ({
         Save
       </button>
     </div>
-  </div>
-);
-
-export const RemoveAlert = ({
-  pending,
-  onConfirm,
-  onCancel,
-}: {
-  pending: {
-    rm: () => void;
-    item:
-      | { item: types.ItemHeader; n: number }
-      | { section: types.Section }
-      | { end: null };
-    label?: ReactNode;
-  };
-  onConfirm: () => void;
-  onCancel: () => void;
-}) => (
-  <div
-    style={{
-      display: "flex",
-      gap: 8,
-      alignItems: "center",
-      background: "#fff3cd",
-      padding: "8px 12px",
-      borderRadius: 4,
-      fontSize: 13,
-    }}
-  >
-    <span>
-      {"item" in pending.item ? (
-        <>
-          Item <strong>{pending.label}</strong>
-        </>
-      ) : "section" in pending.item ? (
-        <>
-          Section <strong>{pending.item.section.title}</strong>
-        </>
-      ) : null}{" "}
-      will be removed.
-    </span>
-    <button type="button" onClick={onConfirm}>
-      Confirm
-    </button>
-    <button type="button" onClick={onCancel}>
-      Cancel
-    </button>
   </div>
 );
 
@@ -463,11 +417,6 @@ export const NestedColumns = ({ columns }: { columns: ReactNode[] }) => (
 
 export type ExtraAction = { label: string; onClick: () => void };
 
-type PendingRemove = {
-  rm: () => void;
-  item: lib.FlatNestedItem<types.TypeNames, types.Params, types.Section>;
-};
-
 const randomId = () => `id_${Math.random().toString(36).slice(2, 7)}`;
 
 const cloneFn: lib.Clone<
@@ -501,48 +450,24 @@ export const FormItemEditorFormTest = ({
   renderAddItem?: (slot: types.AddItemSlot) => ReactNode;
   renderLayout?: (args: types.ListLayoutArgs) => ReactNode;
 }) => {
-  const [focused, setFocused] = useState<lib.AutoFocusState>(null);
-  const [toRemove, setToRemove] = useState<PendingRemove | null>(null);
-
-  const ctx = useMemo(
-    () => lib.autofocusCtx<lib.ContextDom>(lib.branded({}), focused),
-    [focused],
-  );
-
-  const applyItems = (newItems: types.FlatItems, newCtx: typeof ctx) => {
-    if (newItems !== flatItems) updateArgs({ flatItems: newItems });
-    setFocused(newCtx.focused);
-  };
-
-  const sections = useMemo(
-    () => lib.consolidateSections(flatItems),
-    [flatItems],
-  );
+  const session = lib.useFlatListSession({
+    flatItems,
+    setFlatItems: (items) => updateArgs({ flatItems: items }),
+    baseCtx: lib.branded<lib.ContextDom, "context">({}),
+    clone: cloneFn,
+    jump: true,
+  });
   // Visibility only — school always jumps deleted neighbors when moving
   // (action.utils `isDeleted`), so active items never land in a deleted section.
   const [showDeleted, setShowDeleted] = useState(true);
-  const jump = true;
-  const sectionOfItem = useMemo(
-    () => lib.buildItemSectionDict(flatItems),
-    [flatItems],
-  );
-
-  const actionsArgs = {
-    items: flatItems,
-    setItems: applyItems,
-    ctx,
-    sectionOfItem,
-    setToRemove,
-  };
-  const itemActions = lib.getFormItemMoveActions(actionsArgs, cloneFn, jump);
 
   const renderItem = (
     item: types.ListItem,
     parentDeleted = false,
   ): ReactNode => {
     if (item.header.deleted && !showDeleted) return null;
-    const actions = itemActions(item);
-    const fieldFocused = ctx.autoFocused(item.header.id);
+    const actions = session.itemActions(item);
+    const fieldFocused = session.listCtx.autoFocused(item.header.id);
     const deleted = parentDeleted || item.header.deleted;
     return (
       <div key={item.header.id}>
@@ -581,19 +506,17 @@ export const FormItemEditorFormTest = ({
     );
   };
 
+  const toRemove = session.toRemove;
   const alert = toRemove && (
-    <RemoveAlert
-      pending={{
-        ...toRemove,
-        label:
-          "item" in toRemove.item ? itemName(toRemove.item.item) : undefined,
-      }}
+    <ConfirmBanner
       onConfirm={() => {
         toRemove.rm();
-        setToRemove(null);
+        session.setToRemove(null);
       }}
-      onCancel={() => setToRemove(null)}
-    />
+      onCancel={() => session.setToRemove(null)}
+    >
+      {pendingRemoveCopy(toRemove.item, itemName)}
+    </ConfirmBanner>
   );
   const details = (
     <button type="button" onClick={() => setShowDeleted(!showDeleted)}>
@@ -602,14 +525,14 @@ export const FormItemEditorFormTest = ({
   );
   const sectionsNode = (
     <SectionsList>
-      {sections.map((section, sIndex) => {
+      {session.sections.map((section, sIndex) => {
         if (section.header.deleted && !showDeleted) return null;
-        const sectionFocused = ctx.autoFocused(section.header.id);
+        const sectionFocused = session.listCtx.autoFocused(section.header.id);
         const sActions = lib.getSectionMoveActions(
-          actionsArgs,
+          session.args,
           cloneFn,
           section,
-          jump,
+          true,
         );
         const sectionDeleted = section.header.deleted;
         return (
@@ -655,6 +578,6 @@ export const FormItemEditorFormTest = ({
       updateArgs({
         flatItems: typeof update === "function" ? update(flatItems) : update,
       }),
-    focus: (id) => setFocused({ id, value: true }),
+    focus: (id) => session.setFocused({ id, value: true }),
   });
 };

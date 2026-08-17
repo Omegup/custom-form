@@ -3,7 +3,7 @@
  * one section of fillable fields, section-level Validate via `impRef`.
  */
 import { useCallback, useRef, useState, type Ref } from "react";
-import { FormDialogsEditor } from "../../form-dialogs/demo/FormDialogsDemo";
+import { FormDialogsEditor, designSidebar } from "../../form-dialogs/demo/FormDialogsDemo";
 import { sectionsFromFlat } from "../../form-dialogs/demo/formDialogsDemoFlat";
 import { RequiredMark } from "../../form-edit/demo/editFormDemoHelper";
 import {
@@ -150,7 +150,7 @@ export const SectionResponderDemo = ({
       />
       {phase === "design" ? (
         <FormDialogsEditor
-          embedded={false}
+          sidebar={designSidebar}
           flatItems={flatItems}
           setFlatItems={(next) => {
             const [first] = sectionsFromFlat(next);

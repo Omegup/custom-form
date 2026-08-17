@@ -105,5 +105,6 @@ export const useFlatListSession = <
     itemActions,
     toRemove,
     setToRemove,
+    setFocused,
   };
 };

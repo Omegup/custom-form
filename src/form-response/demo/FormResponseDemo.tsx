@@ -1,7 +1,7 @@
 /**
  * FormResponse lifecycle — Design editor, Fill Send, Update Save/feedback.
  */
-import { FormDialogsEditor } from "../../form-dialogs/demo/FormDialogsDemo";
+import { FormDialogsEditor, designSidebar } from "../../form-dialogs/demo/FormDialogsDemo";
 import { sectionsFromFlat } from "../../form-dialogs/demo/formDialogsDemoFlat";
 import {
   FormContainer,
@@ -32,7 +32,7 @@ export const FormResponseDemo = ({
       />
       {phase === "design" ? (
         <FormDialogsEditor
-          embedded={false}
+          sidebar={designSidebar}
           flatItems={flatItems}
           setFlatItems={(next) => updateArgs({ flatItems: next })}
         />

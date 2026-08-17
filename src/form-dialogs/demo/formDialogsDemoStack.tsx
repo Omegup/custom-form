@@ -2,7 +2,7 @@
  * Design-list stack — SectionFormItemHOC + makeUseDialogs + clone.
  * FormDialogsDemo mounts this; it owns layout.
  */
-import { createContext, useContext } from "react";
+import { createContext, useContext, type ReactNode } from "react";
 import { WebRecursiveEdit } from "../../flat-dnd/demo/WebRecursiveEdit";
 import {
   FormItemEditor,
@@ -10,7 +10,11 @@ import {
 } from "../../form-item-editor/demo/FormItemEditorDemo";
 import { SectionDialog } from "../../section-edit/demo/SectionEditDemo";
 import { MENU_ITEMS, randomId } from "../../side-menu/demo/fixtures";
-import { renderAddFormItem } from "../../side-menu/demo/sideMenuDemoHelper";
+import {
+  renderAddFormItem,
+  renderMenuItem,
+  renderSide,
+} from "../../side-menu/demo/sideMenuDemoHelper";
 import * as demo from "./formDialogsDemoHelper";
 import type * as types from "./formDialogsDemoTypes.t";
 import * as lib from "./library";
@@ -98,6 +102,42 @@ export const cloneFn: lib.Clone<
     randomId,
     { rename: "first" },
   );
+
+export type DesignSidebarArgs = {
+  openItemInsert: (
+    item: {
+      header: types.ItemHeader;
+      children: types.ListItem[][];
+    },
+    span: lib.FlatInsertSpan,
+  ) => void;
+  openSectionAdd: (section: {
+    header: types.Section;
+    index: number;
+    total: number;
+    items: types.ListItem[][];
+  }) => void;
+};
+
+/** Library catalog column — Design tabs pass this; follow-up passes `null`. */
+export const designSidebar = ({
+  openItemInsert,
+  openSectionAdd,
+}: DesignSidebarArgs): ReactNode => (
+  <lib.Side<types.TypeNames, types.Params, types.Section>
+    title="Library"
+    addSectionLabel="+ Add section"
+    menuItems={MENU_ITEMS}
+    random={randomId}
+    blankSection={blankSection}
+    render={renderSide}
+    renderMenuItem={renderMenuItem}
+    setAddFormItem={(item) =>
+      openItemInsert(item, lib.AMBIGUOUS_INSERT_SPAN)
+    }
+    setAddSection={openSectionAdd}
+  />
+);
 
 export const useDialogs = lib.makeUseDialogs<
   types.TypeNames,

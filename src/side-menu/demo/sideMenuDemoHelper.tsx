@@ -1,6 +1,6 @@
 /** Layout + catalog chrome for the side-menu demo + Storybook docs source. */
-import { Fragment, type ReactNode } from "react";
-import { FormContainer } from "../../form-edit/demo/editFormDemoHelper";
+import { Fragment } from "react";
+import { DemoPage as FormContainer, DropdownMenu } from "../../demo-utils";
 import type {
   AddFormItemRenderArgs,
   FormMenuItemRenderArgs,
@@ -56,28 +56,30 @@ export const renderAddFormItem = ({
   toggle,
   items,
 }: AddFormItemRenderArgs) => (
-  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-    <button
-      type="button"
-      onClick={toggle}
-      style={{ fontSize: 12, opacity: 0.75 }}
-    >
-      {label}
-    </button>
-    {open && (
-      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        {items.map((item) => (
-          <Fragment key={item.key}>
-            {renderMenuItem({
-              title: item.title,
-              icon: item.icon,
-              onSelect: item.onSelect,
-            })}
-          </Fragment>
-        ))}
-      </div>
-    )}
-  </div>
+  <DropdownMenu
+    open={open}
+    trigger={
+      <button
+        type="button"
+        onClick={toggle}
+        style={{ fontSize: 12, opacity: 0.75 }}
+      >
+        {label}
+      </button>
+    }
+  >
+    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      {items.map((item) => (
+        <Fragment key={item.key}>
+          {renderMenuItem({
+            title: item.title,
+            icon: item.icon,
+            onSelect: item.onSelect,
+          })}
+        </Fragment>
+      ))}
+    </div>
+  </DropdownMenu>
 );
 
 export const renderSide = ({
@@ -114,21 +116,4 @@ export const renderSide = ({
       {addSectionLabel}
     </button>
   </nav>
-);
-
-export const LayoutWithSidebar = ({
-  main,
-  sidebar,
-}: {
-  main: ReactNode;
-  sidebar: ReactNode;
-}) => (
-  <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-    <div
-      style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}
-    >
-      {main}
-    </div>
-    {sidebar}
-  </div>
 );

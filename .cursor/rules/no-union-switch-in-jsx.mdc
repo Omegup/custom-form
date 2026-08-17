@@ -1,0 +1,37 @@
+---
+description: Do not sniff unions or stitch copy with nested ternaries in JSX
+globs: **/*.ts,**/*.tsx
+alwaysApply: true
+---
+
+# No union switch in JSX
+
+JSX **composes** a value. It does not discriminate a domain union or
+assemble English. `"key" in x ? … : "other" in x ? …` inside markup is a
+type probe dressed as UI. `{" "}` glued onto a ternary is the same bug.
+
+```tsx
+// ❌ BAD — union sniff + sentence built in the banner
+<ConfirmBanner>
+  {"item" in pending.item ? (
+    <>Item <strong>{itemName(ctx, pending.item.item)}</strong></>
+  ) : "section" in pending.item ? (
+    <>Section <strong>{pending.item.section.title}</strong></>
+  ) : null}{" "}
+  will be removed.
+</ConfirmBanner>
+
+// ✅ GOOD — named formatter owns the union; JSX is one child
+<ConfirmBanner>{pendingRemoveCopy(pending.item, name)}</ConfirmBanner>
+```
+
+Put the `in` / discriminant in **one named function** that returns the
+finished `ReactNode` (or string). Import that helper — do not paste the
+ladder into a second demo (`unify-demo-chrome.mdc`).
+
+If the call site already has the concrete variant (the click that queued
+remove), format there and pass the message. Do not make the banner reverse
+the union.
+
+Related: `names-establish-meaning.mdc`, `unify-demo-chrome.mdc`,
+`demos-are-wiring.mdc`.

@@ -18,6 +18,7 @@ export {
   applyFlatFormItem,
   buildItemSectionDict,
   consolidateSections,
+  extrasByItemId,
   getFormItemMoveActions,
   openFormItemEditSession,
   openFormItemInsertSession,

@@ -36,7 +36,7 @@ Lifecycle walkthrough — **Design → Response → Follow**:
 2. **Response** — student fills via `CustomFormResponderHOC` (inputs + panel instances);
    JSON shows `responses`.
 3. **Follow** — mounts `CustomFormReviewHOC`: comments, nested Design list
-   under the origin (`FormDialogsEditor` embedded — add, edit, move), status
+   under the origin (`FormDialogsEditor` `sidebar={null}` — add, edit, move), status
    highlighting. Toggle
    **Review round pending** / **showDeleted**. JSON shows live `AdditionalChanges`.
 

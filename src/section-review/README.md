@@ -76,7 +76,7 @@ Lifecycle walkthrough — **Design → Response → Follow** for one section
 the fill shell (`SectionResponderHOC` — **+ Add** on multiple panels); Follow
 mounts `SectionReviewHOC`. Empty follow-up uses a top-icon `AddFormItem`
 (`useFollowUpAdd`); after the first item, unanswered rows are a nested Design
-list (`followUpDraftsList` + `FormDialogsEditor` embedded). Three JSON panels stay
+list (`followUpDraftsList` + `FormDialogsEditor` `sidebar={null}`). Three JSON panels stay
 visible (`section`, `responses`, `AdditionalChanges`). Toggle **Review round
 pending** to see `highlight` vs `disabled`.
 

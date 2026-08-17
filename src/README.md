@@ -3,6 +3,7 @@
 ```
 src/
 ├── main.tsx                 Legacy Vite entry (points to Storybook)
+├── demo-utils/              Generic Storybook chrome (DemoPage, SidebarLayout, …)
 ├── form/                    View layer (read-only form rendering)
 ├── response/                Form response values + viewer validate/update contract
 ├── recursive-form/          Tree types with meta

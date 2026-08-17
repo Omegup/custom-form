@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { ConfirmBanner, DemoPage } from "../../demo-utils";
 import * as demo from "./editFormDemoHelper";
 import * as types from "./editFormDemoTypes.t";
 import * as lib from "./library";
@@ -20,50 +21,28 @@ export const EditFormTest = ({
   renderAddItem,
   renderLayout,
 }: types.EditFormTestProps) => {
-  const [focused, setFocused] = useState<lib.AutoFocusState>(null);
-  const [toRemove, setToRemove] = useState<types.PendingRemove | null>(null);
-
-  const ctx = useMemo(() => lib.autofocusCtx<lib.ContextDom>(lib.branded({}), focused), [focused]);
-
-  const applyItems = (newItems: types.FlatItems, newCtx: typeof ctx) => {
-    if (newItems !== flatItems) updateArgs({ flatItems: newItems });
-    setFocused(newCtx.focused);
-  };
-
-  const sections = useMemo(
-    () => lib.consolidateSections(flatItems),
-    [flatItems],
-  );
-
+  const session = lib.useFlatListSession({
+    flatItems,
+    setFlatItems: (items) => updateArgs({ flatItems: items }),
+    baseCtx: lib.branded<lib.ContextDom, "context">({}),
+    clone: cloneFn,
+    jump: true,
+  });
   // Visibility only — school always jumps deleted neighbors when moving
   // (action.utils `isDeleted`), so active items never land in a deleted section.
   const [showDeleted, setShowDeleted] = useState(true);
-  const jump = true;
-
-  const sectionOfItem = useMemo(
-    () => lib.buildItemSectionDict(flatItems),
-    [flatItems],
-  );
-
-  const actionsArgs = {
-    items: flatItems,
-    setItems: applyItems,
-    ctx,
-    sectionOfItem,
-    setToRemove,
-  };
-
-  const itemActions = lib.getFormItemMoveActions(actionsArgs, cloneFn, jump);
+  const toRemove = session.toRemove;
 
   const alert = toRemove && (
-    <demo.RemoveAlert
-      pending={toRemove}
+    <ConfirmBanner
       onConfirm={() => {
         toRemove.rm();
-        setToRemove(null);
+        session.setToRemove(null);
       }}
-      onCancel={() => setToRemove(null)}
-    />
+      onCancel={() => session.setToRemove(null)}
+    >
+      {demo.pendingRemoveCopy(toRemove.item, (item) => item.params.name)}
+    </ConfirmBanner>
   );
   const details = (
     <button onClick={() => setShowDeleted(!showDeleted)}>
@@ -72,14 +51,14 @@ export const EditFormTest = ({
   );
   const sectionsNode = (
     <demo.SectionsList>
-      {sections.map((section, sIndex) => {
+      {session.sections.map((section, sIndex) => {
         if (section.header.deleted && !showDeleted) return null;
-        const sectionFocused = ctx.autoFocused(section.header.id);
+        const sectionFocused = session.listCtx.autoFocused(section.header.id);
         const sActions = lib.getSectionMoveActions(
-          actionsArgs,
+          session.args,
           cloneFn,
           section,
-          jump,
+          true,
         );
         const sectionDeleted = section.header.deleted;
         return (
@@ -93,8 +72,10 @@ export const EditFormTest = ({
               <>
                 {column.map((item) => {
                   if (item.header.deleted && !showDeleted) return null;
-                  const actions = itemActions(item);
-                  const fieldFocused = ctx.autoFocused(item.header.id);
+                  const actions = session.itemActions(item);
+                  const fieldFocused = session.listCtx.autoFocused(
+                    item.header.id,
+                  );
                   return (
                     <demo.FieldRow
                       key={item.header.id}
@@ -139,7 +120,7 @@ export const EditFormTest = ({
       updateArgs({
         flatItems: typeof update === "function" ? update(flatItems) : update,
       }),
-    focus: (id) => setFocused({ id, value: true }),
+    focus: (id) => session.setFocused({ id, value: true }),
   });
 };
 
@@ -148,7 +129,7 @@ export const EditFormDemo = ({
   flatItems,
   updateArgs,
 }: types.DemoProps) => (
-  <demo.FormContainer title={heading}>
+  <DemoPage title={heading}>
     <EditFormTest flatItems={flatItems} updateArgs={updateArgs} />
-  </demo.FormContainer>
+  </DemoPage>
 );

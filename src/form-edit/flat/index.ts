@@ -6,3 +6,4 @@ export * from "./buildItemSectionDict";
 export * from "./applyFlatFormItem";
 export * from "./openFormItemEditSession";
 export * from "./getFlatInsertionIndex";
+export * from "./extrasByItemId";

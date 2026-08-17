@@ -1,0 +1,59 @@
+---
+description: Package demos are wiring only; generic UI lives in src/demo-utils
+globs: **/*.ts,**/*.tsx
+alwaysApply: true
+---
+
+# Demos are wiring
+
+Package `demo/` **composes** the library. It does not own session machines,
+tree walks, flatten/sync, or other domain rules.
+
+## What a demo may do
+
+- Call library hooks / HOCs (`makeUseDialogs`, `useFlatListSession`,
+  `useFollowUpAdd`, `followUpDraftsList`, …)
+- Pass host chrome (render props, labels, fixtures)
+- Seed Storybook `INITIAL_*` data
+
+## What a demo must not do
+
+- Reimplement a library orchestrator (item/section sessions, `commitDraft`,
+  extra-map walks, flatten/sync)
+- Invent flags that hide host composition (`embedded` instead of
+  `sidebar: ReactNode | null`)
+- Duplicate generic HTML that belongs in `src/demo-utils/`
+
+Heavy logic is either **extracted** (reusable, no HTML) or **removed** by
+twisting the library so the demo can just wire it.
+
+## `src/demo-utils/` vs form chrome
+
+Generic widgets that could live in an external UI kit go in
+[`src/demo-utils/`](../../src/demo-utils): page shell, sidebar layout,
+confirm banner, dropdown. Import them only from `demo/` and `*.stories.tsx`
+— never from library `_deps` / package source.
+
+Form-specific chrome stays in package demos and is **imported**, not copied
+(`RequiredMark`, `sectionChrome`, `FollowUpAdd`). See
+`unify-demo-chrome.mdc`.
+
+```tsx
+// ❌ BAD — demo walks the tree and brands extras
+const map = new Map();
+const walk = (cols) => { … map.set(item.header.id, branded({…})) };
+
+// ✅ GOOD — library walk; host brands at the leaf
+extrasByItemId(sections, (item) => branded({ actions: itemActions(item) }))
+```
+
+```tsx
+// ❌ BAD — boolean hides two host layouts
+<FormDialogsEditor embedded={true} />
+
+// ✅ GOOD — host names the empty chrome
+<FormDialogsEditor sidebar={null} />
+```
+
+Related: `no-html-outside-demo.mdc`, `unify-demo-chrome.mdc`,
+`no-zero-responsibility.mdc`.

@@ -9,7 +9,7 @@ import webRecursiveEditSource from "./WebRecursiveEdit.tsx?raw";
 export { FormContainer, SectionsList };
 export {
   MENU_ITEMS,
-  buildItemExtraMap,
+  emptyItemExtra,
   randomId,
   renderCard,
   viewers,

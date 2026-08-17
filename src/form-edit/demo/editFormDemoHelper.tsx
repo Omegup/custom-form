@@ -58,42 +58,24 @@ export const MoveBar = ({
   </span>
 );
 
-export const RemoveAlert = ({
-  pending,
-  onConfirm,
-  onCancel,
-}: {
-  pending: types.PendingRemove;
-  onConfirm: () => void;
-  onCancel: () => void;
-}) => (
-  <div
-    style={{
-      display: "flex",
-      gap: 8,
-      alignItems: "center",
-      background: "#fff3cd",
-      padding: "8px 12px",
-      borderRadius: 4,
-      fontSize: 13,
-    }}
-  >
-    <span>
-      {"item" in pending.item ? (
-        <>
-          Item <strong>{pending.item.item.params.name} </strong>
-        </>
-      ) : "section" in pending.item ? (
-        <>
-          Section <strong>{pending.item.section.title} </strong>
-        </>
-      ) : null}
-      will be removed.
-    </span>
-    <button onClick={onConfirm}>Confirm</button>
-    <button onClick={onCancel}>Cancel</button>
-  </div>
-);
+export const pendingRemoveCopy = <Item, Section extends { title: string }>(
+  target: { item: Item } | { section: Section } | { end: null },
+  itemName: (item: Item) => ReactNode,
+): ReactNode => {
+  if ("item" in target)
+    return (
+      <>
+        Item <strong>{itemName(target.item)}</strong> will be removed.
+      </>
+    );
+  if ("section" in target)
+    return (
+      <>
+        Section <strong>{target.section.title}</strong> will be removed.
+      </>
+    );
+  return null;
+};
 
 export const NestedSlot = ({ children }: { children: ReactNode }) => (
   <div
@@ -282,17 +264,4 @@ export const SectionsList = ({ children }: { children: ReactNode }) => (
   </div>
 );
 
-export const FormContainer = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) => (
-  <div
-    style={{ display: "flex", flexDirection: "column", gap: 16, padding: 16 }}
-  >
-    <h2 style={{ margin: 0 }}>{title}</h2>
-    {children}
-  </div>
-);
+export { DemoPage as FormContainer } from "../../demo-utils";

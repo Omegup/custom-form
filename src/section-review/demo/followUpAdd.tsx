@@ -3,6 +3,7 @@
  * Session/commit and entries↔flat bind live in the section-review library.
  */
 import { Fragment } from "react";
+import { DropdownMenu } from "../../demo-utils";
 import { AMBIGUOUS_INSERT_SPAN } from "../../form-edit";
 import { FormDialogsEditor } from "../../form-dialogs/demo/FormDialogsDemo";
 import type * as dialogTypes from "../../form-dialogs/demo/formDialogsDemoTypes.t";
@@ -33,51 +34,53 @@ const renderFollowUpIconAdd = ({
   toggle,
   items,
 }: AddFormItemRenderArgs) => (
-  <div style={{ position: "relative" }}>
-    <button
-      type="button"
-      aria-label={label}
-      aria-expanded={open}
-      onClick={toggle}
-      style={{
-        border: "none",
-        background: "transparent",
-        cursor: "pointer",
-        fontSize: 14,
-        lineHeight: 1,
-      }}
-    >
-      💬
-    </button>
-    {open ? (
-      <div
+  <DropdownMenu
+    open={open}
+    trigger={
+      <button
+        type="button"
+        aria-label={label}
+        aria-expanded={open}
+        onClick={toggle}
         style={{
-          position: "absolute",
-          right: 0,
-          zIndex: 2,
-          display: "flex",
-          flexDirection: "column",
-          gap: 4,
-          minWidth: 140,
-          padding: 6,
-          background: "#fff",
-          border: "1px solid #ddd",
-          borderRadius: 4,
-          boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+          border: "none",
+          background: "transparent",
+          cursor: "pointer",
+          fontSize: 14,
+          lineHeight: 1,
         }}
       >
-        {items.map((item) => (
-          <Fragment key={item.key}>
-            {renderMenuItem({
-              title: item.title,
-              icon: item.icon,
-              onSelect: item.onSelect,
-            })}
-          </Fragment>
-        ))}
-      </div>
-    ) : null}
-  </div>
+        💬
+      </button>
+    }
+  >
+    <div
+      style={{
+        position: "absolute",
+        right: 0,
+        zIndex: 2,
+        display: "flex",
+        flexDirection: "column",
+        gap: 4,
+        minWidth: 140,
+        padding: 6,
+        background: "#fff",
+        border: "1px solid #ddd",
+        borderRadius: 4,
+        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+      }}
+    >
+      {items.map((item) => (
+        <Fragment key={item.key}>
+          {renderMenuItem({
+            title: item.title,
+            icon: item.icon,
+            onSelect: item.onSelect,
+          })}
+        </Fragment>
+      ))}
+    </div>
+  </DropdownMenu>
 );
 
 export const FollowUpAdd = ({
@@ -142,7 +145,7 @@ export const FollowUpDrafts = ({
       }}
     >
       <FormDialogsEditor
-        embedded={true}
+        sidebar={null}
         flatItems={list.flatItems}
         setFlatItems={list.setFlatItems}
       />
