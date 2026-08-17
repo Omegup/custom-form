@@ -17,7 +17,7 @@ Flat markers ↔ consolidated tree, plus pure flat mutations.
 |---|---|
 | `flat-form.t.ts` | `FlatFormItem` (`{ item, n }`), `FlatNestedItem` union, `FlatFormItems`, `SectionDom`, `SectionHeader` |
 | `consolidate.ts` | `consolidateSections()` / `customConsolidateSections()` — flat array → `SectionWithItems[]` tree |
-| `flatten.ts` | `flatten()` / `customFlat()` — recursive item/section → flat markers |
+| `flatten.ts` | `flatten()` / `customFlat()` / `flattenSections()` — recursive item/section → flat markers; `flattenSections` is the N-section inverse of `consolidateSections` |
 | `SectionWithItems.t.ts` | Hydrated section: `{ meta, header, items[][] }` |
 | `getFlatInsertionIndex.ts` | **`getFlatInsertionIndex(sectionFlatIndex, columns, colIndex)`** — column slot → flat insertion index (used by `side-menu` add dropdowns) |
 | `buildItemSectionDict.ts` | Item id → owning section dictionary |

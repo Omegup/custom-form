@@ -31,7 +31,8 @@ twisting the library so the demo can just wire it.
 
 Generic widgets that could live in an external UI kit go in
 [`src/demo-utils/`](../../src/demo-utils): page shell, sidebar layout,
-confirm banner, dropdown **including the popover panel**. Import them only
+confirm banner, dropdown **including the popover panel**, phase tabs,
+JSON panels, editor dialog, labeled text field. Import them only
 from `demo/` and `*.stories.tsx` — never from library `_deps` / package
 source. Hosts pass the trigger and items; they do not restyle the panel.
 

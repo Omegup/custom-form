@@ -40,7 +40,7 @@ Logic in `demo/FormItemEditorDemo.tsx` and friends, and where it belongs:
 | `FieldEditor`, `HeadingEditor`, `PanelEditor` (in `FormItemEditorDemo.tsx`) | Domain editors — school keeps these in `editors/`, not in `form-item-edit-react` |
 | `wrapWithRequired` / `RequiredToggle` (demo helper) | School `renderRequired` / `question()` slice — toggles `field.params.required` under the field editor |
 | `useItemEditor` + `save` | App `useFormItemEditor` pattern (school: `legacy-front/.../useFormItemEditor.ts` + formik) |
-| `EditorDialog`, field UI chrome, `FormItemEditorFormTest` | Helper — school: `renderDefaultDialog`, design-system inputs, form-edit list |
+| `EditorDialog` / `TextField` (demo-utils), field UI chrome, `FormItemEditorFormTest` | Helper — school: `renderDefaultDialog`, design-system inputs, form-edit list |
 | Name `viewers` + `createFormItemByGetChild` | Same composition as `form` demo — per-type labels without a type switch |
 | `ctx.flatItems` + `isFieldNameTaken` filter in `FieldEditor` | `ctx` carries raw data only (no field-specific API); `FieldEditor` decides what it means — no context/provider infra |
 
@@ -73,7 +73,7 @@ hand-wiring so the focused story stays a one-package showcase.
 
 | Demo code | Package | Notes |
 |---|---|---|
-| `FormItemEditorFormTest` (helper) | `form-edit` demo | consolidate, move actions, nested panel render, clone |
+| `FormItemEditorFormTest` | `section-view` | `SectionFormItemHOC` + `ColumnsEdit`; Edit extra opens this package's dialog |
 | `cloneFn` via `cloneFlatItems` | `form-edit` — shared `params.name` rename, no type switch |
 | `extra={(item) => [{ label: "Edit", … }]}` | `form-edit` `form-item.actions` | `edit: () => setEditFormItem(q)` |
 
@@ -108,7 +108,7 @@ createFormItemEditorWrapper(editors, useHook, renderDialog)
 
 ### Demo pattern
 
-`FormItemEditorDemo` composes `FormItemEditorFormTest` (form-edit demo) + the editor dialog:
+`FormItemEditorDemo` composes `FormItemEditorFormTest` (`SectionFormItemHOC` list) + the editor dialog:
 
 1. **Edit** opens a session (`form-edit` `openFormItemEditSession`) with draft + children + flat span
 2. **`FormItemEditor`** edits the draft via `setFormItem`

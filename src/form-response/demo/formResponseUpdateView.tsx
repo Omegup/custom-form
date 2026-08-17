@@ -2,9 +2,12 @@
  * Update viewers + review HOC. Chrome/follow-up button come from the form-review demo.
  */
 import type { Ref } from "react";
+import {
+  defaultVariant,
+  followUpVariant,
+} from "../../form-item-editor/demo/itemVariants";
 import { formChrome } from "../../form-review/demo/formReviewDemoHelper";
-import { RequiredMark } from "../../form-edit/demo/editFormDemoHelper";
-import { FOLLOW_UP_BADGE } from "./formResponseDemoHelper";
+import { ReviewFieldViewer } from "../../section-review/demo/ReviewFieldViewer";
 import {
   headingView,
   panelRepeatChildren,
@@ -12,33 +15,6 @@ import {
 } from "../../response/demo/nestedItems";
 import type * as types from "./formResponseDemoTypes.t";
 import * as lib from "./library";
-
-const STATUS_COLOR: Record<lib.ReviewStatus, string> = {
-  normal: "#22883e",
-  disabled: "#ccc",
-  highlight: "#333",
-};
-
-const defaultVariant: types.FieldVariant = {
-  border: "#ccc",
-  background: "#fafafa",
-  badge: null,
-  shell: {},
-  reviewTone: true,
-};
-
-const followUpVariant: types.FieldVariant = {
-  border: "#e6b800",
-  background: "#fffbeb",
-  badge: FOLLOW_UP_BADGE,
-  shell: {
-    padding: 8,
-    borderRadius: 6,
-    background: "#fffbeb",
-    border: "1px solid #e6b800",
-  },
-  reviewTone: false,
-};
 
 const viewers: lib.Viewers<
   types.TypeNames,
@@ -50,60 +26,14 @@ const viewers: lib.Viewers<
   string
 > = {
   field: {
-    viewer: ({ props: { formItem, extra, variant } }) => {
-      const value = extra.response.value.data.value ?? "";
-      const newlyAnswered = extra.status === "highlight";
-      const mute = variant.reviewTone && extra.parentDeleted;
-      const border = variant.reviewTone
-        ? STATUS_COLOR[extra.status]
-        : variant.border;
-      return (
-        <div style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 14 }}>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 4,
-              ...variant.shell,
-            }}
-          >
-            <span
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                fontWeight: newlyAnswered ? 700 : 400,
-                color: mute ? "#777" : undefined,
-              }}
-            >
-              {newlyAnswered ? (
-                <strong>{formItem.params.name}</strong>
-              ) : (
-                <span>{formItem.params.name}</span>
-              )}
-              <RequiredMark required={formItem.params.required} />
-              {variant.badge}
-              {extra.icon}
-            </span>
-            <div
-              style={{
-                padding: "6px 8px",
-                border: `1px solid ${border}`,
-                borderRadius: 4,
-                background: mute ? "#f0f0f0" : variant.background,
-                fontWeight: newlyAnswered ? 700 : 400,
-                color: mute ? "#666" : undefined,
-              }}
-            >
-              {value || (
-                <em style={{ color: "#999", fontWeight: 400 }}>No answer</em>
-              )}
-            </div>
-          </div>
-          {extra.appendix}
-        </div>
-      );
-    },
+    viewer: ({ props: { formItem, extra, variant } }) => (
+      <ReviewFieldViewer
+        name={formItem.params.name}
+        required={formItem.params.required}
+        extra={extra}
+        variant={variant}
+      />
+    ),
   },
   heading: {
     viewer: headingView,

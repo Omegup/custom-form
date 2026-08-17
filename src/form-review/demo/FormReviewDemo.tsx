@@ -4,9 +4,13 @@
  * Follow mounts `CustomFormReviewHOC`.
  */
 import { useCallback, useRef, useState, type Ref } from "react";
+import { DemoPage, PhaseJsonPanels, PhaseTabs } from "../../demo-utils";
 import { FormDialogsEditor, designSidebar } from "../../form-dialogs/demo/FormDialogsDemo";
-import { sectionsFromFlat } from "../../form-dialogs/demo/formDialogsDemoFlat";
-import { RequiredMark } from "../../form-edit/demo/editFormDemoHelper";
+import {
+  defaultVariant,
+  followUpVariant,
+} from "../../form-item-editor/demo/itemVariants";
+import { ReviewFieldViewer } from "../../section-review/demo/ReviewFieldViewer";
 import {
   FormResponder,
   formResponderCtx,
@@ -24,43 +28,6 @@ import * as demo from "./formReviewDemoHelper";
 import type * as types from "./formReviewDemoTypes.t";
 import * as lib from "./library";
 
-const STATUS_COLOR: Record<lib.ReviewStatus, string> = {
-  normal: "#22883e",
-  disabled: "#ccc",
-  highlight: "#333",
-};
-
-const FOLLOW_UP_BADGE = (
-  <span
-    title="Added follow-up"
-    aria-label="Added follow-up"
-    style={{ color: "#b45309", fontSize: 12, fontWeight: 700 }}
-  >
-    ✚
-  </span>
-);
-
-const defaultFieldVariant: types.FieldVariant = {
-  border: "#ccc",
-  background: "#fafafa",
-  badge: null,
-  shell: {},
-  reviewTone: true,
-};
-
-const followUpFieldVariant: types.FieldVariant = {
-  border: "#e6b800",
-  background: "#fffbeb",
-  badge: FOLLOW_UP_BADGE,
-  shell: {
-    padding: 8,
-    borderRadius: 6,
-    background: "#fffbeb",
-    border: "1px solid #e6b800",
-  },
-  reviewTone: false,
-};
-
 const viewers: lib.Viewers<
   types.TypeNames,
   types.Params,
@@ -71,65 +38,14 @@ const viewers: lib.Viewers<
   string
 > = {
   field: {
-    viewer: ({ props: { formItem, extra, variant } }) => {
-      const value = extra.response.value.data.value ?? "";
-      const newlyAnswered = extra.status === "highlight";
-      const mute = variant.reviewTone && extra.parentDeleted;
-      const border = variant.reviewTone
-        ? STATUS_COLOR[extra.status]
-        : variant.border;
-      return (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 4,
-            fontSize: 14,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 4,
-              ...variant.shell,
-            }}
-          >
-            <span
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                fontWeight: newlyAnswered ? 700 : 400,
-                color: mute ? "#777" : undefined,
-              }}
-            >
-              {newlyAnswered ? (
-                <strong>{formItem.params.name}</strong>
-              ) : (
-                <span>{formItem.params.name}</span>
-              )}
-              <RequiredMark required={formItem.params.required} />
-              {variant.badge}
-              {extra.icon}
-            </span>
-            <div
-              style={{
-                padding: "6px 8px",
-                border: `1px solid ${border}`,
-                borderRadius: 4,
-                background: mute ? "#f0f0f0" : variant.background,
-                fontWeight: newlyAnswered ? 700 : 400,
-                color: mute ? "#666" : undefined,
-              }}
-            >
-              {value || <em style={{ color: "#999", fontWeight: 400 }}>No answer</em>}
-            </div>
-          </div>
-          {extra.appendix}
-        </div>
-      );
-    },
+    viewer: ({ props: { formItem, extra, variant } }) => (
+      <ReviewFieldViewer
+        name={formItem.params.name}
+        required={formItem.params.required}
+        extra={extra}
+        variant={variant}
+      />
+    ),
   },
   heading: {
     viewer: headingView,
@@ -141,9 +57,9 @@ const viewers: lib.Viewers<
   },
 };
 
-const variants = lib.branded<types.Variants, "variants">(defaultFieldVariant);
+const variants = lib.branded<types.Variants, "variants">(defaultVariant);
 const followUpVariants = lib.branded<types.Variants, "variants">(
-  followUpFieldVariant,
+  followUpVariant,
 );
 const reviewVariants: Record<lib.ReviewVariantState, types.Variants> = {
   default: variants,
@@ -176,7 +92,7 @@ export const FormReviewDemo = ({
   const fillRef = useRef<SectionValidator | null>(null);
   const [addition, setAddition] = useState<lib.Addition | null>(null);
   const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
-  const liveSections = sectionsFromFlat(flatItems);
+  const liveSections = lib.consolidateSections(flatItems);
 
   const setResponse = useCallback(
     (id: string, next?: lib.Response) => {
@@ -197,9 +113,9 @@ export const FormReviewDemo = ({
   );
 
   return (
-    <demo.FormContainer title={heading}>
+    <DemoPage title={heading}>
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-        <demo.PhaseTabs
+        <PhaseTabs
           phase={phase}
           onChange={(next) => updateArgs({ phase: next })}
           phases={demo.PHASES}
@@ -223,7 +139,7 @@ export const FormReviewDemo = ({
               setFlatItems={(next) =>
                 updateArgs({
                   flatItems: next,
-                  sections: sectionsFromFlat(next),
+                  sections: lib.consolidateSections(next),
                 })
               }
             />
@@ -309,13 +225,16 @@ export const FormReviewDemo = ({
           </div>
         ) : null}
 
-        <demo.PhaseJsonPanels
-          phase={phase}
-          sections={liveSections}
-          responses={responses}
-          changes={changes}
+        <PhaseJsonPanels
+          heading="JSON by phase"
+          activeId={phase}
+          panels={[
+            { id: "design", title: "design · sections", value: liveSections },
+            { id: "response", title: "response · answers", value: responses },
+            { id: "follow", title: "follow · AdditionalChanges", value: changes },
+          ]}
         />
       </div>
-    </demo.FormContainer>
+    </DemoPage>
   );
 };

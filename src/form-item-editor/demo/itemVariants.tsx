@@ -6,7 +6,7 @@
 import type { ItemVariant, Variants } from "./formItemEditorDemoTypes.t";
 import { branded } from "./library";
 
-const FOLLOW_UP_BADGE = (
+export const FOLLOW_UP_BADGE = (
   <span
     title="Added follow-up"
     aria-label="Added follow-up"

@@ -195,21 +195,6 @@ export const Card = ({ children }: { children: ReactNode }) => (
   <div style={{ background: "#f5f5f5", borderRadius: 4 }}>{children}</div>
 );
 
-export const FormContainer = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) => (
-  <div
-    style={{ display: "flex", flexDirection: "column", gap: 16, padding: 16 }}
-  >
-    <h2 style={{ margin: 0 }}>{title}</h2>
-    {children}
-  </div>
-);
-
 export const Section = ({
   title,
   children,

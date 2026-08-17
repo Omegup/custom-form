@@ -3,12 +3,12 @@
  * Dialog/field styling mirrors the form-item-editor demo helpers; the
  * column selector allows up to 3 columns (sections, unlike panels).
  */
-import type { ReactNode } from "react";
+import { EditorDialog, TextField } from "../../demo-utils";
 import { FormContainer } from "../../form-edit/demo/editFormDemoHelper";
 import sectionEditDemoSource from "./SectionEditDemo.tsx?raw";
 import sectionEditDemoTypesSource from "./sectionEditDemoTypes.t.ts?raw";
 
-export { FormContainer };
+export { FormContainer, EditorDialog, TextField };
 
 // ── Storybook docs (`?raw` of types + integration) ────────────────────────────
 
@@ -22,96 +22,6 @@ export const SECTION_EDIT_DEMO_SOURCE = [
 ].join("\n");
 
 // ── Dialog chrome ─────────────────────────────────────────────────────────────
-
-export const EditorDialog = ({
-  title,
-  onCancel,
-  onSave,
-  children,
-}: {
-  title: ReactNode;
-  onCancel: () => void;
-  onSave: () => void;
-  children: ReactNode;
-}) => (
-  <div
-    style={{
-      border: "1px solid #b8d4f0",
-      borderRadius: 8,
-      overflow: "hidden",
-      maxWidth: 360,
-      background: "#e8f4fd",
-      marginBottom: 12,
-    }}
-  >
-    <div style={{ padding: "8px 12px", background: "#d4e9f7", fontSize: 13 }}>
-      <strong>{title}</strong>
-    </div>
-    <div
-      style={{ padding: 12, display: "flex", flexDirection: "column", gap: 8 }}
-    >
-      {children}
-    </div>
-    <div
-      style={{
-        display: "flex",
-        gap: 8,
-        justifyContent: "flex-end",
-        padding: "8px 12px",
-        borderTop: "1px solid #b8d4f0",
-      }}
-    >
-      <button type="button" onClick={onCancel} style={{ padding: "4px 12px" }}>
-        Cancel
-      </button>
-      <button type="button" onClick={onSave} style={{ padding: "4px 12px" }}>
-        Save
-      </button>
-    </div>
-  </div>
-);
-
-export const TextField = ({
-  label,
-  value,
-  error,
-  multiline = false,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  error: string | null;
-  multiline?: boolean;
-  onChange: (value: string) => void;
-}) => (
-  <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-    <span style={{ fontSize: 12, opacity: 0.7 }}>{label}</span>
-    {multiline ? (
-      <textarea
-        rows={3}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        style={{
-          padding: "6px 8px",
-          borderRadius: 4,
-          border: `1px solid ${error ? "#c00" : "#ccc"}`,
-          resize: "vertical",
-        }}
-      />
-    ) : (
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        style={{
-          padding: "6px 8px",
-          borderRadius: 4,
-          border: `1px solid ${error ? "#c00" : "#ccc"}`,
-        }}
-      />
-    )}
-    {error && <span style={{ color: "#c00", fontSize: 12 }}>{error}</span>}
-  </label>
-);
 
 export const SECTION_COL_OPTIONS = [1, 2, 3] as const;
 

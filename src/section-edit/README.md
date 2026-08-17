@@ -43,7 +43,7 @@ their concrete form inline (demo: `SectionEditDemo.tsx` + `SectionForm`). See
 | Demo code | Reason |
 |---|---|
 | `SectionDialog` + local `form` state in `SectionEditDemo.tsx` | App dialog hook — school injects `useSectionEditDialog` (formik) via `form-edit-ui` `SectionEditDialogHOC` |
-| `EditorDialog`, `TextField`, `SelectSectionColumns` chrome | school `form-edit-ui` design-system components (`DefaultFormDialog`, `Input`, `Textarea`, `SelectColumns`) |
+| `EditorDialog` / `TextField` (demo-utils), `SelectSectionColumns` chrome | school `form-edit-ui` design-system components (`DefaultFormDialog`, `Input`, `Textarea`, `SelectColumns`) |
 | `sectionExtra` "Edit" wiring on `EditFormTest` | school `CustomFormEditor` `setEditSection` glue |
 
 ### Deferred — later packages

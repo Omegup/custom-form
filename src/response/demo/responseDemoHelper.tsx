@@ -1,21 +1,8 @@
-import { useImperativeHandle, type ReactNode } from "react";
+import { useImperativeHandle } from "react";
 import responseDemoSource from "./ResponseDemo.tsx?raw";
 import responseDemoTypesSource from "./responseDemoTypes.t.ts?raw";
 import type * as types from "./responseDemoTypes.t";
 import * as lib from "./library";
-
-export const FormContainer = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) => (
-  <div style={{ fontFamily: "system-ui, sans-serif", maxWidth: 520, margin: "0 auto" }}>
-    <h2 style={{ marginTop: 0 }}>{title}</h2>
-    {children}
-  </div>
-);
 
 export const INITIAL_ITEMS: types.Item[] = [
   lib.branded({

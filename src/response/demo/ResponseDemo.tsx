@@ -4,8 +4,8 @@
  * Each field writes `data.value`; Validate runs every `impRef.validate`.
  */
 import { useCallback, useRef, useState } from "react";
-import { RequiredMark } from "../../form-edit/demo/editFormDemoHelper";
-import * as demo from "./responseDemoHelper";
+import { DemoPage } from "../../demo-utils";
+import { FillFieldViewer, defaultFillVariant } from "./FillFieldViewer";
 import type * as types from "./responseDemoTypes.t";
 import * as lib from "./library";
 
@@ -19,34 +19,14 @@ const viewers: lib.Viewers<
   string
 > = {
   field: {
-    viewer: ({ props: { formItem, extra } }) => {
-      const { setDataValue, value } = demo.useFieldMethods(
-        extra.impRef,
-        extra.response,
-        formItem.params.required,
-        formItem.params.name,
-      );
-      return (
-        <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 14 }}>
-          <span>
-            {formItem.params.name}
-            <RequiredMark required={formItem.params.required} />
-          </span>
-          <input
-            value={value}
-            onChange={(e) => setDataValue(e.target.value)}
-            style={{
-              padding: "6px 8px",
-              border: extra.error ? "1px solid #c00" : "1px solid #ccc",
-              borderRadius: 4,
-            }}
-          />
-          {extra.error && (
-            <span style={{ color: "#c00", fontSize: 12 }}>{extra.error}</span>
-          )}
-        </label>
-      );
-    },
+    viewer: ({ props: { formItem, extra } }) => (
+      <FillFieldViewer
+        name={formItem.params.name}
+        required={formItem.params.required}
+        extra={{ ...extra, icon: null, appendix: null }}
+        variant={defaultFillVariant}
+      />
+    ),
   },
 };
 
@@ -97,7 +77,7 @@ export const ResponseDemo = ({
   };
 
   return (
-    <demo.FormContainer title={heading}>
+    <DemoPage title={heading}>
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         {items.map((item) => {
           const value = responses[item.id] ?? lib.emptyResponse();
@@ -141,6 +121,6 @@ export const ResponseDemo = ({
           {JSON.stringify(responses, null, 2)}
         </pre>
       </div>
-    </demo.FormContainer>
+    </DemoPage>
   );
 };

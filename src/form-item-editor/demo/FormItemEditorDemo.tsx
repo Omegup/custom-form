@@ -107,6 +107,7 @@ const HeadingEditor = ({
         label="Heading"
         value={formItem.item.params.name}
         error={hookResult.state.errors.header?.params.name ?? null}
+        multiline={false}
         onChange={(name) => setFormItemParam(() => ["name", name])}
       />
       <demo.HeadingLengthHint text={formItem.item.params.name} />
@@ -143,6 +144,7 @@ const PanelEditor = ({
         label="Panel title"
         value={formItem.item.params.name}
         error={hookResult.state.errors.header?.params.name ?? null}
+        multiline={false}
         onChange={(name) => setFormItemParam(() => ["name", name])}
       />
       <demo.PanelTitleHint title={formItem.item.params.name} />
@@ -371,7 +373,6 @@ export const FormItemEditorDemo = ({
       <demo.FormItemEditorFormTest
         flatItems={flatItems}
         updateArgs={updateArgs}
-        itemName={(header) => itemName(ctx, header)}
         extra={(item) => [
           {
             label: "Edit",

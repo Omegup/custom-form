@@ -2,24 +2,20 @@
  * Fill viewers + responder chrome. Field methods come from the form-responder demo.
  */
 import type { Ref } from "react";
+import { followUpVariant as followUpItemVariant } from "../../form-item-editor/demo/itemVariants";
 import { formChrome } from "../../form-responder/demo/formResponderDemoHelper";
-import { useFieldMethods } from "../../form-responder/demo/formResponderDemoHelper";
-import { RequiredMark } from "../../form-edit/demo/editFormDemoHelper";
+import { FillFieldViewer, defaultFillVariant } from "../../response/demo/FillFieldViewer";
 import {
   headingView,
   panelRepeatChildren,
   panelView,
 } from "../../response/demo/nestedItems";
-import { FOLLOW_UP_BADGE, PRIOR_BADGE } from "./formResponseDemoHelper";
+import { PRIOR_BADGE } from "./formResponseDemoHelper";
 import type * as types from "./formResponseDemoTypes.t";
 import * as lib from "./library";
 
 const defaultVariant: types.FieldVariant = {
-  border: "#ccc",
-  background: "#fff",
-  badge: null,
-  shell: {},
-  errorBorder: "#c00",
+  ...defaultFillVariant,
   reviewTone: true,
 };
 
@@ -33,17 +29,8 @@ const oldVariant: types.FieldVariant = {
 };
 
 const followUpVariant: types.FieldVariant = {
-  border: "#e6b800",
-  background: "#fffbeb",
-  badge: FOLLOW_UP_BADGE,
-  shell: {
-    padding: 8,
-    borderRadius: 6,
-    background: "#fffbeb",
-    border: "1px solid #e6b800",
-  },
+  ...followUpItemVariant,
   errorBorder: "#c00",
-  reviewTone: false,
 };
 
 const variants = lib.branded<types.Variants, "variants">(defaultVariant);
@@ -98,48 +85,17 @@ const viewers: lib.Viewers<
   string
 > = {
   field: {
-    viewer: ({ props: { formItem, extra, variant } }) => {
-      const { setDataValue, value } = useFieldMethods(
-        extra.impRef,
-        extra.response,
-        formItem.params.required,
-        formItem.params.name,
-      );
-      const err = typeof extra.error === "string" ? extra.error : extra.error ? "Invalid" : null;
-      const border =
-        extra.error && variant.errorBorder ? variant.errorBorder : variant.border;
-      return (
-        <label
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 4,
-            fontSize: 14,
-            ...variant.shell,
-          }}
-        >
-          <span>
-            {formItem.params.name}
-            <RequiredMark required={formItem.params.required} />
-            {variant.badge}
-            {extra.icon}
-          </span>
-          <input
-            value={value}
-            onChange={(e) => setDataValue(e.target.value)}
-            disabled={extra.response.setValue == null}
-            style={{
-              padding: "6px 8px",
-              border: `1px solid ${border}`,
-              borderRadius: 4,
-              background: variant.background,
-            }}
-          />
-          {err ? <span style={{ color: "#c00", fontSize: 12 }}>{err}</span> : null}
-          {extra.appendix}
-        </label>
-      );
-    },
+    viewer: ({ props: { formItem, extra, variant } }) => (
+      <FillFieldViewer
+        name={formItem.params.name}
+        required={formItem.params.required}
+        extra={extra}
+        variant={{
+          ...variant,
+          errorBorder: variant.errorBorder ?? null,
+        }}
+      />
+    ),
   },
   heading: {
     viewer: headingView,

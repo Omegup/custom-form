@@ -47,3 +47,19 @@ export const flatten = <
     (items) => [...items, { end: null }],
     (items, s) => [{ section: s }, ...items().slice(0, -1)],
   );
+
+/** Nested sections → one flat list. Inverse of `consolidateSections`. */
+export const flattenSections = <
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames>,
+  SectionConfig extends SectionDom,
+  Meta extends MetaDom,
+>(
+  sections: ReadonlyArray<{
+    header: SectionConfig;
+    items: RecursiveFormItem<TypeNames, Params, Meta>[][];
+  }>,
+): FlatFormItems<TypeNames, Params, SectionConfig> => {
+  const { section } = flatten<TypeNames, Params, SectionConfig, Meta>();
+  return sections.flatMap((s) => section(s));
+};

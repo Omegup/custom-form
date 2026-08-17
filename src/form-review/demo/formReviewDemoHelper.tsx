@@ -1,22 +1,16 @@
-import type { CSSProperties } from "react";
-import { flatFromFieldSections } from "../../form-dialogs/demo/formDialogsDemoFlat";
+import { type PhaseTab } from "../../demo-utils";
 import {
-  FormContainer,
   PENDING_DATE,
   SectionFrame,
   sectionChrome,
 } from "../../section-review/demo/sectionReviewDemoHelper";
 import { FormTitle } from "../../form-responder/demo/formResponderDemoHelper";
-import {
-  PhaseTabs,
-  type PhaseTab,
-} from "../../section-responder/demo/sectionResponderDemoHelper";
 import formReviewDemoSource from "./FormReviewDemo.tsx?raw";
 import formReviewDemoTypesSource from "./formReviewDemoTypes.t.ts?raw";
 import type * as types from "./formReviewDemoTypes.t";
 import * as lib from "./library";
 
-export { FormContainer, PENDING_DATE, PhaseTabs };
+export { PENDING_DATE };
 
 export const PHASES: PhaseTab<types.DemoPhase>[] = [
   {
@@ -36,83 +30,6 @@ export const PHASES: PhaseTab<types.DemoPhase>[] = [
       "Teacher reviews answers: lock/unlock comments, nested Design list under the origin (add/edit/move follow-ups), status highlighting.",
   },
 ];
-
-const jsonPanelStyle = (active: boolean): CSSProperties => ({
-  flex: 1,
-  minWidth: 0,
-  margin: 0,
-  padding: 10,
-  background: active ? "#eef4fb" : "#f6f7f9",
-  border: active ? "1px solid #1a5fb4" : "1px solid #e0e0e0",
-  borderRadius: 6,
-  fontSize: 11,
-  overflow: "auto",
-  maxHeight: 260,
-  lineHeight: 1.4,
-});
-
-/** Three JSON dumps — Design / Response / Follow — always visible for comparison. */
-export const PhaseJsonPanels = ({
-  phase,
-  sections,
-  responses,
-  changes,
-}: {
-  phase: types.DemoPhase;
-  sections: types.ListSection[];
-  responses: Record<string, lib.Response>;
-  changes: lib.AdditionalChanges<types.TypeNames, types.Params>;
-}) => {
-  const panels: {
-    id: types.DemoPhase;
-    title: string;
-    value: unknown;
-  }[] = [
-    { id: "design", title: "design · sections", value: sections },
-    { id: "response", title: "response · answers", value: responses },
-    { id: "follow", title: "follow · AdditionalChanges", value: changes },
-  ];
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      <div
-        style={{
-          fontSize: 12,
-          fontWeight: 600,
-          color: "#444",
-          letterSpacing: "0.02em",
-          textTransform: "uppercase",
-        }}
-      >
-        JSON by phase
-      </div>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-          gap: 10,
-        }}
-      >
-        {panels.map((p) => (
-          <div key={p.id} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <div
-              style={{
-                fontSize: 12,
-                fontWeight: phase === p.id ? 700 : 500,
-                color: phase === p.id ? "#1a5fb4" : "#666",
-              }}
-            >
-              {p.title}
-              {phase === p.id ? " · active" : ""}
-            </div>
-            <pre style={jsonPanelStyle(phase === p.id)}>
-              {JSON.stringify(p.value, null, 2)}
-            </pre>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 /** Demo HTML chrome for `CustomFormReviewHOC` — item slots come from `sectionChrome`. */
 export const formChrome: lib.FormReviewChrome<types.TypeNames, types.Params> = {
@@ -199,7 +116,7 @@ export const INITIAL_SECTIONS: types.ListSection[] = [
   },
 ];
 
-export const INITIAL_FLAT = flatFromFieldSections(INITIAL_SECTIONS);
+export const INITIAL_FLAT = lib.flattenSections(INITIAL_SECTIONS);
 
 export const INITIAL_RESPONSES: Record<string, lib.Response> = {
   name: { meta: {}, data: { value: "Ada Lovelace" } },

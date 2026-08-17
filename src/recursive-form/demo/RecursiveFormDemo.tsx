@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from "react";
+import { DemoPage } from "../../demo-utils";
 import * as demo from "./recursiveFormDemoHelper";
 import type {
   Context,
@@ -146,7 +147,7 @@ export const RecursiveFormDemo = ({
   );
 
   return (
-    <demo.FormContainer title="Recursive form">
+    <DemoPage title="Recursive form">
       <demo.Section title="Skeleton">
         {items.map((item) => (
           <div key={item.header.id}>{renderSkeleton(item)}</div>
@@ -157,6 +158,6 @@ export const RecursiveFormDemo = ({
           <div key={item.header.id}>{renderValues(item)}</div>
         ))}
       </demo.Section>
-    </demo.FormContainer>
+    </DemoPage>
   );
 };

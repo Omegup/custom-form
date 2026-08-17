@@ -1,17 +1,13 @@
 /**
  * FormResponse lifecycle — Design editor, Fill Send, Update Save/feedback.
  */
+import { DemoPage, PhaseJsonPanels, PhaseTabs } from "../../demo-utils";
 import { FormDialogsEditor, designSidebar } from "../../form-dialogs/demo/FormDialogsDemo";
-import { sectionsFromFlat } from "../../form-dialogs/demo/formDialogsDemoFlat";
-import {
-  FormContainer,
-  PHASES,
-  PhaseJsonPanels,
-  PhaseTabs,
-} from "./formResponseDemoHelper";
+import { PHASES } from "./formResponseDemoHelper";
 import { FillPhase } from "./formResponseFill";
 import type * as types from "./formResponseDemoTypes.t";
 import { UpdatePhase } from "./formResponseUpdate";
+import * as lib from "./library";
 
 export const FormResponseDemo = ({
   heading,
@@ -22,9 +18,9 @@ export const FormResponseDemo = ({
   showDeleted,
   updateArgs,
 }: types.DemoProps) => {
-  const sections = sectionsFromFlat(flatItems);
+  const sections = lib.consolidateSections(flatItems);
   return (
-    <FormContainer title={heading}>
+    <DemoPage title={heading}>
       <PhaseTabs
         phase={phase}
         onChange={(next) => updateArgs({ phase: next })}
@@ -54,10 +50,15 @@ export const FormResponseDemo = ({
         />
       ) : null}
       <PhaseJsonPanels
-        phase={phase}
-        responses={responses}
-        formResponse={formResponse}
+        heading="Document"
+        activeId={phase === "fill" ? "fill" : "formResponse"}
+        panels={[
+          { id: "formResponse", title: "FormResponse", value: formResponse },
+          ...(phase === "fill"
+            ? [{ id: "fill", title: "Fill draft", value: responses }]
+            : []),
+        ]}
       />
-    </FormContainer>
+    </DemoPage>
   );
 };

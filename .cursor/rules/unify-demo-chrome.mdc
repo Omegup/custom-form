@@ -28,7 +28,8 @@ export const formChrome = {
 ```
 
 Same for lock icons, remark cards, `useFieldMethods`. Generic shells
-(`DemoPage`, `SidebarLayout`, `ConfirmBanner`, `DropdownMenu`) live in
+(`DemoPage`, `SidebarLayout`, `ConfirmBanner`, `DropdownMenu`,
+`PhaseTabs`, `PhaseJsonPanels`, `EditorDialog`, `TextField`) live in
 `src/demo-utils/` — see `demos-are-wiring.mdc`. Copy-paste is not a variant.
 If blurbs or fixtures differ, pass them as **required** props — do not
 duplicate the widget.

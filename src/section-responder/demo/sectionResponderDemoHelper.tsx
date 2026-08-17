@@ -1,38 +1,9 @@
 import type { ReactNode } from "react";
-import { flatFromFieldSections } from "../../form-dialogs/demo/formDialogsDemoFlat";
-import { useFieldMethods } from "../../response/demo/responseDemoHelper";
+import { type PhaseTab } from "../../demo-utils";
 import sectionResponderDemoSource from "./SectionResponderDemo.tsx?raw";
 import sectionResponderDemoTypesSource from "./sectionResponderDemoTypes.t.ts?raw";
 import type * as types from "./sectionResponderDemoTypes.t";
 import * as lib from "./library";
-
-export { useFieldMethods };
-
-export const FormContainer = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) => (
-  <div
-    style={{
-      fontFamily: "system-ui, sans-serif",
-      maxWidth: 1120,
-      margin: "0 auto",
-      color: "#1a1a1a",
-    }}
-  >
-    <h2 style={{ marginTop: 0, marginBottom: 4 }}>{title}</h2>
-    {children}
-  </div>
-);
-
-export type PhaseTab<Id extends string> = {
-  id: Id;
-  label: string;
-  blurb: string;
-};
 
 export const PHASES: PhaseTab<types.DemoPhase>[] = [
   {
@@ -46,56 +17,6 @@ export const PHASES: PhaseTab<types.DemoPhase>[] = [
     blurb: "Student answers this section, then Validate.",
   },
 ];
-
-export const PhaseTabs = <Id extends string>({
-  phase,
-  onChange,
-  phases,
-}: {
-  phase: Id;
-  onChange: (phase: Id) => void;
-  phases: readonly PhaseTab<Id>[];
-}) => {
-  const current = phases.find((p) => p.id === phase)!;
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 8 }}>
-      <div
-        role="tablist"
-        aria-label="Lifecycle phase"
-        style={{ display: "flex", gap: 0, borderBottom: "1px solid #ddd" }}
-      >
-        {phases.map((p) => {
-          const active = p.id === phase;
-          return (
-            <button
-              key={p.id}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              onClick={() => onChange(p.id)}
-              style={{
-                flex: 1,
-                padding: "10px 12px",
-                border: "none",
-                borderBottom: active ? "2px solid #1a5fb4" : "2px solid transparent",
-                background: active ? "#f0f5fb" : "transparent",
-                color: active ? "#1a5fb4" : "#555",
-                fontWeight: active ? 600 : 500,
-                fontSize: 14,
-                cursor: "pointer",
-              }}
-            >
-              {p.label}
-            </button>
-          );
-        })}
-      </div>
-      <p style={{ margin: 0, fontSize: 13, color: "#555", lineHeight: 1.4 }}>
-        {current.blurb}
-      </p>
-    </div>
-  );
-};
 
 /** Demo HTML chrome for `renderSection` — fill, review, and form shells share this. */
 export const SectionFrame = ({
@@ -205,7 +126,7 @@ export const INITIAL_SECTION: types.ListSection = {
   items: [[field("name", "Full name", true), field("note", "Note (optional)", false)]],
 };
 
-export const INITIAL_FLAT = flatFromFieldSections([INITIAL_SECTION]);
+export const INITIAL_FLAT = lib.flattenSections([INITIAL_SECTION]);
 
 export const INITIAL_RESPONSES: Record<string, lib.Response> = {};
 

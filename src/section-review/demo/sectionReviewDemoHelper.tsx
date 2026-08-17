@@ -1,18 +1,13 @@
 import type { CSSProperties } from "react";
+import { type PhaseTab } from "../../demo-utils";
 import { FollowUpAdd } from "./followUpAdd";
-import { flatFromFieldSections } from "../../form-dialogs/demo/formDialogsDemoFlat";
-import {
-  FormContainer,
-  PhaseTabs,
-  SectionFrame,
-  type PhaseTab,
-} from "../../section-responder/demo/sectionResponderDemoHelper";
+import { SectionFrame } from "../../section-responder/demo/sectionResponderDemoHelper";
 import sectionReviewDemoSource from "./SectionReviewDemo.tsx?raw";
 import sectionReviewDemoTypesSource from "./sectionReviewDemoTypes.t.ts?raw";
 import type * as types from "./sectionReviewDemoTypes.t";
 import * as lib from "./library";
 
-export { FormContainer, PhaseTabs, SectionFrame };
+export { SectionFrame };
 
 /** Stable reference so `lastPending === history.at(-1).date` can match by identity. */
 export const PENDING_DATE = new Date("2024-01-15T00:00:00Z");
@@ -35,78 +30,6 @@ export const PHASES: PhaseTab<types.DemoPhase>[] = [
       "Teacher reviews: lock/unlock comments, nested Design list under the origin (add/edit/move follow-ups), status highlighting.",
   },
 ];
-
-const jsonPanelStyle = (active: boolean): CSSProperties => ({
-  flex: 1,
-  minWidth: 0,
-  margin: 0,
-  padding: 10,
-  background: active ? "#eef4fb" : "#f6f7f9",
-  border: active ? "1px solid #1a5fb4" : "1px solid #e0e0e0",
-  borderRadius: 6,
-  fontSize: 11,
-  overflow: "auto",
-  maxHeight: 260,
-  lineHeight: 1.4,
-});
-
-export const PhaseJsonPanels = ({
-  phase,
-  section,
-  responses,
-  changes,
-}: {
-  phase: types.DemoPhase;
-  section: types.ListSection;
-  responses: Record<string, lib.Response>;
-  changes: lib.AdditionalChanges<types.TypeNames, types.Params>;
-}) => {
-  const panels: { id: types.DemoPhase; title: string; value: unknown }[] = [
-    { id: "design", title: "design · section", value: section },
-    { id: "response", title: "response · answers", value: responses },
-    { id: "follow", title: "follow · AdditionalChanges", value: changes },
-  ];
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      <div
-        style={{
-          fontSize: 12,
-          fontWeight: 600,
-          color: "#444",
-          letterSpacing: "0.02em",
-          textTransform: "uppercase",
-        }}
-      >
-        JSON by phase
-      </div>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-          gap: 10,
-        }}
-      >
-        {panels.map((p) => (
-          <div key={p.id} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <div
-              style={{
-                fontSize: 12,
-                fontWeight: phase === p.id ? 700 : 500,
-                color: phase === p.id ? "#1a5fb4" : "#666",
-              }}
-            >
-              {p.title}
-              {phase === p.id ? " · active" : ""}
-            </div>
-            <pre style={jsonPanelStyle(phase === p.id)}>
-              {JSON.stringify(p.value, null, 2)}
-            </pre>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 const overlayBox: CSSProperties = {
   marginTop: 16,
@@ -279,7 +202,7 @@ export const INITIAL_SECTION: types.ListSection = {
   ],
 };
 
-export const INITIAL_FLAT = flatFromFieldSections([INITIAL_SECTION]);
+export const INITIAL_FLAT = lib.flattenSections([INITIAL_SECTION]);
 
 export const INITIAL_RESPONSES: Record<string, lib.Response> = {
   name: { meta: {}, data: { value: "Ada Lovelace" } },

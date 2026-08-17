@@ -240,19 +240,20 @@ export type ListSection = lib.SectionWithItems<
 >;
 
 /**
- * Column "+ add" slot — school `AppNodeIndex` (`{ index, sIndex }`).
- * Hosts compute `index` via `getFlatInsertionIndex` (FlatDnd list-node index);
- * `makeUseRenderAddItem` returns a renderer of this exact shape.
+ * Per-item extra button on the list row (e.g. Edit).
  */
-export type AddItemSlot = { index: number; sIndex: number };
+export type ExtraAction = { label: string; onClick: () => void };
 
-/** Rendered blocks handed to `renderLayout` so demos can add a sidebar. */
-export type ListLayoutArgs = {
-  alert: ReactNode;
-  details: ReactNode;
-  sections: ReactNode;
-  setFlatItems: Dispatch<SetStateAction<FlatItems>>;
-  focus: (id: string) => void;
+/** Inner list context before `AutoFocus` wrapping. */
+export type ListBaseCtx = lib.ContextDom & { focused: lib.AutoFocusState };
+
+/** List autofocus ctx — what `SectionFormItemHOC` / move actions consume. */
+export type ListCtx = lib.AutoFocus<ListBaseCtx, boolean>;
+
+/** Per-item viewer extra for the list shell (not the dialog's `ItemExtra`). */
+export type ListExtra = lib.ExtraDom & {
+  actions: lib.MoveActions;
+  extra: ExtraAction[];
 };
 
 export type StoryArgs = {

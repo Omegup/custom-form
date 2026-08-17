@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { DemoPage } from "../../demo-utils";
 import * as demo from "./formDemoHelper";
 import * as types from "./formDemoTypes.t";
 import { branded, createFormItemByGetChildPlain } from "./library";
@@ -71,10 +72,10 @@ export const FormDemo = () => {
   };
 
   return (
-    <demo.FormContainer>
+    <DemoPage title="Form">
       {items.map((item) => (
         <div key={item.id}>{renderItem(item, "")}</div>
       ))}
-    </demo.FormContainer>
+    </DemoPage>
   );
 };

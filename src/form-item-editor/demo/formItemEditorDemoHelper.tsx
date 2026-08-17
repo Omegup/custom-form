@@ -1,20 +1,25 @@
 import type { ReactNode } from "react";
-import { useState } from "react";
-import { ConfirmBanner } from "../../demo-utils";
+import { ConfirmBanner, EditorDialog, TextField } from "../../demo-utils";
 import {
-  FieldRow,
-  FormContainer,
-  SectionPanel,
+  FieldLabel,
+  HeadingLabel,
+  PanelLabel,
+  RequiredMark,
   SectionsList,
   pendingRemoveCopy,
+  renderListCard,
 } from "../../form-edit/demo/editFormDemoHelper";
+import { MENU_ITEMS, randomId } from "../../side-menu/demo/fixtures";
+import { renderAddFormItem } from "../../side-menu/demo/sideMenuDemoHelper";
+import { columnsChrome } from "../../section-view/demo/sectionViewDemoHelper";
 import type * as types from "./formItemEditorDemoTypes.t";
 import formItemEditorDemoSource from "./FormItemEditorDemo.tsx?raw";
 import formItemEditorDemoTypesSource from "./formItemEditorDemoTypes.t.ts?raw";
+import { defaultVariants } from "./itemVariants";
 import * as lib from "./library";
 
 export type { StoryArgs } from "./formItemEditorDemoTypes.t";
-export { FormContainer };
+export { EditorDialog, TextField };
 
 // ── Storybook docs (`?raw` of types + integration) ────────────────────────────
 
@@ -29,63 +34,6 @@ export const FORM_ITEM_EDITOR_DEMO_SOURCE = [
 
 // ── Edit dialog + field chrome (orthogonal to the HOC showcase) ─────────────
 
-export const EditorDialog = ({
-  title,
-  onCancel,
-  onSave,
-  saveError,
-  children,
-}: {
-  title: ReactNode;
-  onCancel: () => void;
-  onSave: () => void;
-  saveError: string | null;
-  children: ReactNode;
-}) => (
-  <div
-    style={{
-      border: "1px solid #b8d4f0",
-      borderRadius: 8,
-      overflow: "hidden",
-      maxWidth: 360,
-      background: "#e8f4fd",
-      marginBottom: 12,
-    }}
-  >
-    <div
-      style={{
-        padding: "8px 12px",
-        background: "#d4e9f7",
-        fontSize: 13,
-      }}
-    >
-      <strong>{title}</strong>
-    </div>
-    <div style={{ padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-      {children}
-      {saveError && (
-        <p style={{ margin: 0, color: "#c00", fontSize: 12 }}>{saveError}</p>
-      )}
-    </div>
-    <div
-      style={{
-        display: "flex",
-        gap: 8,
-        justifyContent: "flex-end",
-        padding: "8px 12px",
-        borderTop: "1px solid #b8d4f0",
-      }}
-    >
-      <button type="button" onClick={onCancel} style={{ padding: "4px 12px" }}>
-        Cancel
-      </button>
-      <button type="button" onClick={onSave} style={{ padding: "4px 12px" }}>
-        Save
-      </button>
-    </div>
-  </div>
-);
-
 export const NameField = ({
   value,
   error,
@@ -95,19 +43,13 @@ export const NameField = ({
   error: string | null;
   onChange: (value: string) => void;
 }) => (
-  <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-    <span style={{ fontSize: 12, opacity: 0.7 }}>Name</span>
-    <input
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      style={{
-        padding: "6px 8px",
-        borderRadius: 4,
-        border: `1px solid ${error ? "#c00" : "#ccc"}`,
-      }}
-    />
-    {error && <span style={{ color: "#c00", fontSize: 12 }}>{error}</span>}
-  </label>
+  <TextField
+    label="Name"
+    value={value}
+    error={error}
+    multiline={false}
+    onChange={onChange}
+  />
 );
 
 /**
@@ -220,32 +162,6 @@ export const NameLengthHint = ({ name }: { name: string }) => (
 export { MAX_NAME_LEN };
 
 const MIN_HEADING_LEN = 3;
-
-export const TextField = ({
-  label,
-  value,
-  error,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  error: string | null;
-  onChange: (value: string) => void;
-}) => (
-  <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-    <span style={{ fontSize: 12, opacity: 0.7 }}>{label}</span>
-    <input
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      style={{
-        padding: "6px 8px",
-        borderRadius: 4,
-        border: `1px solid ${error ? "#c00" : "#ccc"}`,
-      }}
-    />
-    {error && <span style={{ color: "#c00", fontSize: 12 }}>{error}</span>}
-  </label>
-);
 
 export const HeadingLengthHint = ({ text }: { text: string }) => (
   <p
@@ -384,45 +300,14 @@ export const PanelTitleHint = ({ title }: { title: string }) => (
 
 export { MIN_PANEL_TITLE_LEN };
 
-export const NestedColumns = ({ columns }: { columns: ReactNode[] }) => (
-  <div
-    style={{
-      display: "flex",
-      flexDirection: "row",
-      gap: 6,
-      marginLeft: 12,
-      marginTop: 4,
-      paddingLeft: 8,
-      borderLeft: "2px solid #b8d4f0",
-    }}
-  >
-    {columns.map((column, i) => (
-      <div
-        key={i}
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          gap: 4,
-          minWidth: 0,
-        }}
-      >
-        {column}
-      </div>
-    ))}
-  </div>
-);
+// ── List shell (`SectionFormItemHOC` + ColumnsEdit) ───────────────────────────
 
-// ── Form-edit list shell (orthogonal — move/clone/sections) ───────────────────
-
-export type ExtraAction = { label: string; onClick: () => void };
-
-const randomId = () => `id_${Math.random().toString(36).slice(2, 7)}`;
+type CardExtra = types.ListExtra & lib.EditExtra & lib.Children;
 
 const cloneFn: lib.Clone<
   types.TypeNames,
   types.Params,
-  lib.ContextDom,
+  types.ListCtx,
   types.Section
 > = (subItems, _, allItems) =>
   lib.cloneFlatItems(
@@ -433,22 +318,103 @@ const cloneFn: lib.Clone<
     { rename: "first" },
   );
 
+const useRenderAddItem = lib.makeUseRenderAddItem<types.TypeNames, types.Params>(
+  (args) => (
+    <lib.AddFormItem
+      {...args}
+      label="+ Add item"
+      render={renderAddFormItem}
+    />
+  ),
+  () => MENU_ITEMS,
+  randomId,
+);
+
+const viewers: lib.Viewers<
+  types.TypeNames,
+  types.Params,
+  types.Variants,
+  CardExtra,
+  types.ListExtra & lib.EditExtra,
+  types.ListCtx,
+  string
+> = {
+  field: {
+    viewer: ({ props: { formItem } }) => (
+      <>
+        <FieldLabel name={formItem.params.name} />
+        <RequiredMark required={formItem.params.required} />
+      </>
+    ),
+  },
+  heading: {
+    viewer: ({ props: { formItem } }) => (
+      <HeadingLabel name={formItem.params.name} />
+    ),
+  },
+  panel: {
+    viewer: ({ props: { formItem } }) => (
+      <PanelLabel name={formItem.params.name} />
+    ),
+    repeatChildren: () => [""],
+  },
+};
+
+const renderCard = (
+  view: ReactNode,
+  viewProps: lib.ViewerProps<
+    types.Params,
+    types.Variants,
+    types.TypeNames,
+    CardExtra,
+    types.ListCtx
+  >,
+) => {
+  const { extra, ctx, formItem } = viewProps;
+  return renderListCard(view, {
+    focused: ctx.autoFocused(formItem.id),
+    actions: extra.actions,
+    parentDeleted: extra.parentDeleted,
+    nested: extra.children.length > 0 ? extra.children : null,
+    extra: extra.parentDeleted ? [] : extra.extra,
+  });
+};
+
+const SectionComponent = lib.SectionFormItemHOC<
+  types.TypeNames,
+  types.Params,
+  types.Variants,
+  types.Section,
+  types.ListBaseCtx,
+  types.ListExtra
+>({
+  viewers,
+  useRenderAddItem,
+  renderTitle: (props) => props.section.header.title,
+  renderEdit: lib.createColumnsEdit(columnsChrome),
+});
+
+const emptyListExtra = (): types.ListExtra =>
+  lib.branded<types.ListExtra, "viewer-extra">({
+    actions: {
+      up: null,
+      down: null,
+      clone: null,
+      remove: null,
+      restore: null,
+      isDeleted: false,
+    },
+    extra: [],
+  });
+
 export const FormItemEditorFormTest = ({
   flatItems,
   updateArgs,
-  itemName,
   extra,
-  sectionExtra,
-  renderAddItem,
-  renderLayout,
 }: {
   flatItems: types.FlatItems;
   updateArgs: (patch: Partial<types.StoryArgs>) => void;
-  itemName: (header: types.ItemHeader) => ReactNode;
-  extra?: (item: types.ListItem) => ExtraAction[];
-  sectionExtra?: (section: types.ListSection) => ExtraAction[];
-  renderAddItem?: (slot: types.AddItemSlot) => ReactNode;
-  renderLayout?: (args: types.ListLayoutArgs) => ReactNode;
+  extra: (item: types.ListItem) => types.ExtraAction[];
 }) => {
   const session = lib.useFlatListSession({
     flatItems,
@@ -457,127 +423,56 @@ export const FormItemEditorFormTest = ({
     clone: cloneFn,
     jump: true,
   });
-  // Visibility only — school always jumps deleted neighbors when moving
-  // (action.utils `isDeleted`), so active items never land in a deleted section.
-  const [showDeleted, setShowDeleted] = useState(true);
-
-  const renderItem = (
-    item: types.ListItem,
-    parentDeleted = false,
-  ): ReactNode => {
-    if (item.header.deleted && !showDeleted) return null;
-    const actions = session.itemActions(item);
-    const fieldFocused = session.listCtx.autoFocused(item.header.id);
-    const deleted = parentDeleted || item.header.deleted;
-    return (
-      <div key={item.header.id}>
-        <FieldRow
-          name={itemName(item.header)}
-          focused={fieldFocused}
-          actions={actions}
-          extra={parentDeleted ? [] : extra?.(item) ?? []}
-          parentDeleted={parentDeleted}
-        />
-        {/*
-          School RecursiveEdit/FlatDnd: every list slot (section column *and*
-          nested panel column) ends with `render.addItem(node)`, where the
-          list-node index is `lastChild.index + lastChild.total` — same as
-          `getFlatInsertionIndex(parent.meta.index, parent.children, col)`.
-        */}
-        {item.children.length > 0 && (
-          <NestedColumns
-            columns={item.children.map((column, colIndex) => (
-              <>
-                {column.map((child) => renderItem(child, deleted))}
-                {!deleted &&
-                  renderAddItem?.({
-                    index: lib.getFlatInsertionIndex(
-                      item.meta.index,
-                      item.children,
-                      colIndex,
-                    ),
-                    sIndex: item.meta.sIndex,
-                  })}
-              </>
-            ))}
-          />
-        )}
-      </div>
-    );
-  };
-
+  const extras = lib.extrasByItemId(session.sections, (item) =>
+    lib.branded<types.ListExtra, "viewer-extra">({
+      actions: session.itemActions(item),
+      extra: extra(item),
+    }),
+  );
+  const itemExtra = (id: string): types.ListExtra =>
+    extras.get(id) ?? emptyListExtra();
+  const setAddItem = (
+    sessionDraft: lib.FlatFormItemEditSession<types.TypeNames, types.Params>,
+  ) =>
+    updateArgs({
+      flatItems: lib.applyFlatFormItem(
+        flatItems,
+        sessionDraft,
+        { header: sessionDraft.draft.item, children: sessionDraft.children },
+        sessionDraft.draft.n,
+      ),
+    });
   const toRemove = session.toRemove;
-  const alert = toRemove && (
-    <ConfirmBanner
-      onConfirm={() => {
-        toRemove.rm();
-        session.setToRemove(null);
-      }}
-      onCancel={() => session.setToRemove(null)}
-    >
-      {pendingRemoveCopy(toRemove.item, itemName)}
-    </ConfirmBanner>
-  );
-  const details = (
-    <button type="button" onClick={() => setShowDeleted(!showDeleted)}>
-      {showDeleted ? "Hide deleted" : "Show deleted"}
-    </button>
-  );
-  const sectionsNode = (
-    <SectionsList>
-      {session.sections.map((section, sIndex) => {
-        if (section.header.deleted && !showDeleted) return null;
-        const sectionFocused = session.listCtx.autoFocused(section.header.id);
-        const sActions = lib.getSectionMoveActions(
-          session.args,
-          cloneFn,
-          section,
-          true,
-        );
-        const sectionDeleted = section.header.deleted;
-        return (
-          <SectionPanel
+  return (
+    <>
+      {toRemove ? (
+        <ConfirmBanner
+          onConfirm={() => {
+            toRemove.rm();
+            session.setToRemove(null);
+          }}
+          onCancel={() => session.setToRemove(null)}
+        >
+          {pendingRemoveCopy(toRemove.item, (item) => item.params.name)}
+        </ConfirmBanner>
+      ) : null}
+      <SectionsList>
+        {session.sections.map((section, sIndex) => (
+          <SectionComponent
             key={section.header.id}
-            title={section.header.title}
-            focused={sectionFocused}
-            sectionActions={sActions}
-            sectionExtra={sectionDeleted ? [] : sectionExtra?.(section) ?? []}
-            columns={section.items.map((column, colIndex) => (
-              <>
-                {column.map((item) => renderItem(item, sectionDeleted))}
-                {!sectionDeleted &&
-                  renderAddItem?.({
-                    index: lib.getFlatInsertionIndex(
-                      section.meta.index,
-                      section.items,
-                      colIndex,
-                    ),
-                    sIndex,
-                  })}
-              </>
-            ))}
+            ctx={session.listCtx}
+            variants={defaultVariants}
+            itemExtra={itemExtra}
+            renderCard={renderCard}
+            args={session.args}
+            clone={cloneFn}
+            section={section}
+            sIndex={sIndex}
+            jump
+            setAddItem={setAddItem}
           />
-        );
-      })}
-    </SectionsList>
+        ))}
+      </SectionsList>
+    </>
   );
-
-  if (!renderLayout)
-    return (
-      <>
-        {alert}
-        {details}
-        {sectionsNode}
-      </>
-    );
-  return renderLayout({
-    alert,
-    details,
-    sections: sectionsNode,
-    setFlatItems: (update) =>
-      updateArgs({
-        flatItems: typeof update === "function" ? update(flatItems) : update,
-      }),
-    focus: (id) => session.setFocused({ id, value: true }),
-  });
 };

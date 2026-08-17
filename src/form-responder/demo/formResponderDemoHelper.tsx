@@ -1,18 +1,12 @@
 import type { ReactNode } from "react";
-import { flatFromFieldSections } from "../../form-dialogs/demo/formDialogsDemoFlat";
+import { type PhaseTab } from "../../demo-utils";
 import {
-  FormContainer,
-  PhaseTabs,
   sectionChrome,
-  useFieldMethods,
-  type PhaseTab,
 } from "../../section-responder/demo/sectionResponderDemoHelper";
 import formResponderDemoSource from "./FormResponderDemo.tsx?raw";
 import formResponderDemoTypesSource from "./formResponderDemoTypes.t.ts?raw";
 import type * as types from "./formResponderDemoTypes.t";
 import * as lib from "./library";
-
-export { FormContainer, PhaseTabs, useFieldMethods };
 
 export const FormTitle = ({
   header,
@@ -103,7 +97,7 @@ export const INITIAL_SECTIONS: types.ListSection[] = [
   },
 ];
 
-export const INITIAL_FLAT = flatFromFieldSections(INITIAL_SECTIONS);
+export const INITIAL_FLAT = lib.flattenSections(INITIAL_SECTIONS);
 
 export const INITIAL_RESPONSES: Record<string, lib.Response> = {};
 

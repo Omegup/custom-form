@@ -5,8 +5,7 @@
  * `render.addItem` at the end of every column (section-level and nested).
  *
  * Soft-deleted parent gate matches the existing demo walks
- * (`form-item-editor/demo/formItemEditorDemoHelper.tsx` `renderItem`,
- * `form-edit/demo/EditFormDemo.tsx`): a deleted item/section dims its whole
+ * (`form-edit/demo/EditFormDemo.tsx`): a deleted item/section dims its whole
  * subtree (`parentDeleted` cascades) and suppresses add-item slots under it,
  * but items still render (never hidden) so move actions stay reachable.
  *
