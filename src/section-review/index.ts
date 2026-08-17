@@ -2,7 +2,6 @@ export type {
   Addition,
   AdditionalChanges,
   CommentAddition,
-  FormItemAddition,
   ReviewExtra,
   ReviewFormItemEntry,
   ReviewFormItemsEditorArgs,

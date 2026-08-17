@@ -157,8 +157,8 @@ const FormReview = lib.CustomFormReviewHOC<
 >(viewers, demo.formChrome);
 
 const ctx = lib.branded<types.Ctx, "context">({});
-const tCommon = (term: "add" | "cancel" | "save" | "delete") =>
-  ({ add: "Add", cancel: "Cancel", save: "Save", delete: "Delete" })[term];
+const tCommon = (term: "cancel" | "save" | "delete") =>
+  ({ cancel: "Cancel", save: "Save", delete: "Delete" })[term];
 
 export const FormReviewDemo = ({
   heading,
@@ -172,9 +172,7 @@ export const FormReviewDemo = ({
   updateArgs,
 }: types.DemoProps) => {
   const fillRef = useRef<SectionValidator | null>(null);
-  const [addition, setAddition] = useState<
-    lib.Addition<types.TypeNames, types.Params> | null
-  >(null);
+  const [addition, setAddition] = useState<lib.Addition | null>(null);
   const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
   const liveSections = sectionsFromFlat(flatItems);
 
@@ -299,7 +297,6 @@ export const FormReviewDemo = ({
                 setChanges,
                 setAddition,
                 setDeleteCommentId,
-                lastPending: reviewPending ? demo.PENDING_DATE : null,
               }),
               tCommon,
             })}

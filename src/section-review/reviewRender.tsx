@@ -59,7 +59,7 @@ type ReviewLive<
   responses: Record<string, Response>;
   changes: AdditionalChanges<TypeNames, Params>;
   setChanges: (changes: AdditionalChanges<TypeNames, Params>) => void;
-  setAddition: (addition: Addition<TypeNames, Params> | null) => void;
+  setAddition: (addition: Addition | null) => void;
   setDeleteCommentId: (id: string | null) => void;
   lastPending: Date | null;
   variants: Record<ReviewVariantState, Variants>;
@@ -193,7 +193,7 @@ export const renderReviewColumns = <
                 : null}
               {renderActionIcon(unlocked ? "unlock" : "lock", () => {
                 if (unlocked) setDeleteCommentId(q.id);
-                else setAddition({ originId: q.id, mode: "comment" });
+                else setAddition({ originId: q.id });
               })}
             </>
           ),
@@ -231,7 +231,6 @@ export const renderReviewColumns = <
             onEdit: () =>
               setAddition({
                 originId,
-                mode: "comment",
                 text: change.comment,
               }),
           })}

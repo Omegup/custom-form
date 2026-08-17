@@ -1,8 +1,8 @@
 /**
  * Teacher/admin review types — school `types/form-response-app`
  * (`AdditionalChanges`, `ReviewExtra`) + `types/form-app/addition`
- * (`Addition`, `CommentAddition`, `QuestionAddition`), adapted for the
- * section-level review contract from `section-review-ui/SectionReview`.
+ * (`Addition` / `CommentAddition`), adapted for the section-level
+ * review contract from `section-review-ui/SectionReview`.
  * slot-tree uses `formItem` naming throughout (school calls this a
  * "follow-up question"; we attach a follow-up form item instead).
  *
@@ -59,29 +59,15 @@ export type AdditionalChanges<
   }
 >;
 
-/** In-progress overlay state for editing a comment — school `CommentAddition`. */
+/** In-progress overlay state for editing a remark — school `CommentAddition`. */
 export type CommentAddition = {
   originId: string;
-  mode: "comment";
   text?: string;
 };
 
-/** In-progress overlay state for adding/editing a follow-up form item — school `QuestionAddition`. */
-export type FormItemAddition<
-  TypeNames extends string,
-  Params extends ParamsDom<TypeNames>,
-> = {
-  originId: string;
-  mode: "formItem";
-  comment?: string;
-  formItem?: SomeFormItem<TypeNames, Params>;
-  replace?: { index: number };
-};
-
-export type Addition<
-  TypeNames extends string,
-  Params extends ParamsDom<TypeNames>,
-> = CommentAddition | FormItemAddition<TypeNames, Params>;
+/** Overlay draft. Follow-ups are not overlay state — they go through
+ * {@link SectionReviewChrome.renderAddFollowUp} / `renderFormItemsEditor`. */
+export type Addition = CommentAddition;
 
 /** Per-item review status driving chrome highlighting — school `ReviewExtra["status"]`. */
 export type ReviewStatus = "normal" | "disabled" | "highlight";
@@ -116,26 +102,18 @@ export type SectionReviewHeader = SectionDom & {
 };
 
 /**
- * Host overlay chrome — comment / follow-up / delete-remark dialogs.
+ * Host overlay chrome — remark / delete-remark dialogs.
  * Mounted by the **call site**, not `SectionReviewHOC` (see
  * {@link reviewOverlayActions}).
  */
-export type ReviewOverlayArgs<
-  TypeNames extends string,
-  Params extends ParamsDom<TypeNames>,
-> = {
-  addition: Addition<TypeNames, Params> | null;
+export type ReviewOverlayArgs = {
+  addition: Addition | null;
   deleteCommentId: string | null;
-  setAddition: (addition: Addition<TypeNames, Params> | null) => void;
+  setAddition: (addition: Addition | null) => void;
   clearDelete: () => void;
   onSubmitComment: (text: string) => void;
   onConfirmDeleteComment: () => void;
-  onSubmitFormItem: (payload: {
-    comment?: string;
-    formItem?: SomeFormItem<TypeNames, Params>;
-    children?: RecursiveFormItem<TypeNames, Params, MetaDom<SIndexed>>[][];
-  }) => void;
-  tCommon: (term: "add" | "cancel" | "save" | "delete") => string;
+  tCommon: (term: "cancel" | "save" | "delete") => string;
 };
 
 /**
@@ -161,7 +139,7 @@ export type SectionReviewChrome<
     children: ReactNode;
     action: ReactNode;
   }) => ReactNode;
-  /** Editable comment card (top-level comment, or a comment-only follow-up entry). */
+  /** Editable unlock remark. */
   renderComment: (args: { text: string; onEdit: () => void }) => ReactNode;
   /** Wraps the comment card + follow-up form item nodes under one item. */
   renderFormItemAppendix: (nodes: ReactNode[]) => ReactNode;
@@ -183,7 +161,7 @@ export type SectionReviewChrome<
     }) => void;
   }) => ReactNode;
   renderActionIcon: (
-    kind: "lock" | "unlock" | "edit",
+    kind: "lock" | "unlock",
     onClick: () => void,
   ) => ReactNode;
   /**
@@ -210,8 +188,8 @@ export type SectionReviewProps<
   lastPending: Date | null;
   changes: AdditionalChanges<TypeNames, Params>;
   setChanges: (changes: AdditionalChanges<TypeNames, Params>) => void;
-  /** Opens the host overlay (comment / follow-up draft). Host mounts the editor. */
-  setAddition: (addition: Addition<TypeNames, Params> | null) => void;
+  /** Opens the host overlay (remark draft). Host mounts the editor. */
+  setAddition: (addition: Addition | null) => void;
   /** Opens the host overlay to confirm removing a remark. */
   setDeleteCommentId: (id: string | null) => void;
   /**

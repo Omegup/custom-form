@@ -189,13 +189,12 @@ const actionButtonStyle: CSSProperties = {
 };
 
 const ACTION_ICON: Record<
-  "lock" | "unlock" | "edit",
+  "lock" | "unlock",
   { glyph: string; label: string }
 > = {
   // Remark unlocks revise — lock = no remark yet; unlock = remark present.
   lock: { glyph: "🔒", label: "Locked — add remark to unlock" },
   unlock: { glyph: "🔓", label: "Unlocked by remark — remove remark" },
-  edit: { glyph: "✎", label: "Edit follow-up" },
 };
 
 /** Demo HTML chrome for `SectionReviewHOC` — not part of the library. */
@@ -289,9 +288,8 @@ export const renderReviewOverlays = ({
   clearDelete,
   onSubmitComment,
   onConfirmDeleteComment,
-  onSubmitFormItem,
   tCommon,
-}: lib.ReviewOverlayArgs<types.TypeNames, types.Params>) => {
+}: lib.ReviewOverlayArgs) => {
   if (deleteCommentId) {
     return (
       <div style={overlayBox}>
@@ -308,7 +306,7 @@ export const renderReviewOverlays = ({
     );
   }
 
-  if (addition?.mode === "comment") {
+  if (addition) {
     return (
       <div style={overlayBox}>
         <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -321,71 +319,6 @@ export const renderReviewOverlays = ({
         </label>
         <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
           <button type="button" onClick={() => onSubmitComment(addition.text ?? "")}>
-            {tCommon("save")}
-          </button>
-          <button type="button" onClick={() => setAddition(null)}>
-            {tCommon("cancel")}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (addition?.mode === "formItem") {
-    const formItem = addition.formItem;
-    return (
-      <div style={overlayBox}>
-        <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          <span>Follow-up comment</span>
-          <textarea
-            rows={2}
-            value={addition.comment ?? ""}
-            onChange={(e) => setAddition({ ...addition, comment: e.target.value })}
-          />
-        </label>
-        <label style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
-          <input
-            type="checkbox"
-            checked={!!formItem}
-            onChange={(e) =>
-              setAddition({
-                ...addition,
-                formItem: e.target.checked
-                  ? {
-                      id: `${addition.originId}-followup-${addition.replace?.index ?? Date.now()}`,
-                      type: "field",
-                      deleted: false,
-                      params: { name: "Follow-up field", required: false },
-                    }
-                  : undefined,
-              })
-            }
-          />
-          Attach a follow-up field
-        </label>
-        {formItem ? (
-          <label style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 8 }}>
-            <span>Field label</span>
-            <input
-              value={formItem.params.name}
-              onChange={(e) => {
-                if (formItem.type !== "field") return;
-                setAddition({
-                  ...addition,
-                  formItem: {
-                    ...formItem,
-                    params: { ...formItem.params, name: e.target.value },
-                  },
-                });
-              }}
-            />
-          </label>
-        ) : null}
-        <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-          <button
-            type="button"
-            onClick={() => onSubmitFormItem({ comment: addition.comment, formItem })}
-          >
             {tCommon("save")}
           </button>
           <button type="button" onClick={() => setAddition(null)}>

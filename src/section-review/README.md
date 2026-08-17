@@ -3,9 +3,10 @@
 **Section review shell** — teacher/admin read-only view of one section's
 answers: wires the same recursive-slot walk as `section-responder`, but
 threads a per-item `status` (`normal` / `disabled` / `highlight`) derived from
-reviewer `AdditionalChanges` + `lastPending`. Comment / follow-up overlay
-**editors** are host-owned (`setAddition` / `setDeleteCommentId` open them;
-the call site mounts chrome via `reviewOverlayActions`).
+reviewer `AdditionalChanges` + `lastPending`. Remark overlay **editors**
+are host-owned (`setAddition` / `setDeleteCommentId` open them; the call
+site mounts chrome via `reviewOverlayActions`). Follow-ups are not
+overlay state — they go through `renderAddFollowUp` / `renderFormItemsEditor`.
 
 Migrated from `school/components/custom-form` → `ui-packages/section-review-ui`
 (`SectionReviewHOC`). **No HTML in the library** — section/item/comment
@@ -16,11 +17,11 @@ are mounted by the **call site**, not this HOC.
 
 | File | Role |
 |---|---|
-| `types.ts` | `AdditionalChanges`, `Addition`/`CommentAddition`/`FormItemAddition`, `ReviewExtra`, `ReviewVariantState`, `SectionReviewChrome`, `SectionReviewProps` |
+| `types.ts` | `AdditionalChanges`, `Addition`/`CommentAddition`, `ReviewExtra`, `ReviewVariantState`, `SectionReviewChrome`, `SectionReviewProps` |
 | `reviewStatus.ts` | `reviewStatusFor` / `reviewVariantState` — highlight vs disabled vs pending yellow |
 | `reviewChanges.ts` | `withComment` / `withoutComment` / `withFormItemEntry` / `withUnansweredFormItems` — writes into `AdditionalChanges` |
 | `followUpPartition.ts` | `partitionFollowUpEntries` — answered (review chrome) vs unanswered (design editor) |
-| `reviewOverlayActions.ts` | overlay submit (`withComment` / `withFormItemEntry` / …) for the host-mounted editor |
+| `reviewOverlayActions.ts` | overlay submit (`withComment` / `withoutComment`) for the host-mounted remark editor |
 | `reviewRender.tsx` | `renderReviewColumns` — slot walk; unanswered rows go to the host editor |
 | `SectionReview.tsx` | **`SectionReviewHOC(viewers, chrome)`** — `FormItemHOC` + `renderSection`; opens overlays via setters |
 | `followUpEntriesFlat.ts` | `followUpEntriesToFlat` / `syncFollowUpEntriesFromFlat` — entries ↔ synthetic flat section |
@@ -54,10 +55,11 @@ between the fill and review shells.
 
 ### Overlay
 
-Host owns `addition` / `deleteCommentId` and mounts the editor next to
-`SectionReviewHOC`. The section only **opens** it (`setAddition` /
+Host owns `addition` / `deleteCommentId` and mounts the **remark** editor
+next to `SectionReviewHOC`. The section only **opens** it (`setAddition` /
 `setDeleteCommentId`). Submit writes `AdditionalChanges` via
-`reviewOverlayActions`.
+`reviewOverlayActions`. Follow-up items are committed in-tree
+(`renderAddFollowUp`) or edited via `renderFormItemsEditor` — not this overlay.
 
 A **remark unlocks** the answer for student revise: `unlock` icon when
 `comment` is set (click removes it); `lock` icon when none (click adds a

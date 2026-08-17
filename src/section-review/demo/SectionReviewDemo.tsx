@@ -155,8 +155,8 @@ const reviewVariants: Record<lib.ReviewVariantState, types.Variants> = {
   default: variants,
   change: followUpVariants,
 };
-const tCommon = (term: "add" | "cancel" | "save" | "delete") =>
-  ({ add: "Add", cancel: "Cancel", save: "Save", delete: "Delete" })[term];
+const tCommon = (term: "cancel" | "save" | "delete") =>
+  ({ cancel: "Cancel", save: "Save", delete: "Delete" })[term];
 
 export const SectionReviewDemo = ({
   heading,
@@ -169,9 +169,7 @@ export const SectionReviewDemo = ({
   updateArgs,
 }: types.DemoProps) => {
   const fillRef = useRef<SectionValidator | null>(null);
-  const [addition, setAddition] = useState<
-    lib.Addition<types.TypeNames, types.Params> | null
-  >(null);
+  const [addition, setAddition] = useState<lib.Addition | null>(null);
   const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
   const liveSection = sectionsFromFlat(flatItems)[0] ?? section;
 
@@ -264,7 +262,6 @@ export const SectionReviewDemo = ({
                 setChanges,
                 setAddition,
                 setDeleteCommentId,
-                lastPending: reviewPending ? demo.PENDING_DATE : null,
               }),
               tCommon,
             })}

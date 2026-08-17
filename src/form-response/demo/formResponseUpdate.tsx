@@ -26,9 +26,7 @@ export const UpdatePhase = ({
   showDeleted: boolean;
   updateArgs: types.DemoProps["updateArgs"];
 }) => {
-  const [addition, setAddition] = useState<
-    lib.Addition<types.TypeNames, types.Params> | null
-  >(null);
+  const [addition, setAddition] = useState<lib.Addition | null>(null);
   const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
   const [feedbackComment, setFeedbackComment] = useState("");
   const [statusNote, setStatusNote] = useState<string | null>(null);
@@ -96,7 +94,6 @@ export const UpdatePhase = ({
           setChanges: review.setChanges,
           setAddition,
           setDeleteCommentId,
-          lastPending,
         }),
         tCommon,
       })}

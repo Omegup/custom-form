@@ -139,5 +139,5 @@ export const FormReview = lib.CustomFormReviewHOC<
 
 export const reviewCtx = lib.branded<lib.SectionReviewContext, "context">({});
 
-export const tCommon = (term: "add" | "cancel" | "save" | "delete") =>
-  ({ add: "Add", cancel: "Cancel", save: "Save", delete: "Delete" })[term];
+export const tCommon = (term: "cancel" | "save" | "delete") =>
+  ({ cancel: "Cancel", save: "Save", delete: "Delete" })[term];

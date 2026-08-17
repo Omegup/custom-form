@@ -8,13 +8,12 @@ type Params = TheParams<{ field: { name: string } }>;
 
 describe("reviewOverlayActions", () => {
   it("writes a comment and clears the draft", () => {
-    const addition: Addition<TypeNames, Params> = {
+    const addition: Addition = {
       originId: "a",
-      mode: "comment",
       text: "fix",
     };
     let changes: AdditionalChanges<TypeNames, Params> = {};
-    let draft: Addition<TypeNames, Params> | null = addition;
+    let draft: Addition | null = addition;
     const actions = reviewOverlayActions({
       addition,
       deleteCommentId: null,
@@ -26,7 +25,6 @@ describe("reviewOverlayActions", () => {
         draft = next;
       },
       setDeleteCommentId: () => {},
-      lastPending: null,
     });
     actions.onSubmitComment("fix");
     expect(changes.a?.comment).toBe("fix");
@@ -49,7 +47,6 @@ describe("reviewOverlayActions", () => {
       setDeleteCommentId: (id) => {
         deleteCommentId = id;
       },
-      lastPending: null,
     });
     actions.onConfirmDeleteComment();
     expect(changes).toEqual({});

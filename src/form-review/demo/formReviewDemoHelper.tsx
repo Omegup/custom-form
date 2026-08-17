@@ -187,13 +187,12 @@ const actionButtonStyle: CSSProperties = {
 };
 
 const ACTION_ICON: Record<
-  "lock" | "unlock" | "edit",
+  "lock" | "unlock",
   { glyph: string; label: string }
 > = {
   // Remark unlocks revise — lock = no remark yet; unlock = remark present.
   lock: { glyph: "🔒", label: "Locked — add remark to unlock" },
   unlock: { glyph: "🔓", label: "Unlocked by remark — remove remark" },
-  edit: { glyph: "✎", label: "Edit follow-up" },
 };
 
 /** Demo HTML chrome for `CustomFormReviewHOC` — not part of the library. */

@@ -54,7 +54,7 @@ export type CustomFormReviewProps<
   lastPending: Date | null;
   changes: AdditionalChanges<TypeNames, Params>;
   setChanges: (changes: AdditionalChanges<TypeNames, Params>) => void;
-  setAddition: (addition: Addition<TypeNames, Params> | null) => void;
+  setAddition: (addition: Addition | null) => void;
   setDeleteCommentId: (id: string | null) => void;
   renderFormItemsEditor: (
     args: ReviewFormItemsEditorArgs<TypeNames, Params>,
