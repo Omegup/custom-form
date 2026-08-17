@@ -1,10 +1,13 @@
 /** Demo-only cross-package imports — see src/README.md import rules. */
 export * from "../index";
 export type {
+  ContextDom,
+  ExtraDom,
+  SomeFormItem,
   TheParams,
   TheVariants,
-  Children,
   TypedFormItem,
+  Children,
   Viewers,
 } from "../../form";
 export { branded } from "../../form";

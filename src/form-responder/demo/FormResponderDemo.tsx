@@ -54,19 +54,21 @@ const viewers: lib.Viewers<
   },
 };
 
-const variants = lib.branded<types.Variants, "variants">({ field: "default" });
-
 const FormResponder = lib.CustomFormResponderHOC<
   types.TypeNames,
   types.Params,
   types.Variants,
   types.Ctx,
   types.Section
->(viewers, variants, demo.formChrome);
+>(viewers, demo.formChrome);
 
 const ctx = lib.branded<types.Ctx, "context">({
   t: () => "Required",
 });
+const variants = lib.branded<types.Variants, "variants">({ field: "default" });
+const resolveVariant = <K extends types.TypeNames>(
+  item: lib.TypedFormItem<types.Params, K>,
+): types.Variants[K] => variants[item.type];
 
 export const FormResponderDemo = ({
   heading,
@@ -109,6 +111,8 @@ export const FormResponderDemo = ({
           getError={(id) => errors[id] ?? null}
           impRef={formRef}
           showDeleted={showDeleted}
+          resolveVariant={resolveVariant}
+          followUpItems={{}}
         />
         <button type="button" onClick={validateForm} style={{ alignSelf: "flex-start" }}>
           Validate

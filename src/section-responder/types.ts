@@ -12,11 +12,13 @@ import type {
   ExtraDom,
   MetaDom,
   ParamsDom,
+  RecursiveFormItem,
   Response,
   ResponseSetter,
   SectionDom,
   SectionMetaDom,
   SectionWithItems,
+  TypedFormItem,
   VariantsDom,
 } from "./_deps";
 
@@ -74,6 +76,14 @@ export type SectionResponderChrome = {
   }) => ReactNode;
   renderClearIcon: (onClear: () => void) => ReactNode;
   renderAppendix: (comment: string) => ReactNode;
+  /**
+   * Host wraps reviewer follow-ups that sit under their origin item
+   * (indent / yellow rail — same placement as review appendix).
+   */
+  renderFollowUpGroup: (args: {
+    originId: string;
+    items: ReactNode;
+  }) => ReactNode;
 };
 
 export type SectionResponderProps<
@@ -96,7 +106,19 @@ export type SectionResponderProps<
   setResponse: (id: string, response?: Response) => void;
   getError: (id: string) => string | null;
   impRef: Ref<SectionValidator>;
-  variants: Variants;
+  /** Per-item chrome key — host maps follow-ups to `"followUp"`, design items to `"default"`. */
+  resolveVariant: <K extends TypeNames>(
+    item: TypedFormItem<Params, K>,
+  ) => Variants[K];
+  /**
+   * Reviewer follow-ups keyed by **origin** item id (same keys as
+   * `AdditionalChanges`). Rendered under each origin — not merged into the
+   * design tree. Empty record when none.
+   */
+  followUpItems: Record<
+    string,
+    RecursiveFormItem<TypeNames, Params, Meta>[]
+  >;
   /** Section ordinal for the title (1-based display when `multiSection`). */
   i: number;
 };

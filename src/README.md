@@ -16,7 +16,9 @@ src/
 ├── flat-dnd/                SectionNodes ↔ drag-drop-tree (lib); demo wires headless DnD + HTML
 ├── form-dialogs/            Dialog orchestrator (makeUseDialogs) + All-in demo
 ├── section-responder/       Section fill shell (SectionResponderHOC)
-└── form-responder/          Multi-section fill shell (CustomFormResponderHOC)
+├── form-responder/          Multi-section fill shell (CustomFormResponderHOC)
+├── section-review/          Section review shell (SectionReviewHOC)
+└── form-review/             Multi-section review shell (CustomFormReviewHOC)
 ```
 
 Each module owns its **Storybook story** (`*.stories.tsx` with args/controls) and a **playground component** (`*Playground.tsx`). Vitest tests live in `*.test.ts`.
@@ -26,6 +28,7 @@ Each module owns its **Storybook story** (`*.stories.tsx` with args/controls) an
 ```
 form ◀── response (types only; form owns getUseImpRefViewProps)
 form / recursive-form / form-edit / response ──▶ section-responder ──▶ form-responder
+form / recursive-form / form-edit / response ──▶ section-review ──▶ form-review
 form ─────────────────────────────────────────┐
 recursive-form ───────────────────────────────┤
 move-actions ─────────────────────────────────┤
@@ -47,11 +50,17 @@ drag-drop-tree (standalone leaf, no _deps) ──▶ flat-dnd (+ form-edit)
 `response` is a leaf (types + `emptyResponse`). `form` imports it for
 `getUseImpRefViewProps`. `section-responder` composes form + response +
 `SectionWithItems` (form-edit) into a fillable section shell; `form-responder`
-stacks sections via `CustomFormResponderHOC`. `drag-drop-tree` is a leaf
-(no `_deps`). `flat-dnd` imports its **pure ops** only; `flat-dnd/demo` wires
-the headless React engine (`DnDTreeCore`, `RecursiveTreeNode`) and owns HTML
-chrome — see `demo/WebRecursiveEdit.tsx`. Stock school widgets also live under
-`drag-drop-tree/demo/`.
+stacks sections via `CustomFormResponderHOC`. `section-review` composes the
+same layers into a read-only teacher/admin review shell (per-item `status` +
+comment/follow-up-form-item overlays mutating `AdditionalChanges`); `form-review`
+stacks sections via `CustomFormReviewHOC`. `section-review`/`form-review` do
+**not** depend on `section-responder`/`form-responder` (siblings, not a
+stack) — a host may share one `viewers` bag between fill and review since
+`ResponderExtra` and `ReviewExtra` have the same shape. `drag-drop-tree` is a
+leaf (no `_deps`). `flat-dnd` imports its **pure ops** only; `flat-dnd/demo`
+wires the headless React engine (`DnDTreeCore`, `RecursiveTreeNode`) and owns
+HTML chrome — see `demo/WebRecursiveEdit.tsx`. Stock school widgets also live
+under `drag-drop-tree/demo/`.
 
 Module demos compose features via props or, for the all-in editor, in `form-dialogs/demo/AllInEditor.tsx`
 (`SectionFormItemHOC` + `WebRecursiveEdit` + `makeUseDialogs`). The demo injects
@@ -133,6 +142,8 @@ Use `branded({ ... })` to construct values; do not cast.
 - [response/README.md](./response/README.md)
 - [section-responder/README.md](./section-responder/README.md)
 - [form-responder/README.md](./form-responder/README.md)
+- [section-review/README.md](./section-review/README.md)
+- [form-review/README.md](./form-review/README.md)
 - [recursive-form/README.md](./recursive-form/README.md)
 - [move-actions/README.md](./move-actions/README.md)
 - [form-edit/README.md](./form-edit/README.md) — also [flat-raw-actions](./form-edit/flat-raw-actions/README.md), [section-layout](./form-edit/section-layout/README.md)

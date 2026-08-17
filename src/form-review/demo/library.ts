@@ -1,10 +1,10 @@
 /** Demo-only cross-package imports — see src/README.md import rules. */
 export * from "../index";
 export type {
+  SomeFormItem,
   TheParams,
   TheVariants,
   Children,
-  TypedFormItem,
   Viewers,
 } from "../../form";
 export { branded } from "../../form";
@@ -21,3 +21,4 @@ export type {
   ViewerMethods,
 } from "../../response";
 export { emptyResponse } from "../../response";
+export type { ReviewStatus } from "../../section-review";

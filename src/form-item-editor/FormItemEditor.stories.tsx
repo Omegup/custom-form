@@ -28,7 +28,7 @@ export default {
       },
       description: {
         component:
-          "Click **Edit** on a **field**, **heading**, or **panel** row. Labels come from name `viewers` + `createFormItemByGetChild` (same pattern as `form` demo). Panel embeds child fields and lets you change column count `n` (1↔2); Save commits via `form-edit` `applyFlatFormItem`. Field: required name, max length, duplicate-name check. Editors register `validate` on `impRef`.",
+          "Click **Edit** on a **field**, **heading**, or **panel** row. Labels come from name `viewers` + `createFormItemByGetChild` (same pattern as `form` demo). Panel embeds child fields and lets you change column count `n` (1↔2); Save commits via `form-edit` `applyFlatFormItem`. Field: required name, max length, duplicate-name check, plus **Required** toggle (`wrapWithRequired` / school `renderRequired`). Editors register `validate` on `impRef`.",
       },
     },
   },

@@ -1,5 +1,6 @@
 /**
- * Multi-section fill domain for `CustomFormResponder` — one text field type.
+ * Section review domain — Design → Response → Follow walkthrough for one
+ * section (same phases as the form-review demo, narrowed to a single section).
  */
 import type { Ref } from "react";
 import type * as lib from "./library";
@@ -14,9 +15,9 @@ export type Variants = lib.TheVariants<{
   field: "default" | "followUp";
 }>;
 
-export type Ctx = lib.SectionResponderContext;
+export type Ctx = lib.SectionReviewContext;
 
-export type Section = lib.SectionResponderHeader;
+export type Section = lib.SectionReviewHeader;
 
 export type ItemMeta = lib.MetaDom<Record<string, never>>;
 export type SectionMeta = lib.SectionMetaDom<lib.Indexed>;
@@ -31,16 +32,21 @@ export type ListSection = lib.SectionWithItems<
   ItemMeta
 >;
 
-export type FieldExtra = lib.ResponderExtra & {
+/** What the field viewer receives after `getUseImpRefViewProps`. */
+export type FieldExtra = lib.ReviewExtra & {
   impRef: Ref<lib.ViewerMethods>;
 };
 
+/** Demo walkthrough stage — not part of the library API. */
+export type DemoPhase = "design" | "response" | "follow";
+
 export type StoryArgs = {
   heading: string;
-  header: lib.FormHeader;
-  sections: ListSection[];
+  phase: DemoPhase;
+  section: ListSection;
   responses: Record<string, lib.Response>;
-  showDeleted: boolean;
+  changes: lib.AdditionalChanges<TypeNames, Params>;
+  reviewPending: boolean;
 };
 
 export type DemoProps = StoryArgs & {

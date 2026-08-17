@@ -80,3 +80,44 @@ concrete `Section` shape (the demo) write the four-line check inline.
 
 **Closed for `section-edit`:** do not reintroduce a library `validateSectionForm`.
 Host dialogs own required-field checks against their concrete form type.
+
+## Generic factories can escape indexed-access assignability
+
+TypeScript is stricter when checking a value against a **concrete**
+instantiation of a polymorphic type than when the same body is checked under
+an unbound type parameter.
+
+```typescript
+type M = { a: number; b: string };
+type Mapper<
+  Keys extends PropertyKey,
+  Src extends Record<Keys, unknown>,
+  Dst extends Record<Keys, unknown>,
+> = <K extends Keys>(x: Src[K]) => Dst[K];
+
+type Dst<M> = { [K in keyof M]: Promise<M[K]> };
+
+// ❌ Direct assign — Promise<M[K]> is not assignable to Dst<M>[K]
+//    (indexed access on a concrete mapped type does not reduce).
+const mapper: Mapper<keyof M, M, Dst<M>> = async (x) => x;
+
+// ✅ Factory — body is checked while M is still a type parameter; Dst<M>[K]
+//    unifies with Promise<M[K]>. Instantiating afterward is fine.
+const makeMapper = <M,>(): Mapper<keyof M, M, Dst<M>> => async (x) => x;
+const mapperOk = makeMapper<M>();
+```
+
+Same pitfall shows up with per-key maps whose value types **differ across
+keys** (e.g. `isError: (param: keyof Params[K]) => boolean` when only some
+`Params[K]` include `"required"`): assigning a generic hook body to a
+concrete `UseFormItemEditor<…, ItemStateMap>` fails; returning that body from
+`makeUse…<TypeNames, Params>()` succeeds without a cast.
+
+Prefer the factory form over `as` / `as unknown as` when you hit this
+pattern. Do **not** confuse this with inventing floating generics that drop
+domain constraints — see “Don't genericize a hardcoded assumption” above.
+The factory's type parameters must still be the real maps (`TypeNames`,
+`Params`, `ItemStateMap`, …).
+
+Related: never switch on concrete item type names outside viewers/editors —
+see `no-per-type-extension.mdc` (`withFormItemName` / `cloneFlatItems`).

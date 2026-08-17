@@ -2,7 +2,11 @@ import type * as types from "./sideMenuDemoTypes.t";
 
 /** Shared catalog for the side-menu demo (and any host that composes `AddFormItem`). */
 export const MENU_ITEMS: types.DemoMenuItem[] = [
-  { title: "Field", icon: "✎", header: { type: "field", params: { name: "" } } },
+  {
+    title: "Field",
+    icon: "✎",
+    header: { type: "field", params: { name: "", required: false } },
+  },
   {
     title: "Heading",
     icon: "§",
@@ -12,7 +16,7 @@ export const MENU_ITEMS: types.DemoMenuItem[] = [
     title: "Panel (2 columns)",
     icon: "▦",
     n: 2,
-    header: { type: "panel", params: { name: "" } },
+    header: { type: "panel", params: { name: "", multiple: false } },
   },
 ];
 

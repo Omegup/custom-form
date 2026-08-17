@@ -1,25 +1,21 @@
-/** Sibling re-exports for section-responder. See src/README.md import rules. */
+/** Sibling re-exports for section-review. See src/README.md import rules. */
 export type {
   Children,
   ContextDom,
   ExtraDom,
   ParamsDom,
-  TypedFormItem,
+  SomeFormItem,
   VariantsDom,
   Viewers,
-  WithChildren,
 } from "../form";
-export {
-  branded,
-  FormItemHOC,
-  getUseImpRefViewProps,
-} from "../form";
+export { branded, FormItemHOC, getUseImpRefViewProps } from "../form";
 export type { MetaDom, RecursiveFormItem } from "../recursive-form";
 export type {
   Indexed,
   SectionDom,
   SectionMetaDom,
   SectionWithItems,
+  SIndexed,
 } from "../form-edit";
 export type {
   Response,

@@ -92,6 +92,7 @@ export const formChrome: lib.FormResponderChrome = {
   renderAppendix: (comment) => (
     <div style={{ marginTop: 4, color: "#c00", fontSize: 12 }}>{comment}</div>
   ),
+  renderFollowUpGroup: ({ items }) => items,
 };
 
 const field = (

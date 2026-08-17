@@ -1,5 +1,6 @@
 /**
- * Multi-section fill domain for `CustomFormResponder` — one text field type.
+ * Multi-section review domain for `CustomFormReview` — one text field type,
+ * walked through Design → Response → Follow phases in the Storybook demo.
  */
 import type { Ref } from "react";
 import type * as lib from "./library";
@@ -14,9 +15,9 @@ export type Variants = lib.TheVariants<{
   field: "default" | "followUp";
 }>;
 
-export type Ctx = lib.SectionResponderContext;
+export type Ctx = lib.SectionReviewContext;
 
-export type Section = lib.SectionResponderHeader;
+export type Section = lib.SectionReviewHeader;
 
 export type ItemMeta = lib.MetaDom<Record<string, never>>;
 export type SectionMeta = lib.SectionMetaDom<lib.Indexed>;
@@ -31,15 +32,21 @@ export type ListSection = lib.SectionWithItems<
   ItemMeta
 >;
 
-export type FieldExtra = lib.ResponderExtra & {
+export type FieldExtra = lib.ReviewExtra & {
   impRef: Ref<lib.ViewerMethods>;
 };
 
+/** Demo walkthrough stage — not part of the library API. */
+export type DemoPhase = "design" | "response" | "follow";
+
 export type StoryArgs = {
   heading: string;
+  phase: DemoPhase;
   header: lib.FormHeader;
   sections: ListSection[];
   responses: Record<string, lib.Response>;
+  changes: lib.AdditionalChanges<TypeNames, Params>;
+  reviewPending: boolean;
   showDeleted: boolean;
 };
 

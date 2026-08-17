@@ -49,20 +49,27 @@ section: commit(header, cols)  → updateSectionInFlat(flatItems, session, heade
 
 ## Demo
 
-`form-dialogs/All-in` story (`demo/AllInEditor.tsx`): **`SectionFormItemHOC`**
-(`section-view`) as the list shell with **`renderEdit: WebRecursiveEdit`**
-(`flat-dnd/demo` — same plug-in as the flat-dnd story), with every dialog flow
-wired through one `useDialogs`:
+`form-dialogs/All-in` story (`demo/AllInEditor.tsx`) — **Design → Fill → Update**
+as **views** over school’s **two documents**:
 
-- row **Edit** → `openItemEdit`
-- **Side** sidebar catalog → `openItemInsert` (section picker when >1 live section)
-- in-slot **+ Add** (section & nested panel columns) → `makeUseRenderAddItem(setItemSession)`
-- section header **Edit** → `openSectionEdit`; **+ Add section** → `openSectionAdd`
-- drag rows to reorder within a column or into a nested panel column
+| Document | Story args | Role |
+|---|---|---|
+| **CustomForm** | `flatItems` | Design (sections / items) |
+| **FormResponse** | `formResponse` | Answers + `changes` + `feedbackHistory` + `status` — null until Send |
+
+1. **Design** — edit the CustomForm via **`SectionFormItemHOC`** + DnD + Library
+   + `useDialogs`.
+2. **Fill** — **`CustomFormResponderHOC`**; **Send** creates/updates
+   `formResponse` (school `addFormResponse`). Draft answers live in `responses`
+   until Send. A prior FormResponse becomes `old` for revise.
+3. **Update** — teacher view of the **same** `formResponse` via
+   **`CustomFormReviewHOC`**: Save (`addAdditionalQuestions`), Request changes /
+   Approve / Reject (`addFeedback`). Not a third document.
+
+JSON panels show CustomForm vs FormResponse (plus fill draft).
 
 Editors, dialog chrome, and fixtures are reused from the `form-item-editor`,
-`section-edit`, and `side-menu` demos (Storybook-only composition). List
-viewers are display-only; edits go through dialogs (not inline).
+`section-edit`, and `side-menu` demos (Storybook-only composition).
 
 ## Dependency rule
 
