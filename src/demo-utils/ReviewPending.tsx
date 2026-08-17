@@ -1,14 +1,11 @@
-import type { ReactNode } from "react";
 import { CheckboxLabel } from "./CheckboxLabel";
 
-export const ToolbarCheck = ({
+export const ReviewPending = ({
   checked,
   onChange,
-  children,
 }: {
   checked: boolean;
   onChange: (checked: boolean) => void;
-  children: ReactNode;
 }) => (
   <CheckboxLabel
     checked={checked}
@@ -18,6 +15,6 @@ export const ToolbarCheck = ({
     marginTop={0}
     color={null}
   >
-    {children}
+    Review round pending (highlight status)
   </CheckboxLabel>
 );

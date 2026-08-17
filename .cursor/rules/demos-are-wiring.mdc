@@ -56,6 +56,20 @@ Leave the ported [`src/drag-drop-tree/`](../../src/drag-drop-tree) **untouched**
 />
 ```
 
+A widget that **is** a specific control is named for that control and
+bakes its label. Do not export a generic `QuietCheck` / `ToolbarCheck` /
+`TextButton` that demos caption with `"Show deleted"`.
+
+```tsx
+// ❌ BAD — generic check; demo still owns the copy and the meaning
+<QuietCheck checked={showDeleted} onChange={setShowDeleted}>
+  Show deleted
+</QuietCheck>
+
+// ✅ GOOD — the widget is the control
+<ShowDeleted checked={showDeleted} onChange={setShowDeleted} />
+```
+
 `Stack` / `Row` / `Inline` stay in `demo-utils` for **other widgets** to
 compose. Package demos do not import them.
 

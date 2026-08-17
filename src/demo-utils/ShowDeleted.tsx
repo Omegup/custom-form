@@ -1,23 +1,20 @@
-import type { ReactNode } from "react";
 import { CheckboxLabel } from "./CheckboxLabel";
 
-export const QuietCheck = ({
+export const ShowDeleted = ({
   checked,
   onChange,
-  children,
 }: {
   checked: boolean;
   onChange: (checked: boolean) => void;
-  children: ReactNode;
 }) => (
   <CheckboxLabel
     checked={checked}
     onChange={onChange}
-    fontSize={11}
-    gap={4}
+    fontSize={14}
+    gap={6}
     marginTop={0}
-    color="#666"
+    color={null}
   >
-    {children}
+    Show deleted
   </CheckboxLabel>
 );

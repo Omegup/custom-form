@@ -4,7 +4,7 @@
  * Follow mounts `SectionReviewHOC`.
  */
 import { useCallback, useRef, useState, type Ref } from "react";
-import { BlockStack, DemoPage, PhaseBody, PhaseJsonPanels, PhaseTabs, ToolbarCheck } from "../../demo-utils";
+import { BlockStack, DemoPage, FollowControls, PhaseBody, PhaseJsonPanels, PhaseTabs } from "../../demo-utils";
 import { FormDialogsEditor, designSidebar } from "../../form-dialogs/demo/FormDialogsDemo";
 import {
   defaultVariant,
@@ -150,12 +150,14 @@ export const SectionReviewDemo = ({
 
         {phase === "follow" ? (
           <BlockStack>
-            <ToolbarCheck
-              checked={reviewPending}
-              onChange={(checked) => updateArgs({ reviewPending: checked })}
-            >
-              Review round pending (highlight status)
-            </ToolbarCheck>
+            <FollowControls
+              reviewPending={reviewPending}
+              onReviewPending={(checked) =>
+                updateArgs({ reviewPending: checked })
+              }
+              showDeleted={null}
+              onShowDeleted={null}
+            />
             <SectionReview
               ctx={ctx}
               multiSection={false}

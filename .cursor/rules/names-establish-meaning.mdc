@@ -15,6 +15,11 @@ Chrome / type slots get their meaning **at the definition**. A host
 reading `renderItemShell` should learn what a shell is, and what each
 argument does, without a side conversation.
 
+Demo-utils widgets follow the same rule: if the control is “Show
+deleted”, the component is `ShowDeleted` and owns that label. A
+generic `QuietCheck` that takes `"Show deleted"` as children still
+leaves the meaning at the call site.
+
 ```typescript
 // ❌ BAD — name is a gesture; behavior is a data copy
 renderItemShell: (args: { onActivate: (() => void) | null }) => ReactNode

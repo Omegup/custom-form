@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ConfirmBanner, DemoPage, TextButton } from "../../demo-utils";
+import { ConfirmBanner, DemoPage, ShowDeleted } from "../../demo-utils";
 import * as demo from "./editFormDemoHelper";
 import * as types from "./editFormDemoTypes.t";
 import * as lib from "./library";
@@ -45,9 +45,7 @@ export const EditFormTest = ({
     </ConfirmBanner>
   );
   const details = (
-    <TextButton onClick={() => setShowDeleted(!showDeleted)}>
-      {showDeleted ? "Hide deleted" : "Show deleted"}
-    </TextButton>
+    <ShowDeleted checked={showDeleted} onChange={setShowDeleted} />
   );
   const sectionsNode = (
     <demo.SectionsList>

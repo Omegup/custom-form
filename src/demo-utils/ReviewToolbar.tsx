@@ -1,4 +1,4 @@
-import { ToolbarCheck } from "./ToolbarCheck";
+import { ShowDeleted } from "./ShowDeleted";
 import { ToneNote } from "./ToneNote";
 import { Toolbar } from "./Toolbar";
 
@@ -26,9 +26,7 @@ export const ReviewToolbar = ({
     <button type="button" onClick={onRevert} disabled={!dirty}>
       Cancel
     </button>
-    <ToolbarCheck checked={showDeleted} onChange={onShowDeleted}>
-      Show deleted sections
-    </ToolbarCheck>
+    <ShowDeleted checked={showDeleted} onChange={onShowDeleted} />
     <ToneNote tone="meta">{statusLine}</ToneNote>
     {statusNote ? <ToneNote tone="ok">{statusNote}</ToneNote> : null}
   </Toolbar>

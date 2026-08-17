@@ -1,7 +1,7 @@
 /**
  * Section `renderEdit` — school `FlatDnd`/`RecursiveEdit` wiring.
- * Demo owns all HTML; `drag-drop-tree` lib is headless (`DnDTreeCore` +
- * `RecursiveTreeNode`). Drop indicator chrome is local.
+ * Demo wires demo-utils chrome; `drag-drop-tree` lib is headless
+ * (`DnDTreeCore` + `RecursiveTreeNode`). Drop indicator chrome is local.
  */
 import { useMemo, useRef, useState } from "react";
 import {
@@ -9,9 +9,9 @@ import {
   DragItem,
   DropLine,
   EmptyDropColumn,
-  QuietCheck,
   SectionColumn,
   SectionPanel,
+  ShowDeleted,
 } from "../../demo-utils";
 import { DnDTreeCore, RecursiveTreeNode, type Handlers } from "../../drag-drop-tree";
 import * as lib from "./library";
@@ -51,9 +51,7 @@ export const WebRecursiveEdit = <
       sectionActions={actions}
       sectionExtra={[]}
       headerExtra={
-        <QuietCheck checked={showDeleted} onChange={setShowDeleted}>
-          Show deleted
-        </QuietCheck>
+        <ShowDeleted checked={showDeleted} onChange={setShowDeleted} />
       }
       columns={[
         <DnDTreeCore<lib.DndNodeValue<TypeNames, Params>>

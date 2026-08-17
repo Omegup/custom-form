@@ -4,7 +4,7 @@
  * Follow mounts `CustomFormReviewHOC`.
  */
 import { useCallback, useRef, useState, type Ref } from "react";
-import { BlockStack, DemoPage, FollowBar, FormTitle, PhaseBody, PhaseJsonPanels, PhaseTabs, ToolbarCheck } from "../../demo-utils";
+import { BlockStack, DemoPage, FollowControls, FormTitle, PhaseBody, PhaseJsonPanels, PhaseTabs } from "../../demo-utils";
 import { FormDialogsEditor, designSidebar } from "../../form-dialogs/demo/FormDialogsDemo";
 import {
   defaultVariant,
@@ -160,20 +160,14 @@ export const FormReviewDemo = ({
 
         {phase === "follow" ? (
           <BlockStack>
-            <FollowBar>
-              <ToolbarCheck
-                checked={reviewPending}
-                onChange={(checked) => updateArgs({ reviewPending: checked })}
-              >
-                Review round pending (highlight status)
-              </ToolbarCheck>
-              <ToolbarCheck
-                checked={showDeleted}
-                onChange={(checked) => updateArgs({ showDeleted: checked })}
-              >
-                Show deleted sections
-              </ToolbarCheck>
-            </FollowBar>
+            <FollowControls
+              reviewPending={reviewPending}
+              onReviewPending={(checked) =>
+                updateArgs({ reviewPending: checked })
+              }
+              showDeleted={showDeleted}
+              onShowDeleted={(checked) => updateArgs({ showDeleted: checked })}
+            />
             <FormReview
               ctx={ctx}
               header={header}

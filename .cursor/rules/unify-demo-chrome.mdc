@@ -34,8 +34,10 @@ Same for lock icons, remark cards, `useFieldMethods`. Shared **UI**
 `ReviewStatusNote`, `Stack`, `Row`, `SectionFrame`, `FieldRow`, …)
 lives in `src/demo-utils/` — see `demos-are-wiring.mdc`. Package
 demos **wire** those widgets; they do not own `style={{…}}`, leftover
-`<strong>`/`<button>`, or layout knobs (`gap={8}`, `align`,
-`fontSize`). Named widgets take data/callbacks only.
+`<strong>`/`<button>`, layout knobs (`gap={8}`, `align`,
+`fontSize`), or chrome copy as `children` (`"Show deleted"`). A
+control is named for what it is (`ShowDeleted`, `ReviewPending`) and
+bakes its label. Named widgets take data/callbacks only.
 If blurbs or fixtures differ, pass them as **required** props — do not
 duplicate the widget.
 
@@ -62,5 +64,6 @@ not draft/list HTML. If several field viewers show it, they compose the same
 mark.
 
 Related: `no-html-outside-demo.mdc` (no HTML in library),
-`no-optional-defaults.mdc` (host/demo still passes copy),
+`no-optional-defaults.mdc` (library still does not invent copy;
+demo-utils named controls bake theirs),
 `demos-are-wiring.mdc` (UI widgets live in `src/demo-utils/`).
