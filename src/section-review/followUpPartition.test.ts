@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { TheParams } from "../form";
-import { partitionFollowUpEntries } from "./followUpPartition";
+import { followUpEntryAsItem, partitionFollowUpEntries } from "./followUpPartition";
 import type { ReviewFormItemEntry } from "./types";
 
 type TypeNames = "field";
@@ -28,5 +28,27 @@ describe("partitionFollowUpEntries", () => {
       ["note", 1],
       ["open", 2],
     ]);
+  });
+
+  it("turns an answered entry into a review tree item", () => {
+    const children = [
+      [
+        {
+          header: field("child").formItem!,
+          children: [],
+          meta: { index: 0, total: 1, sIndex: 0 },
+        },
+      ],
+    ];
+    const entry: ReviewFormItemEntry<TypeNames, Params> = {
+      ...field("done"),
+      children,
+    };
+    expect(followUpEntryAsItem(entry)).toEqual({
+      header: entry.formItem,
+      children,
+      meta: { index: 0, total: 1, sIndex: 0 },
+    });
+    expect(followUpEntryAsItem({ comment: "note", date: null })).toBeNull();
   });
 });

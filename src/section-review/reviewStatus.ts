@@ -137,3 +137,38 @@ export const reviewVariantState = <
     hasUnansweredFollowUps(args.changes, args.id, args.isAnswered);
   return pending ? "change" : "default";
 };
+
+/** Flags + chrome picks for one reviewed item (originals and answered follow-ups). */
+export const reviewItemState = <
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames>,
+>(args: {
+  id: string;
+  changes: AdditionalChanges<TypeNames, Params>;
+  responses: Record<string, Response>;
+  lastPending: Date | null;
+  isAnswered: (id: string) => boolean;
+}): {
+  unlocked: boolean;
+  designingFollowUps: boolean;
+  variant: ReviewVariantState;
+  status: ReviewStatus;
+} => {
+  const unlocked = hasUnlockRemark(args.changes, args.id);
+  const designingFollowUps = hasUnansweredFollowUps(
+    args.changes,
+    args.id,
+    args.isAnswered,
+  );
+  return {
+    unlocked,
+    designingFollowUps,
+    variant: reviewVariantState({
+      id: args.id,
+      isUnansweredFollowUpEntry: false,
+      changes: args.changes,
+      isAnswered: args.isAnswered,
+    }),
+    status: reviewStatusFor({ ...args, unlocked }),
+  };
+};

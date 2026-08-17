@@ -18,7 +18,10 @@ export {
   followUpEntriesToFlat,
   syncFollowUpEntriesFromFlat,
 } from "./followUpEntriesFlat";
-export { partitionFollowUpEntries } from "./followUpPartition";
+export {
+  followUpEntryAsItem,
+  partitionFollowUpEntries,
+} from "./followUpPartition";
 export {
   withComment,
   withFormItemEntry,
@@ -30,6 +33,7 @@ export {
   hasUnansweredFollowUps,
   hasUnlockRemark,
   isAnsweredResponse,
+  reviewItemState,
   reviewStatusFor,
   reviewVariantState,
 } from "./reviewStatus";

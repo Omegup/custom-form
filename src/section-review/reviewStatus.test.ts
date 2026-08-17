@@ -4,6 +4,7 @@ import type { Response } from "../response";
 import {
   hasUnlockRemark,
   isAnsweredResponse,
+  reviewItemState,
   reviewStatusFor,
   reviewVariantState,
 } from "./reviewStatus";
@@ -187,5 +188,59 @@ describe("reviewVariantState", () => {
         isAnswered: () => true,
       }),
     ).toBe("default");
+  });
+});
+
+describe("reviewItemState", () => {
+  const isAnswered = (id: string) => id === "open" ? false : true;
+
+  it("bundles unlock, unanswered follow-ups, variant, and status", () => {
+    const changes: Changes = {
+      a: {
+        comment: "fix",
+        formItems: [
+          {
+            formItem: {
+              id: "open",
+              type: "field",
+              deleted: false,
+              params: { name: "More" },
+            },
+            date: null,
+          },
+        ],
+      },
+    };
+    expect(
+      reviewItemState({
+        id: "a",
+        changes,
+        responses: { a: answered },
+        lastPending: null,
+        isAnswered,
+      }),
+    ).toEqual({
+      unlocked: true,
+      designingFollowUps: true,
+      variant: "change",
+      status: "normal",
+    });
+  });
+
+  it("is settled when there is no remark and no unanswered follow-up", () => {
+    expect(
+      reviewItemState({
+        id: "a",
+        changes: {},
+        responses: { a: answered },
+        lastPending: null,
+        isAnswered,
+      }),
+    ).toEqual({
+      unlocked: false,
+      designingFollowUps: false,
+      variant: "default",
+      status: "highlight",
+    });
   });
 });

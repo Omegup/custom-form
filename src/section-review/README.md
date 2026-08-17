@@ -18,9 +18,9 @@ are mounted by the **call site**, not this HOC.
 | File | Role |
 |---|---|
 | `types.ts` | `AdditionalChanges`, `Addition`/`CommentAddition`, `ReviewExtra`, `ReviewVariantState`, `SectionReviewChrome`, `SectionReviewProps` |
-| `reviewStatus.ts` | `reviewStatusFor` / `reviewVariantState` — highlight vs disabled vs pending yellow |
+| `reviewStatus.ts` | `reviewItemState` / `reviewStatusFor` / `reviewVariantState` — unlock, unanswered follow-ups, highlight vs pending yellow |
 | `reviewChanges.ts` | `withComment` / `withoutComment` / `withFormItemEntry` / `withUnansweredFormItems` — writes into `AdditionalChanges` |
-| `followUpPartition.ts` | `partitionFollowUpEntries` — answered (review chrome) vs unanswered (design editor) |
+| `followUpPartition.ts` | `partitionFollowUpEntries` / `followUpEntryAsItem` — answered tree rows vs unanswered editor |
 | `reviewOverlayActions.ts` | overlay submit (`withComment` / `withoutComment`) for the host-mounted remark editor |
 | `reviewRender.tsx` | `renderReviewColumns` — slot walk; unanswered rows go to the host editor |
 | `SectionReview.tsx` | **`SectionReviewHOC(viewers, chrome)`** — `FormItemHOC` + `renderSection`; opens overlays via setters |

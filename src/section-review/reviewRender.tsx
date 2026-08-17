@@ -9,20 +9,16 @@ import type {
   ParamsDom,
   RecursiveFormItem,
   Response,
-  SIndexed,
   SomeFormItem,
   VariantsDom,
 } from "./_deps";
 import { branded, emptyResponse } from "./_deps";
-import { partitionFollowUpEntries } from "./followUpPartition";
-import { withFormItemEntry, withUnansweredFormItems } from "./reviewChanges";
 import {
-  hasUnansweredFollowUps,
-  hasUnlockRemark,
-  isAnsweredResponse,
-  reviewStatusFor,
-  reviewVariantState,
-} from "./reviewStatus";
+  followUpEntryAsItem,
+  partitionFollowUpEntries,
+} from "./followUpPartition";
+import { withFormItemEntry, withUnansweredFormItems } from "./reviewChanges";
+import { isAnsweredResponse, reviewItemState } from "./reviewStatus";
 import type {
   AdditionalChanges,
   Addition,
@@ -73,6 +69,18 @@ type ReviewLive<
   }) => ReactNode;
 };
 
+const withIdSuffix = <
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames>,
+  Meta extends MetaDom,
+>(
+  item: RecursiveFormItem<TypeNames, Params, Meta>,
+  idSuffix: string,
+): RecursiveFormItem<TypeNames, Params, Meta> =>
+  idSuffix
+    ? { ...item, header: { ...item.header, id: item.header.id + idSuffix } }
+    : item;
+
 export const renderReviewColumns = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
@@ -115,14 +123,7 @@ export const renderReviewColumns = <
       <Fragment key={col}>
         {items
           .filter(({ header }) => !header.deleted || isAnswered(header.id))
-          .map((item) =>
-            idSuffix
-              ? {
-                  ...item,
-                  header: { ...item.header, id: item.header.id + idSuffix },
-                }
-              : item,
-          )
+          .map((item) => withIdSuffix(item, idSuffix))
           .map((item, index) => (
             <Fragment key={item.header.id}>
               {renderItem(item, index, deleted, false)}
@@ -138,13 +139,16 @@ export const renderReviewColumns = <
     fromFollowUpTree: boolean,
   ): ReactNode => {
     const q = item.header;
-    const unlocked = hasUnlockRemark(changes, q.id);
-    const designingFollowUps = hasUnansweredFollowUps(
+    const { unlocked, designingFollowUps, variant, status } = reviewItemState({
+      id: q.id,
       changes,
-      q.id,
+      responses,
+      lastPending,
       isAnswered,
-    );
+    });
     const appendix = appendixFor(q.id);
+    const showFollowUpMark =
+      fromFollowUpTree && !unlocked && !designingFollowUps;
 
     return renderItemShell({
       id: q.id,
@@ -164,15 +168,7 @@ export const renderReviewColumns = <
           }),
       children: renderFormItem({
         formItem: q,
-        variant:
-          variants[
-            reviewVariantState({
-              id: q.id,
-              isUnansweredFollowUpEntry: false,
-              changes,
-              isAnswered,
-            })
-          ],
+        variant: variants[variant],
         extra: branded({
           getChild: (suffix: string) => (
             <>
@@ -188,9 +184,7 @@ export const renderReviewColumns = <
           index,
           icon: (
             <>
-              {fromFollowUpTree && !unlocked && !designingFollowUps
-                ? renderFollowUpMark()
-                : null}
+              {showFollowUpMark ? renderFollowUpMark() : null}
               {renderActionIcon(unlocked ? "unlock" : "lock", () => {
                 if (unlocked) setDeleteCommentId(q.id);
                 else setAddition({ originId: q.id });
@@ -204,14 +198,7 @@ export const renderReviewColumns = <
           appendix: appendix.length
             ? renderFormItemAppendix(appendix)
             : undefined,
-          status: reviewStatusFor({
-            id: q.id,
-            unlocked,
-            changes,
-            responses,
-            lastPending,
-            isAnswered,
-          }),
+          status,
           impRef: null,
         }),
       }),
@@ -229,10 +216,7 @@ export const renderReviewColumns = <
           {renderComment({
             text: change.comment,
             onEdit: () =>
-              setAddition({
-                originId,
-                text: change.comment,
-              }),
+              setAddition({ originId, text: change.comment }),
           })}
         </Fragment>,
       );
@@ -244,18 +228,10 @@ export const renderReviewColumns = <
     );
 
     for (const entry of answered) {
-      if (!entry.formItem) continue;
-      const followUp: RecursiveFormItem<
-        TypeNames,
-        Params,
-        MetaDom<SIndexed>
-      > = {
-        header: entry.formItem,
-        children: entry.children ?? [],
-        meta: { index: 0, total: 1, sIndex: 0 },
-      };
+      const followUp = followUpEntryAsItem(entry);
+      if (!followUp) continue;
       nodes.push(
-        <Fragment key={entry.formItem.id}>
+        <Fragment key={followUp.header.id}>
           {renderItem(followUp, 0, false, true)}
         </Fragment>,
       );
@@ -266,7 +242,7 @@ export const renderReviewColumns = <
         <Fragment key="form-items-editor">
           {renderFormItemsEditor({
             entries: unanswered.map(({ entry }) => entry),
-            setEntries: (nextUnanswered) => {
+            setEntries: (nextUnanswered) =>
               setChanges(
                 withUnansweredFormItems(
                   changes,
@@ -274,8 +250,7 @@ export const renderReviewColumns = <
                   nextUnanswered,
                   isAnswered,
                 ),
-              );
-            },
+              ),
           })}
         </Fragment>,
       );
