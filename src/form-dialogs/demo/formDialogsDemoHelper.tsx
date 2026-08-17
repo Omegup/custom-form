@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { RequiredMark } from "../../demo-utils";
+import { ItemCaption, RequiredMark, VariantShell } from "../../demo-utils";
 import {
   FieldLabel,
   HeadingLabel,
@@ -65,12 +65,9 @@ export const renderCard = (
 ) => {
   const { extra, ctx, formItem, variant } = viewProps;
   return (
-    <div style={variant.shell}>
+    <VariantShell shell={variant.shell}>
       {renderListCard(
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-          {view}
-          {variant.badge}
-        </span>,
+        <ItemCaption badge={variant.badge}>{view}</ItemCaption>,
         {
           focused: ctx.autoFocused(formItem.id),
           actions: extra.actions,
@@ -81,7 +78,7 @@ export const renderCard = (
             : [{ label: "Edit", onClick: extra.onEdit }],
         },
       )}
-    </div>
+    </VariantShell>
   );
 };
 

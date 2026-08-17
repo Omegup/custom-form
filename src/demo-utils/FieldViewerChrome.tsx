@@ -9,7 +9,8 @@ export const FieldViewerChrome = ({
   icon,
   appendix,
   shell,
-  nameStyle,
+  muted,
+  emphasis,
   children,
 }: {
   name: ReactNode;
@@ -18,7 +19,8 @@ export const FieldViewerChrome = ({
   icon: ReactNode | null;
   appendix: ReactNode | null;
   shell: CSSProperties;
-  nameStyle: CSSProperties | null;
+  muted: boolean;
+  emphasis: boolean;
   children: ReactNode;
 }) => (
   <div style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 14 }}>
@@ -28,7 +30,8 @@ export const FieldViewerChrome = ({
           display: "flex",
           alignItems: "center",
           gap: 6,
-          ...nameStyle,
+          fontWeight: emphasis ? 700 : 400,
+          color: muted ? "#777" : undefined,
         }}
       >
         {name}

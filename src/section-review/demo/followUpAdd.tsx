@@ -3,7 +3,7 @@
  * Session/commit and entries↔flat bind live in the section-review library.
  */
 import { Fragment } from "react";
-import { DropdownMenu } from "../../demo-utils";
+import { CornerSlot, DropdownMenu, FollowUpRail, FollowUpTrigger } from "../../demo-utils";
 import { AMBIGUOUS_INSERT_SPAN } from "../../form-edit";
 import { FormDialogsEditor } from "../../form-dialogs/demo/FormDialogsDemo";
 import type * as dialogTypes from "../../form-dialogs/demo/formDialogsDemoTypes.t";
@@ -38,21 +38,7 @@ const renderFollowUpIconAdd = ({
     open={open}
     align="end"
     trigger={
-      <button
-        type="button"
-        aria-label={label}
-        aria-expanded={open}
-        onClick={toggle}
-        style={{
-          border: "none",
-          background: "transparent",
-          cursor: "pointer",
-          fontSize: 14,
-          lineHeight: 1,
-        }}
-      >
-        💬
-      </button>
+      <FollowUpTrigger onClick={toggle} label={label} />
     }
   >
     {items.map((item) => (
@@ -79,7 +65,7 @@ export const FollowUpAdd = ({
 
   return (
     <>
-      <div style={{ position: "absolute", top: 0, right: 0 }}>
+      <CornerSlot>
         <AddFormItem
           span={AMBIGUOUS_INSERT_SPAN}
           menuItems={MENU_ITEMS}
@@ -88,7 +74,7 @@ export const FollowUpAdd = ({
           render={renderFollowUpIconAdd}
           setAddItem={add.setSession}
         />
-      </div>
+      </CornerSlot>
       {add.session ? (
         <FormItemEditor
           ctx={ctx}
@@ -118,21 +104,16 @@ export const FollowUpDrafts = ({
 }) => {
   const list = lib.followUpDraftsList(entries, setEntries, FOLLOW_UP_SECTION);
   return (
-    <div
-      style={{
-        marginTop: 8,
-        marginLeft: 8,
-        padding: "8px 8px 8px 12px",
-        borderLeft: "3px solid #e6b800",
-        background: "#fffbeb",
-        borderRadius: "0 6px 6px 0",
-      }}
+    <FollowUpRail
+      border="#e6b800"
+      background="#fffbeb"
+      label={null}
     >
       <FormDialogsEditor
         sidebar={null}
         flatItems={list.flatItems}
         setFlatItems={list.setFlatItems}
       />
-    </div>
+    </FollowUpRail>
   );
 };

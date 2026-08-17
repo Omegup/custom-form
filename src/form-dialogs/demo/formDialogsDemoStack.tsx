@@ -3,6 +3,7 @@
  * FormDialogsDemo mounts this; it owns layout.
  */
 import { createContext, useContext, type ReactNode } from "react";
+import { HeadingEdit } from "../../demo-utils";
 import { WebRecursiveEdit } from "../../flat-dnd/demo/WebRecursiveEdit";
 import {
   FormItemEditor,
@@ -48,15 +49,12 @@ const SectionTitle = (
 ) => {
   const { openSectionEdit } = useContext(DialogActionsCtx);
   const { section } = props;
+  const editable = openSectionEdit && !section.header.deleted;
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-      <strong>{section.header.title}</strong>
-      {openSectionEdit && !section.header.deleted && (
-        <button type="button" onClick={() => openSectionEdit(section)}>
-          Edit
-        </button>
-      )}
-    </span>
+    <HeadingEdit
+      title={section.header.title}
+      edit={editable && (() => openSectionEdit(section))}
+    />
   );
 };
 
@@ -65,11 +63,7 @@ const useRenderAddItem = lib.makeUseRenderAddItem<
   types.Params
 >(
   (args) => (
-    <lib.AddFormItem
-      {...args}
-      label="+ Add item"
-      render={renderAddFormItem}
-    />
+    <lib.AddFormItem {...args} label="+ Add item" render={renderAddFormItem} />
   ),
   () => MENU_ITEMS,
   randomId,
@@ -132,9 +126,7 @@ export const designSidebar = ({
     blankSection={blankSection}
     render={renderSide}
     renderMenuItem={renderMenuItem}
-    setAddFormItem={(item) =>
-      openItemInsert(item, lib.AMBIGUOUS_INSERT_SPAN)
-    }
+    setAddFormItem={(item) => openItemInsert(item, lib.AMBIGUOUS_INSERT_SPAN)}
     setAddSection={openSectionAdd}
   />
 );

@@ -4,7 +4,7 @@
  * Each field writes `data.value`; Validate runs every `impRef.validate`.
  */
 import { useCallback, useRef, useState } from "react";
-import { DemoPage, PhaseJsonPanels } from "../../demo-utils";
+import { DemoPage, PhaseJsonPanels, ValidateBlock } from "../../demo-utils";
 import { FillFieldViewer, defaultFillVariant } from "./FillFieldViewer";
 import type * as types from "./responseDemoTypes.t";
 import * as lib from "./library";
@@ -78,7 +78,7 @@ export const ResponseDemo = ({
 
   return (
     <DemoPage title={heading}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <ValidateBlock onValidate={validateAll}>
         {items.map((item) => {
           const value = responses[item.id] ?? lib.emptyResponse();
           return (
@@ -105,15 +105,12 @@ export const ResponseDemo = ({
             />
           );
         })}
-        <button type="button" onClick={validateAll} style={{ alignSelf: "flex-start" }}>
-          Validate
-        </button>
         <PhaseJsonPanels
           heading="State"
           activeId="responses"
           panels={[{ id: "responses", title: "Responses", value: responses }]}
         />
-      </div>
+      </ValidateBlock>
     </DemoPage>
   );
 };

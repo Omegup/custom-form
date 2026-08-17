@@ -3,7 +3,7 @@
  * one section of fillable fields, section-level Validate via `impRef`.
  */
 import { useCallback, useRef, useState, type Ref } from "react";
-import { DemoPage, PhaseJsonPanels, PhaseTabs } from "../../demo-utils";
+import { DemoPage, PhaseJsonPanels, PhaseTabs, ValidateBlock } from "../../demo-utils";
 import { FormDialogsEditor, designSidebar } from "../../form-dialogs/demo/FormDialogsDemo";
 import { FillFieldViewer, defaultFillVariant } from "../../response/demo/FillFieldViewer";
 import {
@@ -118,7 +118,7 @@ export const SectionResponderDemo = ({
           }}
         />
       ) : (
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <ValidateBlock onValidate={validateSection}>
         <SectionResponder
           ctx={ctx}
           multiSection={false}
@@ -132,10 +132,7 @@ export const SectionResponderDemo = ({
           followUpItems={{}}
           i={0}
         />
-        <button type="button" onClick={validateSection} style={{ alignSelf: "flex-start" }}>
-          Validate
-        </button>
-      </div>
+      </ValidateBlock>
       )}
       <PhaseJsonPanels
         heading="JSON by phase"

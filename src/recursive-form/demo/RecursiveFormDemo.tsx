@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { DemoPage } from "../../demo-utils";
+import { DemoPage, PlainInput } from "../../demo-utils";
 import * as demo from "./recursiveFormDemoHelper";
 import type {
   Context,
@@ -46,9 +46,10 @@ const decorateViewers: ViewersDecorator = (inner) => ({
 const viewersValues: Viewers<ValueExtra> = decorateViewers({
   text: {
     viewer: ({ props: { extra } }) => (
-      <input
+      <PlainInput
         value={extra.value}
-        onChange={(e) => extra.onChange(e.target.value)}
+        onChange={extra.onChange}
+        disabled={false}
       />
     ),
   },
@@ -61,7 +62,7 @@ const viewersValues: Viewers<ValueExtra> = decorateViewers({
 const viewersSkeleton: Viewers = decorateViewers({
   text: {
     viewer: ({ props: { formItem } }) => (
-      <input value={formItem.params.label} disabled />
+      <PlainInput value={formItem.params.label} onChange={null} disabled={true} />
     ),
   },
   group: {

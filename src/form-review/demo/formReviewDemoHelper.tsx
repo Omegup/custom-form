@@ -1,4 +1,4 @@
-import { FormTitle, type PhaseTab, ReviewStatusNote } from "../../demo-utils";
+import { FormTitle, PhaseBody, type PhaseTab, ReviewStatusNote } from "../../demo-utils";
 import {
   PENDING_DATE,
   SectionFrame,
@@ -41,11 +41,11 @@ export const formChrome: lib.FormReviewChrome<types.TypeNames, types.Params> = {
     />
   ),
   renderForm: ({ header, sections, children }) => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+    <PhaseBody>
       {header}
       {sections}
       {children}
-    </div>
+    </PhaseBody>
   ),
   renderSection: (args) => <SectionFrame {...args} note={null} />,
 };

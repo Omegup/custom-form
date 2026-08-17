@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ConfirmBanner, EditorDialog, RequiredMark, TextField } from "../../demo-utils";
+import { ConfirmBanner, EditorDialog, LengthHint, RequiredMark, RequiredToggle, MultipleToggle, SelectField, TextField } from "../../demo-utils";
 import {
   FieldLabel,
   HeadingLabel,
@@ -51,34 +51,7 @@ export const NameField = ({
   />
 );
 
-/**
- * School `editors/required` `renderRequired` — Switch toggling
- * `params.required`. Demo chrome only (library stays host-agnostic).
- */
-export const RequiredToggle = ({
-  checked,
-  onChange,
-}: {
-  checked: boolean;
-  onChange: (required: boolean) => void;
-}) => (
-  <label
-    style={{
-      display: "flex",
-      alignItems: "center",
-      gap: 8,
-      fontSize: 13,
-      marginTop: 4,
-    }}
-  >
-    <input
-      type="checkbox"
-      checked={checked}
-      onChange={(e) => onChange(e.target.checked)}
-    />
-    Required
-  </label>
-);
+export { RequiredToggle, MultipleToggle };
 
 /**
  * School `question()` slice for required — wrap a field editor so the
@@ -102,31 +75,6 @@ export const wrapWithRequired =
   );
 
 /** School panel `multiple` — student may add many answer rows. */
-export const MultipleToggle = ({
-  checked,
-  onChange,
-}: {
-  checked: boolean;
-  onChange: (multiple: boolean) => void;
-}) => (
-  <label
-    style={{
-      display: "flex",
-      alignItems: "center",
-      gap: 8,
-      fontSize: 13,
-      marginTop: 4,
-    }}
-  >
-    <input
-      type="checkbox"
-      checked={checked}
-      onChange={(e) => onChange(e.target.checked)}
-    />
-    Multiple answers
-  </label>
-);
-
 export const wrapWithMultiple =
   (
     Editor: (props: types.PanelEditorProps) => ReactNode,
@@ -146,16 +94,13 @@ export const wrapWithMultiple =
 const MAX_NAME_LEN = 10;
 
 export const NameLengthHint = ({ name }: { name: string }) => (
-  <p
-    style={{
-      margin: 0,
-      fontSize: 11,
-      opacity: name.length > MAX_NAME_LEN ? 1 : 0.55,
-    }}
+  <LengthHint
+    current={name.length}
+    limit={MAX_NAME_LEN}
+    emphasize={name.length > MAX_NAME_LEN}
   >
-    {name.length}/{MAX_NAME_LEN} characters
-    {name.length > MAX_NAME_LEN ? " — too long" : ""}
-  </p>
+    characters{name.length > MAX_NAME_LEN ? " — too long" : ""}
+  </LengthHint>
 );
 
 export { MAX_NAME_LEN };
@@ -163,16 +108,14 @@ export { MAX_NAME_LEN };
 const MIN_HEADING_LEN = 3;
 
 export const HeadingLengthHint = ({ text }: { text: string }) => (
-  <p
-    style={{
-      margin: 0,
-      fontSize: 11,
-      opacity: text.trim().length < MIN_HEADING_LEN ? 1 : 0.55,
-    }}
+  <LengthHint
+    current={text.trim().length}
+    limit={MIN_HEADING_LEN}
+    emphasize={text.trim().length < MIN_HEADING_LEN}
   >
-    {text.trim().length}/{MIN_HEADING_LEN} characters minimum
+    characters minimum
     {text.trim().length < MIN_HEADING_LEN ? " — too short" : ""}
-  </p>
+  </LengthHint>
 );
 
 export { MIN_HEADING_LEN };
@@ -191,43 +134,27 @@ export const SelectSection = ({
   error: string | null;
   onChange: (index: number) => void;
 }) => (
-  <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-    <span style={{ fontSize: 12, opacity: 0.7 }}>Section</span>
-    <select
-      value={value}
-      onChange={(e) => onChange(Number(e.target.value))}
-      style={{
-        padding: "6px 8px",
-        borderRadius: 4,
-        border: `1px solid ${error ? "#c00" : "#ccc"}`,
-      }}
-    >
-      <option value={-1} disabled>
-        Choose a section…
-      </option>
-      {sections.map(({ index, title }) => (
-        <option key={index} value={index}>
-          {title}
-        </option>
-      ))}
-    </select>
-    {error && <span style={{ color: "#c00", fontSize: 12 }}>{error}</span>}
-  </label>
+  <SelectField
+    label="Section"
+    value={value}
+    error={error}
+    placeholder="Choose a section…"
+    options={sections}
+    onChange={onChange}
+  />
 );
 
 const MIN_PANEL_TITLE_LEN = 2;
 
 export const PanelTitleHint = ({ title }: { title: string }) => (
-  <p
-    style={{
-      margin: 0,
-      fontSize: 11,
-      opacity: title.trim().length < MIN_PANEL_TITLE_LEN ? 1 : 0.55,
-    }}
+  <LengthHint
+    current={title.trim().length}
+    limit={MIN_PANEL_TITLE_LEN}
+    emphasize={title.trim().length < MIN_PANEL_TITLE_LEN}
   >
-    {title.trim().length}/{MIN_PANEL_TITLE_LEN} characters minimum
+    characters minimum
     {title.trim().length < MIN_PANEL_TITLE_LEN ? " — too short" : ""}
-  </p>
+  </LengthHint>
 );
 
 export { MIN_PANEL_TITLE_LEN };

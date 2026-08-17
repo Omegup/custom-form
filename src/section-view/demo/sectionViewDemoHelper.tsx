@@ -95,6 +95,7 @@ export const columnsChrome: lib.ColumnsEditChrome = {
       focused={null}
       sectionActions={actions}
       sectionExtra={[]}
+      headerExtra={null}
       columns={columns}
     />
   ),

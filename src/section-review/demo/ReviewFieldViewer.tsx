@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import { FieldViewerChrome } from "../../demo-utils";
+import { FieldViewerChrome, ReviewValue } from "../../demo-utils";
 import type * as lib from "./library";
 
 const STATUS_COLOR: Record<lib.ReviewStatus, string> = {
@@ -39,31 +39,22 @@ export const ReviewFieldViewer = ({
     : variant.border;
   return (
     <FieldViewerChrome
-      name={newlyAnswered ? <strong>{name}</strong> : name}
+      name={name}
       required={required}
       badge={variant.badge}
       icon={extra.icon}
       appendix={extra.appendix}
       shell={variant.shell}
-      nameStyle={{
-        fontWeight: newlyAnswered ? 700 : 400,
-        color: mute ? "#777" : undefined,
-      }}
+      muted={mute}
+      emphasis={newlyAnswered}
     >
-      <div
-        style={{
-          padding: "6px 8px",
-          border: `1px solid ${border}`,
-          borderRadius: 4,
-          background: mute ? "#f0f0f0" : variant.background,
-          fontWeight: newlyAnswered ? 700 : 400,
-          color: mute ? "#666" : undefined,
-        }}
-      >
-        {value || (
-          <em style={{ color: "#999", fontWeight: 400 }}>No answer</em>
-        )}
-      </div>
+      <ReviewValue
+        value={value}
+        border={border}
+        background={variant.background}
+        mute={mute}
+        emphasis={newlyAnswered}
+      />
     </FieldViewerChrome>
   );
 };

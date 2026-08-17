@@ -31,8 +31,11 @@ Same for lock icons, remark cards, `useFieldMethods`. Shared **UI**
 (`DemoPage`, `SidebarLayout`, `ConfirmBanner`, `DropdownMenu`,
 `PhaseTabs`, `PhaseJsonPanels`, `EditorDialog`, `TextField`,
 `FieldViewerChrome`, `RequiredMark`, `SelectColumns`, `FormTitle`,
-`ReviewStatusNote`) lives in `src/demo-utils/` — see `demos-are-wiring.mdc`.
-Package demos **wire** those widgets; they do not own a second copy.
+`ReviewStatusNote`, `Stack`, `Row`, `SectionFrame`, `FieldRow`, …)
+lives in `src/demo-utils/` — see `demos-are-wiring.mdc`. Package
+demos **wire** those widgets; they do not own `style={{…}}`, leftover
+`<strong>`/`<button>`, or layout knobs (`gap={8}`, `align`,
+`fontSize`). Named widgets take data/callbacks only.
 If blurbs or fixtures differ, pass them as **required** props — do not
 duplicate the widget.
 

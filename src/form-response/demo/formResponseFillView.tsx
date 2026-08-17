@@ -2,6 +2,7 @@
  * Fill viewers + responder chrome. Field methods come from the form-responder demo.
  */
 import type { Ref } from "react";
+import { FollowUpRail } from "../../demo-utils";
 import { followUpVariant as followUpItemVariant } from "../../form-item-editor/demo/itemVariants";
 import { formChrome } from "../../form-responder/demo/formResponderDemoHelper";
 import { FillFieldViewer, defaultFillVariant } from "../../response/demo/FillFieldViewer";
@@ -46,32 +47,13 @@ export const responderVariants: Record<lib.ResponderState, types.Variants> = {
 const fillChrome: lib.FormResponderChrome = {
   ...formChrome,
   renderFollowUpGroup: ({ items }) => (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 8,
-        marginTop: 8,
-        marginLeft: 8,
-        padding: "8px 8px 8px 12px",
-        borderLeft: `3px solid ${followUpVariant.border}`,
-        background: followUpVariant.background,
-        borderRadius: "0 6px 6px 0",
-      }}
+    <FollowUpRail
+      border={followUpVariant.border}
+      background={followUpVariant.background}
+      label="Follow-up"
     >
-      <div
-        style={{
-          fontSize: 11,
-          fontWeight: 700,
-          letterSpacing: "0.04em",
-          textTransform: "uppercase",
-          color: "#b45309",
-        }}
-      >
-        Follow-up
-      </div>
       {items}
-    </div>
+    </FollowUpRail>
   ),
 };
 

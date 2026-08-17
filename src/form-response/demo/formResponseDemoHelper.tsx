@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { type PhaseTab } from "../../demo-utils";
+import { PriorBadge, type PhaseTab } from "../../demo-utils";
 import {
   INITIAL_FLAT,
   INITIAL_HEADER,
@@ -49,19 +49,4 @@ export const FORM_RESPONSE_DEMO_SOURCE = [
   withFileHeader("FormResponseDemo.tsx", formResponseDemoSource),
 ].join("\n");
 
-export const PRIOR_BADGE: ReactNode = (
-  <span
-    title="Prior answer"
-    aria-label="Prior answer"
-    style={{
-      marginLeft: 6,
-      fontSize: 11,
-      fontWeight: 700,
-      letterSpacing: "0.04em",
-      textTransform: "uppercase",
-      color: "#6b7280",
-    }}
-  >
-    Prior
-  </span>
-);
+export const PRIOR_BADGE: ReactNode = <PriorBadge>Prior</PriorBadge>;

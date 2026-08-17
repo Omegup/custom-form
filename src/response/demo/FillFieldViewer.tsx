@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import { FieldViewerChrome } from "../../demo-utils";
+import { BoxedInput, FieldError, FieldViewerChrome } from "../../demo-utils";
 import { useFieldMethods } from "./responseDemoHelper";
 import type * as types from "./responseDemoTypes.t";
 import type * as lib from "./library";
@@ -63,20 +63,17 @@ export const FillFieldViewer = ({
       icon={extra.icon}
       appendix={extra.appendix}
       shell={variant.shell}
-      nameStyle={null}
+      muted={false}
+      emphasis={false}
     >
-      <input
+      <BoxedInput
         value={value}
-        onChange={(e) => setDataValue(e.target.value)}
+        onChange={setDataValue}
         disabled={extra.response.setValue == null}
-        style={{
-          padding: "6px 8px",
-          border: `1px solid ${border}`,
-          borderRadius: 4,
-          background: variant.background,
-        }}
+        border={border}
+        background={variant.background}
       />
-      {err ? <span style={{ color: "#c00", fontSize: 12 }}>{err}</span> : null}
+      {err ? <FieldError>{err}</FieldError> : null}
     </FieldViewerChrome>
   );
 };

@@ -3,6 +3,7 @@
  * Add instance is host-owned; shown only while `response.setValue` is live.
  */
 import type { ReactNode } from "react";
+import { HeadingName, PanelBlock } from "../../demo-utils";
 import type { ResponseSetter } from "./library";
 import {
   nextPanelInstanceId,
@@ -20,7 +21,7 @@ export const headingView = ({
   props: { formItem },
 }: {
   props: { formItem: { params: { name: string } } };
-}) => <strong style={{ fontSize: 15 }}>{formItem.params.name}</strong>;
+}) => <HeadingName name={formItem.params.name} />;
 
 export const panelView = ({
   props: { formItem, extra },
@@ -41,15 +42,14 @@ export const panelView = ({
     );
   };
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      <span style={{ fontWeight: 600 }}>{formItem.params.name}</span>
+    <PanelBlock
+      name={formItem.params.name}
+      add={
+        formItem.params.multiple && extra.response.setValue ? add : null
+      }
+    >
       {extra.children}
-      {formItem.params.multiple && extra.response.setValue ? (
-        <button type="button" onClick={add} style={{ alignSelf: "flex-start" }}>
-          + Add
-        </button>
-      ) : null}
-    </div>
+    </PanelBlock>
   );
 };
 

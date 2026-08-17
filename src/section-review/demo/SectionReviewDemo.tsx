@@ -4,7 +4,7 @@
  * Follow mounts `SectionReviewHOC`.
  */
 import { useCallback, useRef, useState, type Ref } from "react";
-import { DemoPage, PhaseJsonPanels, PhaseTabs } from "../../demo-utils";
+import { BlockStack, DemoPage, PhaseBody, PhaseJsonPanels, PhaseTabs, ToolbarCheck } from "../../demo-utils";
 import { FormDialogsEditor, designSidebar } from "../../form-dialogs/demo/FormDialogsDemo";
 import {
   defaultVariant,
@@ -111,7 +111,7 @@ export const SectionReviewDemo = ({
 
   return (
     <DemoPage title={heading}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      <PhaseBody>
         <PhaseTabs
           phase={phase}
           onChange={(next) => updateArgs({ phase: next })}
@@ -149,15 +149,13 @@ export const SectionReviewDemo = ({
         ) : null}
 
         {phase === "follow" ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14 }}>
-              <input
-                type="checkbox"
-                checked={reviewPending}
-                onChange={(e) => updateArgs({ reviewPending: e.target.checked })}
-              />
+          <BlockStack>
+            <ToolbarCheck
+              checked={reviewPending}
+              onChange={(checked) => updateArgs({ reviewPending: checked })}
+            >
               Review round pending (highlight status)
-            </label>
+            </ToolbarCheck>
             <SectionReview
               ctx={ctx}
               multiSection={false}
@@ -185,7 +183,7 @@ export const SectionReviewDemo = ({
               }),
               tCommon,
             })}
-          </div>
+          </BlockStack>
         ) : null}
 
         <PhaseJsonPanels
@@ -197,7 +195,7 @@ export const SectionReviewDemo = ({
             { id: "follow", title: "follow · AdditionalChanges", value: changes },
           ]}
         />
-      </div>
+      </PhaseBody>
     </DemoPage>
   );
 };

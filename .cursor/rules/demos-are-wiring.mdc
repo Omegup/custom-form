@@ -25,12 +25,39 @@ Leave the ported [`src/drag-drop-tree/`](../../src/drag-drop-tree) **untouched**
 
 ## What a demo must not do
 
+- Own HTML, **`style={{…}}`**, or **layout knobs**. Package `demo/` is
+  wiring only. Do not wrap the same markup in `Inline` / `Stack` /
+  `Row` and pass `gap={8}`, `align="center"`, `fontSize={14}`,
+  `margin`, `maxWidth`. Those numbers and tags live inside a **named
+  widget**. The demo passes data and callbacks.
 - Reimplement a library orchestrator (item/section sessions, `commitDraft`,
   extra-map walks, flatten/sync)
 - Own HTML/styles that another demo also needs — that widget belongs in
   `src/demo-utils/`
 - Invent flags that hide host composition (`embedded` instead of
   `sidebar: ReactNode | null`)
+
+```tsx
+// ❌ BAD — layout primitive + leftover HTML; demo still owns the UI
+<Inline gap={8} align="center">
+  <strong>{section.header.title}</strong>
+  {openSectionEdit && !section.header.deleted && (
+    <button type="button" onClick={() => openSectionEdit(section)}>
+      Edit
+    </button>
+  )}
+</Inline>
+
+// ✅ GOOD — widget owns markup, gap, and the Edit control
+<HeadingEdit
+  title={section.header.title}
+  ready={openSectionEdit != null && !section.header.deleted}
+  onClick={() => openSectionEdit(section)}
+/>
+```
+
+`Stack` / `Row` / `Inline` stay in `demo-utils` for **other widgets** to
+compose. Package demos do not import them.
 
 Heavy logic is either **extracted** (reusable, no HTML) or **removed** by
 twisting the library so the demo can just wire it.
@@ -40,7 +67,9 @@ twisting the library so the demo can just wire it.
 Generic widgets that could live in an external UI kit go here: page shell,
 sidebar layout, confirm banner, dropdown **including the popover panel**,
 phase tabs, JSON panels, editor dialog, labeled text field, field stack,
-required mark, column picker, form title, review-status note.
+required mark, column picker, form title, review-status note, layout
+(`Stack`, `Row`, `Inline`), list chrome (`FieldRow`, `SectionPanel`),
+and every other visual. Package `demo/` must not contain `style={{…}}`.
 
 Import only from `demo/` and `*.stories.tsx` — never from library `_deps` /
 package source. Hosts pass the trigger, items, labels, and fixtures; they

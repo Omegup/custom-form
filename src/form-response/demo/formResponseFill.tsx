@@ -2,6 +2,7 @@
  * Fill — useFormResponseSend + CustomFormResponderHOC.
  */
 import { useEffect, useRef, useState } from "react";
+import { FillActions } from "../../demo-utils";
 import { rememberDate } from "./formResponseDemoHelper";
 import type * as types from "./formResponseDemoTypes.t";
 import {
@@ -71,7 +72,25 @@ export const FillPhase = ({
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+    <FillActions
+      onValidate={() => fill.validate()}
+      onSend={send}
+      canSend={fill.canSend}
+      savedNote={
+        justSent
+          ? "FormResponse saved — open Update to review the same document."
+          : null
+      }
+      statusNote={
+        justSent
+          ? null
+          : doc?.status === "changesRequested"
+            ? "Changes requested — Send is available (edits optional)."
+            : doc
+              ? "Sent — waiting for teacher feedback (Request changes unlocks Send)."
+              : null
+      }
+    >
       <FormResponder
         ctx={fillCtx}
         header={{
@@ -89,42 +108,6 @@ export const FillPhase = ({
         followUpItems={fill.followUpItems}
         children={null}
       />
-      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-        <button type="button" onClick={() => fill.validate()}>
-          Validate
-        </button>
-        <button
-          type="button"
-          onClick={send}
-          disabled={!fill.canSend}
-          style={{
-            background: fill.canSend ? "#1a5fb4" : "#9aa7b8",
-            color: "#fff",
-            border: "none",
-            padding: "6px 14px",
-            borderRadius: 4,
-            cursor: fill.canSend ? "pointer" : "not-allowed",
-            fontWeight: 600,
-          }}
-        >
-          Send
-        </button>
-        {justSent ? (
-          <span style={{ fontSize: 13, color: "#22883e" }}>
-            FormResponse saved — open Update to review the same document.
-          </span>
-        ) : null}
-        {doc?.status === "changesRequested" ? (
-          <span style={{ fontSize: 13, color: "#666" }}>
-            Changes requested — Send is available (edits optional).
-          </span>
-        ) : null}
-        {doc && doc.status !== "changesRequested" && !justSent ? (
-          <span style={{ fontSize: 13, color: "#666" }}>
-            Sent — waiting for teacher feedback (Request changes unlocks Send).
-          </span>
-        ) : null}
-      </div>
-    </div>
+    </FillActions>
   );
 };

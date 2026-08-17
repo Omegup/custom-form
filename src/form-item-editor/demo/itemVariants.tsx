@@ -5,16 +5,9 @@
  */
 import type { ItemVariant, Variants } from "./formItemEditorDemoTypes.t";
 import { branded } from "./library";
+import { FollowUpBadge } from "../../demo-utils";
 
-export const FOLLOW_UP_BADGE = (
-  <span
-    title="Added follow-up"
-    aria-label="Added follow-up"
-    style={{ color: "#b45309", fontSize: 12, fontWeight: 700, lineHeight: 1 }}
-  >
-    ✚
-  </span>
-);
+export const FOLLOW_UP_BADGE = <FollowUpBadge />;
 
 const followUpShell = {
   padding: 8,

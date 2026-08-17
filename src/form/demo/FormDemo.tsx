@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { DemoPage } from "../../demo-utils";
+import { DemoPage, PlainInput } from "../../demo-utils";
 import * as demo from "./formDemoHelper";
 import * as types from "./formDemoTypes.t";
 import { branded, createFormItemByGetChildPlain } from "./library";
@@ -13,7 +13,7 @@ const viewers: types.Viewers = {
       return (
         <demo.Label variant={variant} border={ctx.accent}>
           {showLabel ? demo.applyTemplate(label, template, id) : null}
-          <input value={value} onChange={(e) => onChange(e.target.value)} />
+          <PlainInput value={value} onChange={onChange} disabled={false} />
         </demo.Label>
       );
     },

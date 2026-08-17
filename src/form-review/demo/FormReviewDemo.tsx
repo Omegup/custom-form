@@ -4,7 +4,7 @@
  * Follow mounts `CustomFormReviewHOC`.
  */
 import { useCallback, useRef, useState, type Ref } from "react";
-import { DemoPage, FormTitle, PhaseJsonPanels, PhaseTabs } from "../../demo-utils";
+import { BlockStack, DemoPage, FollowBar, FormTitle, PhaseBody, PhaseJsonPanels, PhaseTabs, ToolbarCheck } from "../../demo-utils";
 import { FormDialogsEditor, designSidebar } from "../../form-dialogs/demo/FormDialogsDemo";
 import {
   defaultVariant,
@@ -114,7 +114,7 @@ export const FormReviewDemo = ({
 
   return (
     <DemoPage title={heading}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      <PhaseBody>
         <PhaseTabs
           phase={phase}
           onChange={(next) => updateArgs({ phase: next })}
@@ -122,7 +122,7 @@ export const FormReviewDemo = ({
         />
 
         {phase === "design" ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <BlockStack>
             <FormTitle
               title={header.title}
               description={header.description}
@@ -138,7 +138,7 @@ export const FormReviewDemo = ({
                 })
               }
             />
-          </div>
+          </BlockStack>
         ) : null}
 
         {phase === "response" ? (
@@ -159,36 +159,21 @@ export const FormReviewDemo = ({
         ) : null}
 
         {phase === "follow" ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 16,
-                fontSize: 14,
-              }}
-            >
-              <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <input
-                  type="checkbox"
-                  checked={reviewPending}
-                  onChange={(e) =>
-                    updateArgs({ reviewPending: e.target.checked })
-                  }
-                />
+          <BlockStack>
+            <FollowBar>
+              <ToolbarCheck
+                checked={reviewPending}
+                onChange={(checked) => updateArgs({ reviewPending: checked })}
+              >
                 Review round pending (highlight status)
-              </label>
-              <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <input
-                  type="checkbox"
-                  checked={showDeleted}
-                  onChange={(e) =>
-                    updateArgs({ showDeleted: e.target.checked })
-                  }
-                />
+              </ToolbarCheck>
+              <ToolbarCheck
+                checked={showDeleted}
+                onChange={(checked) => updateArgs({ showDeleted: checked })}
+              >
                 Show deleted sections
-              </label>
-            </div>
+              </ToolbarCheck>
+            </FollowBar>
             <FormReview
               ctx={ctx}
               header={header}
@@ -217,7 +202,7 @@ export const FormReviewDemo = ({
               }),
               tCommon,
             })}
-          </div>
+          </BlockStack>
         ) : null}
 
         <PhaseJsonPanels
@@ -229,7 +214,7 @@ export const FormReviewDemo = ({
             { id: "follow", title: "follow · AdditionalChanges", value: changes },
           ]}
         />
-      </div>
+      </PhaseBody>
     </DemoPage>
   );
 };

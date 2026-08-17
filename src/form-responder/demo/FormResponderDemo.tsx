@@ -3,7 +3,7 @@
  * multi-section fill + form-level Validate via `impRef`.
  */
 import { useCallback, useRef, useState, type Ref } from "react";
-import { DemoPage, PhaseJsonPanels, PhaseTabs } from "../../demo-utils";
+import { DemoPage, PhaseJsonPanels, PhaseTabs, ValidateBlock } from "../../demo-utils";
 import { FormDialogsEditor, designSidebar } from "../../form-dialogs/demo/FormDialogsDemo";
 import { FillFieldViewer, defaultFillVariant } from "../../response/demo/FillFieldViewer";
 import {
@@ -117,7 +117,7 @@ export const FormResponderDemo = ({
           }
         />
       ) : (
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <ValidateBlock onValidate={validateForm}>
         <FormResponder
           ctx={ctx}
           header={header}
@@ -132,10 +132,7 @@ export const FormResponderDemo = ({
           followUpItems={{}}
           children={null}
         />
-        <button type="button" onClick={validateForm} style={{ alignSelf: "flex-start" }}>
-          Validate
-        </button>
-      </div>
+      </ValidateBlock>
       )}
       <PhaseJsonPanels
         heading="JSON by phase"

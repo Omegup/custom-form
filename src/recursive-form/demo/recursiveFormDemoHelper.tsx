@@ -1,4 +1,12 @@
 import type { ReactNode } from "react";
+import {
+  AccentField,
+  FieldsetGroup,
+  InsetFrame,
+  MutedWell,
+  SectionHeading,
+  SplitColumns,
+} from "../../demo-utils";
 import { branded } from "./library";
 import recursiveFormDemoSource from "./RecursiveFormDemo.tsx?raw";
 import recursiveFormDemoTypesSource from "./recursiveFormDemoTypes.t.ts?raw";
@@ -128,18 +136,9 @@ export const Label = ({
   label: string;
   children: ReactNode;
 }) => (
-  <label
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      gap: 4,
-      padding: variant.padding,
-      borderLeft: `3px solid ${border}`,
-    }}
-  >
-    <span style={{ fontSize: 12, opacity: 0.7 }}>{label}</span>
+  <AccentField padding={variant.padding} border={border} label={label}>
     {children}
-  </label>
+  </AccentField>
 );
 
 export const Group = ({
@@ -153,46 +152,25 @@ export const Group = ({
   title: string;
   children: ReactNode;
 }) => (
-  <fieldset
-    style={{
-      border: variant.showBorder ? `1px solid ${border}` : "none",
-      borderRadius: 4,
-      padding: 8,
-    }}
+  <FieldsetGroup
+    title={title}
+    border={border}
+    showBorder={variant.showBorder}
   >
-    <legend>{title}</legend>
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      {children}
-    </div>
-  </fieldset>
+    {children}
+  </FieldsetGroup>
 );
 
 export const Frame = ({ children }: { children: ReactNode }) => (
-  <div
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      gap: 8,
-      border: "1px solid #ccc",
-      padding: 8,
-    }}
-  >
-    {children}
-  </div>
+  <InsetFrame>{children}</InsetFrame>
 );
 
 export const DisplayColumns = ({ columns }: { columns: ReactNode[][] }) => (
-  <div style={{ display: "flex", gap: 20 }}>
-    {columns.map((column, index) => (
-      <div key={index} style={{ flex: 1 }}>
-        {column}
-      </div>
-    ))}
-  </div>
+  <SplitColumns columns={columns} />
 );
 
 export const Card = ({ children }: { children: ReactNode }) => (
-  <div style={{ background: "#f5f5f5", borderRadius: 4 }}>{children}</div>
+  <MutedWell>{children}</MutedWell>
 );
 
 export const Section = ({
@@ -202,8 +180,5 @@ export const Section = ({
   title: string;
   children: ReactNode;
 }) => (
-  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-    <h3 style={{ margin: 0, fontSize: 14, opacity: 0.7 }}>{title}</h3>
-    {children}
-  </div>
+  <SectionHeading title={title}>{children}</SectionHeading>
 );

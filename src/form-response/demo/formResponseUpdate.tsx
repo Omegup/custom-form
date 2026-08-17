@@ -2,6 +2,7 @@
  * Update — useFormResponseReview + CustomFormReviewHOC.
  */
 import { useState } from "react";
+import { EmptyNotice, UpdateColumn } from "../../demo-utils";
 import { dateFromIso, rememberDate } from "./formResponseDemoHelper";
 import type * as types from "./formResponseDemoTypes.t";
 import { FeedbackBar, UpdateToolbar } from "./formResponseToolbar";
@@ -41,15 +42,15 @@ export const UpdatePhase = ({
 
   if (!formResponse) {
     return (
-      <p style={{ margin: 0, fontSize: 14, color: "#a40" }}>
+      <EmptyNotice>
         No FormResponse yet — use Fill → Send to create the response document.
         Update is a teacher view of that same document, not a third store.
-      </p>
+      </EmptyNotice>
     );
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+    <UpdateColumn>
       <UpdateToolbar
         formResponse={formResponse}
         showDeleted={showDeleted}
@@ -98,6 +99,6 @@ export const UpdatePhase = ({
         }),
         tCommon,
       })}
-    </div>
+    </UpdateColumn>
   );
 };

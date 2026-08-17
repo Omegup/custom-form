@@ -1,5 +1,6 @@
 import { useMemo, type ReactNode } from "react";
 import { useArgs } from "storybook/preview-api";
+import { AccentField, FieldsetGroup, MutedWell } from "../../demo-utils";
 import { branded } from "../branded";
 import formDemoSource from "./FormDemo.tsx?raw";
 import type {
@@ -136,18 +137,9 @@ export const Label = ({
   label === null ? (
     children
   ) : (
-    <label
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 4,
-        padding: variant.padding,
-        borderLeft: `3px solid ${border}`,
-      }}
-    >
-      <span style={{ fontSize: 12, opacity: 0.7 }}>{label}</span>
+    <AccentField padding={variant.padding} border={border} label={label}>
       {children}
-    </label>
+    </AccentField>
   );
 
 export const Group = ({
@@ -161,18 +153,13 @@ export const Group = ({
   title: string;
   children: ReactNode;
 }) => (
-  <fieldset
-    style={{
-      border: variant.showBorder ? `1px solid ${border}` : "none",
-      borderRadius: 4,
-      padding: 8,
-    }}
+  <FieldsetGroup
+    title={title}
+    border={border}
+    showBorder={variant.showBorder}
   >
-    <legend>{title}</legend>
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      {children}
-    </div>
-  </fieldset>
+    {children}
+  </FieldsetGroup>
 );
 
 export const useStoryArgs = () => {
@@ -191,5 +178,5 @@ export const useStoryArgs = () => {
 };
 
 export const Card = ({ children }: { children: ReactNode }) => (
-  <div style={{ background: "#f5f5f5", borderRadius: 4 }}>{children}</div>
+  <MutedWell>{children}</MutedWell>
 );

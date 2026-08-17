@@ -1,4 +1,4 @@
-import { type PhaseTab, FormTitle } from "../../demo-utils";
+import { type PhaseTab, FormColumn, FormTitle } from "../../demo-utils";
 import {
   sectionChrome,
 } from "../../section-responder/demo/sectionResponderDemoHelper";
@@ -27,18 +27,11 @@ export const formChrome: lib.FormResponderChrome = {
     <FormTitle title={header.title} description={header.description} note={null} />
   ),
   renderForm: ({ header, sections, children }) => (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 20,
-        maxWidth: 700,
-      }}
-    >
+    <FormColumn>
       {header}
       {sections}
       {children}
-    </div>
+    </FormColumn>
   ),
 };
 

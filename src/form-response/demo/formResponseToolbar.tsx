@@ -1,4 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
+import { FeedbackPanel, ReviewToolbar } from "../../demo-utils";
 import type * as types from "./formResponseDemoTypes.t";
 import type * as lib from "./library";
 
@@ -26,51 +27,23 @@ export const UpdateToolbar = ({
   updateArgs: types.DemoProps["updateArgs"];
   onNote: (note: string) => void;
 }) => (
-  <div
-    style={{
-      display: "flex",
-      flexWrap: "wrap",
-      gap: 12,
-      alignItems: "center",
-      fontSize: 14,
+  <ReviewToolbar
+    dirty={review.dirty}
+    onSave={() => {
+      review.save();
+      onNote("FormResponse.changes saved.");
     }}
-  >
-    <button
-      type="button"
-      onClick={() => {
-        review.save();
-        onNote("FormResponse.changes saved.");
-      }}
-      disabled={!review.dirty}
-    >
-      Save changes
-    </button>
-    <button
-      type="button"
-      onClick={() => {
-        review.revert();
-        onNote("Changes discarded.");
-      }}
-      disabled={!review.dirty}
-    >
-      Cancel
-    </button>
-    <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-      <input
-        type="checkbox"
-        checked={showDeleted}
-        onChange={(e) => updateArgs({ showDeleted: e.target.checked })}
-      />
-      Show deleted sections
-    </label>
-    <span style={{ fontSize: 13, color: "#555" }}>
-      FormResponse status: <code>{formResponse.status}</code>
-      {lastPending ? ` · ${lastPending.toISOString().slice(0, 10)}` : ""}
-    </span>
-    {statusNote ? (
-      <span style={{ fontSize: 13, color: "#22883e" }}>{statusNote}</span>
-    ) : null}
-  </div>
+    onRevert={() => {
+      review.revert();
+      onNote("Changes discarded.");
+    }}
+    showDeleted={showDeleted}
+    onShowDeleted={(checked) => updateArgs({ showDeleted: checked })}
+    statusLine={`FormResponse status: ${formResponse.status}${
+      lastPending ? ` · ${lastPending.toISOString().slice(0, 10)}` : ""
+    }`}
+    statusNote={statusNote}
+  />
 );
 
 export const FeedbackBar = ({
@@ -86,67 +59,29 @@ export const FeedbackBar = ({
   review: Review;
   onNote: (note: string) => void;
 }) => (
-  <div
-    style={{
-      display: "flex",
-      flexWrap: "wrap",
-      gap: 8,
-      alignItems: "center",
-      padding: "10px 12px",
-      background: "#f6f7f9",
-      borderRadius: 6,
-      fontSize: 13,
+  <FeedbackPanel
+    comment={feedbackComment}
+    onComment={setFeedbackComment}
+    canRequest={formResponse.status !== "changesRequested"}
+    canApprove={formResponse.status !== "approved"}
+    canReject={formResponse.status !== "rejected"}
+    onRequest={() => {
+      review.submitFeedback(
+        "changesRequested",
+        feedbackComment.trim() || undefined,
+      );
+      setFeedbackComment("");
+      onNote("Changes requested — student revises on Fill → Send.");
     }}
-  >
-    <span style={{ fontWeight: 600 }}>Feedback</span>
-    <input
-      type="text"
-      value={feedbackComment}
-      onChange={(e) => setFeedbackComment(e.target.value)}
-      placeholder="Optional comment"
-      style={{ flex: "1 1 160px", minWidth: 120, padding: "4px 8px" }}
-    />
-    <button
-      type="button"
-      onClick={() => {
-        review.submitFeedback(
-          "changesRequested",
-          feedbackComment.trim() || undefined,
-        );
-        setFeedbackComment("");
-        onNote("Changes requested — student revises on Fill → Send.");
-      }}
-      disabled={formResponse.status === "changesRequested"}
-    >
-      Request changes
-    </button>
-    <button
-      type="button"
-      onClick={() => {
-        review.submitFeedback("approved");
-        setFeedbackComment("");
-        onNote("FormResponse approved.");
-      }}
-      disabled={formResponse.status === "approved"}
-      style={{
-        color: formResponse.status === "approved" ? undefined : "#1b7a36",
-      }}
-    >
-      Approve
-    </button>
-    <button
-      type="button"
-      onClick={() => {
-        review.submitFeedback("rejected");
-        setFeedbackComment("");
-        onNote("FormResponse rejected.");
-      }}
-      disabled={formResponse.status === "rejected"}
-      style={{
-        color: formResponse.status === "rejected" ? undefined : "#a40",
-      }}
-    >
-      Reject
-    </button>
-  </div>
+    onApprove={() => {
+      review.submitFeedback("approved");
+      setFeedbackComment("");
+      onNote("FormResponse approved.");
+    }}
+    onReject={() => {
+      review.submitFeedback("rejected");
+      setFeedbackComment("");
+      onNote("FormResponse rejected.");
+    }}
+  />
 );
