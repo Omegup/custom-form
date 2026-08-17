@@ -16,7 +16,7 @@ import {
 } from "./followUps";
 import { buildSend, canSend } from "./send";
 import type { FormResponseDoc, FormResponseValidator } from "./types";
-import { formResponseValues } from "./values";
+import { formResponseValues, keyedResponses } from "./values";
 
 export const useFormResponseSend = <
   TypeNames extends string,
@@ -84,10 +84,7 @@ export const useFormResponseSend = <
     const ref = validatorRef.current;
     if (!ref) return {};
     const prior = doc ? formResponseValues(doc) : {};
-    const keys = ref.getKeys();
-    const keyed = Object.fromEntries(
-      keys.map((k) => [k, draft[k] ?? prior[k]]),
-    ) as Record<string, Response>;
+    const keyed = keyedResponses(ref.getKeys(), draft, prior);
     const nextErrors = ref.validate(keyed);
     setErrors(nextErrors);
     return nextErrors;
@@ -102,9 +99,7 @@ export const useFormResponseSend = <
     const keys = ref.getKeys();
     if (!doc && keys.length === 0) return null;
 
-    const keyed = Object.fromEntries(
-      keys.map((k) => [k, draft[k] ?? prior[k]]),
-    ) as Record<string, Response>;
+    const keyed = keyedResponses(keys, draft, prior);
     if (keys.length > 0) {
       const nextErrors = ref.validate(keyed);
       setErrors(nextErrors);

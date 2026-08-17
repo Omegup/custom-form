@@ -5,7 +5,7 @@ export type {
   FormResponseDoc,
   FormResponseValidator,
 } from "./types";
-export { formResponseValues, toFormResponseEntries } from "./values";
+export { formResponseValues, keyedResponses, toFormResponseEntries } from "./values";
 export {
   withoutUnlockComments,
   stampAnswerHistory,

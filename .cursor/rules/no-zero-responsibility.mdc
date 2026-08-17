@@ -1,0 +1,33 @@
+---
+description: Do not add wrappers with no responsibility or reason to change
+globs: **/*.ts,**/*.tsx
+alwaysApply: true
+---
+
+# No zero-responsibility functions
+
+Do not extract a function that only aliases a callee or adds a type
+check. A function with nothing of its own to do has no reason to change
+and makes the call site harder to read.
+
+```typescript
+// ❌ BAD — typed alias of Object.fromEntries; 0 responsibility
+const recordFromPairs = (pairs: Iterable<readonly [string, V]>): Record<string, V> =>
+  Object.fromEntries(pairs) satisfies Record<string, V>;
+
+// ✅ GOOD — domain fn calls fromEntries itself
+export const formResponseValues = (doc): Record<string, Response> =>
+  Object.fromEntries(
+    doc.responses.map((r): readonly [string, Response] => [
+      r.formItemId,
+      r.response,
+    ]),
+  );
+```
+
+Keep a helper only when it owns a rule that can change (e.g.
+`keyedResponses` prefers draft over prior). Tuple annotations and
+`satisfies` belong at the real call, not in a wrapper invented to hide
+them.
+
+Related: `no-unsafe-casts.mdc` (do not wrap just to avoid `as`).

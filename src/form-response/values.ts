@@ -9,6 +9,14 @@ export const formResponseValues = <
 ): Record<string, Response> =>
   Object.fromEntries(doc.responses.map((r) => [r.formItemId, r.response]));
 
+/** Draft-or-prior answers for the current form keys. */
+export const keyedResponses = (
+  keys: readonly string[],
+  draft: Record<string, Response>,
+  prior: Record<string, Response>,
+): Record<string, Response> =>
+  Object.fromEntries(keys.map((k) => [k, draft[k] ?? prior[k]]));
+
 export const toFormResponseEntries = (
   values: Record<string, Response>,
 ): FormResponseEntry[] =>

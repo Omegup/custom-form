@@ -12,7 +12,7 @@ Not `response/` (per-item `{ meta, data }` values).
 | File | Role |
 |---|---|
 | `types.ts` | `FormResponseDoc`, `FeedbackStatus`, `FormResponseValidator` |
-| `values.ts` | `formResponseValues` / `toFormResponseEntries` |
+| `values.ts` | `formResponseValues` / `keyedResponses` / `toFormResponseEntries` |
 | `changes.ts` | Strip remarks, stamp history, remark-only map for fill `old` |
 | `send.ts` | `canSend` / `buildSend` |
 | `review.ts` | `saveAdditionalQuestions` / `appendFeedback` / `lastAnsweredAt` |
