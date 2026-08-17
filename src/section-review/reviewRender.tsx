@@ -95,13 +95,14 @@ const renderReviewAppendix = <
   if (!change) return [];
 
   const nodes: ReactNode[] = [];
-  if (change.comment) {
+  const remark = change.comment;
+  if (remark) {
     nodes.push(
       <Fragment key="comment">
         {walk.chrome.renderComment({
-          text: change.comment,
+          text: remark,
           onEdit: () =>
-            walk.live.setAddition({ originId, text: change.comment }),
+            walk.live.setAddition({ originId, text: remark }),
         })}
       </Fragment>,
     );

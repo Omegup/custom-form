@@ -26,15 +26,25 @@ import type {
   VariantsDom,
 } from "./_deps";
 
+/** Host commit from `renderAddFollowUp` — a follow-up item, not a remark. */
+export type ReviewFollowUpPick<
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames>,
+> = {
+  comment: string | null;
+  formItem: SomeFormItem<TypeNames, Params>;
+  /** Nested columns when `formItem` is a panel — same shape as design `children`. */
+  children: RecursiveFormItem<TypeNames, Params, MetaDom<SIndexed>>[][] | null;
+};
+
 /** One reviewer follow-up thread entry — school `AdditionalChanges[id].questions[]`. */
 export type ReviewFormItemEntry<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
 > = {
-  comment?: string;
-  formItem?: SomeFormItem<TypeNames, Params>;
-  /** Nested columns when `formItem` is a panel — same shape as design `children`. */
-  children?: RecursiveFormItem<TypeNames, Params, MetaDom<SIndexed>>[][];
+  comment: string | null;
+  formItem: SomeFormItem<TypeNames, Params> | null;
+  children: RecursiveFormItem<TypeNames, Params, MetaDom<SIndexed>>[][] | null;
   date: Date | null;
 };
 
@@ -62,7 +72,7 @@ export type AdditionalChanges<
 /** In-progress overlay state for editing a remark — school `CommentAddition`. */
 export type CommentAddition = {
   originId: string;
-  text?: string;
+  text: string | null;
 };
 
 /** Overlay draft. Follow-ups are not overlay state — they go through
@@ -150,15 +160,7 @@ export type SectionReviewChrome<
    */
   renderAddFollowUp: (args: {
     originId: string;
-    onPick: (payload: {
-      comment?: string;
-      formItem: SomeFormItem<TypeNames, Params>;
-      children?: RecursiveFormItem<
-        TypeNames,
-        Params,
-        MetaDom<SIndexed>
-      >[][];
-    }) => void;
+    onPick: (payload: ReviewFollowUpPick<TypeNames, Params>) => void;
   }) => ReactNode;
   renderActionIcon: (
     kind: "lock" | "unlock",

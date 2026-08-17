@@ -7,6 +7,7 @@ type TypeNames = "field";
 type Params = TheParams<{ field: { name: string } }>;
 
 const field = (id: string): ReviewFormItemEntry<TypeNames, Params> => ({
+  comment: null,
   formItem: { id, type: "field", params: { name: id }, deleted: false },
   children: [],
   date: null,
@@ -16,6 +17,8 @@ describe("partitionFollowUpEntries", () => {
   it("splits answered, unanswered, and comment-only rows", () => {
     const commentOnly: ReviewFormItemEntry<TypeNames, Params> = {
       comment: "note",
+      formItem: null,
+      children: null,
       date: null,
     };
     const entries = [field("done"), commentOnly, field("open")];
@@ -49,6 +52,11 @@ describe("partitionFollowUpEntries", () => {
       children,
       meta: { index: 0, total: 1, sIndex: 0 },
     });
-    expect(followUpEntryAsItem({ comment: "note", date: null })).toBeNull();
+    expect(followUpEntryAsItem({
+      comment: "note",
+      formItem: null,
+      children: null,
+      date: null,
+    })).toBeNull();
   });
 });

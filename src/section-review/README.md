@@ -17,7 +17,7 @@ are mounted by the **call site**, not this HOC.
 
 | File | Role |
 |---|---|
-| `types.ts` | `AdditionalChanges`, `Addition`/`CommentAddition`, `ReviewExtra`, `ReviewVariantState`, `SectionReviewChrome`, `SectionReviewProps` |
+| `types.ts` | `AdditionalChanges`, `ReviewFollowUpPick`, `ReviewFormItemEntry`, `Addition`/`CommentAddition`, `ReviewExtra`, `SectionReviewChrome` |
 | `reviewStatus.ts` | `reviewItemState` / `reviewStatusFor` / `reviewVariantState` — unlock, unanswered follow-ups, highlight vs pending yellow |
 | `reviewChanges.ts` | `withComment` / `withoutComment` / `withFormItemEntry` / `withUnansweredFormItems` — writes into `AdditionalChanges` |
 | `followUpPartition.ts` | `partitionFollowUpEntries` / `followUpEntryAsItem` — answered tree rows vs unanswered editor |

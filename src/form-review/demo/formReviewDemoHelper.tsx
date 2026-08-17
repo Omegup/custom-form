@@ -226,6 +226,7 @@ export const INITIAL_CHANGES: lib.AdditionalChanges<types.TypeNames, types.Param
           deleted: false,
           params: { name: "Tech stack", required: false },
         }),
+        children: null,
         date: PENDING_DATE,
       },
     ],

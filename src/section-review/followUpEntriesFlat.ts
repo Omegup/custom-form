@@ -69,7 +69,7 @@ export const syncFollowUpEntriesFromFlat = <
     ...roots.map((root) => {
       const prior = current.get(root.header.id);
       return {
-        ...prior,
+        comment: prior?.comment ?? null,
         formItem: root.header,
         children: root.children,
         date: prior?.date ?? null,

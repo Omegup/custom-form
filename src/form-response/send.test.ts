@@ -29,7 +29,7 @@ describe("canSend", () => {
 describe("withoutUnlockComments / stampAnswerHistory", () => {
   it("drops remarks and keeps follow-ups", () => {
     const next = withoutUnlockComments<TypeNames, Params>({
-      a: { comment: "fix this", formItems: [{ formItem: field("f"), date: null }] },
+      a: { comment: "fix this", formItems: [{ comment: null, formItem: field("f"), children: null, date: null }] },
       b: { comment: "gone" },
     });
     expect(next.a?.comment).toBeUndefined();
@@ -77,7 +77,7 @@ describe("buildSend", () => {
       changes: {
         a: { comment: "please revise", history: [{ date: new Date("2024-01-01") }] },
         origin: {
-          formItems: [{ formItem: field("fu"), date: null }],
+          formItems: [{ comment: null, formItem: field("fu"), children: null, date: null }],
         },
       },
       feedbackHistory: [{ status: "changesRequested", date: "2024-05-01T00:00:00Z" }],

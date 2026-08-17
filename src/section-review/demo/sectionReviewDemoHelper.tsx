@@ -365,6 +365,7 @@ export const INITIAL_CHANGES: lib.AdditionalChanges<types.TypeNames, types.Param
           deleted: false,
           params: { name: "Topic", required: false },
         }),
+        children: null,
         date: PENDING_DATE,
       },
     ],

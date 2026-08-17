@@ -6,8 +6,9 @@ alwaysApply: true
 
 # Avoid optional fields (especially with defaults)
 
-Prefer **required** props. Do not paper over missing host decisions with
-`?` + a library default.
+Prefer **required** fields. Use `T | null` when a value can be absent.
+Do not paper over missing host decisions with `?` + a library default,
+and do not use `?` as a stand-in for “maybe empty”.
 
 ## Why
 
@@ -16,6 +17,10 @@ Optional + default often smuggles **host-owned** content into the library:
 - English copy (`title = "Library"`, `label = "+ Add item"`)
 - Design choices the host should make
 - Silent behavior when the caller forgets to pass something
+
+`field?: T` also hides absence: readers cannot tell omit-vs-empty without
+checking `in` / `undefined`. A required `field: T | null` makes the
+empty case visible at every construction site.
 
 That fights host-agnostic packages (see `no-html-outside-demo.mdc`).
 
@@ -47,10 +52,19 @@ That fights host-agnostic packages (see `no-html-outside-demo.mdc`).
 
 ## When optional is OK
 
-- Truly absent vs present domain data (`parentId?: string | null`, soft
-  flags already modeled elsewhere)
+- Sparse **keys** on a dict (`AdditionalChanges[originId]` missing vs present)
 - Narrow escape hatches documented as overrides of a required primary path
   (rare — prefer a separate required prop or a variant type)
+
+Absent **fields on a present object** are `T | null`, not `T?`:
+
+```typescript
+// ❌ BAD — omit vs empty is invisible
+{ comment?: string; children?: Cols[][] }
+
+// ✅ GOOD — every construction names the empty case
+{ comment: string | null; children: Cols[][] | null }
+```
 
 ## Not a loophole
 

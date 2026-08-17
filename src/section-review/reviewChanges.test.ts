@@ -13,6 +13,7 @@ type Params = TheParams<{ field: { name: string } }>;
 type Changes = AdditionalChanges<TypeNames, Params>;
 
 const field = (id: string): ReviewFormItemEntry<TypeNames, Params> => ({
+  comment: null,
   formItem: { id, type: "field", params: { name: id }, deleted: false },
   children: [],
   date: null,

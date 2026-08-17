@@ -15,7 +15,7 @@ type FieldItem = {
 };
 
 type FieldDraft = {
-  formItem?: { id: string; params: { name: string; required?: boolean } };
+  formItem: { id: string; params: { name: string; required?: boolean } } | null;
 };
 
 export const FollowUpAdd = ({
@@ -23,7 +23,11 @@ export const FollowUpAdd = ({
   onPick,
 }: {
   originId: string;
-  onPick: (payload: { formItem: FieldItem }) => void;
+  onPick: (payload: {
+    comment: string | null;
+    formItem: FieldItem;
+    children: null;
+  }) => void;
 }) => {
   const [open, setOpen] = useState(false);
   return (
@@ -71,12 +75,14 @@ export const FollowUpAdd = ({
                 e.stopPropagation();
                 setOpen(false);
                 onPick({
+                  comment: null,
                   formItem: lib.branded({
                     id: `${originId}-followup-${Date.now()}`,
                     type: "field",
                     deleted: false,
                     params: { name: "Follow-up field", required: false },
                   }),
+                  children: null,
                 });
               }}
               style={{

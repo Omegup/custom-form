@@ -1,17 +1,13 @@
 import type { ReactNode } from "react";
 import type {
-  MetaDom,
   ParamsDom,
-  RecursiveFormItem,
   Response,
-  SIndexed,
-  SomeFormItem,
   VariantsDom,
 } from "./_deps";
 import { branded } from "./_deps";
 import { withFormItemEntry } from "./reviewChanges";
 import type { ReviewItemExtra, ReviewLive, ReviewWalk } from "./reviewWalk.t";
-import type { ReviewExtra } from "./types";
+import type { ReviewExtra, ReviewFollowUpPick } from "./types";
 
 export const appendFollowUp = <
   TypeNames extends string,
@@ -20,11 +16,7 @@ export const appendFollowUp = <
 >(
   live: ReviewLive<TypeNames, Params, Variants>,
   originId: string,
-  payload: {
-    comment?: string;
-    formItem: SomeFormItem<TypeNames, Params>;
-    children?: RecursiveFormItem<TypeNames, Params, MetaDom<SIndexed>>[][];
-  },
+  payload: ReviewFollowUpPick<TypeNames, Params>,
 ) =>
   live.setChanges(
     withFormItemEntry(
@@ -45,7 +37,7 @@ export const openUnlockOrDelete = <
   unlocked: boolean,
 ) => {
   if (unlocked) live.setDeleteCommentId(originId);
-  else live.setAddition({ originId });
+  else live.setAddition({ originId, text: null });
 };
 
 /** Hide +Follow-up while the host editor is already open under this item. */

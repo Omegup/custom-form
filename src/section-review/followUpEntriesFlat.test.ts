@@ -27,6 +27,7 @@ const entry = (
   id: string,
   name: string,
 ): ReviewFormItemEntry<TypeNames, Params> => ({
+  comment: null,
   formItem: field(id, name),
   children: [],
   date: null,
@@ -50,6 +51,8 @@ describe("followUpEntriesToFlat / syncFollowUpEntriesFromFlat", () => {
   it("keeps comment-only rows that have no form item", () => {
     const commentOnly: ReviewFormItemEntry<TypeNames, Params> = {
       comment: "note",
+      formItem: null,
+      children: null,
       date: null,
     };
     const entries = [entry("a", "A"), commentOnly];

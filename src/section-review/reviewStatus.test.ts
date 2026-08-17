@@ -206,6 +206,8 @@ describe("reviewItemState", () => {
               deleted: false,
               params: { name: "More" },
             },
+            comment: null,
+            children: null,
             date: null,
           },
         ],
