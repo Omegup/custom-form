@@ -9,8 +9,8 @@ import type {
   RecursiveFormItem,
   VariantsDom,
 } from "./_deps";
-import { emptyResponse, withIdSuffix } from "./_deps";
-import { fillViewerExtra, renderFillClearIcon } from "./responderItemChrome";
+import { branded, emptyResponse, withIdSuffix } from "./_deps";
+import { renderFillClearIcon } from "./responderItemChrome";
 import { followUpsForOrigin, oldById } from "./responderLookup";
 import { responderState } from "./responderStatus";
 import { usefulForFill } from "./responderVisibleItems";
@@ -47,7 +47,7 @@ const renderFillItem = <
   return live.renderFormItem({
     formItem: q,
     variant: live.variants[state],
-    extra: fillViewerExtra({
+    extra: branded({
       getChild: (suffix: string) => (
         <>
           {renderFillSlots(
@@ -63,15 +63,17 @@ const renderFillItem = <
       index,
       icon: renderFillClearIcon(walk, q.id, oldValue, current),
       appendix: remark ? chrome.renderAppendix(remark) : null,
-      setValue: editable
-        ? (key, v) => {
-            live.setResponse(q.id, {
-              ...(value ?? emptyResponse()),
-              [key]: v,
-            });
-          }
-        : null,
-      value: value || emptyResponse(),
+      response: {
+        setValue: editable
+          ? (key, v) => {
+              live.setResponse(q.id, {
+                ...(value ?? emptyResponse()),
+                [key]: v,
+              });
+            }
+          : null,
+        value: value || emptyResponse(),
+      },
       impRef: editable
         ? (ref) => {
             live.validators[q.id] = ref;

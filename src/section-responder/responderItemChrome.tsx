@@ -1,14 +1,11 @@
-import type { ReactNode, Ref } from "react";
+import type { ReactNode } from "react";
 import type {
   MetaDom,
   ParamsDom,
   Response,
-  ResponseSetter,
-  StrictViewerMethods,
   VariantsDom,
 } from "./_deps";
-import { branded } from "./_deps";
-import type { FillItemExtra, FillWalk } from "./responderWalk.t";
+import type { FillWalk } from "./responderWalk.t";
 
 export const renderFillClearIcon = <
   TypeNames extends string,
@@ -24,28 +21,3 @@ export const renderFillClearIcon = <
   oldValue && current
     ? walk.chrome.renderClearIcon(() => walk.live.setResponse(id, undefined))
     : null;
-
-export const fillViewerExtra = (args: {
-  getChild: (suffix: string) => ReactNode;
-  error: boolean | string | null;
-  parentDeleted: boolean;
-  index: number;
-  icon: ReactNode;
-  appendix: ReactNode;
-  setValue: ResponseSetter["setValue"];
-  value: Response;
-  impRef: Ref<StrictViewerMethods> | null;
-}): FillItemExtra =>
-  branded({
-    getChild: args.getChild,
-    error: args.error,
-    parentDeleted: args.parentDeleted,
-    index: args.index,
-    icon: args.icon,
-    appendix: args.appendix,
-    response: {
-      setValue: args.setValue,
-      value: args.value,
-    },
-    impRef: args.impRef,
-  });

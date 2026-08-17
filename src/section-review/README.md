@@ -24,7 +24,7 @@ are mounted by the **call site**, not this HOC.
 | `reviewOverlayActions.ts` | overlay submit (`withComment` / `withoutComment`) for the host-mounted remark editor |
 | `reviewWalk.t.ts` | Walk ctx (`ReviewLive`, `ReviewWalk`, `ReviewItemExtra`) |
 | `reviewVisibleItems.ts` | `usefulForReview` (membership) — panel-instance ids via `withIdSuffix` from `recursive-form` |
-| `reviewItemChrome.tsx` | Add-follow-up, lock/unlock, follow-up mark, read-only extra bag |
+| `reviewItemChrome.tsx` | Add-follow-up, lock/unlock, follow-up mark |
 | `reviewRender.tsx` | Recursive walk (`renderReviewItem` ↔ appendix ↔ slots) + `renderReviewColumns` |
 | `SectionReview.tsx` | **`SectionReviewHOC(viewers, chrome)`** — `FormItemHOC` + `renderSection`; opens overlays via setters |
 | `followUpEntriesFlat.ts` | `followUpEntriesToFlat` / `syncFollowUpEntriesFromFlat` — entries ↔ synthetic flat section |

@@ -1,13 +1,8 @@
 import type { ReactNode } from "react";
-import type {
-  ParamsDom,
-  Response,
-  VariantsDom,
-} from "./_deps";
-import { branded } from "./_deps";
+import type { ParamsDom, VariantsDom } from "./_deps";
 import { withFormItemEntry } from "./reviewChanges";
-import type { ReviewItemExtra, ReviewLive, ReviewWalk } from "./reviewWalk.t";
-import type { ReviewExtra, ReviewFollowUpPick } from "./types";
+import type { ReviewLive, ReviewWalk } from "./reviewWalk.t";
+import type { ReviewFollowUpPick } from "./types";
 
 export const appendFollowUp = <
   TypeNames extends string,
@@ -82,25 +77,3 @@ export const renderReviewItemIcon = <
     </>
   );
 };
-
-/** Read-only viewer extra — no validate ref, no fill error. */
-export const reviewViewerExtra = (args: {
-  getChild: (suffix: string) => ReactNode;
-  parentDeleted: boolean;
-  index: number;
-  icon: ReactNode;
-  appendix: ReactNode;
-  status: ReviewExtra["status"];
-  value: Response;
-}): ReviewItemExtra =>
-  branded({
-    getChild: args.getChild,
-    error: null,
-    parentDeleted: args.parentDeleted,
-    index: args.index,
-    icon: args.icon,
-    response: { setValue: null, value: args.value },
-    appendix: args.appendix,
-    status: args.status,
-    impRef: null,
-  });

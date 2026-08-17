@@ -9,7 +9,7 @@ import type {
   RecursiveFormItem,
   VariantsDom,
 } from "./_deps";
-import { emptyResponse, withIdSuffix } from "./_deps";
+import { branded, emptyResponse, withIdSuffix } from "./_deps";
 import {
   followUpEntryAsItem,
   partitionFollowUpEntries,
@@ -18,7 +18,6 @@ import { withUnansweredFormItems } from "./reviewChanges";
 import {
   renderReviewAddAction,
   renderReviewItemIcon,
-  reviewViewerExtra,
 } from "./reviewItemChrome";
 import { isAnsweredResponse, reviewItemState } from "./reviewStatus";
 import { usefulForReview } from "./reviewVisibleItems";
@@ -54,7 +53,7 @@ const renderReviewItem = <
     children: live.renderFormItem({
       formItem: q,
       variant: live.variants[state.variant],
-      extra: reviewViewerExtra({
+      extra: branded({
         getChild: (suffix: string) => (
           <>
             {renderReviewSlots(
@@ -65,6 +64,7 @@ const renderReviewItem = <
             )}
           </>
         ),
+        error: null,
         parentDeleted,
         index,
         icon: renderReviewItemIcon(walk, {
@@ -77,7 +77,11 @@ const renderReviewItem = <
           ? chrome.renderFormItemAppendix(appendix)
           : null,
         status: state.status,
-        value: live.responses[q.id] ?? emptyResponse(),
+        response: {
+          setValue: null,
+          value: live.responses[q.id] ?? emptyResponse(),
+        },
+        impRef: null,
       }),
     }),
   });
