@@ -36,6 +36,7 @@ const renderFollowUpIconAdd = ({
 }: AddFormItemRenderArgs) => (
   <DropdownMenu
     open={open}
+    align="end"
     trigger={
       <button
         type="button"
@@ -54,32 +55,15 @@ const renderFollowUpIconAdd = ({
       </button>
     }
   >
-    <div
-      style={{
-        position: "absolute",
-        right: 0,
-        zIndex: 2,
-        display: "flex",
-        flexDirection: "column",
-        gap: 4,
-        minWidth: 140,
-        padding: 6,
-        background: "#fff",
-        border: "1px solid #ddd",
-        borderRadius: 4,
-        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-      }}
-    >
-      {items.map((item) => (
-        <Fragment key={item.key}>
-          {renderMenuItem({
-            title: item.title,
-            icon: item.icon,
-            onSelect: item.onSelect,
-          })}
-        </Fragment>
-      ))}
-    </div>
+    {items.map((item) => (
+      <Fragment key={item.key}>
+        {renderMenuItem({
+          title: item.title,
+          icon: item.icon,
+          onSelect: item.onSelect,
+        })}
+      </Fragment>
+    ))}
   </DropdownMenu>
 );
 

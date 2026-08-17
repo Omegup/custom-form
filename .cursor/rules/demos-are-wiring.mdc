@@ -31,8 +31,24 @@ twisting the library so the demo can just wire it.
 
 Generic widgets that could live in an external UI kit go in
 [`src/demo-utils/`](../../src/demo-utils): page shell, sidebar layout,
-confirm banner, dropdown. Import them only from `demo/` and `*.stories.tsx`
-— never from library `_deps` / package source.
+confirm banner, dropdown **including the popover panel**. Import them only
+from `demo/` and `*.stories.tsx` — never from library `_deps` / package
+source. Hosts pass the trigger and items; they do not restyle the panel.
+
+One file per widget (`DemoPage.tsx`, `DropdownMenu.tsx`, …). `index.ts`
+only re-exports. Do not dump components into `index.tsx`.
+
+```tsx
+// ❌ BAD — package demo owns popover chrome
+<div style={{ position: "absolute", background: "#fff", boxShadow: … }}>
+  {items}
+</div>
+
+// ✅ GOOD — DropdownMenu owns the panel
+<DropdownMenu open={open} align="end" trigger={icon}>
+  {items}
+</DropdownMenu>
+```
 
 Form-specific chrome stays in package demos and is **imported**, not copied
 (`RequiredMark`, `sectionChrome`, `FollowUpAdd`). See

@@ -58,6 +58,7 @@ export const renderAddFormItem = ({
 }: AddFormItemRenderArgs) => (
   <DropdownMenu
     open={open}
+    align="start"
     trigger={
       <button
         type="button"
@@ -68,17 +69,15 @@ export const renderAddFormItem = ({
       </button>
     }
   >
-    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-      {items.map((item) => (
-        <Fragment key={item.key}>
-          {renderMenuItem({
-            title: item.title,
-            icon: item.icon,
-            onSelect: item.onSelect,
-          })}
-        </Fragment>
-      ))}
-    </div>
+    {items.map((item) => (
+      <Fragment key={item.key}>
+        {renderMenuItem({
+          title: item.title,
+          icon: item.icon,
+          onSelect: item.onSelect,
+        })}
+      </Fragment>
+    ))}
   </DropdownMenu>
 );
 

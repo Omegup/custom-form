@@ -33,6 +33,10 @@ Same for lock icons, remark cards, `useFieldMethods`. Generic shells
 If blurbs or fixtures differ, pass them as **required** props — do not
 duplicate the widget.
 
+`DropdownMenu` owns the popover panel (absolute, white, bordered). Hosts
+pass `trigger`, `align`, and item nodes. Do not inline a second menu
+surface in a package demo.
+
 Review follow-up is a nested Design list under the origin item —
 `FormDialogsEditor` (`sidebar={null}`) plus `followUpDraftsList`. Same
 `AddFormItem`, `FormItemEditor`, Edit, and move as Design. Do not invent a
