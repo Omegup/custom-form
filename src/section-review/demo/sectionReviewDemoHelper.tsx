@@ -147,7 +147,7 @@ export const sectionChrome: lib.SectionReviewChrome<types.TypeNames, types.Param
     />
   ),
   renderItemShell: ({ children, action }) => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+    <div style={{ position: "relative", padding: "4px 28px 4px 0" }}>
       {children}
       {action}
     </div>

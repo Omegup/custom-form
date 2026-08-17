@@ -36,6 +36,10 @@ Review follow-up is a nested Design list under the origin item —
 `syncFollowUpEntriesFromFlat`. Same `AddFormItem`, `FormItemEditor`, Edit, and
 move as Design. Do not invent a label-only draft list or a second item editor.
 
+Empty follow-up (no items yet) uses a **top icon** trigger for `AddFormItem`
+(same Field / Heading / Panel catalog). `+ Add item` is the list slot, shown
+only after the block has its first item.
+
 The required star is field-viewer chrome (`RequiredMark`), not draft/list HTML.
 If several field viewers show it, they compose the same mark.
 

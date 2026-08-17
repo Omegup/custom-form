@@ -2,7 +2,7 @@
  * Review follow-up — Design's `AddFormItem` + nested `FormDialogsEditor`.
  * Shared by section-review, form-review, and form-response demos.
  */
-import { useRef, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 import { FormDialogsEditor } from "../../form-dialogs/demo/FormDialogsDemo";
 import type * as dialogTypes from "../../form-dialogs/demo/formDialogsDemoTypes.t";
 import {
@@ -11,9 +11,9 @@ import {
 } from "../../form-item-editor/demo/FormItemEditorDemo";
 import type * as editorTypes from "../../form-item-editor/demo/formItemEditorDemoTypes.t";
 import * as editorLib from "../../form-item-editor/demo/library";
-import { AddFormItem } from "../../side-menu";
+import { AddFormItem, type AddFormItemRenderArgs } from "../../side-menu";
 import { MENU_ITEMS, randomId } from "../../side-menu/demo/fixtures";
-import { renderAddFormItem } from "../../side-menu/demo/sideMenuDemoHelper";
+import { renderMenuItem } from "../../side-menu/demo/sideMenuDemoHelper";
 import type { ReviewFollowUpPick, ReviewFormItemEntry } from "../types";
 import * as lib from "./library";
 import type * as types from "./sectionReviewDemoTypes.t";
@@ -26,6 +26,60 @@ const FOLLOW_UP_SECTION: dialogTypes.Section = {
   title: "Follow-up",
   description: "",
 };
+
+/** Empty follow-up: top icon + same catalog as Design. `+ Add item` is the list slot. */
+const renderFollowUpIconAdd = ({
+  open,
+  label,
+  toggle,
+  items,
+}: AddFormItemRenderArgs) => (
+  <div style={{ position: "relative" }}>
+    <button
+      type="button"
+      aria-label={label}
+      aria-expanded={open}
+      onClick={toggle}
+      style={{
+        border: "none",
+        background: "transparent",
+        cursor: "pointer",
+        fontSize: 14,
+        lineHeight: 1,
+      }}
+    >
+      💬
+    </button>
+    {open ? (
+      <div
+        style={{
+          position: "absolute",
+          right: 0,
+          zIndex: 2,
+          display: "flex",
+          flexDirection: "column",
+          gap: 4,
+          minWidth: 140,
+          padding: 6,
+          background: "#fff",
+          border: "1px solid #ddd",
+          borderRadius: 4,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+        }}
+      >
+        {items.map((item) => (
+          <Fragment key={item.key}>
+            {renderMenuItem({
+              title: item.title,
+              icon: item.icon,
+              onSelect: item.onSelect,
+            })}
+          </Fragment>
+        ))}
+      </div>
+    ) : null}
+  </div>
+);
 
 export const FollowUpAdd = ({
   onPick,
@@ -43,14 +97,16 @@ export const FollowUpAdd = ({
 
   return (
     <>
-      <AddFormItem
-        span={FOLLOW_UP_SPAN}
-        menuItems={MENU_ITEMS}
-        random={randomId}
-        label="+ Add item"
-        render={renderAddFormItem}
-        setAddItem={setSession}
-      />
+      <div style={{ position: "absolute", top: 0, right: 0 }}>
+        <AddFormItem
+          span={FOLLOW_UP_SPAN}
+          menuItems={MENU_ITEMS}
+          random={randomId}
+          label="Ask follow-up"
+          render={renderFollowUpIconAdd}
+          setAddItem={setSession}
+        />
+      </div>
       {session ? (
         <FormItemEditor
           ctx={ctx}
