@@ -26,8 +26,9 @@ export type { SectionHeader };
 /**
  * Fill chrome states — host supplies a Variant **value** bag per state;
  * the library picks `variants[state]` (see variant-values-not-keys).
+ * Validation error is `extra.error`, not a state.
  */
-export type ResponderState = "default" | "old" | "change" | "error";
+export type ResponderState = "default" | "old" | "change";
 
 /** Teacher/reviewer comments keyed by item id — school `ResponderAdditionalChanges`. */
 export type ResponderAdditionalChanges = Record<string, { comment?: string }>;

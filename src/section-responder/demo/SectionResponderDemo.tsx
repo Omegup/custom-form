@@ -109,7 +109,6 @@ export const sectionResponderVariants: Record<lib.ResponderState, types.Variants
     default: variants,
     old: variants,
     change: variants,
-    error: variants,
   };
 
 export const SectionResponderDemo = ({

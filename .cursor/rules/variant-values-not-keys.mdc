@@ -57,8 +57,11 @@ bags keyed by type.
 | Fill | `variants: Record<ResponderState, Variants>` | `variants[state]` |
 | Review | `variants: Record<ReviewVariantState, Variants>` | `variants[state]` |
 
-`ResponderState`: `default` \| `old` \| `change` \| `error`.
+`ResponderState`: `default` \| `old` \| `change`.
 `ReviewVariantState`: `default` \| `change`.
+
+Validation error is `extra.error`, not a variant. A change can fail
+validate and still pick `change`.
 
 ```typescript
 // ✅ Host constructs the Record; library picks by status
@@ -66,7 +69,6 @@ const responderVariants: Record<ResponderState, Variants> = {
   default: defaultChrome,
   old: defaultChrome,
   change: followUpChrome,
-  error: defaultChrome,
 };
 <FormResponder variants={responderVariants} />
 

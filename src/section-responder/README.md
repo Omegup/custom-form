@@ -14,10 +14,8 @@ appendix chrome is injected via `SectionResponderChrome` (demo owns DOM).
 |---|---|
 | `types.ts` | `ResponderState`, `ResponderExtra`, `FillChrome`, `SectionResponderChrome`, `SectionResponderProps` |
 | `responderWalk.t.ts` | Walk ctx (`FillLive`, `FillWalk`, `FillItemExtra`) |
-| `responderStatus.ts` | `responderState` — error / change / old / default |
-| `responderVisibleItems.ts` | `usefulForFill` (membership) — panel-instance ids via `withIdSuffix` from `recursive-form` |
-| `responderClearIcon.ts` | Clear icon when a prior answer has a live draft |
-| `responderRender.tsx` | Recursive walk (`renderFillItem` ↔ slots) + `renderFillColumns` |
+| `responderStatus.ts` | `responderState` — change / old / default |
+| `responderRender.tsx` | Recursive walk (`renderFillItem` ↔ slots) + `renderFillColumns`; `usefulForFill` membership |
 | `sectionValidator.ts` | Section `validate` / `update` / `getKeys` over item `impRef`s |
 | `SectionResponder.tsx` | **`SectionResponderHOC(viewers, chrome)`** — `FormItemHOC` + `renderSection`; opens the walk |
 
@@ -27,7 +25,7 @@ appendix chrome is injected via `SectionResponderChrome` (demo owns DOM).
 host: responses / setResponse / getError / section impRef
       + variants: Record<ResponderState, Variants>
   → SectionResponderHOC(viewers, chrome)
-  → per item: pick state (error / change / old / default) → variants[state]
+  → per item: pick state (change / old / default) → variants[state]
   → FormItemHOC(…, getUseImpRefViewProps)
   → viewer registers ViewerMethods
   → section impRef.validate aggregates item errors

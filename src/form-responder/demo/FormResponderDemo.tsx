@@ -108,7 +108,6 @@ export const responderVariants: Record<lib.ResponderState, types.Variants> = {
   default: variants,
   old: variants,
   change: variants,
-  error: variants,
 };
 
 export const FormResponderDemo = ({

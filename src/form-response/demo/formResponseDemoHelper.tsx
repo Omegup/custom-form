@@ -135,3 +135,20 @@ export const FOLLOW_UP_BADGE: ReactNode = (
     ✚
   </span>
 );
+
+export const PRIOR_BADGE: ReactNode = (
+  <span
+    title="Prior answer"
+    aria-label="Prior answer"
+    style={{
+      marginLeft: 6,
+      fontSize: 11,
+      fontWeight: 700,
+      letterSpacing: "0.04em",
+      textTransform: "uppercase",
+      color: "#6b7280",
+    }}
+  >
+    Prior
+  </span>
+);

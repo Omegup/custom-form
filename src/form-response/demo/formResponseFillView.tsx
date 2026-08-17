@@ -9,7 +9,7 @@ import {
   panelRepeatChildren,
   panelView,
 } from "../../response/demo/nestedItems";
-import { FOLLOW_UP_BADGE } from "./formResponseDemoHelper";
+import { FOLLOW_UP_BADGE, PRIOR_BADGE } from "./formResponseDemoHelper";
 import type * as types from "./formResponseDemoTypes.t";
 import * as lib from "./library";
 
@@ -17,6 +17,15 @@ const defaultVariant: types.FieldVariant = {
   border: "#ccc",
   background: "#fff",
   badge: null,
+  shell: {},
+  errorBorder: "#c00",
+  reviewTone: true,
+};
+
+const oldVariant: types.FieldVariant = {
+  border: "#9ca3af",
+  background: "#f4f4f5",
+  badge: PRIOR_BADGE,
   shell: {},
   errorBorder: "#c00",
   reviewTone: true,
@@ -37,13 +46,13 @@ const followUpVariant: types.FieldVariant = {
 };
 
 const variants = lib.branded<types.Variants, "variants">(defaultVariant);
+const oldVariants = lib.branded<types.Variants, "variants">(oldVariant);
 const followUpVariants = lib.branded<types.Variants, "variants">(followUpVariant);
 
 export const responderVariants: Record<lib.ResponderState, types.Variants> = {
   default: variants,
-  old: variants,
+  old: oldVariants,
   change: followUpVariants,
-  error: variants,
 };
 
 const fillChrome: lib.FormResponderChrome = {

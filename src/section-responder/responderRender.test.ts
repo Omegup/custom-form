@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { TheParams } from "../form";
 import type { MetaDom, RecursiveFormItem, SIndexed } from "./_deps";
-import { usefulForFill } from "./responderVisibleItems";
+import { usefulForFill } from "./responderRender";
 
 type TypeNames = "field";
 type Params = TheParams<{ field: { name: string } }>;

@@ -7,14 +7,38 @@ import type {
   MetaDom,
   ParamsDom,
   RecursiveFormItem,
+  Response,
   VariantsDom,
 } from "./_deps";
 import { branded, emptyResponse, withIdSuffix } from "./_deps";
-import { renderFillClearIcon } from "./responderClearIcon";
 import { responderState } from "./responderStatus";
-import { usefulForFill } from "./responderVisibleItems";
 import type { FillLive, FillWalk } from "./responderWalk.t";
 import type { FillChrome } from "./types";
+
+/** Live rows, plus deleted rows that still have answer data. */
+export const usefulForFill = (
+  item: { header: { id: string; deleted: boolean } },
+  responses: Record<string, Response>,
+): boolean => {
+  if (!item.header.deleted) return true;
+  const res = responses[item.header.id];
+  return res != null && Object.keys(res.data).length > 0;
+};
+
+const renderFillClearIcon = <
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames>,
+  Variants extends VariantsDom,
+  Meta extends MetaDom,
+>(
+  walk: FillWalk<TypeNames, Params, Variants, Meta>,
+  id: string,
+  oldValue: Response | null,
+  current: Response | null,
+): ReactNode =>
+  oldValue && current
+    ? walk.chrome.renderClearIcon(() => walk.live.setResponse(id, undefined))
+    : null;
 
 const renderFillItem = <
   TypeNames extends string,
@@ -37,7 +61,6 @@ const renderFillItem = <
   const editable = !oldValue || remark != null;
   const error = live.getError(q.id);
   const state = responderState({
-    error,
     oldValue,
     remark,
     isFollowUpTree,
