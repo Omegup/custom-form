@@ -52,6 +52,7 @@ The pure part of school `react-packages/form-edit-react/useDialog.tsx` lives in
 | Demo used to own | Library home | School equivalent |
 |---|---|---|
 | `openSession` (+ `EditingSession` shape) | `form-edit` `openFormItemEditSession` / `FlatFormItemEditSession` | `editFormItem: EditFormItem \| null` |
+| `setFormItem` session wiring | `form-edit` `patchFormItemEditSession` (draft + `resizeColumns`) | live `editFormItem` draft |
 | `commitEditingSession` | `form-edit` `applyFlatFormItem` (edit span replace **and** `index === -1` insert) | `setEditFormItemX` in `useDialog` |
 
 `resizeColumns` already lives in **`recursive-form`** (school’s `changeCols`); `applyFlatFormItem` calls it internally.

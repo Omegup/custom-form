@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { TheParams } from "../form";
 import {
+  followUpDraftsList,
   followUpEntriesToFlat,
   syncFollowUpEntriesFromFlat,
 } from "./followUpEntriesFlat";
@@ -59,5 +60,27 @@ describe("followUpEntriesToFlat / syncFollowUpEntriesFromFlat", () => {
     const flat = followUpEntriesToFlat(entries, section());
     const next = syncFollowUpEntriesFromFlat(flat, entries);
     expect(next?.some((e) => e.comment === "note" && !e.formItem)).toBe(true);
+  });
+});
+
+describe("followUpDraftsList", () => {
+  it("projects entries into a design list and writes back", () => {
+    const entries = [entry("a", "A")];
+    let stored = entries;
+    const list = followUpDraftsList(entries, (next) => {
+      stored = next;
+    }, section());
+    expect(list.flatItems[0]).toEqual({ section: section() });
+    const grown = followUpEntriesToFlat([...entries, entry("b", "B")], section());
+    list.setFlatItems(grown);
+    expect(stored.map((e) => e.formItem?.id)).toEqual(["a", "b"]);
+  });
+
+  it("ignores an empty tree that would wipe form-item entries", () => {
+    const entries = [entry("a", "A")];
+    const setEntries = vi.fn();
+    const list = followUpDraftsList(entries, setEntries, section());
+    list.setFlatItems([{ section: section() }]);
+    expect(setEntries).not.toHaveBeenCalled();
   });
 });

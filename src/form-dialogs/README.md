@@ -23,7 +23,7 @@ The hook returns:
 | Key | Role |
 |---|---|
 | `openItemEdit(item)` | Row "Edit" — `openFormItemEditSession` |
-| `openItemInsert(item, span?)` | Sidebar insert (no span → `-1/-1`) or slot insert (concrete span) — `openFormItemInsertSession` |
+| `openItemInsert(item, span)` | Sidebar insert (`AMBIGUOUS_INSERT_SPAN`) or slot insert (concrete span) — `openFormItemInsertSession` |
 | `setItemSession` | Raw setter — plug into `makeUseRenderAddItem(setItemSession)` (side-menu) |
 | `openSectionEdit(section)` | Section header "Edit" — `openSectionEditSession` |
 | `openSectionAdd(newSection)` | "+ Add section" — accepts `useSide.addSection`'s `NewSection` shape (`index: -1`) |
@@ -33,7 +33,8 @@ The hook returns:
 Commit paths (identical to what each module demo used to hand-wire):
 
 ```
-item:    commit(next)          → applyFlatFormItem(flatItems, session, { header: next.item, children: session.children }, next.n) → setFlatItems → close
+item:    setDraft(updater)     → patchFormItemEditSession (draft + resizeColumns)
+         commit(next)          → applyFlatFormItem(flatItems, session, { header: next.item, children: session.children }, next.n) → setFlatItems → close
 section: commit(header, cols)  → updateSectionInFlat(flatItems, session, header, cols)                                            → setFlatItems → close
 ```
 

@@ -27,7 +27,8 @@ are mounted by the **call site**, not this HOC.
 | `reviewItemChrome.tsx` | Add-follow-up, lock/unlock, follow-up mark |
 | `reviewRender.tsx` | Recursive walk (`renderReviewItem` ↔ appendix ↔ slots) + `renderReviewColumns` |
 | `SectionReview.tsx` | **`SectionReviewHOC(viewers, chrome)`** — `FormItemHOC` + `renderSection`; opens overlays via setters |
-| `followUpEntriesFlat.ts` | `followUpEntriesToFlat` / `syncFollowUpEntriesFromFlat` — entries ↔ synthetic flat section |
+| `followUpEntriesFlat.ts` | `followUpEntriesToFlat` / `syncFollowUpEntriesFromFlat` / `followUpDraftsList` — entries ↔ synthetic flat section for a host design list |
+| `useFollowUpAdd.ts` | `useFollowUpAdd` / `followUpPickFromSession` — headless add session + commit to `ReviewFollowUpPick` (host owns catalog + editor chrome) |
 
 ## How it plugs in
 
@@ -73,8 +74,9 @@ remark).
 Lifecycle walkthrough — **Design → Response → Follow** for one section
 (name / email / note). Design remounts the form-dialogs editor; Response mounts
 the fill shell (`SectionResponderHOC` — **+ Add** on multiple panels); Follow
-mounts `SectionReviewHOC`. Follow-up is a nested Design list under the origin
-(`FormDialogsEditor` embedded — add, edit, move). Three JSON panels stay
+mounts `SectionReviewHOC`. Empty follow-up uses a top-icon `AddFormItem`
+(`useFollowUpAdd`); after the first item, unanswered rows are a nested Design
+list (`followUpDraftsList` + `FormDialogsEditor` embedded). Three JSON panels stay
 visible (`section`, `responses`, `AdditionalChanges`). Toggle **Review round
 pending** to see `highlight` vs `disabled`.
 

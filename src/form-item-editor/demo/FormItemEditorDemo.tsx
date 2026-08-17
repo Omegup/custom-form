@@ -360,12 +360,7 @@ export const FormItemEditorDemo = ({
           })}
           formItem={draft}
           setFormItem={(updater) =>
-            setSession((prev) => {
-              if (!prev) return prev;
-              const nextDraft =
-                typeof updater === "function" ? updater(prev.draft) : updater;
-              return { ...prev, draft: nextDraft };
-            })
+            setSession((prev) => prev && lib.patchFormItemEditSession(prev, updater))
           }
           extra={lib.branded<types.ItemExtra, "item-edit-extra">({
             onCommit: commitDraft,

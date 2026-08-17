@@ -12,6 +12,7 @@ export type {
   SectionWithItems,
   SIndexed,
   Clone,
+  FlatInsertSpan,
 } from "../form-edit";
 export {
   applyFlatFormItem,
@@ -20,6 +21,8 @@ export {
   getFormItemMoveActions,
   openFormItemEditSession,
   openFormItemInsertSession,
+  patchFormItemEditSession,
+  AMBIGUOUS_INSERT_SPAN,
 } from "../form-edit";
 export type { AutoFocus, AutoFocusState } from "../move-actions";
 export { autofocusCtx } from "../move-actions";

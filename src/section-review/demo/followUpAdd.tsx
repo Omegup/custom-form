@@ -1,8 +1,9 @@
 /**
- * Review follow-up — Design's `AddFormItem` + nested `FormDialogsEditor`.
- * Shared by section-review, form-review, and form-response demos.
+ * Review follow-up chrome — Design's `AddFormItem` + nested `FormDialogsEditor`.
+ * Session/commit and entries↔flat bind live in the section-review library.
  */
-import { Fragment, useRef, useState } from "react";
+import { Fragment } from "react";
+import { AMBIGUOUS_INSERT_SPAN } from "../../form-edit";
 import { FormDialogsEditor } from "../../form-dialogs/demo/FormDialogsDemo";
 import type * as dialogTypes from "../../form-dialogs/demo/formDialogsDemoTypes.t";
 import {
@@ -17,8 +18,6 @@ import { renderMenuItem } from "../../side-menu/demo/sideMenuDemoHelper";
 import type { ReviewFollowUpPick, ReviewFormItemEntry } from "../types";
 import * as lib from "./library";
 import type * as types from "./sectionReviewDemoTypes.t";
-
-const FOLLOW_UP_SPAN = { index: -1, sIndex: -1 };
 
 const FOLLOW_UP_SECTION: dialogTypes.Section = {
   id: "follow-up",
@@ -86,11 +85,7 @@ export const FollowUpAdd = ({
 }: {
   onPick: (payload: ReviewFollowUpPick<types.TypeNames, types.Params>) => void;
 }) => {
-  const [session, setSession] = useState<editorTypes.EditingSession | null>(
-    null,
-  );
-  const sessionRef = useRef(session);
-  sessionRef.current = session;
+  const add = lib.useFollowUpAdd({ onPick });
   const ctx = editorLib.branded<editorTypes.Ctx, "context">({
     flatItems: [],
   });
@@ -99,46 +94,25 @@ export const FollowUpAdd = ({
     <>
       <div style={{ position: "absolute", top: 0, right: 0 }}>
         <AddFormItem
-          span={FOLLOW_UP_SPAN}
+          span={AMBIGUOUS_INSERT_SPAN}
           menuItems={MENU_ITEMS}
           random={randomId}
           label="Ask follow-up"
           render={renderFollowUpIconAdd}
-          setAddItem={setSession}
+          setAddItem={add.setSession}
         />
       </div>
-      {session ? (
+      {add.session ? (
         <FormItemEditor
           ctx={ctx}
           dialogArgs={editorLib.branded({
-            title: <>Add · {itemName(ctx, session.draft.item)}</>,
-            onCancel: () => setSession(null),
+            title: <>Add · {itemName(ctx, add.session.draft.item)}</>,
+            onCancel: add.close,
           })}
-          formItem={session.draft}
-          setFormItem={(updater) =>
-            setSession((prev) => {
-              if (!prev) return prev;
-              const nextDraft =
-                typeof updater === "function" ? updater(prev.draft) : updater;
-              return {
-                ...prev,
-                draft: nextDraft,
-                children: editorLib.resizeColumns(nextDraft.n, prev.children),
-              };
-            })
-          }
+          formItem={add.session.draft}
+          setFormItem={add.setDraft}
           extra={editorLib.branded<editorTypes.ItemExtra, "item-edit-extra">({
-            onCommit: () => {
-              const current = sessionRef.current;
-              if (!current) return;
-              onPick({
-                comment: null,
-                formItem: current.draft.item,
-                children:
-                  current.children.length > 0 ? current.children : null,
-              });
-              setSession(null);
-            },
+            onCommit: add.commit,
           })}
         />
       ) : null}
@@ -154,25 +128,24 @@ export const FollowUpDrafts = ({
   setEntries: (
     entries: ReviewFormItemEntry<types.TypeNames, types.Params>[],
   ) => void;
-}) => (
-  <div
-    style={{
-      marginTop: 8,
-      marginLeft: 8,
-      padding: "8px 8px 8px 12px",
-      borderLeft: "3px solid #e6b800",
-      background: "#fffbeb",
-      borderRadius: "0 6px 6px 0",
-    }}
-  >
-    <FormDialogsEditor
-      embedded={true}
-      flatItems={lib.followUpEntriesToFlat(entries, FOLLOW_UP_SECTION)}
-      setFlatItems={(next) => {
-        const synced = lib.syncFollowUpEntriesFromFlat(next, entries);
-        if (synced == null) return;
-        setEntries(synced);
+}) => {
+  const list = lib.followUpDraftsList(entries, setEntries, FOLLOW_UP_SECTION);
+  return (
+    <div
+      style={{
+        marginTop: 8,
+        marginLeft: 8,
+        padding: "8px 8px 8px 12px",
+        borderLeft: "3px solid #e6b800",
+        background: "#fffbeb",
+        borderRadius: "0 6px 6px 0",
       }}
-    />
-  </div>
-);
+    >
+      <FormDialogsEditor
+        embedded={true}
+        flatItems={list.flatItems}
+        setFlatItems={list.setFlatItems}
+      />
+    </div>
+  );
+};

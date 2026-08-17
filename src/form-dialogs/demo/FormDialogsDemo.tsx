@@ -118,7 +118,9 @@ export const FormDialogsEditor = ({
               blankSection={blankSection}
               render={renderSide}
               renderMenuItem={renderMenuItem}
-              setAddFormItem={(item) => dialogs.openItemInsert(item)}
+              setAddFormItem={(item) =>
+                dialogs.openItemInsert(item, lib.AMBIGUOUS_INSERT_SPAN)
+              }
               setAddSection={dialogs.openSectionAdd}
             />
           }

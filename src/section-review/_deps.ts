@@ -21,9 +21,15 @@ export type {
   SectionMetaDom,
   SectionWithItems,
   SIndexed,
+  FlatFormItem,
+  FlatFormItemEditSession,
   FlatFormItems,
 } from "../form-edit";
-export { flatten, consolidateSections } from "../form-edit";
+export {
+  flatten,
+  consolidateSections,
+  patchFormItemEditSession,
+} from "../form-edit";
 export type {
   Response,
   ResponseSetter,

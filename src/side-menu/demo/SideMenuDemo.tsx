@@ -93,12 +93,7 @@ export const SideMenuDemo = ({
           })}
           formItem={session.draft}
           setFormItem={(updater) =>
-            setSession((prev) => {
-              if (!prev) return prev;
-              const nextDraft =
-                typeof updater === "function" ? updater(prev.draft) : updater;
-              return { ...prev, draft: nextDraft };
-            })
+            setSession((prev) => prev && lib.patchFormItemEditSession(prev, updater))
           }
           extra={lib.branded<types.ItemExtra, "item-edit-extra">({
             onCommit: commitDraft,
@@ -161,7 +156,12 @@ export const SideMenuDemo = ({
                 render={demo.renderSide}
                 renderMenuItem={demo.renderMenuItem}
                 setAddFormItem={(item) =>
-                  setSession(lib.openFormItemInsertSession(item))
+                  setSession(
+                    lib.openFormItemInsertSession(
+                      item,
+                      lib.AMBIGUOUS_INSERT_SPAN,
+                    ),
+                  )
                 }
                 setAddSection={(section) =>
                   setSectionSession({

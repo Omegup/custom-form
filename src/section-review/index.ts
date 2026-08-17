@@ -18,8 +18,13 @@ export type {
 export { SectionReviewHOC } from "./SectionReview";
 export {
   followUpEntriesToFlat,
+  followUpDraftsList,
   syncFollowUpEntriesFromFlat,
 } from "./followUpEntriesFlat";
+export {
+  followUpPickFromSession,
+  useFollowUpAdd,
+} from "./useFollowUpAdd";
 export {
   followUpEntryAsItem,
   partitionFollowUpEntries,

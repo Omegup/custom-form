@@ -78,3 +78,26 @@ export const syncFollowUpEntriesFromFlat = <
     ...commentOnly,
   ];
 };
+
+/** Design-list bind for unanswered follow-ups — host still mounts the editor. */
+export const followUpDraftsList = <
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames>,
+  SectionConfig extends SectionDom,
+>(
+  entries: ReviewFormItemEntry<TypeNames, Params>[],
+  setEntries: (entries: ReviewFormItemEntry<TypeNames, Params>[]) => void,
+  section: SectionConfig,
+): {
+  flatItems: FlatFormItems<TypeNames, Params, SectionConfig>;
+  setFlatItems: (
+    items: FlatFormItems<TypeNames, Params, SectionConfig>,
+  ) => void;
+} => ({
+  flatItems: followUpEntriesToFlat(entries, section),
+  setFlatItems: (next) => {
+    const synced = syncFollowUpEntriesFromFlat(next, entries);
+    if (synced == null) return;
+    setEntries(synced);
+  },
+});
