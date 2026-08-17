@@ -74,10 +74,15 @@ export type SectionResponderChrome = {
     /** One ReactNode per column (already a fragment of item shells). */
     columns: ReactNode[];
   }) => ReactNode;
+  /**
+   * Host wrapper around one fill item — layout around the viewer
+   * (`children`), not the viewer itself. Clear-icon and remark appendix
+   * are on `ResponderExtra`, not this shell. First `setValue` already
+   * copies a prior answer into the live draft; the shell is not a write.
+   */
   renderItemShell: (args: {
     id: string;
     children: ReactNode;
-    onActivate?: () => void;
   }) => ReactNode;
   renderClearIcon: (onClear: () => void) => ReactNode;
   renderAppendix: (comment: string) => ReactNode;

@@ -167,9 +167,7 @@ const RemarkAppendix = ({ comment }: { comment: string }) => (
 
 export const sectionChrome: lib.SectionResponderChrome = {
   renderSection: (args) => <FillSection {...args} />,
-  renderItemShell: ({ children, onActivate }) => (
-    <div onClick={onActivate}>{children}</div>
-  ),
+  renderItemShell: ({ children }) => <div>{children}</div>,
   renderClearIcon: (onClear) => <ClearAnswer onClear={onClear} />,
   renderAppendix: (comment) => <RemarkAppendix comment={comment} />,
   renderFollowUpGroup: ({ items }) => items,

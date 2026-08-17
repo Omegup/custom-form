@@ -144,9 +144,15 @@ export type SectionReviewChrome<
     /** One ReactNode per column (already a fragment of item shells). */
     columns: ReactNode[];
   }) => ReactNode;
+  /**
+   * Host wrapper around one reviewed item — layout around the viewer
+   * (`children`) plus the follow-up add control (`action`). Lock/unlock
+   * and the follow-up mark live on `ReviewExtra.icon`, not this shell.
+   */
   renderItemShell: (args: {
     id: string;
     children: ReactNode;
+    /** Follow-up add control for this origin (`renderAddFollowUp`). */
     action: ReactNode;
   }) => ReactNode;
   /** Editable unlock remark. */

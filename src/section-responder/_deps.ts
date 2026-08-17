@@ -4,6 +4,7 @@ export type {
   ContextDom,
   ExtraDom,
   ParamsDom,
+  SomeFormItem,
   TypedFormItem,
   VariantsDom,
   Viewers,
@@ -17,6 +18,7 @@ export {
 export type { MetaDom, RecursiveFormItem } from "../recursive-form";
 export type {
   Indexed,
+  SIndexed,
   SectionDom,
   SectionMetaDom,
   SectionWithItems,

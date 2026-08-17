@@ -13,7 +13,14 @@ appendix chrome is injected via `SectionResponderChrome` (demo owns DOM).
 | File | Role |
 |---|---|
 | `types.ts` | `ResponderState`, `ResponderExtra`, `ResponderAdditionalChanges`, `SectionValidator`, `SectionResponderChrome`, `SectionResponderProps` |
-| `SectionResponder.tsx` | **`SectionResponderHOC(viewers, chrome)`** — `FormItemHOC` + `getUseImpRefViewProps`, recursive slots; picks `variants[state]` |
+| `responderWalk.t.ts` | Walk ctx (`FillChrome`, `FillLive`, `FillWalk`, `FillItemExtra`) |
+| `responderLookup.ts` | `oldById` / `followUpsForOrigin` — instance-id fallback onto stored keys |
+| `responderStatus.ts` | `responderState` — error / change / old / default |
+| `responderVisibleItems.ts` | `usefulForFill` (membership) and `withIdSuffix` (panel-instance ids) — composed at the slot walk |
+| `responderItemChrome.tsx` | Clear icon + branded extra bag |
+| `responderRender.tsx` | Recursive walk (`renderFillItem` ↔ slots) + `renderFillColumns` |
+| `sectionValidator.ts` | Section `validate` / `update` / `getKeys` over item `impRef`s |
+| `SectionResponder.tsx` | **`SectionResponderHOC(viewers, chrome)`** — `FormItemHOC` + `renderSection`; opens the walk |
 
 ## How it plugs in
 
