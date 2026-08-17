@@ -13,7 +13,7 @@ directly (no theme/portal rebuild).
 
 | File | Role |
 |---|---|
-| `types.ts` | `FormHeader`, `FormReviewChrome`, `CustomFormReviewProps` |
+| `types.ts` | `FormReviewChrome` (`SectionReviewChrome` + `FormLayoutChrome`), `CustomFormReviewProps` |
 | `CustomFormReview.tsx` | **`CustomFormReviewHOC(viewers, chrome)`** — required `variants: Record<ReviewVariantState, Variants>` prop |
 
 ## How it plugs in

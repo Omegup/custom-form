@@ -1,16 +1,4 @@
-import type { MetaDom, ParamsDom, RecursiveFormItem, Response } from "./_deps";
-
-export const withIdSuffix = <
-  TypeNames extends string,
-  Params extends ParamsDom<TypeNames>,
-  Meta extends MetaDom,
->(
-  item: RecursiveFormItem<TypeNames, Params, Meta>,
-  idSuffix: string,
-): RecursiveFormItem<TypeNames, Params, Meta> =>
-  idSuffix
-    ? { ...item, header: { ...item.header, id: item.header.id + idSuffix } }
-    : item;
+import type { Response } from "./_deps";
 
 /** Live rows, plus deleted rows that still have answer data. */
 export const usefulForFill = (

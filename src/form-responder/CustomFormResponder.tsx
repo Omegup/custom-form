@@ -15,7 +15,7 @@ import type {
   ResponderExtra,
   SectionMetaDom,
   SectionResponderContext,
-  SectionResponderHeader,
+  SectionHeader,
   SectionValidator,
   StrictViewerMethods,
   VariantsDom,
@@ -36,7 +36,7 @@ export const CustomFormResponderHOC = <
   Params extends ParamsDom<TypeNames>,
   Variants extends VariantsDom,
   Context extends SectionResponderContext,
-  SectionConfig extends SectionResponderHeader,
+  SectionConfig extends SectionHeader,
 >(
   viewers: Viewers<
     TypeNames,

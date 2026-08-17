@@ -28,7 +28,7 @@ import type {
   ResponderExtra,
   SectionResponderChrome,
   SectionResponderContext,
-  SectionResponderHeader,
+  SectionHeader,
   SectionResponderProps,
 } from "./types";
 
@@ -40,7 +40,7 @@ export const SectionResponderHOC = <
   Params extends ParamsDom<TypeNames>,
   Variants extends VariantsDom,
   Context extends SectionResponderContext,
-  SectionConfig extends SectionResponderHeader,
+  SectionConfig extends SectionHeader,
 >(
   viewers: Viewers<
     TypeNames,

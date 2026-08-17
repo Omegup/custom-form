@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { TheParams } from "../form";
 import type { MetaDom, RecursiveFormItem, SIndexed } from "./_deps";
-import { usefulForFill, withIdSuffix } from "./responderVisibleItems";
+import { usefulForFill } from "./responderVisibleItems";
 
 type TypeNames = "field";
 type Params = TheParams<{ field: { name: string } }>;
@@ -33,16 +33,5 @@ describe("usefulForFill", () => {
         gone: { meta: {}, data: { value: "x" } },
       }),
     ).toBe(true);
-  });
-});
-
-describe("withIdSuffix", () => {
-  it("suffixes header ids under a panel instance", () => {
-    expect(withIdSuffix(field("a"), "__p").header.id).toBe("a__p");
-  });
-
-  it("leaves the item unchanged when the suffix is empty", () => {
-    const item = field("a");
-    expect(withIdSuffix(item, "")).toBe(item);
   });
 });

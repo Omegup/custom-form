@@ -6,6 +6,7 @@ export type { MetaDom, RecursiveFormItem } from "../../recursive-form";
 export type {
   Indexed,
   SIndexed,
+  SectionHeader,
   SectionMetaDom,
   SectionWithItems,
 } from "../../form-edit";
@@ -23,7 +24,6 @@ export type {
   ResponderExtra,
   ResponderState,
   SectionResponderContext,
-  SectionResponderHeader,
   SectionValidator,
 } from "../../form-responder";
 export type { FormReviewChrome } from "../../form-review";
@@ -34,6 +34,5 @@ export type {
   ReviewExtra,
   ReviewVariantState,
   SectionReviewContext,
-  SectionReviewHeader,
 } from "../../form-review";
 export type { ReviewStatus, ReviewFormItemEntry } from "../../section-review";

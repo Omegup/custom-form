@@ -4,6 +4,7 @@ export type {
   ContextDom,
   ExtraDom,
   ParamsDom,
+  PhaseItemExtra,
   SectionLayoutChrome,
   SomeFormItem,
   TypedFormItem,
@@ -17,10 +18,12 @@ export {
   getUseImpRefViewProps,
 } from "../form";
 export type { MetaDom, RecursiveFormItem } from "../recursive-form";
+export { withIdSuffix } from "../recursive-form";
 export type {
   Indexed,
   SIndexed,
   SectionDom,
+  SectionHeader,
   SectionMetaDom,
   SectionWithItems,
 } from "../form-edit";

@@ -16,7 +16,7 @@ appendix chrome is injected via `SectionResponderChrome` (demo owns DOM).
 | `responderWalk.t.ts` | Walk ctx (`FillLive`, `FillWalk`, `FillItemExtra`) |
 | `responderLookup.ts` | `oldById` / `followUpsForOrigin` — instance-id fallback onto stored keys |
 | `responderStatus.ts` | `responderState` — error / change / old / default |
-| `responderVisibleItems.ts` | `usefulForFill` (membership) and `withIdSuffix` (panel-instance ids) — composed at the slot walk |
+| `responderVisibleItems.ts` | `usefulForFill` (membership) — panel-instance ids via `withIdSuffix` from `recursive-form` |
 | `responderItemChrome.tsx` | Clear icon + branded extra bag |
 | `responderRender.tsx` | Recursive walk (`renderFillItem` ↔ slots) + `renderFillColumns` |
 | `sectionValidator.ts` | Section `validate` / `update` / `getKeys` over item `impRef`s |

@@ -3,6 +3,8 @@ export type {
   Children,
   ContextDom,
   ExtraDom,
+  FormHeader,
+  FormLayoutChrome,
   ParamsDom,
   VariantsDom,
   Viewers,
@@ -10,6 +12,7 @@ export type {
 export { branded } from "../form";
 export type { MetaDom } from "../recursive-form";
 export type {
+  SectionHeader,
   SectionMetaDom,
   SectionWithItems,
 } from "../form-edit";
@@ -23,7 +26,6 @@ export type {
   ReviewVariantState,
   SectionReviewChrome,
   SectionReviewContext,
-  SectionReviewHeader,
   SectionReviewProps,
 } from "../section-review";
 export { SectionReviewHOC, reviewOverlayActions } from "../section-review";

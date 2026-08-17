@@ -25,7 +25,7 @@ import type {
   ReviewExtra,
   SectionReviewChrome,
   SectionReviewContext,
-  SectionReviewHeader,
+  SectionHeader,
   SectionReviewProps,
 } from "./types";
 
@@ -37,7 +37,7 @@ export const SectionReviewHOC = <
   Params extends ParamsDom<TypeNames>,
   Variants extends VariantsDom,
   Context extends SectionReviewContext,
-  SectionConfig extends SectionReviewHeader,
+  SectionConfig extends SectionHeader,
 >(
   viewers: Viewers<
     TypeNames,

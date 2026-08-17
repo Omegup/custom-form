@@ -14,7 +14,7 @@ import type {
   ReviewExtra,
   SectionMetaDom,
   SectionReviewContext,
-  SectionReviewHeader,
+  SectionHeader,
   StrictViewerMethods,
   VariantsDom,
   ViewerMethods,
@@ -31,7 +31,7 @@ export const CustomFormReviewHOC = <
   Params extends ParamsDom<TypeNames>,
   Variants extends VariantsDom,
   Context extends SectionReviewContext,
-  SectionConfig extends SectionReviewHeader,
+  SectionConfig extends SectionHeader,
 >(
   viewers: Viewers<
     TypeNames,

@@ -4,48 +4,39 @@
  */
 import type { ReactNode, Ref } from "react";
 import type {
+  FormHeader,
+  FormLayoutChrome,
   MetaDom,
   ParamsDom,
   RecursiveFormItem,
   Response,
   ResponderAdditionalChanges,
   ResponderState,
+  SectionHeader,
   SectionMetaDom,
   SectionResponderChrome,
   SectionResponderContext,
-  SectionResponderHeader,
   SectionValidator,
   SectionWithItems,
   VariantsDom,
 } from "./_deps";
 
-/** Optional form title data — stand-in for school's `FormHeader`. */
-export type FormHeader = {
-  title: string;
-  description?: string;
-};
+export type { FormHeader };
 
 /** Host-owned presentation for the form shell + per-section chrome. */
-export type FormResponderChrome = SectionResponderChrome & {
-  renderHeader: (header: FormHeader) => ReactNode;
-  renderForm: (args: {
-    header: ReactNode | null;
-    sections: ReactNode;
-    children?: ReactNode;
-  }) => ReactNode;
-};
+export type FormResponderChrome = SectionResponderChrome & FormLayoutChrome;
 
 export type CustomFormResponderProps<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
   Variants extends VariantsDom,
   Context extends SectionResponderContext,
-  SectionConfig extends SectionResponderHeader,
+  SectionConfig extends SectionHeader,
   SectionMeta extends SectionMetaDom,
   Meta extends MetaDom,
 > = {
   ctx: Context;
-  header?: FormHeader | null;
+  header: FormHeader | null;
   old: {
     values: Record<string, Response>;
     changes: ResponderAdditionalChanges;
@@ -73,5 +64,5 @@ export type CustomFormResponderProps<
     string,
     RecursiveFormItem<TypeNames, Params, Meta>[]
   >;
-  children?: ReactNode;
+  children: ReactNode | null;
 };

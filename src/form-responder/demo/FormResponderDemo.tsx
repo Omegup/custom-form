@@ -172,6 +172,7 @@ export const FormResponderDemo = ({
           showDeleted={showDeleted}
           variants={responderVariants}
           followUpItems={{}}
+          children={null}
         />
         <button type="button" onClick={validateForm} style={{ alignSelf: "flex-start" }}>
           Validate

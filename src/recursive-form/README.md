@@ -10,6 +10,7 @@ Tree-shaped form types built on top of `form`.
 | `RecursiveFormItem.t.ts` | `RecursiveFormItem`, `RecursiveTypedFormItem` |
 | `resizeColumns.ts` | Grow/shrink a column grid |
 | `collectFormItemIds.ts` | Recursive `header.id` walk over column grids |
+| `withIdSuffix.ts` | Append a panel-instance suffix to `header.id` (empty suffix is identity) |
 | `demo/` | Storybook demo: types, helper, `RecursiveFormDemo` integration |
 | `RecursiveForm.stories.tsx` | Storybook entry — docs source from `demo/` via `?raw` |
 

@@ -240,6 +240,7 @@ export const FormReviewDemo = ({
             showDeleted={showDeleted}
             variants={responderVariants}
             followUpItems={{}}
+            children={null}
           />
         ) : null}
 
@@ -289,6 +290,7 @@ export const FormReviewDemo = ({
               )}
               variants={reviewVariants}
               showDeleted={showDeleted}
+              children={null}
             />
             {renderReviewOverlays({
               ...lib.reviewOverlayActions({

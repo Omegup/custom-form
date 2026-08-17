@@ -12,13 +12,12 @@
 import type { ReactNode } from "react";
 import type {
   ContextDom,
-  ExtraDom,
   MetaDom,
   ParamsDom,
+  PhaseItemExtra,
   RecursiveFormItem,
   Response,
-  ResponseSetter,
-  SectionDom,
+  SectionHeader,
   SectionLayoutChrome,
   SectionMetaDom,
   SectionWithItems,
@@ -26,6 +25,8 @@ import type {
   SomeFormItem,
   VariantsDom,
 } from "./_deps";
+
+export type { SectionHeader };
 
 /** Host commit from `renderAddFollowUp` — a follow-up item, not a remark. */
 export type ReviewFollowUpPick<
@@ -94,23 +95,12 @@ export type ReviewVariantState = "default" | "change";
  * is always read-only (`setValue: null`); host layers `impRef` + `getChild`
  * around this, same as `ResponderExtra`.
  */
-export type ReviewExtra = ExtraDom & {
-  error: boolean | string | null;
-  parentDeleted: boolean;
-  index: number;
-  icon: ReactNode;
-  appendix: ReactNode;
-  response: ResponseSetter;
+export type ReviewExtra = PhaseItemExtra & {
   status: ReviewStatus;
 };
 
 /** Context slots school threads for i18n; theme/portal stay host-side. */
 export type SectionReviewContext = ContextDom;
-
-export type SectionReviewHeader = SectionDom & {
-  title: string;
-  description: string;
-};
 
 /**
  * Overlay wiring the library owns — host adds copy via {@link ReviewOverlayArgs}.
@@ -188,7 +178,7 @@ export type SectionReviewProps<
   Params extends ParamsDom<TypeNames>,
   Variants extends VariantsDom,
   Context extends SectionReviewContext,
-  SectionConfig extends SectionReviewHeader,
+  SectionConfig extends SectionHeader,
   SectionMeta extends SectionMetaDom,
   Meta extends MetaDom,
 > = {

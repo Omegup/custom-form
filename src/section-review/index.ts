@@ -12,7 +12,7 @@ export type {
   ReviewVariantState,
   SectionReviewChrome,
   SectionReviewContext,
-  SectionReviewHeader,
+  SectionHeader,
   SectionReviewProps,
 } from "./types";
 export { SectionReviewHOC } from "./SectionReview";

@@ -3,9 +3,10 @@ import { flatFromFieldSections } from "../../form-dialogs/demo/formDialogsDemoFl
 import {
   FormContainer,
   PENDING_DATE,
-  ReviewSection,
+  SectionFrame,
   sectionChrome,
 } from "../../section-review/demo/sectionReviewDemoHelper";
+import { FormTitle } from "../../form-responder/demo/formResponderDemoHelper";
 import {
   PhaseTabs,
   type PhaseTab,
@@ -117,23 +118,22 @@ export const PhaseJsonPanels = ({
 export const formChrome: lib.FormReviewChrome<types.TypeNames, types.Params> = {
   ...sectionChrome,
   renderHeader: (header) => (
-    <div style={{ marginBottom: 4 }}>
-      <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 600 }}>{header.title}</h2>
-      {header.description ? (
-        <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{header.description}</p>
-      ) : null}
-      <p
-        style={{
-          margin: "8px 0 0",
-          fontSize: 12,
-          color: "#888",
-          fontStyle: "italic",
-        }}
-      >
-        Follow / review — status border colors: green = commented, amber = needs attention,
-        grey = idle.
-      </p>
-    </div>
+    <FormTitle
+      header={header}
+      note={
+        <p
+          style={{
+            margin: "8px 0 0",
+            fontSize: 12,
+            color: "#888",
+            fontStyle: "italic",
+          }}
+        >
+          Follow / review — status border colors: green = commented, amber = needs attention,
+          grey = idle.
+        </p>
+      }
+    />
   ),
   renderForm: ({ header, sections, children }) => (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -142,7 +142,7 @@ export const formChrome: lib.FormReviewChrome<types.TypeNames, types.Params> = {
       {children}
     </div>
   ),
-  renderSection: (args) => <ReviewSection {...args} note={null} />,
+  renderSection: (args) => <SectionFrame {...args} note={null} />,
 };
 
 const field = (id: string, name: string, required: boolean): types.ListItem => ({

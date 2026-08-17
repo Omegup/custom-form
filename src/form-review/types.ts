@@ -6,49 +6,40 @@ import type { ReactNode } from "react";
 import type {
   Addition,
   AdditionalChanges,
+  FormHeader,
+  FormLayoutChrome,
   MetaDom,
   ParamsDom,
   Response,
   ReviewVariantState,
+  SectionHeader,
   SectionMetaDom,
   SectionReviewChrome,
   SectionReviewContext,
-  SectionReviewHeader,
   SectionWithItems,
   ReviewFormItemsEditorArgs,
   VariantsDom,
 } from "./_deps";
 
-/** Optional form title data — same shape as `form-responder`'s `FormHeader`. */
-export type FormHeader = {
-  title: string;
-  description?: string;
-};
+export type { FormHeader };
 
 /** Host-owned presentation for the form shell + per-section chrome. */
 export type FormReviewChrome<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-> = SectionReviewChrome<TypeNames, Params> & {
-  renderHeader: (header: FormHeader) => ReactNode;
-  renderForm: (args: {
-    header: ReactNode | null;
-    sections: ReactNode;
-    children?: ReactNode;
-  }) => ReactNode;
-};
+> = SectionReviewChrome<TypeNames, Params> & FormLayoutChrome;
 
 export type CustomFormReviewProps<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
   Variants extends VariantsDom,
   Context extends SectionReviewContext,
-  SectionConfig extends SectionReviewHeader,
+  SectionConfig extends SectionHeader,
   SectionMeta extends SectionMetaDom,
   Meta extends MetaDom,
 > = {
   ctx: Context;
-  header?: FormHeader | null;
+  header: FormHeader | null;
   sections: SectionWithItems<TypeNames, Params, SectionConfig, SectionMeta, Meta>[];
   responses: Record<string, Response>;
   lastPending: Date | null;
@@ -62,5 +53,5 @@ export type CustomFormReviewProps<
   /** Chrome values keyed by {@link ReviewVariantState} — library picks pending vs settled. */
   variants: Record<ReviewVariantState, Variants>;
   showDeleted: boolean;
-  children?: ReactNode;
+  children: ReactNode | null;
 };

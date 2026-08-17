@@ -15,8 +15,15 @@ export const FormContainer = ({
   title: string;
   children: ReactNode;
 }) => (
-  <div style={{ fontFamily: "system-ui, sans-serif", maxWidth: 1120, margin: "0 auto" }}>
-    <h2 style={{ marginTop: 0 }}>{title}</h2>
+  <div
+    style={{
+      fontFamily: "system-ui, sans-serif",
+      maxWidth: 1120,
+      margin: "0 auto",
+      color: "#1a1a1a",
+    }}
+  >
+    <h2 style={{ marginTop: 0, marginBottom: 4 }}>{title}</h2>
     {children}
   </div>
 );
@@ -90,14 +97,15 @@ export const PhaseTabs = <Id extends string>({
   );
 };
 
-/** Demo HTML chrome for `SectionResponderHOC` — not part of the library. */
-const FillSection = ({
+/** Demo HTML chrome for `renderSection` — fill, review, and form shells share this. */
+export const SectionFrame = ({
   deleted,
   title,
   description,
   i,
   multiSection,
   columns,
+  note,
 }: {
   deleted: boolean;
   title: string;
@@ -105,6 +113,7 @@ const FillSection = ({
   i: number;
   multiSection: boolean;
   columns: ReactNode[];
+  note: ReactNode | null;
 }) => (
   <div style={{ marginBottom: 20, opacity: deleted ? 0.5 : 1 }}>
     <div style={{ marginBottom: 12 }}>
@@ -114,6 +123,7 @@ const FillSection = ({
       {description ? (
         <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{description}</p>
       ) : null}
+      {note}
     </div>
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       {columns.map((col, idx) => (
@@ -163,7 +173,7 @@ const RemarkAppendix = ({ comment }: { comment: string }) => (
 );
 
 export const sectionChrome: lib.SectionResponderChrome = {
-  renderSection: (args) => <FillSection {...args} />,
+  renderSection: (args) => <SectionFrame {...args} note={null} />,
   renderClearIcon: (onClear) => <ClearAnswer onClear={onClear} />,
   renderAppendix: (comment) => <RemarkAppendix comment={comment} />,
   renderFollowUpGroup: ({ items }) => items,

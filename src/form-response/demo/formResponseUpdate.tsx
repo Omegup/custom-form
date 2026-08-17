@@ -85,6 +85,7 @@ export const UpdatePhase = ({
         )}
         variants={reviewVariants}
         showDeleted={showDeleted}
+        children={null}
       />
       {renderReviewOverlays({
         ...lib.reviewOverlayActions({

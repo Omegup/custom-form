@@ -9,7 +9,7 @@ import type {
   RecursiveFormItem,
   VariantsDom,
 } from "./_deps";
-import { emptyResponse } from "./_deps";
+import { emptyResponse, withIdSuffix } from "./_deps";
 import {
   followUpEntryAsItem,
   partitionFollowUpEntries,
@@ -21,7 +21,7 @@ import {
   reviewViewerExtra,
 } from "./reviewItemChrome";
 import { isAnsweredResponse, reviewItemState } from "./reviewStatus";
-import { usefulForReview, withIdSuffix } from "./reviewVisibleItems";
+import { usefulForReview } from "./reviewVisibleItems";
 import type { ReviewLive, ReviewWalk } from "./reviewWalk.t";
 import type { ReviewChrome } from "./types";
 

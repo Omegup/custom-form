@@ -13,7 +13,7 @@ directly (no theme/portal rebuild).
 
 | File | Role |
 |---|---|
-| `types.ts` | `FormHeader`, `FormResponderChrome`, `CustomFormResponderProps` |
+| `types.ts` | `FormResponderChrome` (`SectionResponderChrome` + `FormLayoutChrome`), `CustomFormResponderProps` |
 | `CustomFormResponder.tsx` | **`CustomFormResponderHOC(viewers, chrome)`** — required `variants: Record<ResponderState, Variants>` prop |
 
 ## How it plugs in

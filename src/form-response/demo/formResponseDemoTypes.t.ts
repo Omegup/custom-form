@@ -25,7 +25,7 @@ export type FieldVariant = {
 
 export type Variants = lib.TheVariants<FieldVariant>;
 
-export type Section = lib.SectionReviewHeader;
+export type Section = lib.SectionHeader;
 
 export type ItemMeta = lib.MetaDom<lib.SIndexed | Record<string, never>>;
 export type SectionMeta = lib.SectionMetaDom<lib.Indexed>;

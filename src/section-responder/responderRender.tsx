@@ -9,11 +9,11 @@ import type {
   RecursiveFormItem,
   VariantsDom,
 } from "./_deps";
-import { emptyResponse } from "./_deps";
+import { emptyResponse, withIdSuffix } from "./_deps";
 import { fillViewerExtra, renderFillClearIcon } from "./responderItemChrome";
 import { followUpsForOrigin, oldById } from "./responderLookup";
 import { responderState } from "./responderStatus";
-import { usefulForFill, withIdSuffix } from "./responderVisibleItems";
+import { usefulForFill } from "./responderVisibleItems";
 import type { FillLive, FillWalk } from "./responderWalk.t";
 import type { FillChrome } from "./types";
 

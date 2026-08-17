@@ -15,7 +15,7 @@ Flat markers ↔ consolidated tree, plus pure flat mutations.
 
 | File | Role |
 |---|---|
-| `flat-form.t.ts` | `FlatFormItem` (`{ item, n }`), `FlatNestedItem` union, `FlatFormItems`, `SectionDom` |
+| `flat-form.t.ts` | `FlatFormItem` (`{ item, n }`), `FlatNestedItem` union, `FlatFormItems`, `SectionDom`, `SectionHeader` |
 | `consolidate.ts` | `consolidateSections()` / `customConsolidateSections()` — flat array → `SectionWithItems[]` tree |
 | `flatten.ts` | `flatten()` / `customFlat()` — recursive item/section → flat markers |
 | `SectionWithItems.t.ts` | Hydrated section: `{ meta, header, items[][] }` |

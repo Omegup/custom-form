@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { TheParams } from "../form";
 import type { MetaDom, RecursiveFormItem, SIndexed } from "./_deps";
-import { usefulForReview, withIdSuffix } from "./reviewVisibleItems";
+import { usefulForReview } from "./reviewVisibleItems";
 
 type TypeNames = "field";
 type Params = TheParams<{ field: { name: string } }>;
@@ -25,16 +25,5 @@ describe("usefulForReview", () => {
     expect(usefulForReview(field("gone", true), (id) => id === "gone")).toBe(
       true,
     );
-  });
-});
-
-describe("withIdSuffix", () => {
-  it("suffixes header ids under a panel instance", () => {
-    expect(withIdSuffix(field("a"), "__p").header.id).toBe("a__p");
-  });
-
-  it("leaves the item unchanged when the suffix is empty", () => {
-    const item = field("a");
-    expect(withIdSuffix(item, "")).toBe(item);
   });
 });

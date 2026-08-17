@@ -4,7 +4,7 @@ export type {
   ResponderState,
   SectionResponderChrome,
   SectionResponderContext,
-  SectionResponderHeader,
+  SectionHeader,
   SectionResponderProps,
   SectionValidator,
 } from "./types";

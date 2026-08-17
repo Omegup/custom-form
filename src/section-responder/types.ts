@@ -9,18 +9,19 @@
 import type { ReactNode, Ref } from "react";
 import type {
   ContextDom,
-  ExtraDom,
   MetaDom,
   ParamsDom,
+  PhaseItemExtra,
   RecursiveFormItem,
   Response,
-  ResponseSetter,
-  SectionDom,
+  SectionHeader,
   SectionLayoutChrome,
   SectionMetaDom,
   SectionWithItems,
   VariantsDom,
 } from "./_deps";
+
+export type { SectionHeader };
 
 /**
  * Fill chrome states — host supplies a Variant **value** bag per state;
@@ -36,14 +37,7 @@ export type ResponderAdditionalChanges = Record<string, { comment?: string }>;
  * Host layers `impRef` + `getChild` around this; `getUseImpRefViewProps` swaps
  * Strict → ViewerMethods on the way in.
  */
-export type ResponderExtra = ExtraDom & {
-  error: boolean | string | null;
-  parentDeleted: boolean;
-  index: number;
-  icon: ReactNode;
-  appendix: ReactNode;
-  response: ResponseSetter;
-};
+export type ResponderExtra = PhaseItemExtra;
 
 export type SectionValidator = {
   validate: (values: Record<string, Response>) => Record<string, string | null>;
@@ -54,11 +48,6 @@ export type SectionValidator = {
 /** Context slots school threads for i18n; theme/portal stay host-side. */
 export type SectionResponderContext = ContextDom & {
   t: (term: "fieldRequired") => string;
-};
-
-export type SectionResponderHeader = SectionDom & {
-  title: string;
-  description: string;
 };
 
 /** Item-walk chrome — clear control, remark, follow-up group. */
@@ -86,7 +75,7 @@ export type SectionResponderProps<
   Params extends ParamsDom<TypeNames>,
   Variants extends VariantsDom,
   Context extends SectionResponderContext,
-  SectionConfig extends SectionResponderHeader,
+  SectionConfig extends SectionHeader,
   SectionMeta extends SectionMetaDom,
   Meta extends MetaDom,
 > = {

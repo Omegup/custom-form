@@ -87,6 +87,7 @@ export const FillPhase = ({
         showDeleted={false}
         variants={responderVariants}
         followUpItems={fill.followUpItems}
+        children={null}
       />
       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
         <button type="button" onClick={() => fill.validate()}>

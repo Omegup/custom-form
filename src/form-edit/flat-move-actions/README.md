@@ -22,7 +22,8 @@ getFlatRawActions(args, clone)
 
 - **`FlatFormItem`** — `{ section }` | `{ item, n }` | `{ end: null }`
 - **`FlatFormItems`** — array of the above
-- **`SectionDom`** — `{ id, deleted }` (extended at app level with `title`, `description`)
+- **`SectionDom`** — `{ id, deleted }`
+- **`SectionHeader`** — `SectionDom & { title, description }`
 - **`GetActionsArgs`** — `{ items, setItems, ctx, sectionOfItem, setToRemove }`
 
 ## `getFlatRawActions`

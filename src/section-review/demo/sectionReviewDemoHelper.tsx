@@ -1,8 +1,10 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties } from "react";
 import { FollowUpAdd } from "./followUpAdd";
 import { flatFromFieldSections } from "../../form-dialogs/demo/formDialogsDemoFlat";
 import {
+  FormContainer,
   PhaseTabs,
+  SectionFrame,
   type PhaseTab,
 } from "../../section-responder/demo/sectionResponderDemoHelper";
 import sectionReviewDemoSource from "./SectionReviewDemo.tsx?raw";
@@ -10,27 +12,7 @@ import sectionReviewDemoTypesSource from "./sectionReviewDemoTypes.t.ts?raw";
 import type * as types from "./sectionReviewDemoTypes.t";
 import * as lib from "./library";
 
-export { PhaseTabs };
-
-export const FormContainer = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) => (
-  <div
-    style={{
-      fontFamily: "system-ui, sans-serif",
-      maxWidth: 1120,
-      margin: "0 auto",
-      color: "#1a1a1a",
-    }}
-  >
-    <h2 style={{ marginTop: 0, marginBottom: 4 }}>{title}</h2>
-    {children}
-  </div>
-);
+export { FormContainer, PhaseTabs, SectionFrame };
 
 /** Stable reference so `lastPending === history.at(-1).date` can match by identity. */
 export const PENDING_DATE = new Date("2024-01-15T00:00:00Z");
@@ -151,47 +133,10 @@ const ACTION_ICON: Record<
   unlock: { glyph: "🔓", label: "Unlocked by remark — remove remark" },
 };
 
-export const ReviewSection = ({
-  deleted,
-  title,
-  description,
-  i,
-  multiSection,
-  columns,
-  note,
-}: {
-  deleted: boolean;
-  title: string;
-  description: string;
-  i: number;
-  multiSection: boolean;
-  columns: ReactNode[];
-  note: ReactNode;
-}) => (
-  <div style={{ marginBottom: 20, opacity: deleted ? 0.5 : 1 }}>
-    <div style={{ marginBottom: 12 }}>
-      <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 600 }}>
-        {multiSection ? `${i + 1}. ${title}` : title}
-      </h3>
-      {description ? (
-        <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{description}</p>
-      ) : null}
-      {note}
-    </div>
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      {columns.map((col, idx) => (
-        <div key={idx} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {col}
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
 /** Demo HTML chrome for `SectionReviewHOC` — not part of the library. */
 export const sectionChrome: lib.SectionReviewChrome<types.TypeNames, types.Params> = {
   renderSection: (args) => (
-    <ReviewSection
+    <SectionFrame
       {...args}
       note={
         <p style={{ margin: "8px 0 0", fontSize: 12, color: "#888", fontStyle: "italic" }}>

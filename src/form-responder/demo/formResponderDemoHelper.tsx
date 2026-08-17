@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { flatFromFieldSections } from "../../form-dialogs/demo/formDialogsDemoFlat";
 import {
   FormContainer,
@@ -12,6 +13,24 @@ import type * as types from "./formResponderDemoTypes.t";
 import * as lib from "./library";
 
 export { FormContainer, PhaseTabs, useFieldMethods };
+
+export const FormTitle = ({
+  header,
+  note,
+}: {
+  header: lib.FormHeader;
+  note: ReactNode | null;
+}) => (
+  <div style={{ marginBottom: 4 }}>
+    <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 600 }}>
+      {header.title}
+    </h2>
+    {header.description ? (
+      <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{header.description}</p>
+    ) : null}
+    {note}
+  </div>
+);
 
 export const PHASES: PhaseTab<types.DemoPhase>[] = [
   {
@@ -29,16 +48,7 @@ export const PHASES: PhaseTab<types.DemoPhase>[] = [
 /** Demo HTML chrome for `CustomFormResponderHOC` — section slots come from `sectionChrome`. */
 export const formChrome: lib.FormResponderChrome = {
   ...sectionChrome,
-  renderHeader: (header) => (
-    <div style={{ marginBottom: 4 }}>
-      <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 600 }}>
-        {header.title}
-      </h2>
-      {header.description ? (
-        <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{header.description}</p>
-      ) : null}
-    </div>
-  ),
+  renderHeader: (header) => <FormTitle header={header} note={null} />,
   renderForm: ({ header, sections, children }) => (
     <div
       style={{
