@@ -27,12 +27,19 @@ export const formChrome = {
 };
 ```
 
-Same for lock icons, remark cards, `useFieldMethods`. Generic shells
+Same for lock icons, remark cards, `useFieldMethods`. Shared **UI**
 (`DemoPage`, `SidebarLayout`, `ConfirmBanner`, `DropdownMenu`,
-`PhaseTabs`, `PhaseJsonPanels`, `EditorDialog`, `TextField`) live in
-`src/demo-utils/` — see `demos-are-wiring.mdc`. Copy-paste is not a variant.
+`PhaseTabs`, `PhaseJsonPanels`, `EditorDialog`, `TextField`,
+`FieldViewerChrome`, `RequiredMark`, `SelectColumns`, `FormTitle`,
+`ReviewStatusNote`) lives in `src/demo-utils/` — see `demos-are-wiring.mdc`.
+Package demos **wire** those widgets; they do not own a second copy.
 If blurbs or fixtures differ, pass them as **required** props — do not
 duplicate the widget.
+
+`PhaseJsonPanels` owns JSON dumps. Do not paste a second `<pre>`.
+`SelectColumns` is one column picker (`options` and `legend` required).
+Fill and review field viewers compose `FieldViewerChrome`.
+`ReviewStatusNote` is one italic legend. `FormTitle` is the form header.
 
 `DropdownMenu` owns the popover panel (absolute, white, bordered). Hosts
 pass `trigger`, `align`, and item nodes. Do not inline a second menu
@@ -47,8 +54,10 @@ Empty follow-up (no items yet) uses a **top icon** trigger for `AddFormItem`
 (same Field / Heading / Panel catalog). `+ Add item` is the list slot, shown
 only after the block has its first item.
 
-The required star is field-viewer chrome (`RequiredMark`), not draft/list HTML.
-If several field viewers show it, they compose the same mark.
+The required star is field-viewer chrome (`RequiredMark` in `src/demo-utils/`),
+not draft/list HTML. If several field viewers show it, they compose the same
+mark.
 
-Related: `no-html-outside-demo.mdc` (HTML stays in demos),
-`no-optional-defaults.mdc` (host/demo still passes copy).
+Related: `no-html-outside-demo.mdc` (no HTML in library),
+`no-optional-defaults.mdc` (host/demo still passes copy),
+`demos-are-wiring.mdc` (UI widgets live in `src/demo-utils/`).

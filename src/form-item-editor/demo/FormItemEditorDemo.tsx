@@ -11,12 +11,11 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { DemoPage } from "../../demo-utils";
+import { DemoPage, RequiredMark, SelectColumns } from "../../demo-utils";
 import {
   FieldLabel,
   HeadingLabel,
   PanelLabel,
-  RequiredMark,
 } from "../../form-edit/demo/editFormDemoHelper";
 import * as demo from "./formItemEditorDemoHelper";
 import * as types from "./formItemEditorDemoTypes.t";
@@ -148,11 +147,13 @@ const PanelEditor = ({
         onChange={(name) => setFormItemParam(() => ["name", name])}
       />
       <demo.PanelTitleHint title={formItem.item.params.name} />
-      <demo.SelectColumns
+      <SelectColumns
         cols={formItem.n}
         onChange={(n) =>
           editorProps.setFormItem((prev) => ({ ...prev, n }))
         }
+        options={demo.PANEL_COL_OPTIONS}
+        legend="Columns (n)"
       />
     </>
   );

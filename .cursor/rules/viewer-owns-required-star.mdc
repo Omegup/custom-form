@@ -10,7 +10,8 @@ Showing `*` for `params.required` is the **field viewer’s** job. List chrome,
 draft rows, and orchestrators do not probe `required` or paint the mark.
 
 If several field viewers share the same mark, **factor it as viewer chrome**
-(`RequiredMark`). The viewer still composes it. Heading/panel viewers do not.
+(`RequiredMark` in `src/demo-utils/`). The viewer still composes it.
+Heading/panel viewers do not.
 
 ```tsx
 // ❌ BAD — draft/list chrome sniffs a field-only key

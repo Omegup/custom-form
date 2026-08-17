@@ -68,9 +68,11 @@ export const SectionDialog = ({
         error={errors.description ?? null}
         onChange={(description) => setForm((f) => ({ ...f, description }))}
       />
-      <demo.SelectSectionColumns
+      <demo.SelectColumns
         cols={form.cols}
         onChange={(cols) => setForm((f) => ({ ...f, cols }))}
+        options={demo.SECTION_COL_OPTIONS}
+        legend="Columns"
       />
     </demo.EditorDialog>
   );

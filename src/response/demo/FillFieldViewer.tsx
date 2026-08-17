@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import { RequiredMark } from "../../form-edit/demo/editFormDemoHelper";
+import { FieldViewerChrome } from "../../demo-utils";
 import { useFieldMethods } from "./responseDemoHelper";
 import type * as types from "./responseDemoTypes.t";
 import type * as lib from "./library";
@@ -56,21 +56,15 @@ export const FillFieldViewer = ({
   const border =
     extra.error && variant.errorBorder ? variant.errorBorder : variant.border;
   return (
-    <label
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 4,
-        fontSize: 14,
-        ...variant.shell,
-      }}
+    <FieldViewerChrome
+      name={name}
+      required={required}
+      badge={variant.badge}
+      icon={extra.icon}
+      appendix={extra.appendix}
+      shell={variant.shell}
+      nameStyle={null}
     >
-      <span>
-        {name}
-        <RequiredMark required={required} />
-        {variant.badge}
-        {extra.icon}
-      </span>
       <input
         value={value}
         onChange={(e) => setDataValue(e.target.value)}
@@ -83,7 +77,6 @@ export const FillFieldViewer = ({
         }}
       />
       {err ? <span style={{ color: "#c00", fontSize: 12 }}>{err}</span> : null}
-      {extra.appendix}
-    </label>
+    </FieldViewerChrome>
   );
 };

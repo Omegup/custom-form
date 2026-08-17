@@ -1,40 +1,51 @@
 ---
-description: Package demos are wiring only; generic UI lives in src/demo-utils
+description: Package demos are wiring only; UI/styles/utils live in src/demo-utils; library owns domain logic; drag-drop-tree is untouched
 globs: **/*.ts,**/*.tsx
 alwaysApply: true
 ---
 
 # Demos are wiring
 
-Package `demo/` **composes** the library. It does not own session machines,
-tree walks, flatten/sync, or other domain rules.
+Three places, three jobs:
+
+| Place | Owns |
+|---|---|
+| `src/<package>/` library | Relevant domain logic (hooks, HOCs, flatten, sessions, walks) |
+| `src/demo-utils/` | Irrelevant-to-the-model work: **UI, styles, and other utils** that could live in an external kit |
+| Package `demo/` | **Wiring only** — compose library + demo-utils, pass chrome/fixtures, seed Storybook |
+
+Leave the ported [`src/drag-drop-tree/`](../../src/drag-drop-tree) **untouched** (library **and** `demo/`). Form DnD chrome stays in [`src/flat-dnd/demo/WebRecursiveEdit.tsx`](../../src/flat-dnd/demo/WebRecursiveEdit.tsx).
 
 ## What a demo may do
 
 - Call library hooks / HOCs (`makeUseDialogs`, `useFlatListSession`,
   `useFollowUpAdd`, `followUpDraftsList`, …)
-- Pass host chrome (render props, labels, fixtures)
+- Import widgets from `src/demo-utils/` and pass them as host chrome
 - Seed Storybook `INITIAL_*` data
 
 ## What a demo must not do
 
 - Reimplement a library orchestrator (item/section sessions, `commitDraft`,
   extra-map walks, flatten/sync)
+- Own HTML/styles that another demo also needs — that widget belongs in
+  `src/demo-utils/`
 - Invent flags that hide host composition (`embedded` instead of
   `sidebar: ReactNode | null`)
-- Duplicate generic HTML that belongs in `src/demo-utils/`
 
 Heavy logic is either **extracted** (reusable, no HTML) or **removed** by
 twisting the library so the demo can just wire it.
 
-## `src/demo-utils/` vs form chrome
+## `src/demo-utils/`
 
-Generic widgets that could live in an external UI kit go in
-[`src/demo-utils/`](../../src/demo-utils): page shell, sidebar layout,
-confirm banner, dropdown **including the popover panel**, phase tabs,
-JSON panels, editor dialog, labeled text field. Import them only
-from `demo/` and `*.stories.tsx` — never from library `_deps` / package
-source. Hosts pass the trigger and items; they do not restyle the panel.
+Generic widgets that could live in an external UI kit go here: page shell,
+sidebar layout, confirm banner, dropdown **including the popover panel**,
+phase tabs, JSON panels, editor dialog, labeled text field, field stack,
+required mark, column picker, form title, review-status note.
+
+Import only from `demo/` and `*.stories.tsx` — never from library `_deps` /
+package source. Hosts pass the trigger, items, labels, and fixtures; they
+do not restyle the panel. demo-utils must not import package `demo/` or
+library types that a UI kit would not know.
 
 One file per widget (`DemoPage.tsx`, `DropdownMenu.tsx`, …). `index.ts`
 only re-exports. Do not dump components into `index.tsx`.
@@ -51,9 +62,18 @@ only re-exports. Do not dump components into `index.tsx`.
 </DropdownMenu>
 ```
 
-Form-specific chrome stays in package demos and is **imported**, not copied
-(`RequiredMark`, `sectionChrome`, `FollowUpAdd`). See
-`unify-demo-chrome.mdc`.
+```tsx
+// ❌ BAD — shared field stack lives in a package helper
+// form-edit/demo/editFormDemoHelper.tsx
+export const FieldViewerChrome = ({ … }) => <div style={{ … }} />
+
+// ✅ GOOD — UI kit widget; demos wire it
+import { FieldViewerChrome } from "../../demo-utils";
+```
+
+Chrome **bags** (`sectionChrome`, `formChrome`) stay in package demos —
+they are wiring: they pass demo-utils widgets into library render props.
+Do not paste the same JSX into a second helper; import the widget.
 
 ```tsx
 // ❌ BAD — demo walks the tree and brands extras

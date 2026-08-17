@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
+import { RequiredMark } from "../../demo-utils";
 import {
   FieldLabel,
   HeadingLabel,
   PanelLabel,
-  RequiredMark,
   renderListCard,
 } from "../../form-edit/demo/editFormDemoHelper";
 import formDialogsDemoSource from "./FormDialogsDemo.tsx?raw";

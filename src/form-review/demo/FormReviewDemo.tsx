@@ -4,7 +4,7 @@
  * Follow mounts `CustomFormReviewHOC`.
  */
 import { useCallback, useRef, useState, type Ref } from "react";
-import { DemoPage, PhaseJsonPanels, PhaseTabs } from "../../demo-utils";
+import { DemoPage, FormTitle, PhaseJsonPanels, PhaseTabs } from "../../demo-utils";
 import { FormDialogsEditor, designSidebar } from "../../form-dialogs/demo/FormDialogsDemo";
 import {
   defaultVariant,
@@ -123,16 +123,11 @@ export const FormReviewDemo = ({
 
         {phase === "design" ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <div>
-              <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 600 }}>
-                {header.title}
-              </h2>
-              {header.description ? (
-                <p style={{ margin: 0, color: "#555", fontSize: 14 }}>
-                  {header.description}
-                </p>
-              ) : null}
-            </div>
+            <FormTitle
+              title={header.title}
+              description={header.description}
+              note={null}
+            />
             <FormDialogsEditor
               sidebar={designSidebar}
               flatItems={flatItems}

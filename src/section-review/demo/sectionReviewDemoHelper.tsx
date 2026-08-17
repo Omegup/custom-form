@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
-import { type PhaseTab } from "../../demo-utils";
+import { type PhaseTab, ReviewStatusNote } from "../../demo-utils";
+import { FOLLOW_UP_BADGE } from "../../form-item-editor/demo/itemVariants";
 import { FollowUpAdd } from "./followUpAdd";
 import { SectionFrame } from "../../section-responder/demo/sectionResponderDemoHelper";
 import sectionReviewDemoSource from "./SectionReviewDemo.tsx?raw";
@@ -61,12 +62,7 @@ export const sectionChrome: lib.SectionReviewChrome<types.TypeNames, types.Param
   renderSection: (args) => (
     <SectionFrame
       {...args}
-      note={
-        <p style={{ margin: "8px 0 0", fontSize: 12, color: "#888", fontStyle: "italic" }}>
-          Follow / review — status border: green = commented, amber = needs attention, grey =
-          idle.
-        </p>
-      }
+      note={<ReviewStatusNote />}
     />
   ),
   renderItemShell: ({ children, action }) => (
@@ -111,15 +107,7 @@ export const sectionChrome: lib.SectionReviewChrome<types.TypeNames, types.Param
       </button>
     );
   },
-  renderFollowUpMark: () => (
-    <span
-      title="Answered follow-up"
-      aria-label="Answered follow-up"
-      style={{ color: "#b45309", fontSize: 12, fontWeight: 700, lineHeight: 1 }}
-    >
-      ✚
-    </span>
-  ),
+  renderFollowUpMark: () => FOLLOW_UP_BADGE,
 };
 
 /** Host-mounted overlay chrome — not part of `SectionReviewHOC`. */

@@ -1,10 +1,9 @@
-import { type PhaseTab } from "../../demo-utils";
+import { FormTitle, type PhaseTab, ReviewStatusNote } from "../../demo-utils";
 import {
   PENDING_DATE,
   SectionFrame,
   sectionChrome,
 } from "../../section-review/demo/sectionReviewDemoHelper";
-import { FormTitle } from "../../form-responder/demo/formResponderDemoHelper";
 import formReviewDemoSource from "./FormReviewDemo.tsx?raw";
 import formReviewDemoTypesSource from "./formReviewDemoTypes.t.ts?raw";
 import type * as types from "./formReviewDemoTypes.t";
@@ -36,20 +35,9 @@ export const formChrome: lib.FormReviewChrome<types.TypeNames, types.Params> = {
   ...sectionChrome,
   renderHeader: (header) => (
     <FormTitle
-      header={header}
-      note={
-        <p
-          style={{
-            margin: "8px 0 0",
-            fontSize: 12,
-            color: "#888",
-            fontStyle: "italic",
-          }}
-        >
-          Follow / review — status border colors: green = commented, amber = needs attention,
-          grey = idle.
-        </p>
-      }
+      title={header.title}
+      description={header.description}
+      note={<ReviewStatusNote />}
     />
   ),
   renderForm: ({ header, sections, children }) => (

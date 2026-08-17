@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import { RequiredMark } from "../../form-edit/demo/editFormDemoHelper";
+import { FieldViewerChrome } from "../../demo-utils";
 import type * as lib from "./library";
 
 const STATUS_COLOR: Record<lib.ReviewStatus, string> = {
@@ -38,52 +38,32 @@ export const ReviewFieldViewer = ({
     ? STATUS_COLOR[extra.status]
     : variant.border;
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 4,
-        fontSize: 14,
+    <FieldViewerChrome
+      name={newlyAnswered ? <strong>{name}</strong> : name}
+      required={required}
+      badge={variant.badge}
+      icon={extra.icon}
+      appendix={extra.appendix}
+      shell={variant.shell}
+      nameStyle={{
+        fontWeight: newlyAnswered ? 700 : 400,
+        color: mute ? "#777" : undefined,
       }}
     >
       <div
         style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 4,
-          ...variant.shell,
+          padding: "6px 8px",
+          border: `1px solid ${border}`,
+          borderRadius: 4,
+          background: mute ? "#f0f0f0" : variant.background,
+          fontWeight: newlyAnswered ? 700 : 400,
+          color: mute ? "#666" : undefined,
         }}
       >
-        <span
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            fontWeight: newlyAnswered ? 700 : 400,
-            color: mute ? "#777" : undefined,
-          }}
-        >
-          {newlyAnswered ? <strong>{name}</strong> : <span>{name}</span>}
-          <RequiredMark required={required} />
-          {variant.badge}
-          {extra.icon}
-        </span>
-        <div
-          style={{
-            padding: "6px 8px",
-            border: `1px solid ${border}`,
-            borderRadius: 4,
-            background: mute ? "#f0f0f0" : variant.background,
-            fontWeight: newlyAnswered ? 700 : 400,
-            color: mute ? "#666" : undefined,
-          }}
-        >
-          {value || (
-            <em style={{ color: "#999", fontWeight: 400 }}>No answer</em>
-          )}
-        </div>
+        {value || (
+          <em style={{ color: "#999", fontWeight: 400 }}>No answer</em>
+        )}
       </div>
-      {extra.appendix}
-    </div>
+    </FieldViewerChrome>
   );
 };
