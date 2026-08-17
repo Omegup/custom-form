@@ -44,7 +44,6 @@ export type ReviewFormItemsEditorArgs<
 > = {
   entries: ReviewFormItemEntry<TypeNames, Params>[];
   setEntries: (entries: ReviewFormItemEntry<TypeNames, Params>[]) => void;
-  fallback: ReactNode;
 };
 
 /** Teacher/reviewer comments + follow-up form items keyed by item id — school `AdditionalChanges`. */
@@ -162,8 +161,6 @@ export type SectionReviewChrome<
     children: ReactNode;
     action: ReactNode;
   }) => ReactNode;
-  /** Plain, non-interactive note — mirrors `SectionResponderChrome.renderAppendix`. */
-  renderAppendix: (comment: string) => ReactNode;
   /** Editable comment card (top-level comment, or a comment-only follow-up entry). */
   renderComment: (args: { text: string; onEdit: () => void }) => ReactNode;
   /** Wraps the comment card + follow-up form item nodes under one item. */

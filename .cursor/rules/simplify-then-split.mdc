@@ -1,0 +1,26 @@
+---
+description: Simplify in place first; split only for a bounded responsibility
+globs: **/*.ts,**/*.tsx
+alwaysApply: true
+---
+
+# Simplify before splitting
+
+A long file is not automatically a split. First ask whether the code
+can be **reduced** without changing behavior or violating other rules:
+duplication, unused paths, extra curry/wrappers, work the caller already
+does.
+
+Split into another file **only** when a responsibility has clear bounds
+and a reason to change on its own. Splitting to “organize” or to hide
+typing noise is the same smell as a zero-responsibility function.
+
+```typescript
+// ❌ BAD — extract a file that only re-exports the same walk
+// ❌ BAD — keep a fallback UI the host never uses “just in case”
+
+// ✅ GOOD — delete the unused path; keep the recursive walk together
+// ✅ GOOD — a real second job (e.g. overlay submit) lives in its own file
+```
+
+Related: `no-zero-responsibility.mdc`.

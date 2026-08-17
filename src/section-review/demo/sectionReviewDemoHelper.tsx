@@ -229,20 +229,6 @@ export const sectionChrome: lib.SectionReviewChrome<types.TypeNames, types.Param
       {action ? <span style={{ position: "absolute", top: 0, right: 0 }}>{action}</span> : null}
     </div>
   ),
-  renderAppendix: (comment) => (
-    <div
-      style={{
-        marginTop: 4,
-        padding: 8,
-        background: "#fff3cd",
-        borderLeft: "4px solid #ffc107",
-        color: "#856404",
-        fontSize: 12,
-      }}
-    >
-      👉 {comment}
-    </div>
-  ),
   renderComment: ({ text, onEdit }) => (
     <div
       style={{

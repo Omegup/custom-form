@@ -21,7 +21,7 @@ are mounted by the **call site**, not this HOC.
 | `reviewChanges.ts` | `withComment` / `withoutComment` / `withFormItemEntry` / `withUnansweredFormItems` — writes into `AdditionalChanges` |
 | `followUpPartition.ts` | `partitionFollowUpEntries` — answered (review chrome) vs unanswered (design editor) |
 | `reviewOverlayActions.ts` | overlay submit (`withComment` / `withFormItemEntry` / …) for the host-mounted editor |
-| `reviewRender.tsx` | slot walk + appendix (`renderReviewableItem` / unanswered design rows) |
+| `reviewRender.tsx` | `renderReviewColumns` — slot walk; unanswered rows go to the host editor |
 | `SectionReview.tsx` | **`SectionReviewHOC(viewers, chrome)`** — `FormItemHOC` + `renderSection`; opens overlays via setters |
 | `followUpEntriesFlat.ts` | `followUpEntriesToFlat` / `syncFollowUpEntriesFromFlat` — entries ↔ synthetic flat section |
 

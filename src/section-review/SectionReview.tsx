@@ -1,9 +1,9 @@
 /**
  * Section review shell — school `section-review-ui/SectionReview`
- * `SectionReviewHOC`. Wires `FormItemHOC` and the slot walk (`reviewRender`).
- * Overlay editors are **host-owned**: this HOC only opens them via
- * `setAddition` / `setDeleteCommentId`. The call site mounts chrome with
- * {@link reviewOverlayActions}.
+ * `SectionReviewHOC`. Wires `FormItemHOC` and the slot walk
+ * (`renderReviewColumns`). Overlay editors are **host-owned**: this HOC
+ * only opens them via `setAddition` / `setDeleteCommentId`. The call site
+ * mounts chrome with {@link reviewOverlayActions}.
  *
  * All presentation is injected via {@link SectionReviewChrome} — this module
  * emits no HTML (see `.cursor/rules/no-html-outside-demo.mdc`).
@@ -20,7 +20,7 @@ import type {
   Viewers,
 } from "./_deps";
 import { FormItemHOC, getUseImpRefViewProps } from "./_deps";
-import { makeReviewRender } from "./reviewRender";
+import { renderReviewColumns } from "./reviewRender";
 import type {
   ReviewExtra,
   SectionReviewChrome,
@@ -68,8 +68,6 @@ export const SectionReviewHOC = <
     >(),
   );
 
-  const reviewRender = makeReviewRender<TypeNames, Params, Variants>()(chrome);
-
   return <SectionMeta extends SectionMetaDom, Meta extends MetaDom>(
     props: SectionReviewProps<
       TypeNames,
@@ -96,30 +94,33 @@ export const SectionReviewHOC = <
       renderFormItemsEditor,
     } = props;
 
-    const { renderSlots } = reviewRender<Meta>({
-      responses,
-      changes,
-      setChanges,
-      setAddition,
-      setDeleteCommentId,
-      lastPending,
-      variants,
-      renderFormItemsEditor,
-      renderFormItem: ({ formItem, variant, extra }) => (
-        <FormItem
-          viewProps={{ ctx, formItem, variant, extra }}
-          renderCard={(view) => view}
-        />
-      ),
-    });
-
     return chrome.renderSection({
       deleted: section.header.deleted,
       title: section.header.title,
       description: section.header.description,
       i,
       multiSection,
-      columns: renderSlots(section.items, "", section.header.deleted),
+      columns: renderReviewColumns(
+        chrome,
+        {
+          responses,
+          changes,
+          setChanges,
+          setAddition,
+          setDeleteCommentId,
+          lastPending,
+          variants,
+          renderFormItemsEditor,
+          renderFormItem: ({ formItem, variant, extra }) => (
+            <FormItem
+              viewProps={{ ctx, formItem, variant, extra }}
+              renderCard={(view) => view}
+            />
+          ),
+        },
+        section.items,
+        section.header.deleted,
+      ),
     });
   };
 };
