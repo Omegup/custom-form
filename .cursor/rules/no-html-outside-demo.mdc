@@ -22,6 +22,10 @@ design-specific chrome.
 `React.Fragment` (`<>…</>`), composition of host-provided `ReactNode`, and
 calling host **render props** are fine.
 
+Render props are **not** a license to add host UI state onto library types
+(e.g. `focused` for a demo pulse). That state already sits on
+`edit.autofocus` / `ctx.autoFocused` — see `no-host-ui-state-in-library.mdc`.
+
 ## Required pattern
 
 Inject chrome via **render props / HOC args** (same seam as `SectionHOC`,

@@ -1,0 +1,202 @@
+/**
+ * Review slot walk — originals and answered follow-ups share one item
+ * renderer; unanswered follow-ups are host-owned (`renderFormItemsEditor`).
+ */
+import { Fragment, type ReactNode } from "react";
+import type {
+  MetaDom,
+  ParamsDom,
+  RecursiveFormItem,
+  VariantsDom,
+} from "./_deps";
+import { branded, emptyResponse, withIdSuffix } from "./_deps";
+import {
+  followUpEntryAsItem,
+  partitionFollowUpEntries,
+} from "./followUpPartition";
+import { withUnansweredFormItems } from "./reviewChanges";
+import {
+  renderReviewAddAction,
+  renderReviewItemIcon,
+} from "./reviewItemChrome";
+import { isAnsweredResponse, reviewItemState } from "./reviewStatus";
+import { usefulForReview } from "./reviewVisibleItems";
+import type { ReviewLive, ReviewWalk } from "./reviewWalk.t";
+import type { ReviewChrome } from "./types";
+
+const renderReviewItem = <
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames>,
+  Variants extends VariantsDom,
+  Meta extends MetaDom,
+>(
+  walk: ReviewWalk<TypeNames, Params, Variants>,
+  item: RecursiveFormItem<TypeNames, Params, Meta>,
+  index: number,
+  parentDeleted: boolean,
+  fromFollowUpTree: boolean,
+): ReactNode => {
+  const q = item.header;
+  const { live, chrome } = walk;
+  const state = reviewItemState({
+    id: q.id,
+    changes: live.changes,
+    responses: live.responses,
+    lastPending: live.lastPending,
+    isAnswered: walk.isAnswered,
+  });
+  const appendix = renderReviewAppendix(walk, q.id);
+
+  return chrome.renderItemShell({
+    id: q.id,
+    action: renderReviewAddAction(walk, q.id, state.designingFollowUps),
+    children: live.renderFormItem({
+      formItem: q,
+      variant: live.variants[state.variant],
+      extra: branded({
+        getChild: (suffix: string) => (
+          <>
+            {renderReviewSlots(
+              walk,
+              item.children,
+              suffix,
+              q.deleted || parentDeleted,
+            )}
+          </>
+        ),
+        error: null,
+        parentDeleted,
+        index,
+        icon: renderReviewItemIcon(walk, {
+          originId: q.id,
+          unlocked: state.unlocked,
+          fromFollowUpTree,
+          designingFollowUps: state.designingFollowUps,
+        }),
+        appendix: appendix.length
+          ? chrome.renderFormItemAppendix(appendix)
+          : null,
+        status: state.status,
+        response: {
+          setValue: null,
+          value: live.responses[q.id] ?? emptyResponse(),
+        },
+        impRef: null,
+      }),
+    }),
+  });
+};
+
+/** Remark card + answered follow-up items + unanswered host editor. */
+const renderReviewAppendix = <
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames>,
+  Variants extends VariantsDom,
+>(
+  walk: ReviewWalk<TypeNames, Params, Variants>,
+  originId: string,
+): ReactNode[] => {
+  const change = walk.live.changes[originId];
+  if (!change) return [];
+
+  const nodes: ReactNode[] = [];
+  const remark = change.comment;
+  if (remark) {
+    nodes.push(
+      <Fragment key="comment">
+        {walk.chrome.renderComment({
+          text: remark,
+          onEdit: () =>
+            walk.live.setAddition({ originId, text: remark }),
+        })}
+      </Fragment>,
+    );
+  }
+
+  const { answered, unanswered } = partitionFollowUpEntries(
+    change.formItems ?? [],
+    walk.isAnswered,
+  );
+
+  for (const entry of answered) {
+    const followUp = followUpEntryAsItem(entry);
+    if (!followUp) continue;
+    nodes.push(
+      <Fragment key={followUp.header.id}>
+        {renderReviewItem(walk, followUp, 0, false, true)}
+      </Fragment>,
+    );
+  }
+
+  if (unanswered.length) {
+    nodes.push(
+      <Fragment key="form-items-editor">
+        {walk.live.renderFormItemsEditor({
+          entries: unanswered.map(({ entry }) => entry),
+          setEntries: (nextUnanswered) =>
+            walk.live.setChanges(
+              withUnansweredFormItems(
+                walk.live.changes,
+                originId,
+                nextUnanswered,
+                walk.isAnswered,
+              ),
+            ),
+        })}
+      </Fragment>,
+    );
+  }
+
+  return nodes;
+};
+
+const renderReviewSlots = <
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames>,
+  Variants extends VariantsDom,
+  Meta extends MetaDom,
+>(
+  walk: ReviewWalk<TypeNames, Params, Variants>,
+  cols: RecursiveFormItem<TypeNames, Params, Meta>[][],
+  idSuffix: string,
+  deleted: boolean,
+): ReactNode[] =>
+  cols.map((items, col) => (
+    <Fragment key={col}>
+      {items
+        .filter((item) => usefulForReview(item, walk.isAnswered))
+        .map((item, index) => (
+          <Fragment key={item.header.id + idSuffix}>
+            {renderReviewItem(
+              walk,
+              withIdSuffix(item, idSuffix),
+              index,
+              deleted,
+              false,
+            )}
+          </Fragment>
+        ))}
+    </Fragment>
+  ));
+
+export const renderReviewColumns = <
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames>,
+  Variants extends VariantsDom,
+  Meta extends MetaDom,
+>(
+  chrome: ReviewChrome<TypeNames, Params>,
+  live: ReviewLive<TypeNames, Params, Variants>,
+  slots: RecursiveFormItem<TypeNames, Params, Meta>[][],
+  parentDeleted: boolean,
+): ReactNode[] =>
+  renderReviewSlots(
+    {
+      chrome,
+      live,
+      isAnswered: (id) => isAnsweredResponse(live.responses, id),
+    },
+    slots,
+    "",
+    parentDeleted,
+  );

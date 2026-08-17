@@ -6,7 +6,8 @@ export type ParamsDom<K extends string, Param = {}> = TheParams<
 >;
 export type ContextDom = Branded<unknown, "context">;
 export type TheVariants<Variants> = Branded<Variants, "variants">;
-export type VariantsDom<K extends string, T = {}> = TheVariants<Record<K, T>>;
+/** Shared chrome bag — like Extra, not keyed by item type. */
+export type VariantsDom = TheVariants<unknown>;
 export type ExtraDom = Branded<unknown, "viewer-extra">;
 export type ViewExtraKeys = "view" | "children";
 

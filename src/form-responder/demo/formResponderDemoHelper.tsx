@@ -1,96 +1,37 @@
-import { useImperativeHandle, type ReactNode } from "react";
+import { withFileHeader, type PhaseTab, FormColumn, FormTitle } from "../../demo-utils";
+import {
+  sectionChrome,
+} from "../../section-responder/demo/sectionResponderDemoHelper";
 import formResponderDemoSource from "./FormResponderDemo.tsx?raw";
 import formResponderDemoTypesSource from "./formResponderDemoTypes.t.ts?raw";
 import type * as types from "./formResponderDemoTypes.t";
 import * as lib from "./library";
 
-export const FormContainer = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) => (
-  <div style={{ fontFamily: "system-ui, sans-serif", maxWidth: 700, margin: "0 auto" }}>
-    <h2 style={{ marginTop: 0 }}>{title}</h2>
-    {children}
-  </div>
-);
+export const PHASES: PhaseTab<types.DemoPhase>[] = [
+  {
+    id: "design",
+    label: "1. Design",
+    blurb: "Same editor as form-dialogs — library, add/edit, drag-and-drop.",
+  },
+  {
+    id: "fill",
+    label: "2. Fill",
+    blurb: "Student answers every section, then Validate.",
+  },
+];
 
-/** Demo HTML chrome for `CustomFormResponderHOC` — not part of the library. */
+/** Demo HTML chrome for `CustomFormResponderHOC` — section slots come from `sectionChrome`. */
 export const formChrome: lib.FormResponderChrome = {
+  ...sectionChrome,
   renderHeader: (header) => (
-    <div style={{ marginBottom: 4 }}>
-      <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 600 }}>
-        {header.title}
-      </h2>
-      {header.description ? (
-        <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{header.description}</p>
-      ) : null}
-    </div>
+    <FormTitle title={header.title} description={header.description} note={null} />
   ),
   renderForm: ({ header, sections, children }) => (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 20,
-        maxWidth: 700,
-      }}
-    >
+    <FormColumn>
       {header}
       {sections}
       {children}
-    </div>
-  ),
-  renderSection: ({ deleted, title, description, i, multiSection, columns }) => (
-    <div style={{ marginBottom: 20, opacity: deleted ? 0.5 : 1 }}>
-      <div style={{ marginBottom: 12 }}>
-        <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 600 }}>
-          {multiSection ? `${i + 1}. ${title}` : title}
-        </h3>
-        {description ? (
-          <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{description}</p>
-        ) : null}
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        {columns.map((col, idx) => (
-          <div
-            key={idx}
-            style={{ display: "flex", flexDirection: "column", gap: 12 }}
-          >
-            {col}
-          </div>
-        ))}
-      </div>
-    </div>
-  ),
-  renderItemShell: ({ children, onActivate }) => (
-    <div onClick={onActivate}>{children}</div>
-  ),
-  renderClearIcon: (onClear) => (
-    <button
-      type="button"
-      aria-label="Clear draft answer"
-      onClick={(e) => {
-        e.stopPropagation();
-        onClear();
-      }}
-      style={{
-        margin: "0 4px",
-        border: "none",
-        background: "transparent",
-        cursor: "pointer",
-        color: "#666",
-        fontSize: 16,
-        lineHeight: 1,
-      }}
-    >
-      ×
-    </button>
-  ),
-  renderAppendix: (comment) => (
-    <div style={{ marginTop: 4, color: "#c00", fontSize: 12 }}>{comment}</div>
+    </FormColumn>
   ),
 };
 
@@ -132,6 +73,8 @@ export const INITIAL_SECTIONS: types.ListSection[] = [
   },
 ];
 
+export const INITIAL_FLAT = lib.flattenSections(INITIAL_SECTIONS);
+
 export const INITIAL_RESPONSES: Record<string, lib.Response> = {};
 
 export const INITIAL_HEADER: lib.FormHeader = {
@@ -139,8 +82,6 @@ export const INITIAL_HEADER: lib.FormHeader = {
   description: "Fill every section, then Validate.",
 };
 
-const withFileHeader = (path: string, source: string) =>
-  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const FORM_RESPONDER_DEMO_SOURCE = [
   withFileHeader(
@@ -152,25 +93,3 @@ export const FORM_RESPONDER_DEMO_SOURCE = [
     formResponderDemoSource,
   ),
 ].join("\n\n");
-
-export const useFieldMethods = (
-  impRef: types.FieldExtra["impRef"],
-  response: lib.ResponseSetter,
-  required: boolean,
-  label: string,
-) => {
-  useImperativeHandle(impRef, () => ({
-    validate: (value) => {
-      const text = value.data.value?.trim() ?? "";
-      if (required && !text) return `${label} is required`;
-      return null;
-    },
-    update: (value) => value ?? lib.emptyResponse(),
-  }));
-
-  const setDataValue = (text: string) => {
-    response.setValue?.("data", { ...response.value.data, value: text });
-  };
-
-  return { setDataValue, value: response.value.data.value ?? "" };
-};

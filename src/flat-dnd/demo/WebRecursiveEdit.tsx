@@ -1,37 +1,22 @@
 /**
  * Section `renderEdit` — school `FlatDnd`/`RecursiveEdit` wiring.
- * Demo owns all HTML; `drag-drop-tree` lib is headless (`DnDTreeCore` +
- * `RecursiveTreeNode`). Drop indicator chrome is local.
+ * Demo wires demo-utils chrome; `drag-drop-tree` lib is headless
+ * (`DnDTreeCore` + `RecursiveTreeNode`). Drop indicator chrome is local.
  */
-import { useMemo, useRef, useState, type CSSProperties } from "react";
+import { useMemo, useRef, useState } from "react";
+import {
+  ColumnRow,
+  DragItem,
+  DropLine,
+  EmptyDropColumn,
+  SectionColumn,
+  SectionPanel,
+  ShowDeleted,
+} from "../../demo-utils";
 import { DnDTreeCore, RecursiveTreeNode, type Handlers } from "../../drag-drop-tree";
-import { MoveBar } from "../../form-edit/demo/editFormDemoHelper";
 import * as lib from "./library";
 
 type Ctx = Record<string, never>;
-
-const INDICATOR_COLOR = "#4a90d9";
-
-const Indicator = ({ color }: { color: string }) => (
-  <div style={{ display: "flex", alignItems: "center", height: 0, overflow: "visible" }}>
-    <div
-      style={{
-        width: 0,
-        height: 0,
-        borderTop: "5px solid transparent",
-        borderBottom: "5px solid transparent",
-        borderLeft: `8px solid ${color}`,
-      }}
-    />
-    <div style={{ width: "100%", height: 2, background: color }} />
-  </div>
-);
-
-const emptyColumnStyle: CSSProperties = {
-  minHeight: 28,
-  border: "2px dashed #d5d8dd",
-  borderRadius: 4,
-};
 
 export const WebRecursiveEdit = <
   TypeNames extends string,
@@ -60,31 +45,17 @@ export const WebRecursiveEdit = <
   };
 
   return (
-    <section
-      style={{
-        opacity: item.deleted ? 0.6 : 1,
-        border: "1px solid #ddd",
-        borderRadius: 6,
-        padding: 12,
-        marginBottom: 12,
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-        <div>{title}</div>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <label style={{ fontSize: 11, color: "#666", display: "inline-flex", gap: 4, alignItems: "center" }}>
-            <input
-              type="checkbox"
-              checked={showDeleted}
-              onChange={(e) => setShowDeleted(e.target.checked)}
-            />
-            Show deleted
-          </label>
-          <MoveBar actions={actions} extra={[]} />
-        </div>
-      </div>
-      <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+    <SectionPanel
+      title={title}
+      focused={edit.autofocus}
+      sectionActions={actions}
+      sectionExtra={[]}
+      headerExtra={
+        <ShowDeleted checked={showDeleted} onChange={setShowDeleted} />
+      }
+      columns={[
         <DnDTreeCore<lib.DndNodeValue<TypeNames, Params>>
+          key={item.id}
           nodes={tree}
           setNodes={setTree}
           handlersRef={handlersRef}
@@ -95,22 +66,14 @@ export const WebRecursiveEdit = <
               ctx={{}}
               bottomThreshold={0.5}
               topThreshold={0.5}
-              renderIndicator={(where) => (where ? <Indicator color={INDICATOR_COLOR} /> : null)}
+              renderIndicator={(where) =>
+                where ? <DropLine /> : null
+              }
               renderChildren={(children, node) =>
                 node.type === "column" ? (
                   <>{children}</>
                 ) : (
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      gap: 12,
-                      flex: 1,
-                      minWidth: 0,
-                    }}
-                  >
-                    {children}
-                  </div>
+                  <ColumnRow>{children}</ColumnRow>
                 )
               }
               renderItem={() => null}
@@ -127,23 +90,14 @@ export const WebRecursiveEdit = <
                 if (node.type === "column") {
                   if (node.children.length > 0)
                     return (
-                      <div
-                        style={{
-                          flex: 1,
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 6,
-                          minWidth: 0,
-                        }}
-                      >
+                      <SectionColumn>
                         {children}
                         {render.addItem(node)}
-                      </div>
+                      </SectionColumn>
                     );
                   return (
-                    <div
+                    <EmptyDropColumn
                       {...dragHandlers}
-                      style={{ ...emptyColumnStyle, flex: 1, minWidth: 0 }}
                       onDragOver={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -151,24 +105,27 @@ export const WebRecursiveEdit = <
                       }}
                     >
                       {render.addItem(node)}
-                    </div>
+                    </EmptyDropColumn>
                   );
                 }
                 return (
-                  <div draggable={!node.item.header.deleted} {...dragHandlers}>
+                  <DragItem
+                    enabled={!node.item.header.deleted}
+                    {...dragHandlers}
+                  >
                     {render.node({
                       item: node.item,
                       children,
                       parentDeleted: node.parentDeleted,
                       index: ord,
                     })}
-                  </div>
+                  </DragItem>
                 );
               }}
             />
           )}
-        />
-      </div>
-    </section>
+        />,
+      ]}
+    />
   );
 };

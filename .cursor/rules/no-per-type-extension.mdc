@@ -1,0 +1,56 @@
+---
+description: Never add per-type switches/maps that must grow when a new item type is added
+globs: **/*.ts,**/*.tsx
+alwaysApply: true
+---
+
+# Open/closed for item types — no per-type extension points outside viewers/editors
+
+Adding a new form item type (e.g. `"field" | "heading" | "panel" | "…"`) must
+**not** require editing shared helpers, orchestrators, or rename/clone utilities.
+
+The **only** places that may know concrete type names are:
+
+1. **Viewers** — per-type render entries in a `Viewers` bag
+2. **Editors** — per-type editor entries (and host wrappers like `wrapWithRequired`)
+
+Everything else must stay open via **generics** constrained by shared structure
+(e.g. `Params extends ParamsDom<TypeNames, { name: string }>`), not by switching
+on `"field" | "heading" | …`.
+
+```typescript
+// ❌ BAD — must be updated for every new type (OCP violation)
+const withItemName = (item: SomeFormItem<TypeNames, Params>, name: string) => {
+  switch (item.type) {
+    case "field":
+      return { ...item, params: { ...item.params, name } };
+    case "heading":
+      return { ...item, params: { ...item.params, name } };
+    case "panel":
+      return { ...item, params: { ...item.params, name } };
+  }
+};
+
+// ✅ GOOD — open for any TypeNames; shared `name` is the constraint
+const withItemName = <
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames, { name: string }>,
+>(
+  item: SomeFormItem<TypeNames, Params>,
+  name: string,
+): SomeFormItem<TypeNames, Params> => ({
+  ...item,
+  params: { ...item.params, name },
+});
+```
+
+## Also forbidden
+
+- `Record<TypeNames, …>` / `if (type === "field")` helpers outside viewers/editors
+- `"required" in item.params` (or any `in` on params) — that is a type sniff;
+  the field **viewer** owns the star — see `viewer-owns-required-star.mdc`
+- “Utility” maps that list every type just to do a shared-field update
+- Casting around a union spread instead of fixing the generic
+
+Same idea as `cloneFlatItems`: operate on the common shape; let viewers/editors
+own type-specific UI.

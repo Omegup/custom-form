@@ -10,6 +10,9 @@ Migrated from `school/components/custom-form` → `form-react`, `form-model`.
 |---|---|
 | `form.t.ts` | Core types: `TypedFormItem`, `ParamsDom`, `SomeFormItem`, `ContextDom` |
 | `form-react.t.ts` | Viewer types: `Viewer`, `Viewers`, `FormItemProps`, `WithChildren` |
+| `sectionLayoutChrome.t.ts` | `SectionLayoutChrome` — fill and review `renderSection` |
+| `formLayoutChrome.t.ts` | `FormHeader` / `FormLayoutChrome` — fill and review form shell |
+| `phaseItemExtra.t.ts` | `PhaseItemExtra` — fill `ResponderExtra` / review `ReviewExtra` |
 | `branded.ts` / `branded.t.ts` | `branded()` helper and `Branded<T, Tag>` nominal type |
 | `createFormItemByGetChild.tsx` | `FormItemHOC` — resolves lazy children via `getChild`; required `useUpdatedViewProps` + optional `ExtraView` for `getUseImpRefViewProps`. Identity path: `createFormItemByGetChildPlain`. |
 | `getUseImpRefViewProps.ts` | Bridges host `StrictViewerMethods` impRef → viewer `ViewerMethods` (school `form-react`) |
@@ -21,6 +24,11 @@ Migrated from `school/components/custom-form` → `form-react`, `form-model`.
 **ParamsDom** — map from item type name to param shape:
 ```typescript
 type Params = TheParams<{ field: { name: string }; group: { title: string } }>;
+```
+
+**VariantsDom** — shared chrome bag (like Extra), **not** keyed by item type:
+```typescript
+type Variants = TheVariants<{ padding: number; showBorder: boolean }>;
 ```
 
 **Viewer** — React component `( { props: ViewerProps }) => ReactNode` looked up by `formItem.type`.

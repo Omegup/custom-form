@@ -20,8 +20,8 @@ export type Params = TheParams<{
 }>;
 
 export type Variants = TheVariants<{
-  text: "default" | "compact";
-  group: "default" | "bordered";
+  padding: number;
+  showBorder: boolean;
 }>;
 
 export type Context = ContextDom & { accent: string };
@@ -29,10 +29,7 @@ export type Context = ContextDom & { accent: string };
 export type Item = SomeFormItem<TypeNames, Params>;
 
 export type Data = {
-  variants: {
-    text: Variants["text"];
-    group: Variants["group"];
-  };
+  variants: Variants;
   values: Record<string, string>;
   items: SomeFormItem<TypeNames, Params>[];
 };
@@ -42,10 +39,10 @@ export type Props = Data & {
   onValueChange: (id: string, value: string) => void;
 };
 
-/** Storybook Controls args — variant dropdowns map to `variants` on FormDemo. */
+/** Storybook Controls — name keys map to chrome values at the host boundary. */
 export type StoryArgs = Omit<Props, "variants" | "onValueChange"> & {
-  textVariant: Variants["text"];
-  groupVariant: Variants["group"];
+  textVariant: "default" | "compact";
+  groupVariant: "default" | "bordered";
 };
 
 export type ItemExtra = ExtraDom & {

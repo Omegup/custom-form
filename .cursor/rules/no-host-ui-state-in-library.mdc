@@ -1,0 +1,39 @@
+---
+description: Do not add host UI state (e.g. focused pulse) onto library chrome types
+globs: **/*.ts,**/*.tsx
+alwaysApply: true
+---
+
+# Host UI state is not a library field
+
+**Incident:** `focused: boolean | null` was added to `ColumnsEditChrome.renderSection`
+so a demo pulse animation would run. That field did **not** exist on the library
+chrome. Autofocus already lives on `RecursiveEditManager.autofocus` /
+`ctx.autoFocused(id)` — the host reads it in **their** `renderEdit` / `renderCard`.
+
+Copying a presentation prop onto a library type:
+
+- Invents a second contract (`focused`) beside the real one (`edit.autofocus`)
+- Forces every host of that chrome to speak demo CSS-pulse language
+- Looks like a “render prop” fix while smuggling UI state into the package
+
+```typescript
+// ❌ BAD — library chrome grows a demo pulse field
+renderSection: (args: { …; focused: boolean | null }) => ReactNode
+createColumnsEdit: focused: edit.autofocus
+
+// ✅ GOOD — library unchanged; host reads the manager it already got
+renderEdit: (props) =>
+  hostShell({ pulse: props.edit.autofocus, … })
+```
+
+**Test:** if the field exists only so a demo can set `animation` / highlight,
+it is not a library argument. Do not alias `edit.autofocus` as `focused` on
+chrome bags.
+
+Do **not** “fix” that by wrapping layout chrome in a new function that closes
+over `props.edit.autofocus` (`columnsEdit`). That couples column walk to
+autofocus without a host decision. Reuse `SectionPanel` / `FieldRow` as
+static chrome; leave `focused={null}` unless the user asks to wire pulse.
+
+Related: `no-html-outside-demo.mdc`, `no-optional-defaults.mdc`.

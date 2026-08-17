@@ -10,7 +10,7 @@ pnpm install
 pnpm storybook
 ```
 
-Open **http://localhost:6006** — Storybook hosts every module demo plus the **All-in editor** composition.
+Open **http://localhost:6006** — Storybook hosts every module demo.
 
 Legacy Vite entry (`pnpm dev`) redirects to Storybook — demos are not duplicated in `main.tsx`.
 
@@ -18,25 +18,30 @@ Run tests: `pnpm test`.
 
 ## Demos (Storybook)
 
-Each module has a colocated `*.stories.tsx`. Story titles match folder names, e.g. `form-edit/Edit form`, `form-dialogs/All-in`.
+Each module has a colocated `*.stories.tsx`. Story titles match folder names, e.g. `form-edit/Edit form`, `form-dialogs/Form dialogs`.
+
+The Storybook sidebar uses this **dependency order** — start at `form`, end at `form-response`.
 
 | Story | Module | What it shows |
 |---|---|---|
-| **form-dialogs/All-in** | `form-dialogs/` | Full composed editor (`SectionFormItemHOC` + `WebRecursiveEdit` DnD + every dialog flow) |
 | form/Form | `form/` | Viewers rendering a JSON-driven form |
+| recursive-form/Recursive form | `recursive-form/` | Nested recursive item rendering |
 | response/Response | `response/` | Fill-path foundation (`ResponseSetter` + `getUseImpRefViewProps` validate) |
-| section-responder/Section responder | `section-responder/` | One section of fillable fields + section-level validate |
-| form-responder/Form responder | `form-responder/` | Multi-section fill shell + form-level validate |
 | move-actions/Move actions | `move-actions/` | Item list with up/down/clone/remove |
 | form-edit/Edit form | `form-edit/` | Section/field list with move actions only |
 | form-item-editor/Form item editor | `form-item-editor/` | Edit form + per-field edit dialog |
-| side-menu/Side menu | `side-menu/` | Library sidebar + in-slot add (section & nested panels) |
 | section-edit/Section edit | `section-edit/` | Edit form + section edit dialog |
+| side-menu/Side menu | `side-menu/` | Library sidebar + in-slot add (section & nested panels) |
 | section-view/Section view | `section-view/` | `SectionHOC` + `ColumnsEdit` composing viewers + nested panels + add slots (no DnD) |
 | flat-dnd/Flat dnd | `flat-dnd/` | `SectionFormItemHOC` with HTML5 drag-and-drop reorder (`WebRecursiveEdit`, web-only) swapped in for `ColumnsEdit` |
-| recursive-form/Recursive form | `recursive-form/` | Nested recursive item rendering |
+| form-dialogs/Form dialogs | `form-dialogs/` | `makeUseDialogs` + `useFlatListSession` on the design list |
+| section-responder/Section responder | `section-responder/` | Design editor + one section of fillable fields + validate |
+| form-responder/Form responder | `form-responder/` | Design editor + multi-section fill shell + validate |
+| section-review/Section review | `section-review/` | Design editor + Response + Follow for one section + JSON per phase |
+| form-review/Form review | `form-review/` | Design editor + Response + Follow + JSON per phase |
+| form-response/Form response | `form-response/` | Design editor + FormResponse Send / Save / feedback |
 
-Shared edit-form fixtures: `form-edit/demo/fixtures.ts` (single-type list) and `form-item-editor/demo/fixtures.ts` (multi-type list, reused by the side-menu and All-in stories).
+Shared edit-form fixtures: `form-edit/demo/fixtures.ts` (single-type list) and `form-item-editor/demo/fixtures.ts` (multi-type list, reused by the side-menu and form-dialogs stories).
 
 > Storybook requires **Node 20+**. Use `nvm use 22` if `pnpm storybook` fails on Node 18.
 
@@ -56,9 +61,12 @@ side-menu                      ← library catalog: Side sidebar + AddFormItem s
 section-edit                   ← section title/description edit dialog
 section-view                   ← SectionHOC + ColumnsEdit (section list rendering, no DnD)
 flat-dnd                       ← SectionNodes ↔ drag-drop-tree conversion (lib); demo wires React DnD
-form-dialogs                   ← dialog orchestration (makeUseDialogs) + All-in demo
+form-dialogs                   ← dialog orchestration (makeUseDialogs)
 section-responder              ← section fill shell (SectionResponderHOC)
 form-responder                 ← multi-section fill shell (CustomFormResponderHOC)
+section-review                 ← section review shell (SectionReviewHOC)
+form-review                    ← multi-section review shell (CustomFormReviewHOC)
+form-response                  ← FormResponse document lifecycle (Send / Save / feedback)
 ```
 
 **Canonical edit state** is the **flat list** (`FlatFormItems`): an array of `{ section }`, `{ item, n }`, and `{ end: null }` markers. The tree is rebuilt on demand via `consolidateSections`.
@@ -82,6 +90,9 @@ Original packages live under `school/components/custom-form/src/`:
 | `response/` | `types/response`, `types/form-response-react` (`ViewerMethods`) |
 | `section-responder/` | `ui-packages/section-responder-ui` (`SectionResponderHOC`) |
 | `form-responder/` | `ui-packages/form-responder-ui` (`CustomFormResponderHOC`) |
+| `section-review/` | `ui-packages/section-review-ui` (`SectionReviewHOC`) |
+| `form-review/` | `ui-packages/form-response-ui` (`CustomFormResponsesHOC`) |
+| `form-response/` | school `FormResponse` document + `addFormResponse` / `addAdditionalQuestions` / `addFeedback` |
 | `form-edit/` | `ts-packages/form-edit` |
 | `form-item-editor/` | `react-packages/form-item-edit-react` |
 | `side-menu/` | `react-packages/form-edit-react` (`useSide`, `MenuItemDefinition`, `makeUseRenderAddItem`) + `section-edit-ui` (`FormMenuItem`, `AddFormItem`) |

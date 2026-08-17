@@ -1,0 +1,34 @@
+---
+description: Live item ids are exact keys; colon suffixes are not parent/type inheritance
+globs: **/*.ts,**/*.tsx
+alwaysApply: true
+---
+
+# Exact item ids — no colon-family lookups
+
+`questionA:0:1` is **one live instance** of the design item `questionA`.
+A follow-up hanging under it is a **different form item** (any type). They
+share no inheritance. Parenthood lives in `changes[originId].formItems`,
+not in the child’s `header.id`.
+
+Lookups are **exact**. Do not strip `:` / invent `itemIdBase` / scan “same
+base” keys. Missing key means missing — not a sibling’s or the design
+item’s annotation. That is the model, not a fault-tolerant reader — see
+`pure-logic-not-fault-tolerance.mdc`.
+
+```typescript
+// ❌ BAD — follow-up is not an instance of questionA:0
+itemIdBase("questionA:0:1-followup-…") === itemIdBase("questionA:0:0")
+
+// ❌ BAD — sibling nested instances share a “base”
+itemIdBase("questionA:0:1") === "questionA:0"
+
+// ✅ GOOD
+changes[originId]
+followUpItems[originId]
+old?.values[id]
+old?.changes[id]
+```
+
+Follow-up `formItem.id` is an opaque unique answer key (`followup-${Date.now()}`).
+Do not prefix it with the origin instance path.

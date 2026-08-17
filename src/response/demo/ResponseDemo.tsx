@@ -4,7 +4,8 @@
  * Each field writes `data.value`; Validate runs every `impRef.validate`.
  */
 import { useCallback, useRef, useState } from "react";
-import * as demo from "./responseDemoHelper";
+import { DemoPage, PhaseJsonPanels, ValidateBlock } from "../../demo-utils";
+import { FillFieldViewer, defaultFillVariant } from "./FillFieldViewer";
 import type * as types from "./responseDemoTypes.t";
 import * as lib from "./library";
 
@@ -18,34 +19,14 @@ const viewers: lib.Viewers<
   string
 > = {
   field: {
-    viewer: ({ props: { formItem, extra } }) => {
-      const { setDataValue, value } = demo.useFieldMethods(
-        extra.impRef,
-        extra.response,
-        formItem.params.required,
-        formItem.params.name,
-      );
-      return (
-        <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 14 }}>
-          <span>
-            {formItem.params.name}
-            {formItem.params.required ? " *" : ""}
-          </span>
-          <input
-            value={value}
-            onChange={(e) => setDataValue(e.target.value)}
-            style={{
-              padding: "6px 8px",
-              border: extra.error ? "1px solid #c00" : "1px solid #ccc",
-              borderRadius: 4,
-            }}
-          />
-          {extra.error && (
-            <span style={{ color: "#c00", fontSize: 12 }}>{extra.error}</span>
-          )}
-        </label>
-      );
-    },
+    viewer: ({ props: { formItem, extra } }) => (
+      <FillFieldViewer
+        name={formItem.params.name}
+        required={formItem.params.required}
+        extra={{ ...extra, icon: null, appendix: null }}
+        variant={defaultFillVariant}
+      />
+    ),
   },
 };
 
@@ -68,7 +49,7 @@ const FormItem = lib.FormItemHOC<
 );
 
 const ctx = lib.branded<types.Ctx, "context">({});
-const variants = lib.branded<types.Variants, "variants">({ field: "default" });
+const variants = lib.branded<types.Variants, "variants">({});
 
 export const ResponseDemo = ({
   heading,
@@ -96,8 +77,8 @@ export const ResponseDemo = ({
   };
 
   return (
-    <demo.FormContainer title={heading}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+    <DemoPage title={heading}>
+      <ValidateBlock onValidate={validateAll}>
         {items.map((item) => {
           const value = responses[item.id] ?? lib.emptyResponse();
           return (
@@ -106,7 +87,7 @@ export const ResponseDemo = ({
               viewProps={{
                 formItem: item,
                 ctx,
-                variant: variants.field,
+                variant: variants,
                 extra: lib.branded({
                   error: errors[item.id] ?? null,
                   response: {
@@ -124,22 +105,12 @@ export const ResponseDemo = ({
             />
           );
         })}
-        <button type="button" onClick={validateAll} style={{ alignSelf: "flex-start" }}>
-          Validate
-        </button>
-        <pre
-          style={{
-            margin: 0,
-            padding: 12,
-            background: "#f6f7f9",
-            borderRadius: 6,
-            fontSize: 12,
-            overflow: "auto",
-          }}
-        >
-          {JSON.stringify(responses, null, 2)}
-        </pre>
-      </div>
-    </demo.FormContainer>
+        <PhaseJsonPanels
+          heading="State"
+          activeId="responses"
+          panels={[{ id: "responses", title: "Responses", value: responses }]}
+        />
+      </ValidateBlock>
+    </DemoPage>
   );
 };

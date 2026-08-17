@@ -1,14 +1,14 @@
 import type { StoryObj } from "@storybook/react-vite";
 import { useArgs } from "storybook/preview-api";
 import { FORM_ITEM_EDITOR_INITIAL } from "../form-item-editor/demo/fixtures";
-import { AllInEditor } from "./demo/AllInEditor";
-import { ALL_IN_DEMO_SOURCE } from "./demo/allInDemoHelper";
-import type * as types from "./demo/allInDemoTypes.t";
+import { FormDialogsDemo } from "./demo/FormDialogsDemo";
+import { FORM_DIALOGS_DEMO_SOURCE } from "./demo/formDialogsDemoHelper";
+import type * as types from "./demo/formDialogsDemoTypes.t";
 
-const AllInStory = () => {
+const FormDialogsStory = () => {
   const [{ heading, flatItems }, updateArgs] = useArgs<types.StoryArgs>();
   return (
-    <AllInEditor
+    <FormDialogsDemo
       heading={heading}
       flatItems={flatItems}
       updateArgs={updateArgs}
@@ -17,32 +17,32 @@ const AllInStory = () => {
 };
 
 export default {
-  title: "form-dialogs/All-in",
-  component: AllInEditor,
+  title: "form-dialogs/Form dialogs",
+  component: FormDialogsDemo,
   tags: ["autodocs"],
   parameters: {
     docs: {
       source: {
-        code: ALL_IN_DEMO_SOURCE,
+        code: FORM_DIALOGS_DEMO_SOURCE,
         language: "tsx",
       },
       description: {
         component:
-          "School `CustomFormEditor` + `DialogsHOC` on **`makeUseDialogs`** + **`SectionFormItemHOC`** (`section-view` list shell with `renderEdit: WebRecursiveEdit` DnD): row **Edit** (item dialog), sidebar catalog (ambiguous insert + section picker), in-slot **+ Add** on every column, section header **Edit** and **+ Add section** (section dialog), drag-to-reorder within/into nested columns. All commits flow through `applyFlatFormItem` / `updateSectionInFlat`.",
+          "**`makeUseDialogs`** owns item/section edit sessions and commits. Same Side + list + editors as earlier stories; the new idea is the orchestrator instead of hand-wired `useState`.",
       },
     },
   },
-  render: AllInStory,
+  render: FormDialogsStory,
   argTypes: {
     heading: { control: "text", table: { category: "Layout" } },
     flatItems: {
       control: "object",
-      description: "Flat edit list — every dialog save rewrites it.",
+      description: "Flat edit list — dialogs commit back into it.",
       table: { category: "Form data" },
     },
   },
   args: {
-    heading: "All-in editor",
+    heading: "Form dialogs",
     flatItems: FORM_ITEM_EDITOR_INITIAL,
   },
 };

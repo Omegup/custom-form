@@ -25,7 +25,7 @@ import type { EditExtra, RenderNodeArgs, SectionProps } from "./types";
 export const createRenderEditFormItem = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Variants extends VariantsDom<TypeNames>,
+  Variants extends VariantsDom,
   Extra extends ExtraDom,
   Context extends ContextDom,
 >(
@@ -57,7 +57,7 @@ export const createRenderEditFormItem = <
           viewProps={{
             ctx: props.ctx,
             formItem,
-            variant: props.variants[formItem.type],
+            variant: props.variants,
             extra: {
               ...props.itemExtra(formItem.id),
               index,

@@ -38,8 +38,9 @@ Logic in `demo/FormItemEditorDemo.tsx` and friends, and where it belongs:
 | Demo code | Reason |
 |---|---|
 | `FieldEditor`, `HeadingEditor`, `PanelEditor` (in `FormItemEditorDemo.tsx`) | Domain editors — school keeps these in `editors/`, not in `form-item-edit-react` |
+| `wrapWithRequired` / `RequiredToggle` (demo helper) | School `renderRequired` / `question()` slice — toggles `field.params.required` under the field editor |
 | `useItemEditor` + `save` | App `useFormItemEditor` pattern (school: `legacy-front/.../useFormItemEditor.ts` + formik) |
-| `EditorDialog`, field UI chrome, `FormItemEditorFormTest` | Helper — school: `renderDefaultDialog`, design-system inputs, form-edit list |
+| `EditorDialog` / `TextField` / `SelectColumns` (demo-utils), field UI chrome, `FormItemEditorFormTest` | Helper — school: `renderDefaultDialog`, design-system inputs, form-edit list |
 | Name `viewers` + `createFormItemByGetChild` | Same composition as `form` demo — per-type labels without a type switch |
 | `ctx.flatItems` + `isFieldNameTaken` filter in `FieldEditor` | `ctx` carries raw data only (no field-specific API); `FieldEditor` decides what it means — no context/provider infra |
 
@@ -51,6 +52,7 @@ The pure part of school `react-packages/form-edit-react/useDialog.tsx` lives in
 | Demo used to own | Library home | School equivalent |
 |---|---|---|
 | `openSession` (+ `EditingSession` shape) | `form-edit` `openFormItemEditSession` / `FlatFormItemEditSession` | `editFormItem: EditFormItem \| null` |
+| `setFormItem` session wiring | `form-edit` `patchFormItemEditSession` (draft + `resizeColumns`) | live `editFormItem` draft |
 | `commitEditingSession` | `form-edit` `applyFlatFormItem` (edit span replace **and** `index === -1` insert) | `setEditFormItemX` in `useDialog` |
 
 `resizeColumns` already lives in **`recursive-form`** (school’s `changeCols`); `applyFlatFormItem` calls it internally.
@@ -58,20 +60,20 @@ The pure part of school `react-packages/form-edit-react/useDialog.tsx` lives in
 ### Orchestrator now in **`form-dialogs`** (`makeUseDialogs`)
 
 School home: `react-packages/form-edit-react/useDialog.tsx` (`makeUseDialogs`) —
-ported as `form-dialogs/makeUseDialogs`. The composed `form-dialogs/All-in`
+ported as `form-dialogs/makeUseDialogs`. The `form-dialogs/Form dialogs`
 story runs this demo's editors through it; this demo keeps its own minimal
 hand-wiring so the focused story stays a one-package showcase.
 
 | Demo code | School equivalent | Library home |
 |---|---|---|
 | `session` state + `commitDraft` / `setFormItem` wiring | `makeUseDialogs` React state, `setEditFormItem(item, cols)` via `extra` | `form-dialogs` (`useDialogs` sessions + `commit`) |
-| `FormItemEditorDemo` shell | `DialogUi` + `CustomFormEditor` | `form-dialogs/demo/AllInEditor.tsx` (Storybook composition) |
+| `FormItemEditorDemo` shell | `DialogUi` + `CustomFormEditor` | `form-dialogs/demo/FormDialogsDemo.tsx` (Storybook composition) |
 
-### Stays in demo until **`form-edit`** story integration (or `form-dialogs` All-in)
+### Stays in demo until **`form-edit`** story integration (or `form-dialogs`)
 
 | Demo code | Package | Notes |
 |---|---|---|
-| `FormItemEditorFormTest` (helper) | `form-edit` demo | consolidate, move actions, nested panel render, clone |
+| `FormItemEditorFormTest` | `section-view` | `SectionFormItemHOC` + `ColumnsEdit`; Edit extra opens this package's dialog |
 | `cloneFn` via `cloneFlatItems` | `form-edit` — shared `params.name` rename, no type switch |
 | `extra={(item) => [{ label: "Edit", … }]}` | `form-edit` `form-item.actions` | `edit: () => setEditFormItem(q)` |
 
@@ -84,6 +86,8 @@ hand-wiring so the focused story stays a one-package showcase.
 | `update` + `validate` on responses | **done** — `response/` + `form/getUseImpRefViewProps` | `getUseImpRefViewProps` |
 | Section fill shell | **done** — `section-responder/` | `SectionResponderHOC` |
 | Multi-section fill shell | **done** — `form-responder/` | `CustomFormResponderHOC` |
+| Section review shell | **done** — `section-review/` | `SectionReviewHOC` |
+| Multi-section review shell | **done** — `form-review/` | `CustomFormReviewHOC` |
 
 ## Architecture
 
@@ -104,7 +108,7 @@ createFormItemEditorWrapper(editors, useHook, renderDialog)
 
 ### Demo pattern
 
-`FormItemEditorDemo` composes `FormItemEditorFormTest` (form-edit demo) + the editor dialog:
+`FormItemEditorDemo` composes `FormItemEditorFormTest` (`SectionFormItemHOC` list) + the editor dialog:
 
 1. **Edit** opens a session (`form-edit` `openFormItemEditSession`) with draft + children + flat span
 2. **`FormItemEditor`** edits the draft via `setFormItem`

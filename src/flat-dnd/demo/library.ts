@@ -15,14 +15,13 @@ export type {
 export { branded } from "../../form";
 export type { AutoFocus, AutoFocusState, MoveActions } from "../../move-actions";
 export { autofocusCtx } from "../../move-actions";
-export type { FlatFormItemEditSession, FlatFormItems, GetActionsArgs, Indexed, SectionMetaDom, SectionWithItems, Clone } from "../../form-edit";
+export type { FlatFormItemEditSession, FlatFormItems, Clone } from "../../form-edit";
 export {
   applyFlatFormItem,
-  buildItemSectionDict,
   cloneFlatItems,
-  consolidateSections,
-  getFormItemMoveActions,
+  extrasByItemId,
 } from "../../form-edit";
+export { useFlatListSession } from "../../form-dialogs";
 export { SectionFormItemHOC } from "../../section-view";
 export type { EditExtra, RecursiveEditProps, SectionProps } from "../../section-view";
 export type { MenuItemDefinition } from "../../side-menu";

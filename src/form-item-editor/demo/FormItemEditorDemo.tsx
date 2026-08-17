@@ -5,9 +5,17 @@
  * this file is the docs source — types in `formItemEditorDemoTypes.t.ts`,
  * chrome / list shell in `formItemEditorDemoHelper.tsx`.
  */
-import { useCallback, useImperativeHandle, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useImperativeHandle,
+  useState,
+  type ReactNode,
+} from "react";
+import { DemoPage, SelectColumns, TooLongHint, TooShortHint } from "../../demo-utils";
 import * as demo from "./formItemEditorDemoHelper";
+import { listViewers } from "./listViewers";
 import * as types from "./formItemEditorDemoTypes.t";
+import { defaultVariants } from "./itemVariants";
 import * as lib from "./library";
 
 // ── Editors (domain) ──────────────────────────────────────────────────────────
@@ -64,7 +72,10 @@ const FieldEditor = ({
         error={hookResult.state.errors.header?.params.name ?? null}
         onChange={(name) => setFormItemParam(() => ["name", name])}
       />
-      <demo.NameLengthHint name={formItem.item.params.name} />
+      <TooLongHint
+        current={formItem.item.params.name.length}
+        limit={demo.MAX_NAME_LEN}
+      />
     </>
   );
 };
@@ -94,9 +105,13 @@ const HeadingEditor = ({
         label="Heading"
         value={formItem.item.params.name}
         error={hookResult.state.errors.header?.params.name ?? null}
+        multiline={false}
         onChange={(name) => setFormItemParam(() => ["name", name])}
       />
-      <demo.HeadingLengthHint text={formItem.item.params.name} />
+      <TooShortHint
+        current={formItem.item.params.name.trim().length}
+        limit={demo.MIN_HEADING_LEN}
+      />
     </>
   );
 };
@@ -130,34 +145,32 @@ const PanelEditor = ({
         label="Panel title"
         value={formItem.item.params.name}
         error={hookResult.state.errors.header?.params.name ?? null}
+        multiline={false}
         onChange={(name) => setFormItemParam(() => ["name", name])}
       />
-      <demo.PanelTitleHint title={formItem.item.params.name} />
-      <demo.SelectColumns
+      <TooShortHint
+        current={formItem.item.params.name.trim().length}
+        limit={demo.MIN_PANEL_TITLE_LEN}
+      />
+      <SelectColumns
         cols={formItem.n}
         onChange={(n) =>
           editorProps.setFormItem((prev) => ({ ...prev, n }))
         }
+        options={demo.PANEL_COL_OPTIONS}
+        legend="Columns (n)"
       />
     </>
   );
 };
 
-// ── Name viewers (like FormDemo `viewers`) ────────────────────────────────────
-
-const nameViewers: types.NameViewers = {
-  field: {
-    viewer: ({ props: { formItem } }) => formItem.params.name,
-  },
-  heading: {
-    viewer: ({ props: { formItem } }) => `§ ${formItem.params.name}`,
-  },
-  panel: {
-    viewer: ({ props: { formItem } }) => `▦ ${formItem.params.name}`,
-  },
-};
-
-const ItemName = lib.createFormItemByGetChildPlain(nameViewers);
+const ItemName = lib.createFormItemByGetChildPlain<
+  types.TypeNames,
+  types.Params,
+  types.Variants,
+  lib.ExtraDom,
+  types.Ctx
+>(listViewers);
 
 /** Exported for the side-menu demo (same editor stack). */
 export const itemName = (ctx: types.Ctx, header: types.ItemHeader): ReactNode => (
@@ -165,7 +178,7 @@ export const itemName = (ctx: types.Ctx, header: types.ItemHeader): ReactNode =>
     viewProps={{
       formItem: header,
       ctx,
-      variant: "default",
+      variant: defaultVariants,
       extra: lib.branded({
         getChild: () => null,
       }),
@@ -185,47 +198,71 @@ export const itemName = (ctx: types.Ctx, header: types.ItemHeader): ReactNode =>
  * than one candidate section (`extra.sectionPicker` set by side-menu);
  * a no-op for edits and for `AddFormItem` slot inserts, which already have
  * a concrete `index`/section.
+ *
+ * Built via a generic factory: assigning the hook body directly to
+ * `types.UseItemEditor` fails once `Params[K]` keys differ across K
+ * (`isError`'s param is contravariant — field has `"required"`, heading/panel
+ * do not). Checking the body under unbound `TN`/`P` escapes that (see
+ * `.cursor/rules/typescript-types.mdc` “Generic factories can escape
+ * indexed-access assignability”).
  */
-const useItemEditor: types.UseItemEditor = <K extends types.TypeNames>(
-  props: types.EditorProps<K>,
-  { validate }: types.Validate<K>,
-): types.ItemStateFor<K> => {
-  const { onCommit, sectionPicker } = props.extra;
-  const { formItem: draft } = props;
-  const [errors, setErrors] = useState<types.ItemValidateErrors<K>>({});
+const makeUseItemEditor: types.MakeUseItemEditor =
+  <TN extends string, P extends lib.ParamsDom<TN>>() =>
+  <K extends TN>(
+    props: lib.FormItemEditorProps<
+      types.Ctx,
+      types.DialogArgs,
+      types.HookExtra<TN, P>,
+      TN,
+      P,
+      K
+    >,
+    { validate }: lib.FormItemEditorValidate<TN, P, K>,
+  ) => {
+    const { onCommit, sectionPicker } = props.extra;
+    const { formItem: draft } = props;
+    const [errors, setErrors] = useState<
+      types.HookStateFields<P, K>["errors"]
+    >({});
 
-  const save = useCallback(() => {
-    const next: types.ItemValidateErrors<K> = {};
-    validate(draft, {
-      param: (name, message) => {
-        next.header ??= { params: {} };
-        next.header.params[name] = message;
-      },
-      section: (message) => {
-        next.sIndex ??= message;
-      },
-    });
-    if (sectionPicker && sectionPicker.sections.length > 1 && sectionPicker.sIndex === -1) {
-      next.sIndex ??= "Pick a section";
-    }
-    setErrors(next);
-    if (next.sIndex) return;
-    if (next.header?.params && Object.keys(next.header.params).length > 0) {
-      return;
-    }
-    onCommit(draft);
-  }, [draft, onCommit, validate, sectionPicker]);
+    const save = useCallback(() => {
+      const next: types.HookStateFields<P, K>["errors"] = {};
+      validate(draft, {
+        param: (name, message) => {
+          next.header ??= { params: {} };
+          next.header.params[name] = message;
+        },
+        section: (message) => {
+          next.sIndex ??= message;
+        },
+      });
+      if (
+        sectionPicker &&
+        sectionPicker.sections.length > 1 &&
+        sectionPicker.sIndex === -1
+      ) {
+        next.sIndex ??= "Pick a section";
+      }
+      setErrors(next);
+      if (next.sIndex) return;
+      if (next.header?.params && Object.keys(next.header.params).length > 0) {
+        return;
+      }
+      onCommit(draft);
+    }, [draft, onCommit, validate, sectionPicker]);
 
-  return {
-    state: lib.branded<types.ItemState<K>, "item-edit-state">({
-      save,
-      errors,
-      isError: (param) => Boolean(errors.header?.params[param]),
-      isSectionError: Boolean(errors.sIndex),
-      sectionPicker,
-    }),
+    return {
+      state: lib.branded<types.HookStateFields<P, K>, "item-edit-state">({
+        save,
+        errors,
+        isError: (param) => Boolean(errors.header?.params[param]),
+        isSectionError: Boolean(errors.sIndex),
+        sectionPicker,
+      }),
+    };
   };
-};
+
+const useItemEditor = makeUseItemEditor<types.TypeNames, types.Params>();
 
 const renderDialog = <K extends types.TypeNames>(
   dialogArgs: types.DialogArgs,
@@ -269,9 +306,9 @@ export const FormItemEditor = lib.createFormItemEditorWrapper<
   types.ItemStateMap
 >(
   {
-    field: { editor: FieldEditor },
+    field: { editor: demo.wrapWithRequired(FieldEditor) },
     heading: { editor: HeadingEditor },
-    panel: { editor: PanelEditor },
+    panel: { editor: demo.wrapWithMultiple(PanelEditor) },
   },
   useItemEditor,
   renderDialog,
@@ -305,7 +342,7 @@ export const FormItemEditorDemo = ({
   );
 
   return (
-    <demo.FormContainer title={heading}>
+    <DemoPage title={heading}>
       {draft && session && (
         <FormItemEditor
           ctx={ctx}
@@ -315,12 +352,7 @@ export const FormItemEditorDemo = ({
           })}
           formItem={draft}
           setFormItem={(updater) =>
-            setSession((prev) => {
-              if (!prev) return prev;
-              const nextDraft =
-                typeof updater === "function" ? updater(prev.draft) : updater;
-              return { ...prev, draft: nextDraft };
-            })
+            setSession((prev) => prev && lib.patchFormItemEditSession(prev, updater))
           }
           extra={lib.branded<types.ItemExtra, "item-edit-extra">({
             onCommit: commitDraft,
@@ -330,7 +362,6 @@ export const FormItemEditorDemo = ({
       <demo.FormItemEditorFormTest
         flatItems={flatItems}
         updateArgs={updateArgs}
-        itemName={(header) => itemName(ctx, header)}
         extra={(item) => [
           {
             label: "Edit",
@@ -338,6 +369,6 @@ export const FormItemEditorDemo = ({
           },
         ]}
       />
-    </demo.FormContainer>
+    </DemoPage>
   );
 };

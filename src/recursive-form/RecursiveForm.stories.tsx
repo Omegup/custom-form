@@ -66,8 +66,8 @@ export default {
   },
   args: {
     accent: "#4a90d9",
-    textVariant: DEFAULT_RECURSIVE_FORM_DEMO.variants.text,
-    groupVariant: DEFAULT_RECURSIVE_FORM_DEMO.variants.group,
+    textVariant: "default",
+    groupVariant: "bordered",
     values: DEFAULT_RECURSIVE_FORM_DEMO.values,
     items: DEFAULT_RECURSIVE_FORM_DEMO.items,
   },

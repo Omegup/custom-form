@@ -6,8 +6,9 @@ alwaysApply: true
 
 # Avoid optional fields (especially with defaults)
 
-Prefer **required** props. Do not paper over missing host decisions with
-`?` + a library default.
+Prefer **required** fields. Use `T | null` when a value can be absent.
+Do not paper over missing host decisions with `?` + a library default,
+and do not use `?` as a stand-in for “maybe empty”.
 
 ## Why
 
@@ -16,6 +17,10 @@ Optional + default often smuggles **host-owned** content into the library:
 - English copy (`title = "Library"`, `label = "+ Add item"`)
 - Design choices the host should make
 - Silent behavior when the caller forgets to pass something
+
+`field?: T` also hides absence: readers cannot tell omit-vs-empty without
+checking `in` / `undefined`. A required `field: T | null` makes the
+empty case visible at every construction site.
 
 That fights host-agnostic packages (see `no-html-outside-demo.mdc`).
 
@@ -47,10 +52,19 @@ That fights host-agnostic packages (see `no-html-outside-demo.mdc`).
 
 ## When optional is OK
 
-- Truly absent vs present domain data (`parentId?: string | null`, soft
-  flags already modeled elsewhere)
+- Sparse **keys** on a dict (`AdditionalChanges[originId]` missing vs present)
 - Narrow escape hatches documented as overrides of a required primary path
   (rare — prefer a separate required prop or a variant type)
+
+Absent **fields on a present object** are `T | null`, not `T?`:
+
+```typescript
+// ❌ BAD — omit vs empty is invisible
+{ comment?: string; children?: Cols[][] }
+
+// ✅ GOOD — every construction names the empty case
+{ comment: string | null; children: Cols[][] | null }
+```
 
 ## Not a loophole
 
@@ -58,18 +72,36 @@ Do **not** "fix" hardcoded copy by making the field optional with the
 same string as default. Either the host owns the value (required) or the
 library should not mention that string at all (move it to the demo).
 
-## Prefer split types over `Omit`
+## Prefer split types over `Pick` / `Omit`
 
-When one caller needs a subset of another type's fields, **declare that
-subset as its own type** and compose with `&` — do not carve fields out
-with `Omit<BigType, "field">`.
+Declare the small type, then extend it. Do not define a big bag and
+carve a hole with `Omit` or slice a subset with `Pick`.
 
 ```typescript
 // ❌ BAD — derived hole; the factory's real contract is invisible
 renderAddItem: (args: Omit<AddFormItemArgs<…>, "label">) => ReactNode
 
-// ✅ GOOD — named slot args; full args = slot + host label
+// ❌ BAD — walk chrome sliced from the section bag
+type FillChrome = Pick<
+  SectionResponderChrome,
+  "renderClearIcon" | "renderAppendix" | "renderFollowUpGroup"
+>;
+
+// ✅ GOOD — named small type; full type extends it
 type AddFormItemSlotArgs<…> = { span; menuItems; random; setAddItem };
 type AddFormItemArgs<…> = AddFormItemSlotArgs<…> & { label: string };
 renderAddItem: (args: AddFormItemSlotArgs<…>) => ReactNode
+
+type SectionLayoutChrome = { renderSection: … };
+type FillChrome = {
+  renderClearIcon: …;
+  renderAppendix: …;
+  renderFollowUpGroup: …;
+};
+type SectionResponderChrome = FillChrome & SectionLayoutChrome;
+type SectionReviewChrome<…> = ReviewChrome<…> & SectionLayoutChrome;
 ```
+
+Identical chrome args across sibling packages are **one type in a
+shared lower layer**. Do not paste the same `renderSection` bag into
+fill and review, and do not import across siblings to share it.

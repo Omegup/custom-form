@@ -4,8 +4,8 @@
  * aggregates section validators into a form-level `validate` / `update` /
  * `getKeys`.
  *
- * Host passes `ctx` and {@link FormResponderChrome} (no HTML in this module —
- * see `.cursor/rules/no-html-outside-demo.mdc`).
+ * Host passes `ctx`, `variants`, and {@link FormResponderChrome} (no HTML
+ * in this module — see `.cursor/rules/no-html-outside-demo.mdc`).
  */
 import { useImperativeHandle, useRef, type Ref } from "react";
 import type {
@@ -15,7 +15,7 @@ import type {
   ResponderExtra,
   SectionMetaDom,
   SectionResponderContext,
-  SectionResponderHeader,
+  SectionHeader,
   SectionValidator,
   StrictViewerMethods,
   VariantsDom,
@@ -34,9 +34,9 @@ type HostExtra = ResponderExtra & { impRef: Ref<StrictViewerMethods> };
 export const CustomFormResponderHOC = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Variants extends VariantsDom<TypeNames>,
+  Variants extends VariantsDom,
   Context extends SectionResponderContext,
-  SectionConfig extends SectionResponderHeader,
+  SectionConfig extends SectionHeader,
 >(
   viewers: Viewers<
     TypeNames,
@@ -47,7 +47,6 @@ export const CustomFormResponderHOC = <
     Context,
     string
   >,
-  variants: Variants,
   chrome: FormResponderChrome,
 ) => {
   const { renderHeader, renderForm, ...sectionChrome } = chrome;
@@ -66,6 +65,7 @@ export const CustomFormResponderHOC = <
     props: CustomFormResponderProps<
       TypeNames,
       Params,
+      Variants,
       Context,
       SectionConfig,
       SectionMeta,
@@ -81,6 +81,8 @@ export const CustomFormResponderHOC = <
       setResponse,
       impRef,
       showDeleted,
+      variants,
+      followUpItems,
       ctx,
       children,
     } = props;
@@ -132,6 +134,7 @@ export const CustomFormResponderHOC = <
                     validators.current[section.header.id] = ref;
                   }}
                   variants={variants}
+                  followUpItems={followUpItems}
                   i={i}
                 />
               ),

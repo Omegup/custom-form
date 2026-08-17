@@ -1,0 +1,139 @@
+---
+description: Package demos are wiring only; UI/styles/utils live in src/demo-utils; library owns domain logic; drag-drop-tree is untouched
+globs: **/*.ts,**/*.tsx
+alwaysApply: true
+---
+
+# Demos are wiring
+
+Three places, three jobs:
+
+| Place | Owns |
+|---|---|
+| `src/<package>/` library | Relevant domain logic (hooks, HOCs, flatten, sessions, walks) |
+| `src/demo-utils/` | Irrelevant-to-the-model work: **UI, styles, and other utils** that could live in an external kit |
+| Package `demo/` | **Wiring only** — compose library + demo-utils, pass chrome/fixtures, seed Storybook |
+
+Leave the ported [`src/drag-drop-tree/`](../../src/drag-drop-tree) **untouched** (library **and** `demo/`). Form DnD chrome stays in [`src/flat-dnd/demo/WebRecursiveEdit.tsx`](../../src/flat-dnd/demo/WebRecursiveEdit.tsx).
+
+## What a demo may do
+
+- Call library hooks / HOCs (`makeUseDialogs`, `useFlatListSession`,
+  `useFollowUpAdd`, `followUpDraftsList`, …)
+- Import widgets from `src/demo-utils/` and pass them as host chrome
+- Seed Storybook `INITIAL_*` data
+
+## What a demo must not do
+
+- Own HTML, **`style={{…}}`**, or **layout knobs**. Package `demo/` is
+  wiring only. Do not wrap the same markup in `Inline` / `Stack` /
+  `Row` and pass `gap={8}`, `align="center"`, `fontSize={14}`,
+  `margin`, `maxWidth`. Those numbers and tags live inside a **named
+  widget**. The demo passes data and callbacks.
+- Reimplement a library orchestrator (item/section sessions, `commitDraft`,
+  extra-map walks, flatten/sync)
+- Own HTML/styles that another demo also needs — that widget belongs in
+  `src/demo-utils/`
+- Invent flags that hide host composition (`embedded` instead of
+  `sidebar: ReactNode | null`)
+
+```tsx
+// ❌ BAD — layout primitive + leftover HTML; demo still owns the UI
+<Inline gap={8} align="center">
+  <strong>{section.header.title}</strong>
+  {openSectionEdit && !section.header.deleted && (
+    <button type="button" onClick={() => openSectionEdit(section)}>
+      Edit
+    </button>
+  )}
+</Inline>
+
+// ✅ GOOD — widget owns markup, gap, and the Edit control
+<HeadingEdit
+  title={section.header.title}
+  ready={openSectionEdit != null && !section.header.deleted}
+  onClick={() => openSectionEdit(section)}
+/>
+```
+
+A widget that **is** a specific control is named for that control and
+bakes its label. Do not export a generic `QuietCheck` / `ToolbarCheck` /
+`TextButton` that demos caption with `"Show deleted"`.
+
+```tsx
+// ❌ BAD — generic check; demo still owns the copy and the meaning
+<QuietCheck checked={showDeleted} onChange={setShowDeleted}>
+  Show deleted
+</QuietCheck>
+
+// ✅ GOOD — the widget is the control
+<ShowDeleted checked={showDeleted} onChange={setShowDeleted} />
+```
+
+`Stack` / `Row` / `Inline` stay in `demo-utils` for **other widgets** to
+compose. Package demos do not import them.
+
+Heavy logic is either **extracted** (reusable, no HTML) or **removed** by
+twisting the library so the demo can just wire it.
+
+## `src/demo-utils/`
+
+Generic widgets that could live in an external UI kit go here: page shell,
+sidebar layout, confirm banner, dropdown **including the popover panel**,
+phase tabs, JSON panels, editor dialog, labeled text field, field stack,
+required mark, column picker, form title, review-status note, layout
+(`Stack`, `Row`, `Inline`), list chrome (`FieldRow`, `SectionPanel`),
+and every other visual. Package `demo/` must not contain `style={{…}}`.
+
+Import only from `demo/` and `*.stories.tsx` — never from library `_deps` /
+package source. Hosts pass the trigger, items, labels, and fixtures; they
+do not restyle the panel. demo-utils must not import package `demo/` or
+library types that a UI kit would not know.
+
+One file per widget (`DemoPage.tsx`, `DropdownMenu.tsx`, …). `index.ts`
+only re-exports. Do not dump components into `index.tsx`.
+
+```tsx
+// ❌ BAD — package demo owns popover chrome
+<div style={{ position: "absolute", background: "#fff", boxShadow: … }}>
+  {items}
+</div>
+
+// ✅ GOOD — DropdownMenu owns the panel
+<DropdownMenu open={open} align="end" trigger={icon}>
+  {items}
+</DropdownMenu>
+```
+
+```tsx
+// ❌ BAD — shared field stack lives in a package helper
+// form-edit/demo/editFormDemoHelper.tsx
+export const FieldViewerChrome = ({ … }) => <div style={{ … }} />
+
+// ✅ GOOD — UI kit widget; demos wire it
+import { FieldViewerChrome } from "../../demo-utils";
+```
+
+Chrome **bags** (`sectionChrome`, `formChrome`) stay in package demos —
+they are wiring: they pass demo-utils widgets into library render props.
+Do not paste the same JSX into a second helper; import the widget.
+
+```tsx
+// ❌ BAD — demo walks the tree and brands extras
+const map = new Map();
+const walk = (cols) => { … map.set(item.header.id, branded({…})) };
+
+// ✅ GOOD — library walk; host brands at the leaf
+extrasByItemId(sections, (item) => branded({ actions: itemActions(item) }))
+```
+
+```tsx
+// ❌ BAD — boolean hides two host layouts
+<FormDialogsEditor embedded={true} />
+
+// ✅ GOOD — host names the empty chrome
+<FormDialogsEditor sidebar={null} />
+```
+
+Related: `no-html-outside-demo.mdc`, `unify-demo-chrome.mdc`,
+`no-zero-responsibility.mdc`.

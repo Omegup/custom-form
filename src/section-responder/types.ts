@@ -9,16 +9,26 @@
 import type { ReactNode, Ref } from "react";
 import type {
   ContextDom,
-  ExtraDom,
   MetaDom,
   ParamsDom,
+  PhaseItemExtra,
+  RecursiveFormItem,
   Response,
-  ResponseSetter,
-  SectionDom,
+  SectionHeader,
+  SectionLayoutChrome,
   SectionMetaDom,
   SectionWithItems,
   VariantsDom,
 } from "./_deps";
+
+export type { SectionHeader };
+
+/**
+ * Fill chrome states — host supplies a Variant **value** bag per state;
+ * the library picks `variants[state]` (see variant-values-not-keys).
+ * Validation error is `extra.error`, not a state.
+ */
+export type ResponderState = "default" | "old" | "change";
 
 /** Teacher/reviewer comments keyed by item id — school `ResponderAdditionalChanges`. */
 export type ResponderAdditionalChanges = Record<string, { comment?: string }>;
@@ -28,14 +38,7 @@ export type ResponderAdditionalChanges = Record<string, { comment?: string }>;
  * Host layers `impRef` + `getChild` around this; `getUseImpRefViewProps` swaps
  * Strict → ViewerMethods on the way in.
  */
-export type ResponderExtra = ExtraDom & {
-  error: boolean | string | null;
-  parentDeleted: boolean;
-  index: number;
-  icon: ReactNode;
-  appendix: ReactNode;
-  response: ResponseSetter;
-};
+export type ResponderExtra = PhaseItemExtra;
 
 export type SectionValidator = {
   validate: (values: Record<string, Response>) => Record<string, string | null>;
@@ -48,40 +51,32 @@ export type SectionResponderContext = ContextDom & {
   t: (term: "fieldRequired") => string;
 };
 
-export type SectionResponderHeader = SectionDom & {
-  title: string;
-  description: string;
+/** Item-walk chrome — clear control, remark, follow-up group. */
+export type FillChrome = {
+  renderClearIcon: (onClear: () => void) => ReactNode;
+  renderAppendix: (comment: string) => ReactNode;
+  /**
+   * Host wraps reviewer follow-ups that sit under their origin item
+   * (indent / yellow rail — same placement as review appendix).
+   */
+  renderFollowUpGroup: (args: {
+    originId: string;
+    items: ReactNode;
+  }) => ReactNode;
 };
 
 /**
  * Host-owned presentation — same seam as `SectionHOC`'s `renderTitle` /
  * `renderEdit`. Library never creates DOM tags.
  */
-export type SectionResponderChrome = {
-  renderSection: (args: {
-    deleted: boolean;
-    title: string;
-    description: string;
-    i: number;
-    multiSection: boolean;
-    /** One ReactNode per column (already a fragment of item shells). */
-    columns: ReactNode[];
-  }) => ReactNode;
-  renderItemShell: (args: {
-    id: string;
-    children: ReactNode;
-    onActivate?: () => void;
-  }) => ReactNode;
-  renderClearIcon: (onClear: () => void) => ReactNode;
-  renderAppendix: (comment: string) => ReactNode;
-};
+export type SectionResponderChrome = FillChrome & SectionLayoutChrome;
 
 export type SectionResponderProps<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Variants extends VariantsDom<TypeNames>,
+  Variants extends VariantsDom,
   Context extends SectionResponderContext,
-  SectionConfig extends SectionResponderHeader,
+  SectionConfig extends SectionHeader,
   SectionMeta extends SectionMetaDom,
   Meta extends MetaDom,
 > = {
@@ -96,7 +91,17 @@ export type SectionResponderProps<
   setResponse: (id: string, response?: Response) => void;
   getError: (id: string) => string | null;
   impRef: Ref<SectionValidator>;
-  variants: Variants;
+  /** Chrome values keyed by {@link ResponderState} — library picks by fill status. */
+  variants: Record<ResponderState, Variants>;
+  /**
+   * Reviewer follow-ups keyed by **origin** item id (same keys as
+   * `AdditionalChanges`). Rendered under each origin — not merged into the
+   * design tree. Empty record when none.
+   */
+  followUpItems: Record<
+    string,
+    RecursiveFormItem<TypeNames, Params, Meta>[]
+  >;
   /** Section ordinal for the title (1-based display when `multiSection`). */
   i: number;
 };

@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from "react";
+import { DemoPage, PlainInput } from "../../demo-utils";
 import * as demo from "./recursiveFormDemoHelper";
 import type {
   Context,
@@ -45,9 +46,10 @@ const decorateViewers: ViewersDecorator = (inner) => ({
 const viewersValues: Viewers<ValueExtra> = decorateViewers({
   text: {
     viewer: ({ props: { extra } }) => (
-      <input
+      <PlainInput
         value={extra.value}
-        onChange={(e) => extra.onChange(e.target.value)}
+        onChange={extra.onChange}
+        disabled={false}
       />
     ),
   },
@@ -60,7 +62,7 @@ const viewersValues: Viewers<ValueExtra> = decorateViewers({
 const viewersSkeleton: Viewers = decorateViewers({
   text: {
     viewer: ({ props: { formItem } }) => (
-      <input value={formItem.params.label} disabled />
+      <PlainInput value={formItem.params.label} onChange={null} disabled={true} />
     ),
   },
   group: {
@@ -81,7 +83,7 @@ const renderItem: RenderItem = (formItem, variants, ctx, FormItem, extra) => {
       viewProps={{
         formItem: item.header,
         ctx,
-        variant: variants[item.header.type],
+        variant: variants,
         extra: extra(item, render, suffix),
       }}
       renderCard={(view) => <demo.Card>{view}</demo.Card>}
@@ -99,10 +101,12 @@ export const RecursiveFormDemo = ({
   items,
   updateArgs,
 }: RecursiveFormDemoProps) => {
-  const variants = useMemo(
-    (): Variants => branded({ text: textVariant, group: groupVariant }),
-    [textVariant, groupVariant],
-  );
+  const variants = useMemo((): Variants => {
+    return branded({
+      padding: textVariant === "compact" ? 4 : 8,
+      showBorder: groupVariant === "bordered",
+    });
+  }, [textVariant, groupVariant]);
   const ctx = useMemo((): Context => branded({ accent }), [accent]);
 
   const onValueChange = useCallback(
@@ -144,7 +148,7 @@ export const RecursiveFormDemo = ({
   );
 
   return (
-    <demo.FormContainer title="Recursive form">
+    <DemoPage title="Recursive form">
       <demo.Section title="Skeleton">
         {items.map((item) => (
           <div key={item.header.id}>{renderSkeleton(item)}</div>
@@ -155,6 +159,6 @@ export const RecursiveFormDemo = ({
           <div key={item.header.id}>{renderValues(item)}</div>
         ))}
       </demo.Section>
-    </demo.FormContainer>
+    </DemoPage>
   );
 };

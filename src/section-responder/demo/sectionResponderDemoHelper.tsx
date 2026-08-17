@@ -1,73 +1,29 @@
-import { useImperativeHandle, type ReactNode } from "react";
+import { withFileHeader, ClearIcon, type PhaseTab, RemarkCard, SectionFrame } from "../../demo-utils";
 import sectionResponderDemoSource from "./SectionResponderDemo.tsx?raw";
 import sectionResponderDemoTypesSource from "./sectionResponderDemoTypes.t.ts?raw";
 import type * as types from "./sectionResponderDemoTypes.t";
 import * as lib from "./library";
 
-export const FormContainer = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) => (
-  <div style={{ fontFamily: "system-ui, sans-serif", maxWidth: 520, margin: "0 auto" }}>
-    <h2 style={{ marginTop: 0 }}>{title}</h2>
-    {children}
-  </div>
-);
+export { SectionFrame };
 
-/** Demo HTML chrome for `SectionResponderHOC` — not part of the library. */
+export const PHASES: PhaseTab<types.DemoPhase>[] = [
+  {
+    id: "design",
+    label: "1. Design",
+    blurb: "Same editor as form-dialogs — library, add/edit, drag-and-drop.",
+  },
+  {
+    id: "fill",
+    label: "2. Fill",
+    blurb: "Student answers this section, then Validate.",
+  },
+];
+
 export const sectionChrome: lib.SectionResponderChrome = {
-  renderSection: ({ deleted, title, description, i, multiSection, columns }) => (
-    <div style={{ marginBottom: 20, opacity: deleted ? 0.5 : 1 }}>
-      <div style={{ marginBottom: 12 }}>
-        <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 600 }}>
-          {multiSection ? `${i + 1}. ${title}` : title}
-        </h3>
-        {description ? (
-          <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{description}</p>
-        ) : null}
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        {columns.map((col, idx) => (
-          <div
-            key={idx}
-            style={{ display: "flex", flexDirection: "column", gap: 12 }}
-          >
-            {col}
-          </div>
-        ))}
-      </div>
-    </div>
-  ),
-  renderItemShell: ({ children, onActivate }) => (
-    <div onClick={onActivate}>{children}</div>
-  ),
-  renderClearIcon: (onClear) => (
-    <button
-      type="button"
-      aria-label="Clear draft answer"
-      onClick={(e) => {
-        e.stopPropagation();
-        onClear();
-      }}
-      style={{
-        margin: "0 4px",
-        border: "none",
-        background: "transparent",
-        cursor: "pointer",
-        color: "#666",
-        fontSize: 16,
-        lineHeight: 1,
-      }}
-    >
-      ×
-    </button>
-  ),
-  renderAppendix: (comment) => (
-    <div style={{ marginTop: 4, color: "#c00", fontSize: 12 }}>{comment}</div>
-  ),
+  renderSection: (args) => <SectionFrame {...args} note={null} />,
+  renderClearIcon: (onClear) => <ClearIcon onClick={onClear} />,
+  renderAppendix: (comment) => <RemarkCard>{comment}</RemarkCard>,
+  renderFollowUpGroup: ({ items }) => items,
 };
 
 const field = (
@@ -96,10 +52,10 @@ export const INITIAL_SECTION: types.ListSection = {
   items: [[field("name", "Full name", true), field("note", "Note (optional)", false)]],
 };
 
+export const INITIAL_FLAT = lib.flattenSections([INITIAL_SECTION]);
+
 export const INITIAL_RESPONSES: Record<string, lib.Response> = {};
 
-const withFileHeader = (path: string, source: string) =>
-  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const SECTION_RESPONDER_DEMO_SOURCE = [
   withFileHeader(
@@ -111,25 +67,3 @@ export const SECTION_RESPONDER_DEMO_SOURCE = [
     sectionResponderDemoSource,
   ),
 ].join("\n\n");
-
-export const useFieldMethods = (
-  impRef: types.FieldExtra["impRef"],
-  response: lib.ResponseSetter,
-  required: boolean,
-  label: string,
-) => {
-  useImperativeHandle(impRef, () => ({
-    validate: (value) => {
-      const text = value.data.value?.trim() ?? "";
-      if (required && !text) return `${label} is required`;
-      return null;
-    },
-    update: (value) => value ?? lib.emptyResponse(),
-  }));
-
-  const setDataValue = (text: string) => {
-    response.setValue?.("data", { ...response.value.data, value: text });
-  };
-
-  return { setDataValue, value: response.value.data.value ?? "" };
-};

@@ -2,18 +2,13 @@
 export * from "../index";
 export * from "../_deps";
 export type { AutoFocus, AutoFocusState, MoveActions } from "../../move-actions";
-export { autofocusCtx } from "../../move-actions";
-export {
-  buildItemSectionDict,
-  cloneFlatItems,
-  getFormItemMoveActions,
-} from "../../form-edit";
+export { cloneFlatItems, flatten } from "../../form-edit";
 export type { Clone } from "../../form-edit";
 export {
   SectionFormItemHOC,
-  type ColumnsEditChrome,
   type EditExtra,
   type SectionProps,
 } from "../../section-view";
-export type { FlatNestedItem } from "../../form-edit";
 export { AddFormItem, makeUseRenderAddItem, Side } from "../../side-menu";
+export type { Children, TypedFormItem, Viewers, ViewerProps } from "../../form";
+export { branded } from "../../form";

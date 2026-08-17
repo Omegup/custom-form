@@ -1,0 +1,52 @@
+---
+description: Names must say what they do; chrome/type slots are defined at the type
+globs: **/*.ts,**/*.tsx
+alwaysApply: true
+---
+
+# Names establish meaning
+
+If explaining a field requires a **different verb** than its identifier,
+the name is wrong — rename. Do not keep `onActivate` and then describe
+it as “copy the prior answer into the live draft.” That mismatch is the
+bug; a comment that restates a better name is not a fix.
+
+Chrome / type slots get their meaning **at the definition**. A host
+reading `renderItemShell` should learn what a shell is, and what each
+argument does, without a side conversation.
+
+Demo-utils widgets follow the same rule: if the control is “Show
+deleted”, the component is `ShowDeleted` and owns that label. A
+generic `QuietCheck` that takes `"Show deleted"` as children still
+leaves the meaning at the call site.
+
+```typescript
+// ❌ BAD — name is a gesture; behavior is a data copy
+renderItemShell: (args: { onActivate: (() => void) | null }) => ReactNode
+
+// ❌ BAD — layout wrapper owns a domain write; host invents a click
+renderItemShell: (args: {
+  children: ReactNode;
+  copyPriorIntoDraft: (() => void) | null;
+}) => ReactNode
+
+// ❌ BAD — wrapper slot kept after the write is gone; host wraps in an empty div
+renderItemShell: (args: { id: string; children: ReactNode }) => ReactNode
+
+// ✅ GOOD — fill has no wrapper slot; first `setValue` copies prior into draft.
+// Review's shell is layout around the viewer plus the follow-up add control.
+renderItemShell: (args: {
+  id: string;
+  children: ReactNode;
+  action: ReactNode;
+}) => ReactNode
+```
+
+If using a callback would require inventing a gesture (click the box),
+that callback does not belong on the slot. Put the write where the user
+already acts (here: `setValue` spreading `current ?? oldValue`).
+
+When the only extra arg on a wrapper is deleted, **delete the wrapper
+slot** if the library has nothing left to compose. Do not leave
+`stopPropagation` on inner buttons that existed only to protect that
+parent click.

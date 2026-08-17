@@ -1,0 +1,29 @@
+---
+description: Type-only modules use the .t.ts suffix
+globs: **/*.ts,**/*.tsx,**/*.t.ts
+alwaysApply: true
+---
+
+# Type-only files are `*.t.ts`
+
+A module that exports **only types** (no runtime values) uses the
+`*.t.ts` suffix. Import it as `./name.t` (same as `form.t.ts`,
+`Recursive.t.ts`, demo `*DemoTypes.t.ts`).
+
+Do **not** leave a types-only walk/ctx/bag in a `.ts` file — that
+extension means the module has runtime code.
+
+```typescript
+// ❌ BAD — types only, but looks like a runtime module
+// reviewWalk.ts
+export type ReviewWalk<…> = { … };
+
+// ✅ GOOD
+// reviewWalk.t.ts
+export type ReviewWalk<…> = { … };
+import type { ReviewWalk } from "./reviewWalk.t";
+```
+
+`types.ts` as a package’s public type barrel is the existing exception
+when that file is already the module’s type entry (e.g.
+`section-review/types.ts`). New type-only splits still use `*.t.ts`.

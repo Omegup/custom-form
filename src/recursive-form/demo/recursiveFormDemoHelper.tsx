@@ -1,4 +1,14 @@
 import type { ReactNode } from "react";
+import {
+  withFileHeader,
+  AccentField,
+  FieldsetGroup,
+  InsetFrame,
+  MutedWell,
+  SectionHeading,
+  SplitColumns,
+} from "../../demo-utils";
+import { branded } from "./library";
 import recursiveFormDemoSource from "./RecursiveFormDemo.tsx?raw";
 import recursiveFormDemoTypesSource from "./recursiveFormDemoTypes.t.ts?raw";
 import type { Context, Data, Variants } from "./recursiveFormDemoTypes.t";
@@ -8,10 +18,10 @@ export type { StoryArgs } from "./recursiveFormDemoTypes.t";
 // ── Fixture ───────────────────────────────────────────────────────────────────
 
 export const DEFAULT_RECURSIVE_FORM_DEMO: Data = {
-  variants: {
-    text: "default",
-    group: "bordered",
-  },
+  variants: branded<Variants, "variants">({
+    padding: 8,
+    showBorder: true,
+  }),
   values: {
     t: "Alice",
     g: "1,2,3",
@@ -105,8 +115,6 @@ export const DEFAULT_RECURSIVE_FORM_DEMO: Data = {
 
 // ── Storybook docs (`?raw` of types + integration) ────────────────────────────
 
-const withFileHeader = (path: string, source: string) =>
-  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const RECURSIVE_FORM_DEMO_SOURCE = [
   withFileHeader("recursiveFormDemoTypes.t.ts", recursiveFormDemoTypesSource),
@@ -122,23 +130,14 @@ export const Label = ({
   label,
   children,
 }: {
-  variant: Variants["text"];
+  variant: Variants;
   border: Context["accent"];
   label: string;
   children: ReactNode;
 }) => (
-  <label
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      gap: 4,
-      padding: variant === "compact" ? 4 : 8,
-      borderLeft: `3px solid ${border}`,
-    }}
-  >
-    <span style={{ fontSize: 12, opacity: 0.7 }}>{label}</span>
+  <AccentField padding={variant.padding} border={border} label={label}>
     {children}
-  </label>
+  </AccentField>
 );
 
 export const Group = ({
@@ -147,66 +146,30 @@ export const Group = ({
   title,
   children,
 }: {
-  variant: Variants["group"];
+  variant: Variants;
   border: Context["accent"];
   title: string;
   children: ReactNode;
 }) => (
-  <fieldset
-    style={{
-      border: variant === "bordered" ? `1px solid ${border}` : "none",
-      borderRadius: 4,
-      padding: 8,
-    }}
+  <FieldsetGroup
+    title={title}
+    border={border}
+    showBorder={variant.showBorder}
   >
-    <legend>{title}</legend>
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      {children}
-    </div>
-  </fieldset>
+    {children}
+  </FieldsetGroup>
 );
 
 export const Frame = ({ children }: { children: ReactNode }) => (
-  <div
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      gap: 8,
-      border: "1px solid #ccc",
-      padding: 8,
-    }}
-  >
-    {children}
-  </div>
+  <InsetFrame>{children}</InsetFrame>
 );
 
 export const DisplayColumns = ({ columns }: { columns: ReactNode[][] }) => (
-  <div style={{ display: "flex", gap: 20 }}>
-    {columns.map((column, index) => (
-      <div key={index} style={{ flex: 1 }}>
-        {column}
-      </div>
-    ))}
-  </div>
+  <SplitColumns columns={columns} />
 );
 
 export const Card = ({ children }: { children: ReactNode }) => (
-  <div style={{ background: "#f5f5f5", borderRadius: 4 }}>{children}</div>
-);
-
-export const FormContainer = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) => (
-  <div
-    style={{ display: "flex", flexDirection: "column", gap: 16, padding: 16 }}
-  >
-    <h2 style={{ margin: 0 }}>{title}</h2>
-    {children}
-  </div>
+  <MutedWell>{children}</MutedWell>
 );
 
 export const Section = ({
@@ -216,8 +179,5 @@ export const Section = ({
   title: string;
   children: ReactNode;
 }) => (
-  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-    <h3 style={{ margin: 0, fontSize: 14, opacity: 0.7 }}>{title}</h3>
-    {children}
-  </div>
+  <SectionHeading title={title}>{children}</SectionHeading>
 );
