@@ -174,9 +174,7 @@ export const sectionChrome: lib.SectionReviewChrome<types.TypeNames, types.Param
   renderFormItemAppendix: (nodes) => (
     <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>{nodes}</div>
   ),
-  renderAddFollowUp: ({ originId, onPick }) => (
-    <FollowUpAdd originId={originId} onPick={onPick} />
-  ),
+  renderAddFollowUp: ({ onPick }) => <FollowUpAdd onPick={onPick} />,
   renderActionIcon: (kind, onClick) => {
     const { glyph, label } = ACTION_ICON[kind];
     return (

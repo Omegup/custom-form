@@ -11,5 +11,5 @@ export type {
   SIndexed,
 } from "../form-edit";
 export type { Response } from "../response";
-export { emptyResponse, itemIdBase } from "../response";
+export { emptyResponse } from "../response";
 export type { AdditionalChanges, ReviewFormItemEntry } from "../section-review";

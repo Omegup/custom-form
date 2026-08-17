@@ -19,10 +19,8 @@ type FieldDraft = {
 };
 
 export const FollowUpAdd = ({
-  originId,
   onPick,
 }: {
-  originId: string;
   onPick: (payload: {
     comment: string | null;
     formItem: FieldItem;
@@ -73,7 +71,7 @@ export const FollowUpAdd = ({
                 onPick({
                   comment: null,
                   formItem: lib.branded({
-                    id: `${originId}-followup-${Date.now()}`,
+                    id: `followup-${Date.now()}`,
                     type: "field",
                     deleted: false,
                     params: { name: "Follow-up field", required: false },

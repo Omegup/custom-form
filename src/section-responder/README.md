@@ -14,10 +14,9 @@ appendix chrome is injected via `SectionResponderChrome` (demo owns DOM).
 |---|---|
 | `types.ts` | `ResponderState`, `ResponderExtra`, `FillChrome`, `SectionResponderChrome`, `SectionResponderProps` |
 | `responderWalk.t.ts` | Walk ctx (`FillLive`, `FillWalk`, `FillItemExtra`) |
-| `responderLookup.ts` | `oldById` / `followUpsForOrigin` — instance-id fallback onto stored keys |
 | `responderStatus.ts` | `responderState` — error / change / old / default |
 | `responderVisibleItems.ts` | `usefulForFill` (membership) — panel-instance ids via `withIdSuffix` from `recursive-form` |
-| `responderItemChrome.tsx` | Clear icon when a prior answer has a live draft |
+| `responderClearIcon.ts` | Clear icon when a prior answer has a live draft |
 | `responderRender.tsx` | Recursive walk (`renderFillItem` ↔ slots) + `renderFillColumns` |
 | `sectionValidator.ts` | Section `validate` / `update` / `getKeys` over item `impRef`s |
 | `SectionResponder.tsx` | **`SectionResponderHOC(viewers, chrome)`** — `FormItemHOC` + `renderSection`; opens the walk |

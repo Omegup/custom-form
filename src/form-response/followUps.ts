@@ -6,7 +6,6 @@ import type {
   Response,
   SIndexed,
 } from "./_deps";
-import { itemIdBase } from "./_deps";
 import { formResponseValues } from "./values";
 import type { FormResponseDoc } from "./types";
 
@@ -50,8 +49,6 @@ export const followUpsByOrigin = <
       ) ?? [];
     if (!items.length) continue;
     map[originId] = items;
-    const base = itemIdBase(originId);
-    if (base !== originId && map[base] == null) map[base] = items;
   }
   return map;
 };

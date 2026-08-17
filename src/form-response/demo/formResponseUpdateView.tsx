@@ -124,9 +124,7 @@ export const reviewVariants: Record<lib.ReviewVariantState, types.Variants> = {
 
 const reviewChrome: lib.FormReviewChrome<types.TypeNames, types.Params> = {
   ...formChrome,
-  renderAddFollowUp: ({ originId, onPick }) => (
-    <FollowUpAdd originId={originId} onPick={onPick} />
-  ),
+  renderAddFollowUp: ({ onPick }) => <FollowUpAdd onPick={onPick} />,
 };
 
 export const FormReview = lib.CustomFormReviewHOC<

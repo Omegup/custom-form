@@ -10,8 +10,7 @@ import type {
   VariantsDom,
 } from "./_deps";
 import { branded, emptyResponse, withIdSuffix } from "./_deps";
-import { renderFillClearIcon } from "./responderItemChrome";
-import { followUpsForOrigin, oldById } from "./responderLookup";
+import { renderFillClearIcon } from "./responderClearIcon";
 import { responderState } from "./responderStatus";
 import { usefulForFill } from "./responderVisibleItems";
 import type { FillLive, FillWalk } from "./responderWalk.t";
@@ -31,8 +30,8 @@ const renderFillItem = <
 ): ReactNode => {
   const q = item.header;
   const { live, chrome } = walk;
-  const remark = oldById(live.old?.changes, q.id)?.comment ?? null;
-  const oldValue = oldById(live.old?.values, q.id);
+  const remark = live.old?.changes[q.id]?.comment ?? null;
+  const oldValue = live.old?.values[q.id] ?? null;
   const current = live.responses[q.id] ?? null;
   const value = current ?? oldValue;
   const editable = !oldValue || remark != null;
@@ -101,7 +100,7 @@ const renderFillSlots = <
         .map((item, index) => {
           const filled = withIdSuffix(item, idSuffix);
           const originId = filled.header.id;
-          const followUps = followUpsForOrigin(walk.live.followUpItems, originId);
+          const followUps = walk.live.followUpItems[originId] ?? [];
           return (
             <Fragment key={originId}>
               {renderFillItem(walk, filled, index, deleted, false)}

@@ -5,7 +5,6 @@ export type {
   StrictViewerMethods,
 } from "./types";
 export { emptyResponse } from "./emptyResponse";
-export { itemIdBase } from "./itemIdBase";
 export {
   PANEL_INSTANCES_KEY,
   parsePanelInstanceIds,
