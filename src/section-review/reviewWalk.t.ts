@@ -9,24 +9,11 @@ import type {
 import type {
   AdditionalChanges,
   Addition,
+  ReviewChrome,
   ReviewExtra,
   ReviewFormItemsEditorArgs,
   ReviewVariantState,
-  SectionReviewChrome,
 } from "./types";
-
-export type ReviewChrome<
-  TypeNames extends string,
-  Params extends ParamsDom<TypeNames>,
-> = Pick<
-  SectionReviewChrome<TypeNames, Params>,
-  | "renderItemShell"
-  | "renderComment"
-  | "renderFormItemAppendix"
-  | "renderAddFollowUp"
-  | "renderActionIcon"
-  | "renderFollowUpMark"
->;
 
 export type ReviewItemExtra = ExtraDom &
   ReviewExtra & {

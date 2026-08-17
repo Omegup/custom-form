@@ -14,7 +14,8 @@ import { fillViewerExtra, renderFillClearIcon } from "./responderItemChrome";
 import { followUpsForOrigin, oldById } from "./responderLookup";
 import { responderState } from "./responderStatus";
 import { usefulForFill, withIdSuffix } from "./responderVisibleItems";
-import type { FillChrome, FillLive, FillWalk } from "./responderWalk.t";
+import type { FillLive, FillWalk } from "./responderWalk.t";
+import type { FillChrome } from "./types";
 
 const renderFillItem = <
   TypeNames extends string,
@@ -43,42 +44,39 @@ const renderFillItem = <
     isFollowUpTree,
   });
 
-  return chrome.renderItemShell({
-    id: q.id,
-    children: live.renderFormItem({
-      formItem: q,
-      variant: live.variants[state],
-      extra: fillViewerExtra({
-        getChild: (suffix: string) => (
-          <>
-            {renderFillSlots(
-              walk,
-              item.children,
-              suffix,
-              q.deleted || parentDeleted,
-            )}
-          </>
-        ),
-        error: error || (live.old && editable && oldValue ? true : null),
-        parentDeleted,
-        index,
-        icon: renderFillClearIcon(walk, q.id, oldValue, current),
-        appendix: remark ? chrome.renderAppendix(remark) : null,
-        setValue: editable
-          ? (key, v) => {
-              live.setResponse(q.id, {
-                ...(value ?? emptyResponse()),
-                [key]: v,
-              });
-            }
-          : null,
-        value: value || emptyResponse(),
-        impRef: editable
-          ? (ref) => {
-              live.validators[q.id] = ref;
-            }
-          : null,
-      }),
+  return live.renderFormItem({
+    formItem: q,
+    variant: live.variants[state],
+    extra: fillViewerExtra({
+      getChild: (suffix: string) => (
+        <>
+          {renderFillSlots(
+            walk,
+            item.children,
+            suffix,
+            q.deleted || parentDeleted,
+          )}
+        </>
+      ),
+      error,
+      parentDeleted,
+      index,
+      icon: renderFillClearIcon(walk, q.id, oldValue, current),
+      appendix: remark ? chrome.renderAppendix(remark) : null,
+      setValue: editable
+        ? (key, v) => {
+            live.setResponse(q.id, {
+              ...(value ?? emptyResponse()),
+              [key]: v,
+            });
+          }
+        : null,
+      value: value || emptyResponse(),
+      impRef: editable
+        ? (ref) => {
+            live.validators[q.id] = ref;
+          }
+        : null,
     }),
   });
 };

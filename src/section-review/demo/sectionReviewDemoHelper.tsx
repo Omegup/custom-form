@@ -238,10 +238,7 @@ export const sectionChrome: lib.SectionReviewChrome<types.TypeNames, types.Param
       <button
         type="button"
         aria-label={label}
-        onClick={(e) => {
-          e.stopPropagation();
-          onClick();
-        }}
+        onClick={onClick}
         style={actionButtonStyle}
       >
         {glyph}

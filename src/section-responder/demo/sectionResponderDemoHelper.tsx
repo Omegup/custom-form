@@ -132,10 +132,7 @@ const ClearAnswer = ({ onClear }: { onClear: () => void }) => (
   <button
     type="button"
     aria-label="Clear draft answer"
-    onClick={(e) => {
-      e.stopPropagation();
-      onClear();
-    }}
+    onClick={onClear}
     style={{
       margin: "0 4px",
       border: "none",
@@ -167,7 +164,6 @@ const RemarkAppendix = ({ comment }: { comment: string }) => (
 
 export const sectionChrome: lib.SectionResponderChrome = {
   renderSection: (args) => <FillSection {...args} />,
-  renderItemShell: ({ children }) => <div>{children}</div>,
   renderClearIcon: (onClear) => <ClearAnswer onClear={onClear} />,
   renderAppendix: (comment) => <RemarkAppendix comment={comment} />,
   renderFollowUpGroup: ({ items }) => items,

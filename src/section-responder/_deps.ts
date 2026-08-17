@@ -4,6 +4,7 @@ export type {
   ContextDom,
   ExtraDom,
   ParamsDom,
+  SectionLayoutChrome,
   SomeFormItem,
   TypedFormItem,
   VariantsDom,

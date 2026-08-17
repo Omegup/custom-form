@@ -6,6 +6,7 @@ export type {
   ReviewFollowUpPick,
   ReviewFormItemEntry,
   ReviewFormItemsEditorArgs,
+  ReviewOverlayActions,
   ReviewOverlayArgs,
   ReviewStatus,
   ReviewVariantState,

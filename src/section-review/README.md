@@ -17,12 +17,12 @@ are mounted by the **call site**, not this HOC.
 
 | File | Role |
 |---|---|
-| `types.ts` | `AdditionalChanges`, `ReviewFollowUpPick`, `ReviewFormItemEntry`, `Addition`/`CommentAddition`, `ReviewExtra`, `SectionReviewChrome` |
+| `types.ts` | `AdditionalChanges`, `ReviewFollowUpPick`, `ReviewFormItemEntry`, `Addition`/`CommentAddition`, `ReviewExtra`, `ReviewChrome`, `SectionReviewChrome` |
 | `reviewStatus.ts` | `reviewItemState` / `reviewStatusFor` / `reviewVariantState` — unlock, unanswered follow-ups, highlight vs pending yellow |
 | `reviewChanges.ts` | `withComment` / `withoutComment` / `withFormItemEntry` / `withUnansweredFormItems` — writes into `AdditionalChanges` |
 | `followUpPartition.ts` | `partitionFollowUpEntries` / `followUpEntryAsItem` — answered tree rows vs unanswered editor |
 | `reviewOverlayActions.ts` | overlay submit (`withComment` / `withoutComment`) for the host-mounted remark editor |
-| `reviewWalk.t.ts` | Walk ctx (`ReviewChrome`, `ReviewLive`, `ReviewWalk`, `ReviewItemExtra`) |
+| `reviewWalk.t.ts` | Walk ctx (`ReviewLive`, `ReviewWalk`, `ReviewItemExtra`) |
 | `reviewVisibleItems.ts` | `usefulForReview` (membership) and `withIdSuffix` (panel-instance ids) — composed at the slot walk |
 | `reviewItemChrome.tsx` | Add-follow-up, lock/unlock, follow-up mark, read-only extra bag |
 | `reviewRender.tsx` | Recursive walk (`renderReviewItem` ↔ appendix ↔ slots) + `renderReviewColumns` |

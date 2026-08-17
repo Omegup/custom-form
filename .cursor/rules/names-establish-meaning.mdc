@@ -25,10 +25,23 @@ renderItemShell: (args: {
   copyPriorIntoDraft: (() => void) | null;
 }) => ReactNode
 
-// ✅ GOOD — shell is a wrapper; first `setValue` copies prior into draft
+// ❌ BAD — wrapper slot kept after the write is gone; host wraps in an empty div
 renderItemShell: (args: { id: string; children: ReactNode }) => ReactNode
+
+// ✅ GOOD — fill has no wrapper slot; first `setValue` copies prior into draft.
+// Review's shell is layout around the viewer plus the follow-up add control.
+renderItemShell: (args: {
+  id: string;
+  children: ReactNode;
+  action: ReactNode;
+}) => ReactNode
 ```
 
 If using a callback would require inventing a gesture (click the box),
 that callback does not belong on the slot. Put the write where the user
 already acts (here: `setValue` spreading `current ?? oldValue`).
+
+When the only extra arg on a wrapper is deleted, **delete the wrapper
+slot** if the library has nothing left to compose. Do not leave
+`stopPropagation` on inner buttons that existed only to protect that
+parent click.

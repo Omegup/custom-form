@@ -16,6 +16,7 @@ import type {
   Response,
   ResponseSetter,
   SectionDom,
+  SectionLayoutChrome,
   SectionMetaDom,
   SectionWithItems,
   VariantsDom,
@@ -60,30 +61,8 @@ export type SectionResponderHeader = SectionDom & {
   description: string;
 };
 
-/**
- * Host-owned presentation — same seam as `SectionHOC`'s `renderTitle` /
- * `renderEdit`. Library never creates DOM tags.
- */
-export type SectionResponderChrome = {
-  renderSection: (args: {
-    deleted: boolean;
-    title: string;
-    description: string;
-    i: number;
-    multiSection: boolean;
-    /** One ReactNode per column (already a fragment of item shells). */
-    columns: ReactNode[];
-  }) => ReactNode;
-  /**
-   * Host wrapper around one fill item — layout around the viewer
-   * (`children`), not the viewer itself. Clear-icon and remark appendix
-   * are on `ResponderExtra`, not this shell. First `setValue` already
-   * copies a prior answer into the live draft; the shell is not a write.
-   */
-  renderItemShell: (args: {
-    id: string;
-    children: ReactNode;
-  }) => ReactNode;
+/** Item-walk chrome — clear control, remark, follow-up group. */
+export type FillChrome = {
   renderClearIcon: (onClear: () => void) => ReactNode;
   renderAppendix: (comment: string) => ReactNode;
   /**
@@ -95,6 +74,12 @@ export type SectionResponderChrome = {
     items: ReactNode;
   }) => ReactNode;
 };
+
+/**
+ * Host-owned presentation — same seam as `SectionHOC`'s `renderTitle` /
+ * `renderEdit`. Library never creates DOM tags.
+ */
+export type SectionResponderChrome = FillChrome & SectionLayoutChrome;
 
 export type SectionResponderProps<
   TypeNames extends string,

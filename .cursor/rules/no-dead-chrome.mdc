@@ -32,8 +32,14 @@ type Chrome = { renderAppendix: (comment: string) => ReactNode; … };
 ```
 
 Identity host wrappers (`({ items }) => items`) are fine **when the
-library still calls them**. Unused args a host ignores (`setEntries`)
-are not dead chrome; an entire unused function on the bag is.
+library still calls them** and the slot still composes something the
+host may style (follow-up group, appendix). A wrapper whose only job
+was a deleted gesture (`onActivate` / click-to-copy) is dead — delete
+the slot, not just the callback. Host `<div>{children}</div>` is the
+tell.
+
+Unused args a host ignores (`setEntries`) are not dead chrome; an
+entire unused function on the bag is.
 
 Do **not** keep a second UI for a path the host already owns.
 

@@ -36,10 +36,7 @@ export const FollowUpAdd = ({
         type="button"
         aria-label="Ask follow-up"
         aria-expanded={open}
-        onClick={(e) => {
-          e.stopPropagation();
-          setOpen((v) => !v);
-        }}
+        onClick={() => setOpen((v) => !v)}
         style={{
           border: "none",
           background: "transparent",
@@ -71,8 +68,7 @@ export const FollowUpAdd = ({
             <button
               key={item.key}
               type="button"
-              onClick={(e) => {
-                e.stopPropagation();
+              onClick={() => {
                 setOpen(false);
                 onPick({
                   comment: null,

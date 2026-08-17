@@ -12,8 +12,8 @@ appendix chrome is injected via `SectionResponderChrome` (demo owns DOM).
 
 | File | Role |
 |---|---|
-| `types.ts` | `ResponderState`, `ResponderExtra`, `ResponderAdditionalChanges`, `SectionValidator`, `SectionResponderChrome`, `SectionResponderProps` |
-| `responderWalk.t.ts` | Walk ctx (`FillChrome`, `FillLive`, `FillWalk`, `FillItemExtra`) |
+| `types.ts` | `ResponderState`, `ResponderExtra`, `FillChrome`, `SectionResponderChrome`, `SectionResponderProps` |
+| `responderWalk.t.ts` | Walk ctx (`FillLive`, `FillWalk`, `FillItemExtra`) |
 | `responderLookup.ts` | `oldById` / `followUpsForOrigin` — instance-id fallback onto stored keys |
 | `responderStatus.ts` | `responderState` — error / change / old / default |
 | `responderVisibleItems.ts` | `usefulForFill` (membership) and `withIdSuffix` (panel-instance ids) — composed at the slot walk |

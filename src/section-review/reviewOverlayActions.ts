@@ -7,7 +7,7 @@ import { withComment, withoutComment } from "./reviewChanges";
 import type {
   Addition,
   AdditionalChanges,
-  ReviewOverlayArgs,
+  ReviewOverlayActions,
 } from "./types";
 
 export const reviewOverlayActions = <
@@ -20,7 +20,7 @@ export const reviewOverlayActions = <
   setChanges: (changes: AdditionalChanges<TypeNames, Params>) => void;
   setAddition: (addition: Addition | null) => void;
   setDeleteCommentId: (id: string | null) => void;
-}): Omit<ReviewOverlayArgs, "tCommon"> => {
+}): ReviewOverlayActions => {
   const {
     addition,
     deleteCommentId,

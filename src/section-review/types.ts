@@ -19,6 +19,7 @@ import type {
   Response,
   ResponseSetter,
   SectionDom,
+  SectionLayoutChrome,
   SectionMetaDom,
   SectionWithItems,
   SIndexed,
@@ -112,38 +113,31 @@ export type SectionReviewHeader = SectionDom & {
 };
 
 /**
- * Host overlay chrome — remark / delete-remark dialogs.
- * Mounted by the **call site**, not `SectionReviewHOC` (see
- * {@link reviewOverlayActions}).
+ * Overlay wiring the library owns — host adds copy via {@link ReviewOverlayArgs}.
  */
-export type ReviewOverlayArgs = {
+export type ReviewOverlayActions = {
   addition: Addition | null;
   deleteCommentId: string | null;
   setAddition: (addition: Addition | null) => void;
   clearDelete: () => void;
   onSubmitComment: (text: string) => void;
   onConfirmDeleteComment: () => void;
-  tCommon: (term: "cancel" | "save" | "delete") => string;
 };
 
 /**
- * Host-owned presentation — same seam as `SectionResponderChrome`. Library
- * never creates DOM tags. Overlay dialogs are **not** on this bag — the
- * call site mounts them with {@link ReviewOverlayArgs}.
+ * Host overlay chrome — remark / delete-remark dialogs.
+ * Mounted by the **call site**, not `SectionReviewHOC` (see
+ * {@link reviewOverlayActions}).
  */
-export type SectionReviewChrome<
+export type ReviewOverlayArgs = ReviewOverlayActions & {
+  tCommon: (term: "cancel" | "save" | "delete") => string;
+};
+
+/** Item-walk chrome — shell, remark, follow-up add, lock, follow-up mark. */
+export type ReviewChrome<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
 > = {
-  renderSection: (args: {
-    deleted: boolean;
-    title: string;
-    description: string;
-    i: number;
-    multiSection: boolean;
-    /** One ReactNode per column (already a fragment of item shells). */
-    columns: ReactNode[];
-  }) => ReactNode;
   /**
    * Host wrapper around one reviewed item — layout around the viewer
    * (`children`) plus the follow-up add control (`action`). Lock/unlock
@@ -178,6 +172,16 @@ export type SectionReviewChrome<
    */
   renderFollowUpMark: () => ReactNode;
 };
+
+/**
+ * Host-owned presentation — same seam as `SectionResponderChrome`. Library
+ * never creates DOM tags. Overlay dialogs are **not** on this bag — the
+ * call site mounts them with {@link ReviewOverlayArgs}.
+ */
+export type SectionReviewChrome<
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames>,
+> = ReviewChrome<TypeNames, Params> & SectionLayoutChrome;
 
 export type SectionReviewProps<
   TypeNames extends string,

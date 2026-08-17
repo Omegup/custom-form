@@ -10,19 +10,11 @@ import type {
   VariantsDom,
 } from "./_deps";
 import type {
+  FillChrome,
   ResponderAdditionalChanges,
   ResponderExtra,
   ResponderState,
-  SectionResponderChrome,
 } from "./types";
-
-export type FillChrome = Pick<
-  SectionResponderChrome,
-  | "renderItemShell"
-  | "renderClearIcon"
-  | "renderAppendix"
-  | "renderFollowUpGroup"
->;
 
 export type FillItemExtra = ExtraDom &
   ResponderExtra & {

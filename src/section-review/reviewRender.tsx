@@ -22,7 +22,8 @@ import {
 } from "./reviewItemChrome";
 import { isAnsweredResponse, reviewItemState } from "./reviewStatus";
 import { usefulForReview, withIdSuffix } from "./reviewVisibleItems";
-import type { ReviewChrome, ReviewLive, ReviewWalk } from "./reviewWalk.t";
+import type { ReviewLive, ReviewWalk } from "./reviewWalk.t";
+import type { ReviewChrome } from "./types";
 
 const renderReviewItem = <
   TypeNames extends string,
@@ -74,7 +75,7 @@ const renderReviewItem = <
         }),
         appendix: appendix.length
           ? chrome.renderFormItemAppendix(appendix)
-          : undefined,
+          : null,
         status: state.status,
         value: live.responses[q.id] ?? emptyResponse(),
       }),
