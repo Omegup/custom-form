@@ -54,16 +54,13 @@ export type CustomFormReviewProps<
   lastPending: Date | null;
   changes: AdditionalChanges<TypeNames, Params>;
   setChanges: (changes: AdditionalChanges<TypeNames, Params>) => void;
-  addition: Addition<TypeNames, Params> | null;
   setAddition: (addition: Addition<TypeNames, Params> | null) => void;
-  deleteCommentId: string | null;
   setDeleteCommentId: (id: string | null) => void;
   renderFormItemsEditor: (
     args: ReviewFormItemsEditorArgs<TypeNames, Params>,
   ) => ReactNode;
   /** Chrome values keyed by {@link ReviewVariantState} — library picks pending vs settled. */
   variants: Record<ReviewVariantState, Variants>;
-  tCommon: (term: "add" | "cancel" | "save" | "delete") => string;
   showDeleted: boolean;
   children?: ReactNode;
 };

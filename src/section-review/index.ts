@@ -26,6 +26,7 @@ export {
   withoutComment,
   withUnansweredFormItems,
 } from "./reviewChanges";
+export { reviewOverlayActions } from "./reviewOverlayActions";
 export {
   hasUnansweredFollowUps,
   hasUnlockRemark,
@@ -33,5 +34,4 @@ export {
   reviewStatusFor,
   reviewVariantState,
 } from "./reviewStatus";
-export { idInSectionTree, sectionOwnsOverlay } from "./sectionOwnsOverlay";
 

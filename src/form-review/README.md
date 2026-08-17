@@ -20,9 +20,11 @@ directly (no theme/portal rebuild).
 
 ```
 host: sections / responses / changes / setChanges / lastPending
+      + setAddition / setDeleteCommentId
       + variants: Record<ReviewVariantState, Variants>
   → CustomFormReviewHOC(viewers, chrome)
   → per section: SectionReviewHOC (library picks variants[state])
+host: reviewOverlayActions + overlay chrome (once, sibling of the form)
 ```
 
 ## Demo (`form-review/Form review` story)

@@ -178,14 +178,6 @@ export const PhaseJsonPanels = ({
   );
 };
 
-const overlayBox: CSSProperties = {
-  marginTop: 16,
-  padding: 12,
-  border: "1px solid #ddd",
-  borderRadius: 6,
-  background: "#fff",
-};
-
 const actionButtonStyle: CSSProperties = {
   border: "none",
   background: "transparent",
@@ -321,122 +313,6 @@ export const formChrome: lib.FormReviewChrome<types.TypeNames, types.Params> = {
       ✚
     </span>
   ),
-  renderOverlays: ({
-    addition,
-    deleteCommentId,
-    setAddition,
-    clearDelete,
-    onSubmitComment,
-    onConfirmDeleteComment,
-    onSubmitFormItem,
-    tCommon,
-  }) => {
-    if (deleteCommentId) {
-      return (
-        <div style={overlayBox}>
-          <p style={{ margin: "0 0 8px" }}>Remove this comment?</p>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button type="button" onClick={onConfirmDeleteComment}>
-              {tCommon("delete")}
-            </button>
-            <button type="button" onClick={clearDelete}>
-              {tCommon("cancel")}
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    if (addition?.mode === "comment") {
-      return (
-        <div style={overlayBox}>
-          <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <span>Comment</span>
-            <textarea
-              rows={3}
-              value={addition.text ?? ""}
-              onChange={(e) => setAddition({ ...addition, text: e.target.value })}
-            />
-          </label>
-          <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-            <button type="button" onClick={() => onSubmitComment(addition.text ?? "")}>
-              {tCommon("save")}
-            </button>
-            <button type="button" onClick={() => setAddition(null)}>
-              {tCommon("cancel")}
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    if (addition?.mode === "formItem") {
-      const formItem = addition.formItem;
-      return (
-        <div style={overlayBox}>
-          <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <span>Follow-up comment</span>
-            <textarea
-              rows={2}
-              value={addition.comment ?? ""}
-              onChange={(e) => setAddition({ ...addition, comment: e.target.value })}
-            />
-          </label>
-          <label style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
-            <input
-              type="checkbox"
-              checked={!!formItem}
-              onChange={(e) =>
-                setAddition({
-                  ...addition,
-                  formItem: e.target.checked
-                    ? {
-                        id: `${addition.originId}-followup-${addition.replace?.index ?? Date.now()}`,
-                        type: "field",
-                        deleted: false,
-                        params: { name: "Follow-up field", required: false },
-                      }
-                    : undefined,
-                })
-              }
-            />
-            Attach a follow-up field
-          </label>
-          {formItem ? (
-            <label style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 8 }}>
-              <span>Field label</span>
-              <input
-                value={formItem.params.name}
-                onChange={(e) => {
-                  if (formItem.type !== "field") return;
-                  setAddition({
-                    ...addition,
-                    formItem: {
-                      ...formItem,
-                      params: { ...formItem.params, name: e.target.value },
-                    },
-                  });
-                }}
-              />
-            </label>
-          ) : null}
-          <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-            <button
-              type="button"
-              onClick={() => onSubmitFormItem({ comment: addition.comment, formItem })}
-            >
-              {tCommon("save")}
-            </button>
-            <button type="button" onClick={() => setAddition(null)}>
-              {tCommon("cancel")}
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    return null;
-  },
 };
 
 const field = (id: string, name: string, required: boolean): types.ListItem => ({

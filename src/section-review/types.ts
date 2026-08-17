@@ -6,8 +6,8 @@
  * slot-tree uses `formItem` naming throughout (school calls this a
  * "follow-up question"; we attach a follow-up form item instead).
  *
- * Chrome (section shell, item cards, comment cards, overlays) is injected via
- * {@link SectionReviewChrome} — library code emits no HTML.
+ * Section/item/comment chrome is injected via {@link SectionReviewChrome}.
+ * Overlay editors are host-owned (see {@link ReviewOverlayArgs}).
  */
 import type { ReactNode } from "react";
 import type {
@@ -116,7 +116,11 @@ export type SectionReviewHeader = SectionDom & {
   description: string;
 };
 
-/** Args passed to {@link SectionReviewChrome.renderOverlays}. */
+/**
+ * Host overlay chrome — comment / follow-up / delete-remark dialogs.
+ * Mounted by the **call site**, not `SectionReviewHOC` (see
+ * {@link reviewOverlayActions}).
+ */
 export type ReviewOverlayArgs<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
@@ -137,7 +141,8 @@ export type ReviewOverlayArgs<
 
 /**
  * Host-owned presentation — same seam as `SectionResponderChrome`. Library
- * never creates DOM tags; overlays render inline (no `createPortal`).
+ * never creates DOM tags. Overlay dialogs are **not** on this bag — the
+ * call site mounts them with {@link ReviewOverlayArgs}.
  */
 export type SectionReviewChrome<
   TypeNames extends string,
@@ -189,7 +194,6 @@ export type SectionReviewChrome<
    * host supplies chrome (e.g. ✚) without forcing pending yellow.
    */
   renderFollowUpMark: () => ReactNode;
-  renderOverlays: (args: ReviewOverlayArgs<TypeNames, Params>) => ReactNode;
 };
 
 export type SectionReviewProps<
@@ -209,11 +213,9 @@ export type SectionReviewProps<
   lastPending: Date | null;
   changes: AdditionalChanges<TypeNames, Params>;
   setChanges: (changes: AdditionalChanges<TypeNames, Params>) => void;
-  /** Host-owned overlay draft (comment / follow-up form item) — so a sidebar catalog can fill `formItem`. */
-  addition: Addition<TypeNames, Params> | null;
+  /** Opens the host overlay (comment / follow-up draft). Host mounts the editor. */
   setAddition: (addition: Addition<TypeNames, Params> | null) => void;
-  /** Item id pending comment deletion, or null. */
-  deleteCommentId: string | null;
+  /** Opens the host overlay to confirm removing a remark. */
   setDeleteCommentId: (id: string | null) => void;
   /**
    * Host may replace the stock read-only follow-up rendering with its design
@@ -224,7 +226,6 @@ export type SectionReviewProps<
   ) => ReactNode;
   /** Chrome values keyed by {@link ReviewVariantState} — library picks pending vs settled. */
   variants: Record<ReviewVariantState, Variants>;
-  tCommon: (term: "add" | "cancel" | "save" | "delete") => string;
   /** Section ordinal for the title (1-based display when `multiSection`). */
   i: number;
 };

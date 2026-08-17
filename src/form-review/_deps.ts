@@ -19,10 +19,11 @@ export type {
   AdditionalChanges,
   ReviewExtra,
   ReviewFormItemsEditorArgs,
+  ReviewOverlayArgs,
   ReviewVariantState,
   SectionReviewChrome,
   SectionReviewContext,
   SectionReviewHeader,
   SectionReviewProps,
 } from "../section-review";
-export { SectionReviewHOC } from "../section-review";
+export { SectionReviewHOC, reviewOverlayActions } from "../section-review";

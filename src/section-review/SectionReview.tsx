@@ -1,22 +1,19 @@
 /**
  * Section review shell — school `section-review-ui/SectionReview`
- * `SectionReviewHOC`. Wires `FormItemHOC`, the slot walk (`reviewRender`),
- * and overlay submit callbacks (`reviewChanges`). Status, partition, and
- * overlay ownership live in sibling modules.
+ * `SectionReviewHOC`. Wires `FormItemHOC` and the slot walk (`reviewRender`).
+ * Overlay editors are **host-owned**: this HOC only opens them via
+ * `setAddition` / `setDeleteCommentId`. The call site mounts chrome with
+ * {@link reviewOverlayActions}.
  *
  * All presentation is injected via {@link SectionReviewChrome} — this module
- * emits no HTML (see `.cursor/rules/no-html-outside-demo.mdc`). Overlays
- * render inline (sibling to content), never via `createPortal`.
+ * emits no HTML (see `.cursor/rules/no-html-outside-demo.mdc`).
  */
 import { type Ref } from "react";
 import type {
   Children,
   MetaDom,
   ParamsDom,
-  RecursiveFormItem,
   SectionMetaDom,
-  SIndexed,
-  SomeFormItem,
   StrictViewerMethods,
   VariantsDom,
   ViewerMethods,
@@ -24,8 +21,6 @@ import type {
 } from "./_deps";
 import { FormItemHOC, getUseImpRefViewProps } from "./_deps";
 import { makeReviewRender } from "./reviewRender";
-import { withComment, withFormItemEntry, withoutComment } from "./reviewChanges";
-import { sectionOwnsOverlay } from "./sectionOwnsOverlay";
 import type {
   ReviewExtra,
   SectionReviewChrome,
@@ -73,10 +68,7 @@ export const SectionReviewHOC = <
     >(),
   );
 
-  const { renderSection, renderOverlays, ...itemChrome } = chrome;
-  const reviewRender = makeReviewRender<TypeNames, Params, Variants>()(
-    itemChrome,
-  );
+  const reviewRender = makeReviewRender<TypeNames, Params, Variants>()(chrome);
 
   return <SectionMeta extends SectionMetaDom, Meta extends MetaDom>(
     props: SectionReviewProps<
@@ -99,10 +91,7 @@ export const SectionReviewHOC = <
       setChanges,
       lastPending,
       variants,
-      tCommon,
-      addition,
       setAddition,
-      deleteCommentId,
       setDeleteCommentId,
       renderFormItemsEditor,
     } = props;
@@ -124,61 +113,13 @@ export const SectionReviewHOC = <
       ),
     });
 
-    const submitComment = (text: string) => {
-      if (!addition || addition.mode !== "comment") return;
-      setChanges(withComment(changes, addition.originId, text));
-      setAddition(null);
-    };
-
-    const confirmDeleteComment = () => {
-      if (!deleteCommentId) return;
-      setChanges(withoutComment(changes, deleteCommentId));
-      setDeleteCommentId(null);
-    };
-
-    const submitFormItem = (payload: {
-      comment?: string;
-      formItem?: SomeFormItem<TypeNames, Params>;
-      children?: RecursiveFormItem<TypeNames, Params, MetaDom<SIndexed>>[][];
-    }) => {
-      if (!addition || addition.mode !== "formItem") return;
-      setChanges(
-        withFormItemEntry(
-          changes,
-          addition.originId,
-          { ...payload, date: lastPending },
-          addition.replace != null ? addition.replace.index : null,
-        ),
-      );
-      setAddition(null);
-    };
-
-    const overlayId = addition?.originId ?? deleteCommentId;
-
-    return (
-      <>
-        {renderSection({
-          deleted: section.header.deleted,
-          title: section.header.title,
-          description: section.header.description,
-          i,
-          multiSection,
-          columns: renderSlots(section.items, "", section.header.deleted),
-        })}
-        {overlayId &&
-        sectionOwnsOverlay(overlayId, section.items, changes)
-          ? renderOverlays({
-              addition,
-              deleteCommentId,
-              setAddition,
-              clearDelete: () => setDeleteCommentId(null),
-              onSubmitComment: submitComment,
-              onConfirmDeleteComment: confirmDeleteComment,
-              onSubmitFormItem: submitFormItem,
-              tCommon,
-            })
-          : null}
-      </>
-    );
+    return chrome.renderSection({
+      deleted: section.header.deleted,
+      title: section.header.title,
+      description: section.header.description,
+      i,
+      multiSection,
+      columns: renderSlots(section.items, "", section.header.deleted),
+    });
   };
 };

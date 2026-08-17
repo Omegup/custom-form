@@ -27,7 +27,7 @@ export type {
   SectionValidator,
 } from "../../form-responder";
 export type { FormReviewChrome } from "../../form-review";
-export { CustomFormReviewHOC } from "../../form-review";
+export { CustomFormReviewHOC, reviewOverlayActions } from "../../form-review";
 export type {
   Addition,
   AdditionalChanges,

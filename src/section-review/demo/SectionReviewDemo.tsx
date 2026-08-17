@@ -248,17 +248,26 @@ export const SectionReviewDemo = ({
               lastPending={reviewPending ? demo.PENDING_DATE : null}
               changes={changes}
               setChanges={setChanges}
-              addition={addition}
               setAddition={setAddition}
-              deleteCommentId={deleteCommentId}
               setDeleteCommentId={setDeleteCommentId}
               renderFormItemsEditor={({ entries }) => (
                 <FollowUpDrafts entries={entries} />
               )}
               variants={reviewVariants}
-              tCommon={tCommon}
               i={0}
             />
+            {demo.renderReviewOverlays({
+              ...lib.reviewOverlayActions({
+                addition,
+                deleteCommentId,
+                changes,
+                setChanges,
+                setAddition,
+                setDeleteCommentId,
+                lastPending: reviewPending ? demo.PENDING_DATE : null,
+              }),
+              tCommon,
+            })}
           </div>
         ) : null}
 

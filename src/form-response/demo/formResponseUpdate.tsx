@@ -6,6 +6,7 @@ import { dateFromIso, rememberDate } from "./formResponseDemoHelper";
 import type * as types from "./formResponseDemoTypes.t";
 import { FeedbackBar, UpdateToolbar } from "./formResponseToolbar";
 import { FollowUpDrafts } from "../../section-review/demo/followUpAdd";
+import { renderReviewOverlays } from "../../section-review/demo/sectionReviewDemoHelper";
 import {
   FormReview,
   reviewCtx,
@@ -79,17 +80,26 @@ export const UpdatePhase = ({
         lastPending={lastPending}
         changes={formResponse.changes}
         setChanges={review.setChanges}
-        addition={addition}
         setAddition={setAddition}
-        deleteCommentId={deleteCommentId}
         setDeleteCommentId={setDeleteCommentId}
         renderFormItemsEditor={({ entries }) => (
           <FollowUpDrafts entries={entries} />
         )}
         variants={reviewVariants}
-        tCommon={tCommon}
         showDeleted={showDeleted}
       />
+      {renderReviewOverlays({
+        ...lib.reviewOverlayActions({
+          addition,
+          deleteCommentId,
+          changes: formResponse.changes,
+          setChanges: review.setChanges,
+          setAddition,
+          setDeleteCommentId,
+          lastPending,
+        }),
+        tCommon,
+      })}
     </div>
   );
 };

@@ -18,6 +18,7 @@ import {
   panelView,
 } from "../../response/demo/nestedItems";
 import { FollowUpDrafts } from "../../section-review/demo/followUpAdd";
+import { renderReviewOverlays } from "../../section-review/demo/sectionReviewDemoHelper";
 import * as demo from "./formReviewDemoHelper";
 import type * as types from "./formReviewDemoTypes.t";
 import * as lib from "./library";
@@ -282,17 +283,26 @@ export const FormReviewDemo = ({
               lastPending={reviewPending ? demo.PENDING_DATE : null}
               changes={changes}
               setChanges={setChanges}
-              addition={addition}
               setAddition={setAddition}
-              deleteCommentId={deleteCommentId}
               setDeleteCommentId={setDeleteCommentId}
               renderFormItemsEditor={({ entries }) => (
                 <FollowUpDrafts entries={entries} />
               )}
               variants={reviewVariants}
-              tCommon={tCommon}
               showDeleted={showDeleted}
             />
+            {renderReviewOverlays({
+              ...lib.reviewOverlayActions({
+                addition,
+                deleteCommentId,
+                changes,
+                setChanges,
+                setAddition,
+                setDeleteCommentId,
+                lastPending: reviewPending ? demo.PENDING_DATE : null,
+              }),
+              tCommon,
+            })}
           </div>
         ) : null}
 
