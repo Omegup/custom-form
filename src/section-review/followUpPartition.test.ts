@@ -1,0 +1,32 @@
+import { describe, expect, it } from "vitest";
+import type { TheParams } from "../form";
+import { partitionFollowUpEntries } from "./followUpPartition";
+import type { ReviewFormItemEntry } from "./types";
+
+type TypeNames = "field";
+type Params = TheParams<{ field: { name: string } }>;
+
+const field = (id: string): ReviewFormItemEntry<TypeNames, Params> => ({
+  formItem: { id, type: "field", params: { name: id }, deleted: false },
+  children: [],
+  date: null,
+});
+
+describe("partitionFollowUpEntries", () => {
+  it("splits answered, unanswered, and comment-only rows", () => {
+    const commentOnly: ReviewFormItemEntry<TypeNames, Params> = {
+      comment: "note",
+      date: null,
+    };
+    const entries = [field("done"), commentOnly, field("open")];
+    const { answered, unanswered } = partitionFollowUpEntries(
+      entries,
+      (id) => id === "done",
+    );
+    expect(answered.map((e) => e.formItem?.id)).toEqual(["done"]);
+    expect(unanswered.map(({ entry, sourceIndex }) => [entry.formItem?.id ?? entry.comment, sourceIndex])).toEqual([
+      ["note", 1],
+      ["open", 2],
+    ]);
+  });
+});

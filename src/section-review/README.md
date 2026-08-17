@@ -16,7 +16,12 @@ inline (sibling to content), never via `createPortal`.
 | File | Role |
 |---|---|
 | `types.ts` | `AdditionalChanges`, `Addition`/`CommentAddition`/`FormItemAddition`, `ReviewExtra`, `ReviewVariantState`, `SectionReviewChrome`, `SectionReviewProps` |
-| `SectionReview.tsx` | **`SectionReviewHOC(viewers, chrome)`** — `FormItemHOC` + `getUseImpRefViewProps`, recursive slots, status + overlay state |
+| `reviewStatus.ts` | `reviewStatusFor` / `reviewVariantState` — highlight vs disabled vs pending yellow |
+| `reviewChanges.ts` | `withComment` / `withoutComment` / `withFormItemEntry` / `withUnansweredFormItems` — writes into `AdditionalChanges` |
+| `followUpPartition.ts` | `partitionFollowUpEntries` — answered (review chrome) vs unanswered (design editor) |
+| `sectionOwnsOverlay.ts` | which section mounts the comment / follow-up overlay |
+| `reviewRender.tsx` | slot walk + appendix (`renderReviewableItem` / unanswered design rows) |
+| `SectionReview.tsx` | **`SectionReviewHOC(viewers, chrome)`** — `FormItemHOC`, overlay submit callbacks, `renderSection` |
 | `followUpEntriesFlat.ts` | `followUpEntriesToFlat` / `syncFollowUpEntriesFromFlat` — entries ↔ synthetic flat section |
 
 ## How it plugs in
