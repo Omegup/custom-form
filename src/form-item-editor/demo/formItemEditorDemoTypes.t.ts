@@ -1,4 +1,4 @@
-import type { Dispatch, SetStateAction, ReactNode } from "react";
+import type { CSSProperties, Dispatch, SetStateAction, ReactNode } from "react";
 import type * as lib from "./library";
 
 export type TypeNames = "field" | "heading" | "panel";
@@ -14,12 +14,26 @@ export type Params = lib.TheParams<{
   panel: { name: string; multiple: boolean };
 }>;
 
-/** `followUp` — reviewer-added items (yellow chrome); not an error/status flag. */
-export type Variants = lib.TheVariants<{
-  field: "default" | "followUp";
-  heading: "default" | "followUp";
-  panel: "default" | "followUp";
-}>;
+/**
+ * Host-owned chrome for every item type — the **value** passed as `variant`,
+ * not a name key and not a per-type bag (see variant-values-not-keys).
+ */
+export type ItemVariant = {
+  border: string;
+  background: string;
+  badge: ReactNode;
+  shell: CSSProperties;
+  /** Fill: when set, used while `extra.error` is truthy. */
+  errorBorder?: string;
+  /**
+   * Review: apply earlier/new mute + status-colored borders on this item's
+   * own chrome. False for pending follow-up yellow (no ancient mute).
+   */
+  reviewTone: boolean;
+};
+
+/** Shared chrome — one value for every item type (like Extra). */
+export type Variants = lib.TheVariants<ItemVariant>;
 
 export type Section = {
   id: string;
@@ -108,18 +122,6 @@ export type DialogArgs = lib.DialogArgsDom<{
   title: ReactNode;
   onCancel: () => void;
 }>;
-
-export type NameExtra = lib.ExtraDom;
-
-export type NameViewers = lib.Viewers<
-  TypeNames,
-  Params,
-  Variants,
-  NameExtra & lib.Children,
-  NameExtra,
-  Ctx,
-  string
->;
 
 export type Validate<K extends TypeNames> = lib.FormItemEditorValidate<
   TypeNames,
@@ -226,19 +228,20 @@ export type ListSection = lib.SectionWithItems<
 >;
 
 /**
- * Column "+ add" slot — school `AppNodeIndex` (`{ index, sIndex }`).
- * Hosts compute `index` via `getFlatInsertionIndex` (FlatDnd list-node index);
- * `makeUseRenderAddItem` returns a renderer of this exact shape.
+ * Per-item extra button on the list row (e.g. Edit).
  */
-export type AddItemSlot = { index: number; sIndex: number };
+export type ExtraAction = { label: string; onClick: () => void };
 
-/** Rendered blocks handed to `renderLayout` so demos can add a sidebar. */
-export type ListLayoutArgs = {
-  alert: ReactNode;
-  details: ReactNode;
-  sections: ReactNode;
-  setFlatItems: Dispatch<SetStateAction<FlatItems>>;
-  focus: (id: string) => void;
+/** Inner list context before `AutoFocus` wrapping. */
+export type ListBaseCtx = lib.ContextDom & { focused: lib.AutoFocusState };
+
+/** List autofocus ctx — what `SectionFormItemHOC` / move actions consume. */
+export type ListCtx = lib.AutoFocus<ListBaseCtx, boolean>;
+
+/** Per-item viewer extra for the list shell (not the dialog's `ItemExtra`). */
+export type ListExtra = lib.ExtraDom & {
+  actions: lib.MoveActions;
+  extra: ExtraAction[];
 };
 
 export type StoryArgs = {

@@ -1,24 +1,24 @@
 /**
  * Teacher/admin review types — school `types/form-response-app`
  * (`AdditionalChanges`, `ReviewExtra`) + `types/form-app/addition`
- * (`Addition`, `CommentAddition`, `QuestionAddition`), adapted for the
- * section-level review contract from `section-review-ui/SectionReview`.
+ * (`Addition` / `CommentAddition`), adapted for the section-level
+ * review contract from `section-review-ui/SectionReview`.
  * slot-tree uses `formItem` naming throughout (school calls this a
  * "follow-up question"; we attach a follow-up form item instead).
  *
- * Chrome (section shell, item cards, comment cards, overlays) is injected via
- * {@link SectionReviewChrome} — library code emits no HTML.
+ * Section/item/comment chrome is injected via {@link SectionReviewChrome}.
+ * Overlay editors are host-owned (see {@link ReviewOverlayArgs}).
  */
 import type { ReactNode } from "react";
 import type {
   ContextDom,
-  ExtraDom,
   MetaDom,
   ParamsDom,
+  PhaseItemExtra,
   RecursiveFormItem,
   Response,
-  ResponseSetter,
-  SectionDom,
+  SectionHeader,
+  SectionLayoutChrome,
   SectionMetaDom,
   SectionWithItems,
   SIndexed,
@@ -26,15 +26,27 @@ import type {
   VariantsDom,
 } from "./_deps";
 
+export type { SectionHeader };
+
+/** Host commit from `renderAddFollowUp` — a follow-up item, not a remark. */
+export type ReviewFollowUpPick<
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames>,
+> = {
+  comment: string | null;
+  formItem: SomeFormItem<TypeNames, Params>;
+  /** Nested columns when `formItem` is a panel — same shape as design `children`. */
+  children: RecursiveFormItem<TypeNames, Params, MetaDom<SIndexed>>[][] | null;
+};
+
 /** One reviewer follow-up thread entry — school `AdditionalChanges[id].questions[]`. */
 export type ReviewFormItemEntry<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
 > = {
-  comment?: string;
-  formItem?: SomeFormItem<TypeNames, Params>;
-  /** Nested columns when `formItem` is a panel — same shape as design `children`. */
-  children?: RecursiveFormItem<TypeNames, Params, MetaDom<SIndexed>>[][];
+  comment: string | null;
+  formItem: SomeFormItem<TypeNames, Params> | null;
+  children: RecursiveFormItem<TypeNames, Params, MetaDom<SIndexed>>[][] | null;
   date: Date | null;
 };
 
@@ -44,7 +56,6 @@ export type ReviewFormItemsEditorArgs<
 > = {
   entries: ReviewFormItemEntry<TypeNames, Params>[];
   setEntries: (entries: ReviewFormItemEntry<TypeNames, Params>[]) => void;
-  fallback: ReactNode;
 };
 
 /** Teacher/reviewer comments + follow-up form items keyed by item id — school `AdditionalChanges`. */
@@ -60,100 +71,75 @@ export type AdditionalChanges<
   }
 >;
 
-/** In-progress overlay state for editing a comment — school `CommentAddition`. */
+/** In-progress overlay state for editing a remark — school `CommentAddition`. */
 export type CommentAddition = {
   originId: string;
-  mode: "comment";
-  text?: string;
+  text: string | null;
 };
 
-/** In-progress overlay state for adding/editing a follow-up form item — school `QuestionAddition`. */
-export type FormItemAddition<
-  TypeNames extends string,
-  Params extends ParamsDom<TypeNames>,
-> = {
-  originId: string;
-  mode: "formItem";
-  comment?: string;
-  formItem?: SomeFormItem<TypeNames, Params>;
-  replace?: { index: number };
-};
-
-export type Addition<
-  TypeNames extends string,
-  Params extends ParamsDom<TypeNames>,
-> = CommentAddition | FormItemAddition<TypeNames, Params>;
+/** Overlay draft. Follow-ups are not overlay state — they go through
+ * {@link SectionReviewChrome.renderAddFollowUp} / `renderFormItemsEditor`. */
+export type Addition = CommentAddition;
 
 /** Per-item review status driving chrome highlighting — school `ReviewExtra["status"]`. */
 export type ReviewStatus = "normal" | "disabled" | "highlight";
+
+/**
+ * Review chrome states — host supplies a Variant **value** bag per state;
+ * the library picks `variants[state]` (see variant-values-not-keys).
+ */
+export type ReviewVariantState = "default" | "change";
 
 /**
  * Viewer bag for read-only reviewed items — school `ReviewExtra`. `response`
  * is always read-only (`setValue: null`); host layers `impRef` + `getChild`
  * around this, same as `ResponderExtra`.
  */
-export type ReviewExtra = ExtraDom & {
-  error: boolean | string | null;
-  parentDeleted: boolean;
-  index: number;
-  icon: ReactNode;
-  appendix: ReactNode;
-  response: ResponseSetter;
+export type ReviewExtra = PhaseItemExtra & {
   status: ReviewStatus;
 };
 
 /** Context slots school threads for i18n; theme/portal stay host-side. */
 export type SectionReviewContext = ContextDom;
 
-export type SectionReviewHeader = SectionDom & {
-  title: string;
-  description: string;
-};
-
-/** Args passed to {@link SectionReviewChrome.renderOverlays}. */
-export type ReviewOverlayArgs<
-  TypeNames extends string,
-  Params extends ParamsDom<TypeNames>,
-> = {
-  addition: Addition<TypeNames, Params> | null;
+/**
+ * Overlay wiring the library owns — host adds copy via {@link ReviewOverlayArgs}.
+ */
+export type ReviewOverlayActions = {
+  addition: Addition | null;
   deleteCommentId: string | null;
-  setAddition: (addition: Addition<TypeNames, Params> | null) => void;
+  setAddition: (addition: Addition | null) => void;
   clearDelete: () => void;
   onSubmitComment: (text: string) => void;
   onConfirmDeleteComment: () => void;
-  onSubmitFormItem: (payload: {
-    comment?: string;
-    formItem?: SomeFormItem<TypeNames, Params>;
-    children?: RecursiveFormItem<TypeNames, Params, MetaDom<SIndexed>>[][];
-  }) => void;
-  tCommon: (term: "add" | "cancel" | "save" | "delete") => string;
 };
 
 /**
- * Host-owned presentation — same seam as `SectionResponderChrome`. Library
- * never creates DOM tags; overlays render inline (no `createPortal`).
+ * Host overlay chrome — remark / delete-remark dialogs.
+ * Mounted by the **call site**, not `SectionReviewHOC` (see
+ * {@link reviewOverlayActions}).
  */
-export type SectionReviewChrome<
+export type ReviewOverlayArgs = ReviewOverlayActions & {
+  tCommon: (term: "cancel" | "save" | "delete") => string;
+};
+
+/** Item-walk chrome — shell, remark, follow-up add, lock, follow-up mark. */
+export type ReviewChrome<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
 > = {
-  renderSection: (args: {
-    deleted: boolean;
-    title: string;
-    description: string;
-    i: number;
-    multiSection: boolean;
-    /** One ReactNode per column (already a fragment of item shells). */
-    columns: ReactNode[];
-  }) => ReactNode;
+  /**
+   * Host wrapper around one reviewed item — layout around the viewer
+   * (`children`) plus the follow-up add control (`action`). Lock/unlock
+   * and the follow-up mark live on `ReviewExtra.icon`, not this shell.
+   */
   renderItemShell: (args: {
     id: string;
     children: ReactNode;
+    /** Follow-up add control for this origin (`renderAddFollowUp`). */
     action: ReactNode;
   }) => ReactNode;
-  /** Plain, non-interactive note — mirrors `SectionResponderChrome.renderAppendix`. */
-  renderAppendix: (comment: string) => ReactNode;
-  /** Editable comment card (top-level comment, or a comment-only follow-up entry). */
+  /** Editable unlock remark. */
   renderComment: (args: { text: string; onEdit: () => void }) => ReactNode;
   /** Wraps the comment card + follow-up form item nodes under one item. */
   renderFormItemAppendix: (nodes: ReactNode[]) => ReactNode;
@@ -164,29 +150,35 @@ export type SectionReviewChrome<
    */
   renderAddFollowUp: (args: {
     originId: string;
-    onPick: (payload: {
-      comment?: string;
-      formItem: SomeFormItem<TypeNames, Params>;
-      children?: RecursiveFormItem<
-        TypeNames,
-        Params,
-        MetaDom<SIndexed>
-      >[][];
-    }) => void;
+    onPick: (payload: ReviewFollowUpPick<TypeNames, Params>) => void;
   }) => ReactNode;
   renderActionIcon: (
-    kind: "lock" | "unlock" | "edit",
+    kind: "lock" | "unlock",
     onClick: () => void,
   ) => ReactNode;
-  renderOverlays: (args: ReviewOverlayArgs<TypeNames, Params>) => ReactNode;
+  /**
+   * Mark for answered follow-up items that behave as originals (step 4) —
+   * host supplies chrome (e.g. ✚) without forcing pending yellow.
+   */
+  renderFollowUpMark: () => ReactNode;
 };
+
+/**
+ * Host-owned presentation — same seam as `SectionResponderChrome`. Library
+ * never creates DOM tags. Overlay dialogs are **not** on this bag — the
+ * call site mounts them with {@link ReviewOverlayArgs}.
+ */
+export type SectionReviewChrome<
+  TypeNames extends string,
+  Params extends ParamsDom<TypeNames>,
+> = ReviewChrome<TypeNames, Params> & SectionLayoutChrome;
 
 export type SectionReviewProps<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Variants extends VariantsDom<TypeNames>,
+  Variants extends VariantsDom,
   Context extends SectionReviewContext,
-  SectionConfig extends SectionReviewHeader,
+  SectionConfig extends SectionHeader,
   SectionMeta extends SectionMetaDom,
   Meta extends MetaDom,
 > = {
@@ -198,11 +190,9 @@ export type SectionReviewProps<
   lastPending: Date | null;
   changes: AdditionalChanges<TypeNames, Params>;
   setChanges: (changes: AdditionalChanges<TypeNames, Params>) => void;
-  /** Host-owned overlay draft (comment / follow-up form item) — so a sidebar catalog can fill `formItem`. */
-  addition: Addition<TypeNames, Params> | null;
-  setAddition: (addition: Addition<TypeNames, Params> | null) => void;
-  /** Item id pending comment deletion, or null. */
-  deleteCommentId: string | null;
+  /** Opens the host overlay (remark draft). Host mounts the editor. */
+  setAddition: (addition: Addition | null) => void;
+  /** Opens the host overlay to confirm removing a remark. */
   setDeleteCommentId: (id: string | null) => void;
   /**
    * Host may replace the stock read-only follow-up rendering with its design
@@ -211,10 +201,8 @@ export type SectionReviewProps<
   renderFormItemsEditor: (
     args: ReviewFormItemsEditorArgs<TypeNames, Params>,
   ) => ReactNode;
-  variants: Variants;
-  /** Chrome bag for reviewer-added form items (e.g. all `"followUp"`). */
-  followUpVariants: Variants;
-  tCommon: (term: "add" | "cancel" | "save" | "delete") => string;
+  /** Chrome values keyed by {@link ReviewVariantState} — library picks pending vs settled. */
+  variants: Record<ReviewVariantState, Variants>;
   /** Section ordinal for the title (1-based display when `multiSection`). */
   i: number;
 };

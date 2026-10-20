@@ -23,7 +23,7 @@ import type { NodeIndex, RecursiveEditProps, RenderFormItem, SectionProps } from
 export const SectionHOC = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Variants extends VariantsDom<TypeNames>,
+  Variants extends VariantsDom,
   SectionConfig extends SectionDom,
   Context extends ContextDom,
   Extra extends ExtraDom,

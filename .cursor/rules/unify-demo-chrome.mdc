@@ -1,0 +1,77 @@
+---
+description: Reuse demo UI widgets; do not copy the same HTML chrome between demos
+globs: **/*.ts,**/*.tsx
+alwaysApply: true
+---
+
+# Unify demo UI components
+
+Demo HTML that is the same widget must be **one component**, imported.
+Do not paste the same JSX into a second `*DemoHelper`.
+
+Demos may cross-import (see `src/README.md`). Upper-layer demos reuse
+lower-layer chrome: `formChrome = { ...sectionChrome, renderHeader, renderForm }`.
+
+```tsx
+// ❌ BAD — identical appendix in two helpers
+// sectionResponderDemoHelper.tsx
+renderAppendix: (comment) => <div style={yellow}>{comment}</div>
+// formResponderDemoHelper.tsx
+renderAppendix: (comment) => <div style={yellow}>{comment}</div>
+
+// ✅ GOOD — one chrome bag; the form shell adds only form-level slots
+export const formChrome = {
+  ...sectionChrome,
+  renderHeader,
+  renderForm,
+};
+```
+
+Same for lock icons, remark cards, `useFieldMethods`. Shared **UI**
+(`DemoPage`, `SidebarLayout`, `ConfirmBanner`, `DropdownMenu`,
+`PhaseTabs`, `PhaseJsonPanels`, `EditorDialog`, `TextField`,
+`FieldViewerChrome`, `RequiredMark`, `SelectColumns`, `FormTitle`,
+`ReviewStatusNote`, `Stack`, `Row`, `SectionFrame`, `FieldRow`, …)
+lives in `src/demo-utils/` — see `demos-are-wiring.mdc`. Package
+demos **wire** those widgets; they do not own `style={{…}}`, leftover
+`<strong>`/`<button>`, layout knobs (`gap={8}`, `align`,
+`fontSize`), or chrome copy as `children` (`"Show deleted"`). A
+control is named for what it is (`ShowDeleted`, `ReviewPending`) and
+bakes its label. Named widgets take data/callbacks only.
+If blurbs or fixtures differ, pass them as **required** props — do not
+duplicate the widget.
+
+`PhaseJsonPanels` owns JSON dumps. Do not paste a second `<pre>`.
+`SelectColumns` is one column picker (`options` and `legend` required).
+Fill and review field viewers compose `FieldViewerChrome`.
+`ReviewStatusNote` is one italic legend. `FormTitle` is the form header.
+
+`DropdownMenu` owns the popover panel (absolute, white, bordered). Hosts
+pass `trigger`, `align`, and item nodes. Do not inline a second menu
+surface in a package demo.
+
+Review follow-up is a nested Design list under the origin item —
+`FormDialogsEditor` (`sidebar={null}`) plus `followUpDraftsList`. Same
+`AddFormItem`, `FormItemEditor`, Edit, and move as Design. Do not invent a
+label-only draft list or a second item editor.
+
+Empty follow-up (no items yet) uses a **top icon** trigger for `AddFormItem`
+(same Field / Heading / Panel catalog). `+ Add item` is the list slot, shown
+only after the block has its first item.
+
+The required star is field-viewer chrome (`RequiredMark` in `src/demo-utils/`),
+not draft/list HTML. If several field viewers show it, they compose the same
+mark.
+
+Design list viewers (field + star, heading, panel) are **one bag** —
+`listViewers` in `form-item-editor/demo`. Do not paste `FieldLabel` /
+`HeadingLabel` / `PanelLabel` into a second helper. Fill/review viewers
+are **one bag** each (`fillViewers` / `reviewViewers`); they compose
+`FillFieldViewer` / `ReviewFieldViewer` plus nested heading/panel.
+Review overlay copy is `tCommon` next to `renderReviewOverlays`.
+Review fill/follow chrome bags are `reviewVariants` next to `reviewViewers`.
+
+Related: `no-html-outside-demo.mdc` (no HTML in library),
+`no-optional-defaults.mdc` (library still does not invent copy;
+demo-utils named controls bake theirs),
+`demos-are-wiring.mdc` (UI widgets live in `src/demo-utils/`).

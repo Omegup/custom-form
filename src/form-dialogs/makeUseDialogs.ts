@@ -16,6 +16,7 @@ import type {
   FlatFormItem,
   FlatFormItemEditSession,
   FlatFormItems,
+  FlatInsertSpan,
   FlatSectionEditSession,
   Indexed,
   MetaDom,
@@ -33,6 +34,7 @@ import {
   openFormItemEditSession,
   openFormItemInsertSession,
   openSectionEditSession,
+  patchFormItemEditSession,
   updateSectionInFlat,
 } from "./_deps";
 
@@ -165,7 +167,7 @@ export const makeUseDialogs =
       ) => setItemSession(openFormItemEditSession(item)),
       /**
        * New item (sidebar `NewFormItem` or any `{ header, children }`).
-       * Omit `span` for the ambiguous sidebar insert (`-1/-1` → picker);
+       * Pass `AMBIGUOUS_INSERT_SPAN` for the sidebar insert (`-1/-1` → picker);
        * slot inserts pass their concrete `{ index, sIndex }`.
        */
       openItemInsert: (
@@ -173,7 +175,7 @@ export const makeUseDialogs =
           header: SomeFormItem<TypeNames, Params>;
           children: RecursiveFormItem<TypeNames, Params, MetaDom<SIndexed>>[][];
         },
-        span?: { index: number; sIndex: number },
+        span: FlatInsertSpan,
       ) => setItemSession(openFormItemInsertSession(item, span)),
       /** Raw session setter — plug into `makeUseRenderAddItem(setItemSession)`. */
       setItemSession,
@@ -209,14 +211,7 @@ export const makeUseDialogs =
           add: itemSession.index === -1,
           setDraft: (updater) =>
             setItemSession(
-              (prev) =>
-                prev && {
-                  ...prev,
-                  draft:
-                    typeof updater === "function"
-                      ? updater(prev.draft)
-                      : updater,
-                },
+              (prev) => prev && patchFormItemEditSession(prev, updater),
             ),
           setSIndex: (sIndex) =>
             setItemSession((prev) => prev && { ...prev, sIndex }),

@@ -1,0 +1,65 @@
+---
+description: Do not add wrappers with no responsibility or reason to change
+globs: **/*.ts,**/*.tsx
+alwaysApply: true
+---
+
+# No zero-responsibility functions
+
+Do not extract a function that only aliases a callee or adds a type
+check. A function with nothing of its own to do has no reason to change
+and makes the call site harder to read.
+
+```typescript
+// ❌ BAD — typed alias of Object.fromEntries; 0 responsibility
+const recordFromPairs = (pairs: Iterable<readonly [string, V]>): Record<string, V> =>
+  Object.fromEntries(pairs) satisfies Record<string, V>;
+
+// ✅ GOOD — domain fn calls fromEntries itself
+export const formResponseValues = (doc): Record<string, Response> =>
+  Object.fromEntries(
+    doc.responses.map((r): readonly [string, Response] => [
+      r.formItemId,
+      r.response,
+    ]),
+  );
+```
+
+Keep a helper only when it owns a rule that can change (e.g.
+`keyedResponses` prefers draft over prior). Tuple annotations and
+`satisfies` belong at the real call, not in a wrapper invented to hide
+them.
+
+**Incident:** `fillViewerExtra` / `reviewViewerExtra` took a raw field bag
+and returned `branded({ …same fields… })`. Nesting `setValue`+`value` into
+`response` is not a mapping between two known types — it is an object
+literal the call site already had. The wrapper added no concision and hid
+the real constructor (`branded`).
+
+```typescript
+// ❌ BAD — typed alias of branded; args are the output fields
+export const fillViewerExtra = (args: {
+  getChild; error; setValue; value; impRef; …
+}): FillItemExtra =>
+  branded({
+    getChild: args.getChild,
+    error: args.error,
+    response: { setValue: args.setValue, value: args.value },
+    impRef: args.impRef,
+    …
+  });
+
+// ✅ GOOD — branded at the call that already owns every field
+extra: branded({
+  getChild,
+  error,
+  response: { setValue, value },
+  impRef,
+  …
+})
+```
+
+If `branded({…})` needs a type argument, pass it **at that call**. Do not
+invent a function to hide `branded` or to restitch a bag the caller built.
+
+Related: `no-unsafe-casts.mdc` (do not wrap just to avoid `as`).

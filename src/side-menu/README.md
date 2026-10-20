@@ -30,7 +30,7 @@ dropdown is the concrete-span insert. They belong in the same package.
 ```
 FormMenuItem click (Side)
   → createBlankFormItem(definition, random)
-  → openFormItemInsertSession(newItem)          index/sIndex: -1, total: 0
+  → openFormItemInsertSession(newItem, AMBIGUOUS_INSERT_SPAN)   total: 0
   → form-item-editor (+ sectionPicker when >1 section)
   → applyFlatFormItem(…)
 ```
@@ -57,7 +57,7 @@ consumer opens the section-edit dialog and saves via `updateSectionInFlat`
 | School | Here | Why |
 |---|---|---|
 | `addSection` hardcodes the `AppSection` blank header | `blankSection(id)` factory param | `SectionConfig` is generic in this repo |
-| `FormMenuItem` click payload carries `index/sIndex: -1` | payload is `NewFormItem` (header + children only) | the consumer attaches the span (`openFormItemInsertSession` default for the sidebar, concrete slot index for `AddFormItem`), so one row component serves both |
+| `FormMenuItem` click payload carries `index/sIndex: -1` | payload is `NewFormItem` (header + children only) | the consumer attaches the span (`AMBIGUOUS_INSERT_SPAN` for the sidebar, concrete slot index for `AddFormItem`), so one row component serves both |
 | `MenuItem` / `InputSearch` / theme / i18n design system | **no HTML in library** — host `render` / `renderMenuItem` (demo chrome) | host-agnostic; see `.cursor/rules/no-html-outside-demo.mdc` |
 
 ## Demo

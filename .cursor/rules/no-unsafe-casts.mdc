@@ -13,12 +13,42 @@ Forbidden (unless the user explicitly approved that exact cast):
 - `as unknown as T`
 - `as any`
 - double assertions (`x as A as B`)
-- casts whose only purpose is to silence the checker when the types are not actually related
+- `as T` / `as Record<…>` whose only purpose is to silence the checker
+  (including `Object.fromEntries(…) as Record<string, T>`)
 
-If a real type / API shape mismatch blocks you:
+`satisfies T` **checks** a value; `as T` **asserts** it. Prefer `satisfies`
+when the expression has no other `T`. If `satisfies` fails, the types are
+not related — that is a modeling bug, not a prompt to recast.
 
-1. **Stop** — do not invent a cast “just to compile”.
-2. **Show the user** the concrete types on both sides, where they meet, and why TypeScript rejects the assignment.
-3. **Wait** for the user to decide how to model it (change a parameter type, split generics, constrain `ExtraView`, etc.).
+**Do not keep a redundant `satisfies`.** An explicit type already checks:
 
-Related: prefer real/existing types over ad-hoc shapes — see `typescript-types.mdc`. Fixing the parameter type is the default move; casting around a wrong type is not.
+```typescript
+// ❌ BAD — return type / annotation already is T
+const v: T = expr satisfies T;
+const f = (): T => expr satisfies T;
+
+// ✅ GOOD — one check
+const v: T = expr;
+const f = (): T => expr;
+const v = expr satisfies T; // no other T on the binding
+```
+
+**Stuck → solicit the user. Do not invent a workaround.** If a safe typing
+is not obvious (fromEntries `any` overload, indexed access, generic
+instantiation, extra/variant bags, …):
+
+1. **Stop** — do not invent a cast, a looser parameter, or a dummy
+   generic “just to compile”.
+2. **Show the user** the concrete types on both sides, where they meet,
+   and why TypeScript rejects the assignment (or why `satisfies` fails).
+3. **Wait** for the user to decide how to model it.
+
+Related: prefer real/existing types over ad-hoc shapes — see
+`typescript-types.mdc`. Fixing the parameter type is the default move;
+casting around a wrong type is not.
+
+`Object.fromEntries` has an `Iterable<readonly any[]>` overload that
+returns `any`. Annotate each pair as a `[K, V]` tuple so the typed
+overload is chosen. If the binding/return is already `Record<K, V>`,
+that is the check — do not add `satisfies Record<K, V>` on top, and
+never `as Record`.

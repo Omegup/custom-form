@@ -5,7 +5,7 @@ import type { MetaDom } from "../_deps";
 import { getFlatInsertionIndex } from "./getFlatInsertionIndex";
 import { consolidateSections, customConsolidateSections, type SIndexed } from "./consolidate";
 import type { FlatNestedItem } from "./flat-form.t";
-import { flatten } from "./flatten";
+import { flatten, flattenSections } from "./flatten";
 
 type TypeNames = "field";
 type Params = TheParams<{ field: { name: string } }>;
@@ -184,10 +184,8 @@ describe("flatten", () => {
     ]);
   });
 
-  it("round-trips a full flat document through consolidate then per-section flatten", () => {
+  it("round-trips a full flat document through consolidate then flattenSections", () => {
     const sections = consolidateSections(EDIT_FORM_INITIAL);
-    const roundTripped = sections.flatMap((s) => flattenTree.section(s));
-
-    expect(roundTripped).toEqual(EDIT_FORM_INITIAL);
+    expect(flattenSections(sections)).toEqual(EDIT_FORM_INITIAL);
   });
 });

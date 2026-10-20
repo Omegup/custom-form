@@ -12,7 +12,8 @@ loosely-typed stand-in that requires an internal cast to be usable.
 
 If you find yourself writing `as typeof X` (or any cast) to make a narrowed
 inline type behave like the real one, that's a signal the parameter type is
-wrong. Fix the type, don't cast around it.
+wrong. Fix the type, don't cast around it. `satisfies` checks; if it fails,
+stop and ask — see `no-unsafe-casts.mdc`.
 
 ```typescript
 // ❌ BAD — inline shape with `unknown[][]` children can't actually recurse;

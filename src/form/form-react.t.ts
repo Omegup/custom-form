@@ -17,7 +17,7 @@ export type WithGetChild<Extra> = {
 
 export type Viewer<
   in Params extends ParamsDom<K>,
-  in Variants extends VariantsDom<K>,
+  in Variants extends VariantsDom,
   in K extends string,
   in Extra extends ExtraDom,
   in Context extends ContextDom,
@@ -27,7 +27,7 @@ export type Viewer<
 
 export type ViewerProps<
   out Params extends ParamsDom<K>,
-  out Variants extends VariantsDom<K>,
+  out Variants extends VariantsDom,
   out K extends string,
   out Extra extends ExtraDom,
   out Context extends ContextDom,
@@ -35,13 +35,13 @@ export type ViewerProps<
   formItem: TypedFormItem<Params, K>
   ctx: Context
   extra: Extra
-  variant: Variants[K]
+  variant: Variants
 }
 
 export type Viewers<
   in TypeNames extends string,
   in Params extends ParamsDom<TypeNames>,
-  in Variants extends VariantsDom<TypeNames>,
+  in Variants extends VariantsDom,
   in ExtraView extends ExtraDom,
   in ExtraChildren extends ExtraDom,
   in Context extends ContextDom,
@@ -58,7 +58,7 @@ export type Viewers<
 
 export type FormItemProps<
   in out Params extends ParamsDom<K>,
-  in out Variants extends VariantsDom<K>,
+  in out Variants extends VariantsDom,
   in out K extends string,
   out ExtraView extends ExtraDom,
   in ExtraChildren extends ExtraDom,
@@ -74,7 +74,7 @@ export type FormItemProps<
 export type RenderCard<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Variants extends VariantsDom<TypeNames>,
+  Variants extends VariantsDom,
   Extra extends ExtraDom,
   Context extends ContextDom,
 > = <K extends TypeNames>(

@@ -15,14 +15,15 @@ Flat markers ↔ consolidated tree, plus pure flat mutations.
 
 | File | Role |
 |---|---|
-| `flat-form.t.ts` | `FlatFormItem` (`{ item, n }`), `FlatNestedItem` union, `FlatFormItems`, `SectionDom` |
+| `flat-form.t.ts` | `FlatFormItem` (`{ item, n }`), `FlatNestedItem` union, `FlatFormItems`, `SectionDom`, `SectionHeader` |
 | `consolidate.ts` | `consolidateSections()` / `customConsolidateSections()` — flat array → `SectionWithItems[]` tree |
-| `flatten.ts` | `flatten()` / `customFlat()` — recursive item/section → flat markers |
+| `flatten.ts` | `flatten()` / `customFlat()` / `flattenSections()` — recursive item/section → flat markers; `flattenSections` is the N-section inverse of `consolidateSections` |
 | `SectionWithItems.t.ts` | Hydrated section: `{ meta, header, items[][] }` |
 | `getFlatInsertionIndex.ts` | **`getFlatInsertionIndex(sectionFlatIndex, columns, colIndex)`** — column slot → flat insertion index (used by `side-menu` add dropdowns) |
 | `buildItemSectionDict.ts` | Item id → owning section dictionary |
+| `extrasByItemId.ts` | **`extrasByItemId(sections, extra)`** — recursive walk of `section.items` / `item.children`, keyed by `header.id`. Host brands the extra. |
 | `applyFlatFormItem.ts` | **`applyFlatFormItem(items, editing, item, cols)`** — save an edited item span (`resizeColumns` + `flatten().formItem` + `toSpliced`); `editing.index === -1` inserts into section `sIndex` instead. Port of school `useDialog.tsx` `setEditFormItemX` |
-| `openFormItemEditSession.ts` | **`openFormItemEditSession(item)`** — snapshot a consolidated item into `{ draft, children, index, total, sIndex }` (`FlatFormItemEditSession`) for a single-item edit dialog. Also **`openFormItemInsertSession(newItem, span?)`** — same session shape for a *new* item (`total: 0`; default span `-1/-1` appends, slots pass a concrete index) |
+| `openFormItemEditSession.ts` | **`openFormItemEditSession(item)`** — snapshot a consolidated item into `{ draft, children, index, total, sIndex }` (`FlatFormItemEditSession`) for a single-item edit dialog. Also **`openFormItemInsertSession(newItem, span)`** — same session shape for a *new* item (`total: 0`; pass `AMBIGUOUS_INSERT_SPAN` to append, or a concrete slot `{ index, sIndex }`). **`patchFormItemEditSession(session, updater)`** — apply a draft updater and `resizeColumns` so panel `n` stays aligned with `children` during the dialog. |
 
 ### `flat-move-actions/`
 

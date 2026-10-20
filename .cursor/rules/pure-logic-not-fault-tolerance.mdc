@@ -1,0 +1,40 @@
+---
+description: Domain lookups are exact model rules, not defensive fallbacks
+globs: **/*.ts,**/*.tsx
+alwaysApply: true
+---
+
+# Pure logic, not fault tolerance
+
+The domain model **is** the contract. Lookups, identity, and writes follow
+that model exactly. They do **not** paper over mismatches, missing keys, or
+divergent write/read paths.
+
+**Incident:** `itemIdBase` / “same base” aliases existed so a live id like
+`questionA:0:1` could still find an answer stored under `questionA` or
+`questionA:0`. That is fault tolerance. There are no old answers under a
+shorter key. Missing means missing.
+
+```typescript
+// ❌ BAD — defensive: try the live id, then a stripped “family”
+bag[id] ?? bag[itemIdBase(id)]
+
+// ❌ BAD — scan for a close-enough key when the exact one is absent
+Object.keys(bag).find((k) => itemIdBase(k) === itemIdBase(id))
+
+// ✅ GOOD — the key the model already put on the item
+bag[id]
+changes[originId]
+```
+
+Do **not** add:
+
+- Fallback lookups (“if this key misses, try the parent / base / sibling”)
+- Dual keys written “in case readers still use the old shape”
+- Prefixing foreign ids so a later strip can recover parenthood
+- Helpers whose only job is to survive inconsistent keys
+
+If write and read disagree, **fix the write** (same live id both sides).
+Do not invent a tolerant reader.
+
+Related: `exact-item-ids.mdc`.

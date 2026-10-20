@@ -6,9 +6,10 @@ export type {
 export type {
   ResponderAdditionalChanges,
   ResponderExtra,
+  ResponderState,
   SectionResponderChrome,
   SectionResponderContext,
-  SectionResponderHeader,
+  SectionHeader,
   SectionValidator,
 } from "./_deps";
 export { CustomFormResponderHOC } from "./CustomFormResponder";

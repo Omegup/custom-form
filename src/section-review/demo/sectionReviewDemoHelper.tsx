@@ -1,521 +1,111 @@
-import type { CSSProperties, ReactNode } from "react";
+import {
+  withFileHeader,
+  AppendixStack,
+  CommentCard,
+  CommentComposer,
+  ConfirmPrompt,
+  FollowUpBadge,
+  ItemShell,
+  OverlayBox,
+  type PhaseTab,
+  ReviewLock,
+  ReviewStatusNote,
+  SectionFrame,
+} from "../../demo-utils";
+import { FollowUpAdd } from "./followUpAdd";
 import sectionReviewDemoSource from "./SectionReviewDemo.tsx?raw";
 import sectionReviewDemoTypesSource from "./sectionReviewDemoTypes.t.ts?raw";
 import type * as types from "./sectionReviewDemoTypes.t";
 import * as lib from "./library";
 
-export const FormContainer = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) => (
-  <div
-    style={{
-      fontFamily: "system-ui, sans-serif",
-      maxWidth: 920,
-      margin: "0 auto",
-      color: "#1a1a1a",
-    }}
-  >
-    <h2 style={{ marginTop: 0, marginBottom: 4 }}>{title}</h2>
-    {children}
-  </div>
-);
+export { SectionFrame };
+
+export const tCommon = (term: "cancel" | "save" | "delete") =>
+  ({ cancel: "Cancel", save: "Save", delete: "Delete" })[term];
 
 /** Stable reference so `lastPending === history.at(-1).date` can match by identity. */
 export const PENDING_DATE = new Date("2024-01-15T00:00:00Z");
 
-const PHASES: {
-  id: types.DemoPhase;
-  label: string;
-  blurb: string;
-}[] = [
+export const PHASES: PhaseTab<types.DemoPhase>[] = [
   {
     id: "design",
     label: "1. Design",
-    blurb: "Author builds this section — field labels and required flags only.",
+    blurb: "Same editor as form-dialogs — library, add/edit, drag-and-drop. This story reviews the first section.",
   },
   {
     id: "response",
     label: "2. Response",
-    blurb: "Student answers. No reviewer comments yet.",
+    blurb: "Student answers this section (multiple panels get + Add). No reviewer comments yet.",
   },
   {
     id: "follow",
     label: "3. Follow",
     blurb:
-      "Teacher reviews: lock/unlock comments, ask follow-ups, status highlighting.",
+      "Teacher reviews: lock/unlock comments, nested Design list under the origin (add/edit/move follow-ups), status highlighting.",
   },
 ];
 
-export const PhaseTabs = ({
-  phase,
-  onChange,
-}: {
-  phase: types.DemoPhase;
-  onChange: (phase: types.DemoPhase) => void;
-}) => {
-  const current = PHASES.find((p) => p.id === phase)!;
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <div
-        role="tablist"
-        aria-label="Lifecycle phase"
-        style={{ display: "flex", gap: 0, borderBottom: "1px solid #ddd" }}
-      >
-        {PHASES.map((p) => {
-          const active = p.id === phase;
-          return (
-            <button
-              key={p.id}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              onClick={() => onChange(p.id)}
-              style={{
-                flex: 1,
-                padding: "10px 12px",
-                border: "none",
-                borderBottom: active ? "2px solid #1a5fb4" : "2px solid transparent",
-                background: active ? "#f0f5fb" : "transparent",
-                color: active ? "#1a5fb4" : "#555",
-                fontWeight: active ? 600 : 500,
-                fontSize: 14,
-                cursor: "pointer",
-              }}
-            >
-              {p.label}
-            </button>
-          );
-        })}
-      </div>
-      <p style={{ margin: 0, fontSize: 13, color: "#555", lineHeight: 1.4 }}>
-        {current.blurb}
-      </p>
-    </div>
-  );
-};
-
-const jsonPanelStyle = (active: boolean): CSSProperties => ({
-  flex: 1,
-  minWidth: 0,
-  margin: 0,
-  padding: 10,
-  background: active ? "#eef4fb" : "#f6f7f9",
-  border: active ? "1px solid #1a5fb4" : "1px solid #e0e0e0",
-  borderRadius: 6,
-  fontSize: 11,
-  overflow: "auto",
-  maxHeight: 260,
-  lineHeight: 1.4,
-});
-
-export const PhaseJsonPanels = ({
-  phase,
-  section,
-  responses,
-  changes,
-}: {
-  phase: types.DemoPhase;
-  section: types.ListSection;
-  responses: Record<string, lib.Response>;
-  changes: lib.AdditionalChanges<types.TypeNames, types.Params>;
-}) => {
-  const panels: { id: types.DemoPhase; title: string; value: unknown }[] = [
-    { id: "design", title: "design · section", value: section },
-    { id: "response", title: "response · answers", value: responses },
-    { id: "follow", title: "follow · AdditionalChanges", value: changes },
-  ];
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      <div
-        style={{
-          fontSize: 12,
-          fontWeight: 600,
-          color: "#444",
-          letterSpacing: "0.02em",
-          textTransform: "uppercase",
-        }}
-      >
-        JSON by phase
-      </div>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-          gap: 10,
-        }}
-      >
-        {panels.map((p) => (
-          <div key={p.id} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <div
-              style={{
-                fontSize: 12,
-                fontWeight: phase === p.id ? 700 : 500,
-                color: phase === p.id ? "#1a5fb4" : "#666",
-              }}
-            >
-              {p.title}
-              {phase === p.id ? " · active" : ""}
-            </div>
-            <pre style={jsonPanelStyle(phase === p.id)}>
-              {JSON.stringify(p.value, null, 2)}
-            </pre>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const fieldRowStyle: CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 4,
-  padding: "8px 10px",
-  border: "1px solid #e5e5e5",
-  borderRadius: 4,
-  background: "#fff",
-};
-
-export const DesignView = ({ section }: { section: types.ListSection }) => (
-  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-    <div>
-      <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 600 }}>
-        {section.header.title}
-      </h3>
-      {section.header.description ? (
-        <p style={{ margin: 0, color: "#555", fontSize: 14 }}>
-          {section.header.description}
-        </p>
-      ) : null}
-      <p style={{ margin: "8px 0 0", fontSize: 12, color: "#888", fontStyle: "italic" }}>
-        Design blueprint — field labels and required flags only.
-      </p>
-    </div>
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      {section.items.flat().map(({ header: q }) => (
-        <div key={q.id} style={fieldRowStyle}>
-          <span style={{ fontSize: 14, fontWeight: 600 }}>
-            {q.params.name}
-            {q.params.required ? (
-              <span style={{ color: "#b00020", marginLeft: 4 }}>*</span>
-            ) : null}
-          </span>
-          <span style={{ fontSize: 12, color: "#888" }}>
-            id: {q.id} · type: {q.type}
-          </span>
-          <div
-            style={{
-              height: 28,
-              borderRadius: 3,
-              border: "1px dashed #ccc",
-              background: "#fafafa",
-            }}
-          />
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-export const ResponseView = ({
-  section,
-  responses,
-}: {
-  section: types.ListSection;
-  responses: Record<string, lib.Response>;
-}) => (
-  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-    <div>
-      <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 600 }}>
-        {section.header.title}
-      </h3>
-      {section.header.description ? (
-        <p style={{ margin: 0, color: "#555", fontSize: 14 }}>
-          {section.header.description}
-        </p>
-      ) : null}
-      <p style={{ margin: "8px 0 0", fontSize: 12, color: "#888", fontStyle: "italic" }}>
-        Student response — answers only; no reviewer annotations yet.
-      </p>
-    </div>
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      {section.items.flat().map(({ header: q }) => {
-        const raw = responses[q.id]?.data.value;
-        const value = typeof raw === "string" ? raw : raw != null ? String(raw) : "";
-        return (
-          <div key={q.id} style={fieldRowStyle}>
-            <span style={{ fontSize: 14, fontWeight: 600 }}>
-              {q.params.name}
-              {q.params.required ? (
-                <span style={{ color: "#b00020", marginLeft: 4 }}>*</span>
-              ) : null}
-            </span>
-            <div
-              style={{
-                padding: "6px 8px",
-                borderRadius: 3,
-                border: "1px solid #c8d4e0",
-                background: value ? "#f3f8fc" : "#fafafa",
-                fontSize: 14,
-                minHeight: 28,
-              }}
-            >
-              {value || <em style={{ color: "#999" }}>No answer</em>}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  </div>
-);
-
-const overlayBox: CSSProperties = {
-  marginTop: 16,
-  padding: 12,
-  border: "1px solid #ddd",
-  borderRadius: 6,
-  background: "#fff",
-};
-
-const actionButtonStyle: CSSProperties = {
-  border: "none",
-  background: "transparent",
-  cursor: "pointer",
-  fontSize: 14,
-  lineHeight: 1,
-};
-
-const ACTION_ICON: Record<
-  "lock" | "unlock" | "edit",
-  { glyph: string; label: string }
-> = {
-  // Remark unlocks revise — lock = no remark yet; unlock = remark present.
-  lock: { glyph: "🔒", label: "Locked — add remark to unlock" },
-  unlock: { glyph: "🔓", label: "Unlocked by remark — remove remark" },
-  edit: { glyph: "✎", label: "Edit follow-up" },
-};
-
-/** Demo HTML chrome for `SectionReviewHOC` — not part of the library. */
 export const sectionChrome: lib.SectionReviewChrome<types.TypeNames, types.Params> = {
-  renderSection: ({ deleted, title, description, i, multiSection, columns }) => (
-    <div style={{ marginBottom: 20, opacity: deleted ? 0.5 : 1 }}>
-      <div style={{ marginBottom: 12 }}>
-        <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 600 }}>
-          {multiSection ? `${i + 1}. ${title}` : title}
-        </h3>
-        {description ? (
-          <p style={{ margin: 0, color: "#555", fontSize: 14 }}>{description}</p>
-        ) : null}
-        <p style={{ margin: "8px 0 0", fontSize: 12, color: "#888", fontStyle: "italic" }}>
-          Follow / review — status border: green = commented, amber = needs attention, grey =
-          idle.
-        </p>
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        {columns.map((col, idx) => (
-          <div key={idx} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {col}
-          </div>
-        ))}
-      </div>
-    </div>
+  renderSection: (args) => (
+    <SectionFrame
+      {...args}
+      note={<ReviewStatusNote />}
+    />
   ),
   renderItemShell: ({ children, action }) => (
-    <div style={{ position: "relative", padding: "4px 28px 4px 0" }}>
-      {children}
-      {action ? <span style={{ position: "absolute", top: 0, right: 0 }}>{action}</span> : null}
-    </div>
-  ),
-  renderAppendix: (comment) => (
-    <div
-      style={{
-        marginTop: 4,
-        padding: 8,
-        background: "#fff3cd",
-        borderLeft: "4px solid #ffc107",
-        fontSize: 12,
-      }}
-    >
-      👉 {comment}
-    </div>
+    <ItemShell action={action}>{children}</ItemShell>
   ),
   renderComment: ({ text, onEdit }) => (
-    <div
-      style={{
-        marginTop: 4,
-        padding: 8,
-        background: "#e7f1ff",
-        borderLeft: "4px solid #4285f4",
-        fontSize: 13,
-        display: "flex",
-        justifyContent: "space-between",
-        gap: 8,
-      }}
-    >
-      <span>💬 {text}</span>
-      <button type="button" aria-label="Edit comment" onClick={onEdit} style={actionButtonStyle}>
-        ✎
-      </button>
-    </div>
+    <CommentCard text={text} onEdit={onEdit} />
   ),
-  renderFormItemAppendix: (nodes) => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>{nodes}</div>
+  renderFormItemAppendix: (nodes) => <AppendixStack>{nodes}</AppendixStack>,
+  renderAddFollowUp: ({ onPick }) => <FollowUpAdd onPick={onPick} />,
+  renderActionIcon: (kind, onClick) => (
+    <ReviewLock kind={kind} onClick={onClick} />
   ),
-  renderAddFollowUp: ({ originId, onPick }) => (
-    <button
-      type="button"
-      aria-label="Ask follow-up"
-      onClick={(e) => {
-        e.stopPropagation();
-        onPick({
-          formItem: {
-            id: `${originId}-followup-${Date.now()}`,
-            type: "field",
-            deleted: false,
-            params: { name: "Follow-up field", required: false },
-          },
-        });
-      }}
-      style={actionButtonStyle}
-    >
-      💬
-    </button>
-  ),
-  renderActionIcon: (kind, onClick) => {
-    const { glyph, label } = ACTION_ICON[kind];
+  renderFollowUpMark: () => <FollowUpBadge />,
+};
+
+/** Host-mounted overlay chrome — not part of `SectionReviewHOC`. */
+export const renderReviewOverlays = ({
+  addition,
+  deleteCommentId,
+  setAddition,
+  clearDelete,
+  onSubmitComment,
+  onConfirmDeleteComment,
+  tCommon,
+}: lib.ReviewOverlayArgs) => {
+  if (deleteCommentId) {
     return (
-      <button
-        type="button"
-        aria-label={label}
-        onClick={(e) => {
-          e.stopPropagation();
-          onClick();
-        }}
-        style={actionButtonStyle}
-      >
-        {glyph}
-      </button>
+      <OverlayBox>
+        <ConfirmPrompt
+          message="Remove this comment?"
+          confirmLabel={tCommon("delete")}
+          cancelLabel={tCommon("cancel")}
+          onConfirm={onConfirmDeleteComment}
+          onCancel={clearDelete}
+        />
+      </OverlayBox>
     );
-  },
-  renderOverlays: ({
-    addition,
-    deleteCommentId,
-    setAddition,
-    clearDelete,
-    onSubmitComment,
-    onConfirmDeleteComment,
-    onSubmitFormItem,
-    tCommon,
-  }) => {
-    if (deleteCommentId) {
-      return (
-        <div style={overlayBox}>
-          <p style={{ margin: "0 0 8px" }}>Remove this comment?</p>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button type="button" onClick={onConfirmDeleteComment}>
-              {tCommon("delete")}
-            </button>
-            <button type="button" onClick={clearDelete}>
-              {tCommon("cancel")}
-            </button>
-          </div>
-        </div>
-      );
-    }
+  }
 
-    if (addition?.mode === "comment") {
-      return (
-        <div style={overlayBox}>
-          <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <span>Comment</span>
-            <textarea
-              rows={3}
-              value={addition.text ?? ""}
-              onChange={(e) => setAddition({ ...addition, text: e.target.value })}
-            />
-          </label>
-          <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-            <button type="button" onClick={() => onSubmitComment(addition.text ?? "")}>
-              {tCommon("save")}
-            </button>
-            <button type="button" onClick={() => setAddition(null)}>
-              {tCommon("cancel")}
-            </button>
-          </div>
-        </div>
-      );
-    }
+  if (addition) {
+    return (
+      <OverlayBox>
+        <CommentComposer
+          value={addition.text ?? ""}
+          onChange={(text) => setAddition({ ...addition, text })}
+          onSave={() => onSubmitComment(addition.text ?? "")}
+          onCancel={() => setAddition(null)}
+          saveLabel={tCommon("save")}
+          cancelLabel={tCommon("cancel")}
+        />
+      </OverlayBox>
+    );
+  }
 
-    if (addition?.mode === "formItem") {
-      const formItem = addition.formItem;
-      return (
-        <div style={overlayBox}>
-          <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <span>Follow-up comment</span>
-            <textarea
-              rows={2}
-              value={addition.comment ?? ""}
-              onChange={(e) => setAddition({ ...addition, comment: e.target.value })}
-            />
-          </label>
-          <label style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
-            <input
-              type="checkbox"
-              checked={!!formItem}
-              onChange={(e) =>
-                setAddition({
-                  ...addition,
-                  formItem: e.target.checked
-                    ? {
-                        id: `${addition.originId}-followup-${addition.replace?.index ?? Date.now()}`,
-                        type: "field",
-                        deleted: false,
-                        params: { name: "Follow-up field", required: false },
-                      }
-                    : undefined,
-                })
-              }
-            />
-            Attach a follow-up field
-          </label>
-          {formItem ? (
-            <label style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 8 }}>
-              <span>Field label</span>
-              <input
-                value={formItem.params.name}
-                onChange={(e) =>
-                  setAddition({
-                    ...addition,
-                    formItem: {
-                      ...formItem,
-                      params: { ...formItem.params, name: e.target.value },
-                    },
-                  })
-                }
-              />
-            </label>
-          ) : null}
-          <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-            <button
-              type="button"
-              onClick={() => onSubmitFormItem({ comment: addition.comment, formItem })}
-            >
-              {tCommon("save")}
-            </button>
-            <button type="button" onClick={() => setAddition(null)}>
-              {tCommon("cancel")}
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    return null;
-  },
+  return null;
 };
 
 const field = (id: string, name: string, required: boolean): types.ListItem => ({
@@ -546,6 +136,8 @@ export const INITIAL_SECTION: types.ListSection = {
   ],
 };
 
+export const INITIAL_FLAT = lib.flattenSections([INITIAL_SECTION]);
+
 export const INITIAL_RESPONSES: Record<string, lib.Response> = {
   name: { meta: {}, data: { value: "Ada Lovelace" } },
   email: { meta: {}, data: { value: "ada@analytical.engine" } },
@@ -570,14 +162,13 @@ export const INITIAL_CHANGES: lib.AdditionalChanges<types.TypeNames, types.Param
           deleted: false,
           params: { name: "Topic", required: false },
         }),
+        children: null,
         date: PENDING_DATE,
       },
     ],
   },
 };
 
-const withFileHeader = (path: string, source: string) =>
-  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const SECTION_REVIEW_DEMO_SOURCE = [
   withFileHeader(

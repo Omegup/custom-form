@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { DemoPage, PlainInput } from "../../demo-utils";
 import * as demo from "./formDemoHelper";
 import * as types from "./formDemoTypes.t";
 import { branded, createFormItemByGetChildPlain } from "./library";
@@ -12,7 +13,7 @@ const viewers: types.Viewers = {
       return (
         <demo.Label variant={variant} border={ctx.accent}>
           {showLabel ? demo.applyTemplate(label, template, id) : null}
-          <input value={value} onChange={(e) => onChange(e.target.value)} />
+          <PlainInput value={value} onChange={onChange} disabled={false} />
         </demo.Label>
       );
     },
@@ -53,7 +54,7 @@ export const FormDemo = () => {
         viewProps={{
           formItem: { ...item, id },
           ctx,
-          variant: variants[item.type],
+          variant: variants,
           extra: branded({
             value: values[id] ?? "",
             onChange: (value) => onValueChange(id, value),
@@ -71,10 +72,10 @@ export const FormDemo = () => {
   };
 
   return (
-    <demo.FormContainer>
+    <DemoPage title="Form">
       {items.map((item) => (
         <div key={item.id}>{renderItem(item, "")}</div>
       ))}
-    </demo.FormContainer>
+    </DemoPage>
   );
 };

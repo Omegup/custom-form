@@ -1,16 +1,21 @@
 import type { ReactNode } from "react";
-import { FieldRow, FormContainer, MoveBar } from "../../form-edit/demo/editFormDemoHelper";
+import { withFileHeader, FieldLabel, PanelLabel } from "../../demo-utils";
+import {
+  FormContainer,
+  SectionColumn,
+  SectionPanel,
+  SectionsList,
+  renderListCard,
+} from "../../form-edit/demo/editFormDemoHelper";
 import sectionViewDemoSource from "./SectionViewDemo.tsx?raw";
 import sectionViewDemoTypesSource from "./sectionViewDemoTypes.t.ts?raw";
 import * as types from "./sectionViewDemoTypes.t";
 import * as lib from "./library";
 
-export { FormContainer };
+export { FormContainer, SectionsList };
 
 // ── Storybook docs (`?raw` of types + integration) ────────────────────────────
 
-const withFileHeader = (path: string, source: string) =>
-  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const SECTION_VIEW_DEMO_SOURCE = [
   withFileHeader("sectionViewDemoTypes.t.ts", sectionViewDemoTypesSource),
@@ -29,7 +34,7 @@ export const MENU_ITEMS: lib.MenuItemDefinition<types.TypeNames, types.Params>[]
 
 type CardExtra = types.ItemExtra & lib.EditExtra & lib.Children;
 
-// ── Viewers — labels/inputs only; nested columns are placed by `renderCard` ──
+// ── Viewers — labels only; nested columns are placed by `renderCard` ──
 
 export const viewers: lib.Viewers<
   types.TypeNames,
@@ -41,48 +46,18 @@ export const viewers: lib.Viewers<
   string
 > = {
   field: {
-    viewer: ({ props: { extra } }) => (
-      <input
-        value={extra.value}
-        onChange={(e) => extra.onChange(e.target.value)}
-        style={{ padding: "4px 6px", border: "1px solid #ccc", borderRadius: 4 }}
-      />
+    viewer: ({ props: { formItem } }) => (
+      <FieldLabel name={formItem.params.name} />
     ),
   },
   panel: {
-    viewer: ({ props: { extra } }) => (
-      <input
-        value={extra.value}
-        onChange={(e) => extra.onChange(e.target.value)}
-        style={{
-          padding: "4px 6px",
-          border: "1px solid #ccc",
-          borderRadius: 4,
-          fontWeight: 600,
-        }}
-      />
+    viewer: ({ props: { formItem } }) => (
+      <PanelLabel name={formItem.params.name} />
     ),
     /** One slot — `ColumnsEdit` already built the full column flex into `getChild`. */
     repeatChildren: () => [""],
   },
 };
-
-const NestedSlot = ({ children }: { children: ReactNode }) => (
-  <div
-    style={{
-      display: "flex",
-      flexDirection: "row",
-      gap: 6,
-      marginLeft: 12,
-      marginTop: 4,
-      paddingLeft: 8,
-      borderLeft: "2px solid #b8d4f0",
-      minWidth: 0,
-    }}
-  >
-    {children}
-  </div>
-);
 
 // ── Item chrome (`renderCard` — school `HandledCard`) ─────────────────────────
 
@@ -95,93 +70,42 @@ export const renderCard = (
     CardExtra,
     types.Ctx
   >,
-) => (
-  <div>
-    <FieldRow
-      name={view}
-      focused={null}
-      actions={viewProps.extra.actions}
-      extra={[]}
-      parentDeleted={viewProps.extra.parentDeleted}
-    />
-    {viewProps.extra.children.length > 0 && (
-      <NestedSlot>{viewProps.extra.children}</NestedSlot>
-    )}
-  </div>
-);
+) => {
+  const { extra, ctx, formItem } = viewProps;
+  return renderListCard(view, {
+    focused: ctx.autoFocused(formItem.id),
+    actions: extra.actions,
+    parentDeleted: extra.parentDeleted,
+    nested: extra.children.length > 0 ? extra.children : null,
+    extra: [],
+  });
+};
 
-// ── ColumnsEdit chrome (demo HTML — not part of the library) ─────────────────
+// ── ColumnsEdit chrome — same `SectionPanel` / `SectionColumn` as form-edit.
+// Does not read autofocus; that stays with the caller that owns `ctx`.
 
 export const columnsChrome: lib.ColumnsEditChrome = {
-  renderMoveActions: (actions) => <MoveBar actions={actions} extra={[]} />,
-  renderColumn: ({ children }) => (
-    <div
-      style={{
-        flex: 1,
-        display: "flex",
-        flexDirection: "column",
-        gap: 6,
-        minWidth: 0,
-      }}
-    >
-      {children}
-    </div>
-  ),
-  renderSection: ({ deleted, title, actions, body }) => (
-    <section
-      style={{
-        opacity: deleted ? 0.6 : 1,
-        border: "1px solid #ddd",
-        borderRadius: 6,
-        padding: 12,
-        marginBottom: 12,
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 8,
-        }}
-      >
-        <div>{title}</div>
-        {columnsChrome.renderMoveActions(actions)}
-      </div>
-      <div style={{ display: "flex", gap: 12, marginTop: 8 }}>{body}</div>
-    </section>
+  renderColumn: ({ children }) => <SectionColumn>{children}</SectionColumn>,
+  renderSection: ({ title, actions, columns }) => (
+    <SectionPanel
+      title={title}
+      focused={null}
+      sectionActions={actions}
+      sectionExtra={[]}
+      headerExtra={null}
+      columns={columns}
+    />
   ),
 };
 
-// ── Per-item extra: live name binding + move actions, keyed by id ─────────────
-
-export const buildItemExtraMap = (
-  sections: lib.SectionWithItems<
-    types.TypeNames,
-    types.Params,
-    types.Section,
-    lib.SectionMetaDom<lib.Indexed>,
-    types.ItemMeta
-  >[],
-  itemActions: (item: types.ListItem) => lib.MoveActions,
-  onChange: (id: string, value: string) => void,
-): Map<string, types.ItemExtra> => {
-  const map = new Map<string, types.ItemExtra>();
-  const walk = (columns: types.ListItem[][]) => {
-    for (const column of columns) {
-      for (const item of column) {
-        map.set(
-          item.header.id,
-          lib.branded<types.ItemExtra, "viewer-extra">({
-            value: item.header.params.name,
-            onChange: (value) => onChange(item.header.id, value),
-            actions: itemActions(item),
-          }),
-        );
-        walk(item.children);
-      }
-    }
-  };
-  for (const section of sections) walk(section.items);
-  return map;
-};
+export const emptyItemExtra = (): types.ItemExtra =>
+  lib.branded<types.ItemExtra, "viewer-extra">({
+    actions: {
+      up: null,
+      down: null,
+      clone: null,
+      remove: null,
+      restore: null,
+      isDeleted: false,
+    },
+  });

@@ -47,6 +47,8 @@ const withItemName = <
 ## Also forbidden
 
 - `Record<TypeNames, …>` / `if (type === "field")` helpers outside viewers/editors
+- `"required" in item.params` (or any `in` on params) — that is a type sniff;
+  the field **viewer** owns the star — see `viewer-owns-required-star.mdc`
 - “Utility” maps that list every type just to do a shared-field update
 - Casting around a union spread instead of fixing the generic
 

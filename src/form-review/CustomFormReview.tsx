@@ -14,7 +14,7 @@ import type {
   ReviewExtra,
   SectionMetaDom,
   SectionReviewContext,
-  SectionReviewHeader,
+  SectionHeader,
   StrictViewerMethods,
   VariantsDom,
   ViewerMethods,
@@ -29,9 +29,9 @@ type HostExtra = ReviewExtra & { impRef: Ref<StrictViewerMethods> };
 export const CustomFormReviewHOC = <
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Variants extends VariantsDom<TypeNames>,
+  Variants extends VariantsDom,
   Context extends SectionReviewContext,
-  SectionConfig extends SectionReviewHeader,
+  SectionConfig extends SectionHeader,
 >(
   viewers: Viewers<
     TypeNames,
@@ -42,8 +42,6 @@ export const CustomFormReviewHOC = <
     Context,
     string
   >,
-  variants: Variants,
-  followUpVariants: Variants,
   chrome: FormReviewChrome<TypeNames, Params>,
 ) => {
   const { renderHeader, renderForm, ...sectionChrome } = chrome;
@@ -59,6 +57,7 @@ export const CustomFormReviewHOC = <
     props: CustomFormReviewProps<
       TypeNames,
       Params,
+      Variants,
       Context,
       SectionConfig,
       SectionMeta,
@@ -72,12 +71,10 @@ export const CustomFormReviewHOC = <
       lastPending,
       changes,
       setChanges,
-      addition,
       setAddition,
-      deleteCommentId,
       setDeleteCommentId,
       renderFormItemsEditor,
-      tCommon,
+      variants,
       showDeleted,
       ctx,
       children,
@@ -101,14 +98,10 @@ export const CustomFormReviewHOC = <
                   lastPending={lastPending}
                   changes={changes}
                   setChanges={setChanges}
-                  addition={addition}
                   setAddition={setAddition}
-                  deleteCommentId={deleteCommentId}
                   setDeleteCommentId={setDeleteCommentId}
                   renderFormItemsEditor={renderFormItemsEditor}
                   variants={variants}
-                  followUpVariants={followUpVariants}
-                  tCommon={tCommon}
                   i={i}
                 />
               ),

@@ -20,3 +20,4 @@ export type FlatFormItems<
 > = FlatNestedItem<TypeNames, Params, SectionConfig>[];
 
 export type SectionDom = { id: string; deleted: boolean };
+export type SectionHeader = SectionDom & { title: string; description: string };

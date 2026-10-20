@@ -1,8 +1,7 @@
 # form-dialogs
 
 **Dialog orchestrator** — owns the item / section edit sessions and their
-commit wiring, and renders the dialogs through host callbacks. The composed
-"All-in" Storybook story lives here.
+commit wiring, and renders the dialogs through host callbacks.
 
 Migrated from `school/components/custom-form` → `react-packages/form-edit-react`
 (`makeUseDialogs` in `useDialog.tsx`); the pure mutations were already extracted
@@ -17,13 +16,14 @@ package is only the React state + save glue on top of them.
 | File | Role |
 |---|---|
 | `makeUseDialogs.ts` | **`makeUseDialogs({ renderFormItem, renderSection })`** → `useDialogs({ flatItems, setFlatItems, ctx })` — sessions, open helpers, commits, dialog nodes |
+| `useFlatListSession.ts` | Autofocus ctx + consolidate + move actions + pending-remove (no HTML) |
 
 The hook returns:
 
 | Key | Role |
 |---|---|
 | `openItemEdit(item)` | Row "Edit" — `openFormItemEditSession` |
-| `openItemInsert(item, span?)` | Sidebar insert (no span → `-1/-1`) or slot insert (concrete span) — `openFormItemInsertSession` |
+| `openItemInsert(item, span)` | Sidebar insert (`AMBIGUOUS_INSERT_SPAN`) or slot insert (concrete span) — `openFormItemInsertSession` |
 | `setItemSession` | Raw setter — plug into `makeUseRenderAddItem(setItemSession)` (side-menu) |
 | `openSectionEdit(section)` | Section header "Edit" — `openSectionEditSession` |
 | `openSectionAdd(newSection)` | "+ Add section" — accepts `useSide.addSection`'s `NewSection` shape (`index: -1`) |
@@ -33,7 +33,8 @@ The hook returns:
 Commit paths (identical to what each module demo used to hand-wire):
 
 ```
-item:    commit(next)          → applyFlatFormItem(flatItems, session, { header: next.item, children: session.children }, next.n) → setFlatItems → close
+item:    setDraft(updater)     → patchFormItemEditSession (draft + resizeColumns)
+         commit(next)          → applyFlatFormItem(flatItems, session, { header: next.item, children: session.children }, next.n) → setFlatItems → close
 section: commit(header, cols)  → updateSectionInFlat(flatItems, session, header, cols)                                            → setFlatItems → close
 ```
 
@@ -49,31 +50,23 @@ section: commit(header, cols)  → updateSectionInFlat(flatItems, session, heade
 
 ## Demo
 
-`form-dialogs/All-in` story (`demo/AllInEditor.tsx`) — **Design → Fill → Update**
-as **views** over school’s **two documents**:
+`form-dialogs/Form dialogs` (`demo/FormDialogsDemo.tsx`) — **`makeUseDialogs`**
+plus **`useFlatListSession`** on the design list. `FormDialogsEditor` is the
+same stack without the page title, reused by Design tabs on later stories.
+`SideMenuDemo` remounts that editor with `designSidebar`.
 
-| Document | Story args | Role |
-|---|---|---|
-| **CustomForm** | `flatItems` | Design (sections / items) |
-| **FormResponse** | `formResponse` | Answers + `changes` + `feedbackHistory` + `status` — null until Send |
+Side, `SectionFormItemHOC`, `WebRecursiveEdit`, `FormItemEditor`, and
+`SectionDialog` were taught in earlier stories; this one only plugs them into
+`useDialogs`.
 
-1. **Design** — edit the CustomForm via **`SectionFormItemHOC`** + DnD + Library
-   + `useDialogs`.
-2. **Fill** — **`CustomFormResponderHOC`**; **Send** creates/updates
-   `formResponse` (school `addFormResponse`). Draft answers live in `responses`
-   until Send. A prior FormResponse becomes `old` for revise.
-3. **Update** — teacher view of the **same** `formResponse` via
-   **`CustomFormReviewHOC`**: Save (`addAdditionalQuestions`), Request changes /
-   Approve / Reject (`addFeedback`). Not a third document.
+Read [`demo/FormDialogsDemo.tsx`](./demo/FormDialogsDemo.tsx) and
+[`demo/formDialogsDemoTypes.t.ts`](./demo/formDialogsDemoTypes.t.ts).
 
-JSON panels show CustomForm vs FormResponse (plus fill draft).
-
-Editors, dialog chrome, and fixtures are reused from the `form-item-editor`,
-`section-edit`, and `side-menu` demos (Storybook-only composition).
+Fill / Send / FormResponse live in [`form-response/`](../form-response/README.md).
 
 ## Dependency rule
 
-Imports from: `form`, `recursive-form`, `form-edit`, `section-edit` (via `_deps`).
+Imports from: `form`, `recursive-form`, `form-edit`, `section-edit`, `move-actions` (via `_deps`).
 
 Does **not** import: `form-item-editor`, `side-menu`, `section-view`, `flat-dnd`.
 The demo composes those packages for Storybook only (`section-view` for the

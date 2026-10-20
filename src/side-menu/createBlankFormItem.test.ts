@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { openFormItemInsertSession } from "../form-edit";
+import { AMBIGUOUS_INSERT_SPAN, openFormItemInsertSession } from "../form-edit";
 import type { TheParams } from "./_deps";
 import { createBlankFormItem } from "./createBlankFormItem";
 import type { MenuItemDefinition } from "./MenuItemDefinition.t";
@@ -42,9 +42,10 @@ describe("createBlankFormItem", () => {
     expect(children[0]).not.toBe(children[1]);
   });
 
-  it("feeds openFormItemInsertSession with the sidebar default span", () => {
+  it("feeds openFormItemInsertSession with AMBIGUOUS_INSERT_SPAN", () => {
     const session = openFormItemInsertSession(
       createBlankFormItem(fieldDef, random),
+      AMBIGUOUS_INSERT_SPAN,
     );
     expect(session).toEqual({
       draft: {

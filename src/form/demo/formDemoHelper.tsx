@@ -1,5 +1,6 @@
 import { useMemo, type ReactNode } from "react";
 import { useArgs } from "storybook/preview-api";
+import { withFileHeader, AccentField, FieldsetGroup, MutedWell } from "../../demo-utils";
 import { branded } from "../branded";
 import formDemoSource from "./FormDemo.tsx?raw";
 import type {
@@ -16,10 +17,7 @@ export type { StoryArgs } from "./formDemoTypes.t";
 // ── Fixture ───────────────────────────────────────────────────────────────────
 
 export const DEFAULT_FORM_DEMO: Data = {
-  variants: {
-    text: "default",
-    group: "bordered",
-  },
+  variants: branded({ padding: 8, showBorder: true }),
   values: {
     t: "Alice",
     g: "1,2",
@@ -84,8 +82,6 @@ export const DEFAULT_FORM_DEMO: Data = {
 
 // ── Storybook docs (`?raw` of types + integration) ────────────────────────────
 
-const withFileHeader = (path: string, source: string) =>
-  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const FORM_DEMO_SOURCE = [
   withFileHeader("formDemoTypes.t.ts", formDemoTypesSource),
@@ -101,8 +97,21 @@ export const storyArgsToDemoProps = ({
   ...rest
 }: StoryArgs): Omit<Props, "onValueChange"> => ({
   ...rest,
-  variants: { text: textVariant, group: groupVariant },
+  variants: branded({
+    ...TEXT_VARIANT[textVariant],
+    ...GROUP_VARIANT[groupVariant],
+  }),
 });
+
+const TEXT_VARIANT = {
+  default: { padding: 8 },
+  compact: { padding: 4 },
+} as const satisfies Record<"default" | "compact", { padding: number }>;
+
+const GROUP_VARIANT = {
+  default: { showBorder: false },
+  bordered: { showBorder: true },
+} as const satisfies Record<"default" | "bordered", { showBorder: boolean }>;
 
 // ── Demo helpers (typing lives here, not in FormDemo.tsx) ─────────────────────
 
@@ -119,25 +128,16 @@ export const Label = ({
   border,
   children: [label, ...children],
 }: {
-  variant: Variants["text"];
+  variant: Variants;
   border: Context["accent"];
   children: ReactNode[];
 }) =>
   label === null ? (
     children
   ) : (
-    <label
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 4,
-        padding: variant === "compact" ? 4 : 8,
-        borderLeft: `3px solid ${border}`,
-      }}
-    >
-      <span style={{ fontSize: 12, opacity: 0.7 }}>{label}</span>
+    <AccentField padding={variant.padding} border={border} label={label}>
       {children}
-    </label>
+    </AccentField>
   );
 
 export const Group = ({
@@ -146,23 +146,18 @@ export const Group = ({
   title,
   children,
 }: {
-  variant: Variants["group"];
+  variant: Variants;
   border: Context["accent"];
   title: string;
   children: ReactNode;
 }) => (
-  <fieldset
-    style={{
-      border: variant === "bordered" ? `1px solid ${border}` : "none",
-      borderRadius: 4,
-      padding: 8,
-    }}
+  <FieldsetGroup
+    title={title}
+    border={border}
+    showBorder={variant.showBorder}
   >
-    <legend>{title}</legend>
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      {children}
-    </div>
-  </fieldset>
+    {children}
+  </FieldsetGroup>
 );
 
 export const useStoryArgs = () => {
@@ -170,23 +165,16 @@ export const useStoryArgs = () => {
     useArgs<StoryArgs>();
   const ctx = useMemo((): Context => branded({ accent }), [accent]);
   const variants = useMemo(
-    (): Variants => branded({ text: textVariant, group: groupVariant }),
+    (): Variants =>
+      branded({
+        ...TEXT_VARIANT[textVariant],
+        ...GROUP_VARIANT[groupVariant],
+      }),
     [textVariant, groupVariant],
   );
   return { ctx, variants, values, items, updateArgs };
 };
 
 export const Card = ({ children }: { children: ReactNode }) => (
-  <div style={{ background: "#f5f5f5", borderRadius: 4 }}>{children}</div>
-);
-
-export const FormContainer = ({ children }: { children: ReactNode }) => (
-  <div
-    style={{ display: "flex", flexDirection: "column", gap: 16, padding: 16 }}
-  >
-    <h2 style={{ margin: 0 }}>Form</h2>
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-      {children}
-    </div>
-  </div>
+  <MutedWell>{children}</MutedWell>
 );

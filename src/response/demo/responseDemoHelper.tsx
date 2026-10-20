@@ -1,21 +1,9 @@
-import { useImperativeHandle, type ReactNode } from "react";
+import { useImperativeHandle } from "react";
+import { withFileHeader } from "../../demo-utils";
 import responseDemoSource from "./ResponseDemo.tsx?raw";
 import responseDemoTypesSource from "./responseDemoTypes.t.ts?raw";
 import type * as types from "./responseDemoTypes.t";
 import * as lib from "./library";
-
-export const FormContainer = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) => (
-  <div style={{ fontFamily: "system-ui, sans-serif", maxWidth: 520, margin: "0 auto" }}>
-    <h2 style={{ marginTop: 0 }}>{title}</h2>
-    {children}
-  </div>
-);
 
 export const INITIAL_ITEMS: types.Item[] = [
   lib.branded({
@@ -34,8 +22,6 @@ export const INITIAL_ITEMS: types.Item[] = [
 
 export const INITIAL_RESPONSES: Record<string, lib.Response> = {};
 
-const withFileHeader = (path: string, source: string) =>
-  `// ── ${path} ──\n${source.trimEnd()}`;
 
 export const RESPONSE_DEMO_SOURCE = [
   withFileHeader("response/demo/responseDemoTypes.t.ts", responseDemoTypesSource),

@@ -3,7 +3,7 @@
  * (open/close + insert session). Host owns toggle/menu chrome via `render`.
  */
 import { useState, type ReactNode } from "react";
-import type { FlatFormItemEditSession, ParamsDom } from "./_deps";
+import type { FlatFormItemEditSession, FlatInsertSpan, ParamsDom } from "./_deps";
 import { openFormItemInsertSession } from "./_deps";
 import { createBlankFormItem } from "./createBlankFormItem";
 import type { MenuItemDefinition } from "./MenuItemDefinition.t";
@@ -26,7 +26,7 @@ export type AddFormItemSlotArgs<
   Params extends ParamsDom<TypeNames>,
 > = {
   /** Slot span: concrete flat `index` (see `getFlatInsertionIndex`) + section ordinal. */
-  span: { index: number; sIndex: number };
+  span: FlatInsertSpan;
   menuItems: MenuItemDefinition<TypeNames, Params>[];
   random: () => string;
   setAddItem: (session: FlatFormItemEditSession<TypeNames, Params>) => void;

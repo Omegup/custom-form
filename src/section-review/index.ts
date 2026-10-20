@@ -2,15 +2,46 @@ export type {
   Addition,
   AdditionalChanges,
   CommentAddition,
-  FormItemAddition,
   ReviewExtra,
+  ReviewFollowUpPick,
   ReviewFormItemEntry,
   ReviewFormItemsEditorArgs,
+  ReviewOverlayActions,
   ReviewOverlayArgs,
   ReviewStatus,
+  ReviewVariantState,
   SectionReviewChrome,
   SectionReviewContext,
-  SectionReviewHeader,
+  SectionHeader,
   SectionReviewProps,
 } from "./types";
 export { SectionReviewHOC } from "./SectionReview";
+export {
+  followUpEntriesToFlat,
+  followUpDraftsList,
+  syncFollowUpEntriesFromFlat,
+} from "./followUpEntriesFlat";
+export {
+  followUpPickFromSession,
+  useFollowUpAdd,
+} from "./useFollowUpAdd";
+export {
+  followUpEntryAsItem,
+  partitionFollowUpEntries,
+} from "./followUpPartition";
+export {
+  withComment,
+  withFormItemEntry,
+  withoutComment,
+  withUnansweredFormItems,
+} from "./reviewChanges";
+export { reviewOverlayActions } from "./reviewOverlayActions";
+export {
+  hasUnansweredFollowUps,
+  hasUnlockRemark,
+  isAnsweredResponse,
+  reviewItemState,
+  reviewStatusFor,
+  reviewVariantState,
+} from "./reviewStatus";
+

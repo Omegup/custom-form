@@ -73,7 +73,7 @@ export type RecursiveEditProps<
 export type SectionProps<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Variants extends VariantsDom<TypeNames>,
+  Variants extends VariantsDom,
   SectionConfig extends SectionDom,
   Context extends ContextDom,
   Extra extends ExtraDom,
@@ -114,7 +114,7 @@ export type SectionProps<
 export type RenderFormItem<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
-  Variants extends VariantsDom<TypeNames>,
+  Variants extends VariantsDom,
   SectionConfig extends SectionDom,
   Context extends ContextDom,
   Extra extends ExtraDom,

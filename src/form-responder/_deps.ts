@@ -3,6 +3,8 @@ export type {
   Children,
   ContextDom,
   ExtraDom,
+  FormHeader,
+  FormLayoutChrome,
   ParamsDom,
   TypedFormItem,
   VariantsDom,
@@ -11,6 +13,7 @@ export type {
 export { branded } from "../form";
 export type { MetaDom, RecursiveFormItem } from "../recursive-form";
 export type {
+  SectionHeader,
   SectionMetaDom,
   SectionWithItems,
 } from "../form-edit";
@@ -22,10 +25,9 @@ export type {
 export type {
   ResponderAdditionalChanges,
   ResponderExtra,
+  ResponderState,
   SectionResponderChrome,
   SectionResponderContext,
-  SectionResponderHeader,
-  SectionResponderProps,
   SectionValidator,
 } from "../section-responder";
 export { SectionResponderHOC } from "../section-responder";

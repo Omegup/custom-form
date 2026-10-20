@@ -1,0 +1,46 @@
+---
+description: Never leave chrome or render-prop slots the library does not call
+globs: **/*.ts,**/*.tsx
+alwaysApply: true
+---
+
+# No dead chrome
+
+**Incident:** `SectionReviewChrome.renderAppendix` (demo 👉 yellow box)
+stayed on the review chrome bag after the only call site — unanswered
+**fallback** shells — was removed. Hosts still had to implement a slot
+the library never invoked. It was **not** the review remark UI
+(`renderComment` is). Same class of leftover: `renderActionIcon("edit")`,
+`tCommon("add")`, overlay `FormItemAddition` / `onSubmitFormItem`
+(follow-ups commit via `renderAddFollowUp` / `renderFormItemsEditor`).
+
+A chrome / render-prop / overlay-arg / union member exists **only** if
+library code calls it. Not “mirrors fill”, not “host might want it”,
+not “fallback just in case”.
+
+When you delete a call site, **in the same change** delete:
+
+1. the field (or union member) on the library type
+2. every host/demo implementation of that slot
+3. args that existed only to feed that slot
+
+```typescript
+// ❌ BAD — type requires a slot the walk never calls
+type Chrome = { renderAppendix: (comment: string) => ReactNode; … };
+
+// ✅ GOOD — every key has a library call; deleting the call deletes the key
+```
+
+Identity host wrappers (`({ items }) => items`) are fine **when the
+library still calls them** and the slot still composes something the
+host may style (follow-up group, appendix). A wrapper whose only job
+was a deleted gesture (`onActivate` / click-to-copy) is dead — delete
+the slot, not just the callback. Host `<div>{children}</div>` is the
+tell.
+
+Unused args a host ignores (`setEntries`) are not dead chrome; an
+entire unused function on the bag is.
+
+Do **not** keep a second UI for a path the host already owns.
+
+Related: `simplify-then-split.mdc`, `no-optional-defaults.mdc`.

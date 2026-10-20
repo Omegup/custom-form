@@ -8,10 +8,7 @@ export type Params = lib.TheParams<{
   panel: { name: string };
 }>;
 
-export type Variants = lib.TheVariants<{
-  field: "default";
-  panel: "default";
-}>;
+export type Variants = lib.TheVariants<Record<string, never>>;
 
 export type Section = {
   id: string;
@@ -34,10 +31,8 @@ export type FlatItems = lib.FlatFormItems<TypeNames, Params, Section>;
 
 export type ListItem = lib.RecursiveFormItem<TypeNames, Params, ItemMeta>;
 
-/** Looked up per item id — live name binding + move actions for the row's `renderCard`. */
+/** Looked up per item id — move actions for the row's `renderCard`. */
 export type ItemExtra = lib.ExtraDom & {
-  value: string;
-  onChange: (value: string) => void;
   actions: lib.MoveActions;
 };
 

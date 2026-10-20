@@ -52,23 +52,27 @@ export const SectionDialog = ({
       title={title ?? <>Edit section · {draft.header.title}</>}
       onCancel={onCancel}
       onSave={save}
+      saveError={null}
     >
       <demo.TextField
         label="Title"
         value={form.title}
         error={errors.title ?? null}
+        multiline={false}
         onChange={(title) => setForm((f) => ({ ...f, title }))}
       />
       <demo.TextField
         label="Description"
-        multiline
+        multiline={true}
         value={form.description}
         error={errors.description ?? null}
         onChange={(description) => setForm((f) => ({ ...f, description }))}
       />
-      <demo.SelectSectionColumns
+      <demo.SelectColumns
         cols={form.cols}
         onChange={(cols) => setForm((f) => ({ ...f, cols }))}
+        options={demo.SECTION_COL_OPTIONS}
+        legend="Columns"
       />
     </demo.EditorDialog>
   );

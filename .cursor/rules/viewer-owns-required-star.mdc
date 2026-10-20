@@ -1,0 +1,48 @@
+---
+description: Required star is viewer chrome; shared viewer helpers are OK
+globs: **/*.ts,**/*.tsx
+alwaysApply: true
+---
+
+# Viewer owns the required star
+
+Showing `*` for `params.required` is the **field viewer’s** job. List chrome,
+draft rows, and orchestrators do not probe `required` or paint the mark.
+
+If several field viewers share the same mark, **factor it as viewer chrome**
+(`RequiredMark` in `src/demo-utils/`). The viewer still composes it.
+Heading/panel viewers do not.
+
+```tsx
+// ❌ BAD — draft/list chrome sniffs a field-only key
+const required = "required" in item.params && item.params.required === true;
+
+// ✅ GOOD — the field viewer shows the star
+field: {
+  viewer: ({ props: { formItem } }) => (
+    <>
+      {formItem.params.name}
+      {formItem.params.required ? " *" : ""}
+    </>
+  ),
+}
+
+// ✅ ALSO GOOD — shared mark chrome, still composed by the field viewer
+field: {
+  viewer: ({ props: { formItem } }) => (
+    <>
+      <FieldLabel name={formItem.params.name} />
+      <RequiredMark required={formItem.params.required} />
+    </>
+  ),
+}
+```
+
+That field/heading/panel bag is **one** `listViewers` import. Do not
+paste it into a second demo helper (`unify-demo-chrome.mdc`).
+
+`wrapWithRequired` is the **editor** toggle, not the star. Unanswered follow-up
+rows go through Design’s list viewers (`FormDialogsEditor` `sidebar={null}`) so each
+field viewer can show its own star.
+
+Related: `no-per-type-extension.mdc`, `unify-demo-chrome.mdc`.

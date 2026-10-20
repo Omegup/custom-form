@@ -1,9 +1,10 @@
 export type {
   ResponderAdditionalChanges,
   ResponderExtra,
+  ResponderState,
   SectionResponderChrome,
   SectionResponderContext,
-  SectionResponderHeader,
+  SectionHeader,
   SectionResponderProps,
   SectionValidator,
 } from "./types";

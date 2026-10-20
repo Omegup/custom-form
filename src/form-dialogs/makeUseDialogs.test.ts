@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { ContextDom, TheParams } from "./_deps";
-import { branded, consolidateSections } from "./_deps";
+import { branded, consolidateSections, AMBIGUOUS_INSERT_SPAN } from "./_deps";
 import type { FlatFormItems, FlatNestedItem } from "../form-edit";
 import type { ItemDialogArgs, SectionDialogArgs } from "./makeUseDialogs";
 import { makeUseDialogs } from "./makeUseDialogs";
@@ -113,7 +113,7 @@ describe("makeUseDialogs", () => {
       expect(result.current.formItemDialog).toBeNull();
     });
 
-    it("openItemInsert without span: add is true (section picker case); commit appends to the first live section", () => {
+    it("openItemInsert with AMBIGUOUS_INSERT_SPAN: add is true (section picker case); commit appends to the first live section", () => {
       const items = flat(
         section("s1", "Main"),
         field("f1", "Name"),
@@ -123,10 +123,13 @@ describe("makeUseDialogs", () => {
       const { result, setFlatItems, itemArgs } = setup(items);
 
       act(() =>
-        result.current.openItemInsert({
-          header: header("new", "Phone"),
-          children: [],
-        }),
+        result.current.openItemInsert(
+          {
+            header: header("new", "Phone"),
+            children: [],
+          },
+          AMBIGUOUS_INSERT_SPAN,
+        ),
       );
       expect(itemArgs().add).toBe(true);
 
@@ -152,10 +155,13 @@ describe("makeUseDialogs", () => {
       const { result, setFlatItems, itemArgs } = setup(items);
 
       act(() =>
-        result.current.openItemInsert({
-          header: header("new", "Phone"),
-          children: [],
-        }),
+        result.current.openItemInsert(
+          {
+            header: header("new", "Phone"),
+            children: [],
+          },
+          AMBIGUOUS_INSERT_SPAN,
+        ),
       );
       // Pick the second section (flat marker index 2 — school selectSection value).
       act(() => itemArgs().setSIndex(2));

@@ -1,0 +1,17 @@
+---
+description: Persist user remarks into .cursor/rules without waiting to be asked
+alwaysApply: true
+---
+
+# Capture user remarks as rules
+
+When the user states a standing preference, a correction, or a “don’t
+do X / do Y instead” remark, **write or update a `.cursor/rules/*.mdc`
+immediately**. Do not wait for “add that to the rules” / “note that”.
+
+Treat it as a rule if it should apply on later turns (casts, wrappers,
+host vs library, typing, decomposition, …). One concern per file;
+update an existing rule when the remark belongs there.
+
+Do **not** persist one-off task instructions (“rename this function”,
+“commit these files”).

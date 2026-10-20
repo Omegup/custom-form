@@ -13,28 +13,32 @@ directly (no theme/portal rebuild).
 
 | File | Role |
 |---|---|
-| `types.ts` | `FormHeader`, `FormReviewChrome`, `CustomFormReviewProps` |
-| `CustomFormReview.tsx` | **`CustomFormReviewHOC(viewers, variants, followUpVariants, chrome)`** |
+| `types.ts` | `FormReviewChrome` (`SectionReviewChrome` + `FormLayoutChrome`), `CustomFormReviewProps` |
+| `CustomFormReview.tsx` | **`CustomFormReviewHOC(viewers, chrome)`** — required `variants: Record<ReviewVariantState, Variants>` prop |
 
 ## How it plugs in
 
 ```
 host: sections / responses / changes / setChanges / lastPending
-  → CustomFormReviewHOC(viewers, variants, followUpVariants, chrome)
-  → per section: SectionReviewHOC (shares `changes` / `lastPending` across all sections)
+      + setAddition / setDeleteCommentId
+      + variants: Record<ReviewVariantState, Variants>
+  → CustomFormReviewHOC(viewers, chrome)
+  → per section: SectionReviewHOC (library picks variants[state])
+host: reviewOverlayActions + overlay chrome (once, sibling of the form)
 ```
 
 ## Demo (`form-review/Form review` story)
 
 Lifecycle walkthrough — **Design → Response → Follow**:
 
-1. **Design** — form blueprint (Personal + Experience + a deleted Archived
-   section); JSON shows `sections`.
-2. **Response** — student answers (summary left empty on purpose); JSON shows
-   `responses`.
-3. **Follow** — mounts `CustomFormReviewHOC`: comments, follow-up form items,
-   status highlighting. Toggle **Review round pending** / **showDeleted**.
-   JSON shows live `AdditionalChanges`.
+1. **Design** — same editor as form-dialogs (library, add/edit dialogs, DnD).
+   Headings and panels stay on the fill/review tree (`multiple` panels get **+ Add**).
+2. **Response** — student fills via `CustomFormResponderHOC` (inputs + panel instances);
+   JSON shows `responses`.
+3. **Follow** — mounts `CustomFormReviewHOC`: comments, nested Design list
+   under the origin (`FormDialogsEditor` `sidebar={null}` — add, edit, move), status
+   highlighting. Toggle
+   **Review round pending** / **showDeleted**. JSON shows live `AdditionalChanges`.
 
 All three JSON panels stay visible so you can compare phases while interacting.
 

@@ -1,95 +1,24 @@
 /**
  * `form-review` showcase — Design → Response → Follow walkthrough.
- * Only the Follow phase mounts `CustomFormReviewHOC`; earlier phases are
- * demo-only blueprints so you can compare structure, answers, and reviewer
- * annotations side by side (JSON panels always visible).
+ * Design remounts the form-dialogs editor. Response mounts the fill shell;
+ * Follow mounts `CustomFormReviewHOC`.
  */
-import { useCallback, useState, type ReactNode, type Ref } from "react";
+import { useCallback, useRef, useState } from "react";
+import { patchResponse } from "../../response/demo/patchResponse";
+import { BlockStack, DemoPage, FollowControls, FormTitle, PhaseBody, PhaseJsonPanels, PhaseTabs } from "../../demo-utils";
+import { FormDialogsEditor, designSidebar } from "../../form-dialogs/demo/FormDialogsDemo";
+import {
+  FormResponder,
+  formResponderCtx,
+  responderVariants,
+} from "../../form-responder/demo/FormResponderDemo";
+import type { SectionValidator } from "../../form-responder";
+import { FollowUpDrafts } from "../../section-review/demo/followUpAdd";
+import { reviewVariants, reviewViewers } from "../../section-review/demo/reviewViewers";
+import { renderReviewOverlays, tCommon } from "../../section-review/demo/sectionReviewDemoHelper";
 import * as demo from "./formReviewDemoHelper";
 import type * as types from "./formReviewDemoTypes.t";
 import * as lib from "./library";
-
-const STATUS_COLOR: Record<lib.ReviewStatus, string> = {
-  normal: "#22883e",
-  disabled: "#ddd",
-  highlight: "#f59e0b",
-};
-
-const FOLLOW_UP_BADGE = (
-  <span
-    title="Added follow-up"
-    aria-label="Added follow-up"
-    style={{ color: "#b45309", fontSize: 12, fontWeight: 700 }}
-  >
-    ✚
-  </span>
-);
-
-const VARIANT_CHROME: Record<
-  types.Variants["field"],
-  { border: (status: lib.ReviewStatus) => string; background: string; badge: ReactNode }
-> = {
-  default: {
-    border: (status) => STATUS_COLOR[status],
-    background: "#fafafa",
-    badge: null,
-  },
-  followUp: {
-    border: () => "#e6b800",
-    background: "#fffbeb",
-    badge: FOLLOW_UP_BADGE,
-  },
-};
-
-const viewers: lib.Viewers<
-  types.TypeNames,
-  types.Params,
-  types.Variants,
-  types.FieldExtra & lib.Children,
-  lib.ReviewExtra & { impRef: Ref<lib.StrictViewerMethods> },
-  types.Ctx,
-  string
-> = {
-  field: {
-    viewer: ({ props: { formItem, extra, variant } }) => {
-      const value = extra.response.value.data.value ?? "";
-      const chrome = VARIANT_CHROME[variant];
-      return (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 4,
-            fontSize: 14,
-            opacity: extra.parentDeleted ? 0.5 : 1,
-          }}
-        >
-          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <strong>{formItem.params.name}</strong>
-            {chrome.badge}
-            {extra.icon}
-          </span>
-          <div
-            style={{
-              padding: "6px 8px",
-              border: `1px solid ${chrome.border(extra.status)}`,
-              borderRadius: 4,
-              background: chrome.background,
-            }}
-          >
-            {value || <em style={{ color: "#999" }}>No answer</em>}
-          </div>
-          {extra.appendix}
-        </div>
-      );
-    },
-  },
-};
-
-const variants = lib.branded<types.Variants, "variants">({ field: "default" });
-const followUpVariants = lib.branded<types.Variants, "variants">({
-  field: "followUp",
-});
 
 const FormReview = lib.CustomFormReviewHOC<
   types.TypeNames,
@@ -97,27 +26,32 @@ const FormReview = lib.CustomFormReviewHOC<
   types.Variants,
   types.Ctx,
   types.Section
->(viewers, variants, followUpVariants, demo.formChrome);
+>(reviewViewers, demo.formChrome);
 
 const ctx = lib.branded<types.Ctx, "context">({});
-const tCommon = (term: "add" | "cancel" | "save" | "delete") =>
-  ({ add: "Add", cancel: "Cancel", save: "Save", delete: "Delete" })[term];
 
 export const FormReviewDemo = ({
   heading,
   phase,
   header,
-  sections,
+  flatItems,
   responses,
   changes,
   reviewPending,
   showDeleted,
   updateArgs,
 }: types.DemoProps) => {
-  const [addition, setAddition] = useState<
-    lib.Addition<types.TypeNames, types.Params> | null
-  >(null);
+  const fillRef = useRef<SectionValidator | null>(null);
+  const [addition, setAddition] = useState<lib.Addition | null>(null);
   const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
+  const liveSections = lib.consolidateSections(flatItems);
+
+  const setResponse = useCallback(
+    (id: string, next?: lib.Response) => {
+      updateArgs({ responses: patchResponse(responses, id, next) });
+    },
+    [responses, updateArgs],
+  );
 
   const setChanges = useCallback(
     (next: lib.AdditionalChanges<types.TypeNames, types.Params>) =>
@@ -126,82 +60,102 @@ export const FormReviewDemo = ({
   );
 
   return (
-    <demo.FormContainer title={heading}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-        <demo.PhaseTabs
+    <DemoPage title={heading}>
+      <PhaseBody>
+        <PhaseTabs
           phase={phase}
           onChange={(next) => updateArgs({ phase: next })}
+          phases={demo.PHASES}
         />
 
         {phase === "design" ? (
-          <demo.DesignView header={header} sections={sections} />
+          <BlockStack>
+            <FormTitle
+              title={header.title}
+              description={header.description}
+              note={null}
+            />
+            <FormDialogsEditor
+              sidebar={designSidebar}
+              flatItems={flatItems}
+              setFlatItems={(next) =>
+                updateArgs({
+                  flatItems: next,
+                  sections: lib.consolidateSections(next),
+                })
+              }
+            />
+          </BlockStack>
         ) : null}
 
         {phase === "response" ? (
-          <demo.ResponseView
+          <FormResponder
+            ctx={formResponderCtx}
             header={header}
-            sections={sections}
+            sections={liveSections}
             responses={responses}
+            old={null}
+            setResponse={setResponse}
+            getError={() => null}
+            impRef={fillRef}
+            showDeleted={showDeleted}
+            variants={responderVariants}
+            followUpItems={{}}
+            children={null}
           />
         ) : null}
 
         {phase === "follow" ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 16,
-                fontSize: 14,
-              }}
-            >
-              <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <input
-                  type="checkbox"
-                  checked={reviewPending}
-                  onChange={(e) =>
-                    updateArgs({ reviewPending: e.target.checked })
-                  }
-                />
-                Review round pending (highlight status)
-              </label>
-              <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <input
-                  type="checkbox"
-                  checked={showDeleted}
-                  onChange={(e) =>
-                    updateArgs({ showDeleted: e.target.checked })
-                  }
-                />
-                Show deleted sections
-              </label>
-            </div>
+          <BlockStack>
+            <FollowControls
+              reviewPending={reviewPending}
+              onReviewPending={(checked) =>
+                updateArgs({ reviewPending: checked })
+              }
+              showDeleted={showDeleted}
+              onShowDeleted={(checked) => updateArgs({ showDeleted: checked })}
+            />
             <FormReview
               ctx={ctx}
               header={header}
-              sections={sections}
+              sections={liveSections}
               responses={responses}
               lastPending={reviewPending ? demo.PENDING_DATE : null}
               changes={changes}
               setChanges={setChanges}
-              addition={addition}
               setAddition={setAddition}
-              deleteCommentId={deleteCommentId}
               setDeleteCommentId={setDeleteCommentId}
-              renderFormItemsEditor={({ fallback }) => fallback}
-              tCommon={tCommon}
+              renderFormItemsEditor={({ entries, setEntries }) => (
+                <FollowUpDrafts entries={entries} setEntries={setEntries} />
+              )}
+              variants={reviewVariants}
               showDeleted={showDeleted}
+              children={null}
             />
-          </div>
+            {renderReviewOverlays({
+              ...lib.reviewOverlayActions({
+                addition,
+                deleteCommentId,
+                changes,
+                setChanges,
+                setAddition,
+                setDeleteCommentId,
+              }),
+              tCommon,
+            })}
+          </BlockStack>
         ) : null}
 
-        <demo.PhaseJsonPanels
-          phase={phase}
-          sections={sections}
-          responses={responses}
-          changes={changes}
+        <PhaseJsonPanels
+          heading="JSON by phase"
+          activeId={phase}
+          panels={[
+            { id: "design", title: "design · sections", value: liveSections },
+            { id: "response", title: "response · answers", value: responses },
+            { id: "follow", title: "follow · AdditionalChanges", value: changes },
+          ]}
         />
-      </div>
-    </demo.FormContainer>
+      </PhaseBody>
+    </DemoPage>
   );
 };
