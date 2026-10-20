@@ -22,13 +22,18 @@ export const FORM_ITEM_EDITOR_INITIAL: FlatItems = [
     item: {
       id: "p1",
       type: "panel",
-      params: { name: "Name & email" },
+      params: { name: "Name & email", multiple: false },
       deleted: false,
     },
     n: 2,
   },
   {
-    item: { id: "f1", type: "field", params: { name: "Name" }, deleted: false },
+    item: {
+      id: "f1",
+      type: "field",
+      params: { name: "Name", required: true },
+      deleted: false,
+    },
     n: 0,
   },
   { end: null },
@@ -36,7 +41,7 @@ export const FORM_ITEM_EDITOR_INITIAL: FlatItems = [
     item: {
       id: "f2",
       type: "field",
-      params: { name: "Email" },
+      params: { name: "Email", required: false },
       deleted: false,
     },
     n: 0,
@@ -63,7 +68,7 @@ export const FORM_ITEM_EDITOR_INITIAL: FlatItems = [
     item: {
       id: "f3",
       type: "field",
-      params: { name: "Notes" },
+      params: { name: "Notes", required: false },
       deleted: false,
     },
     n: 0,

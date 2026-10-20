@@ -14,13 +14,13 @@ directly (no theme/portal rebuild).
 | File | Role |
 |---|---|
 | `types.ts` | `FormHeader`, `FormResponderChrome`, `CustomFormResponderProps` |
-| `CustomFormResponder.tsx` | **`CustomFormResponderHOC(viewers, variants, chrome)`** |
+| `CustomFormResponder.tsx` | **`CustomFormResponderHOC(viewers, chrome)`** + required `resolveVariant` prop |
 
 ## How it plugs in
 
 ```
 host: sections / responses / setResponse / form impRef
-  → CustomFormResponderHOC(viewers, variants)
+  → CustomFormResponderHOC(viewers, chrome) + resolveVariant
   → per section: SectionResponderHOC
   → form impRef.validate merges section errors (skips deleted)
 ```
@@ -39,4 +39,6 @@ section-responder
 ```
 
 Does **not** import `section-view` / `form-dialogs`. Review / admin response
-UIs (school `section-review-ui`, `form-response-ui`) are still deferred.
+UIs live in the sibling [`section-review/`](../section-review/) /
+[`form-review/`](../form-review/) packages (school `section-review-ui`,
+`form-response-ui`).

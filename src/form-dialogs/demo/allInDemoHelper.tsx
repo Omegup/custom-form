@@ -1,14 +1,8 @@
-/**
- * All-in list chrome — viewers + `renderCard` for `SectionFormItemHOC`.
- * Display-only rows (no inline edit); Edit opens a dialog via `ListExtra.onEdit`.
- *
- * Panel nested columns are rendered **below** the row chrome (same as
- * `FormItemEditorFormTest`), not inside `FieldRow`'s horizontal `name` slot.
- */
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { FieldRow } from "../../form-edit/demo/editFormDemoHelper";
 import allInEditorSource from "./AllInEditor.tsx?raw";
 import allInDemoTypesSource from "./allInDemoTypes.t.ts?raw";
+import allInPhasesSource from "./allInPhases.tsx?raw";
 import type * as types from "./allInDemoTypes.t";
 import * as lib from "./library";
 
@@ -17,6 +11,8 @@ const withFileHeader = (path: string, source: string) =>
 
 export const ALL_IN_DEMO_SOURCE = [
   withFileHeader("allInDemoTypes.t.ts", allInDemoTypesSource),
+  "",
+  withFileHeader("allInPhases.tsx", allInPhasesSource),
   "",
   withFileHeader("AllInEditor.tsx", allInEditorSource),
 ].join("\n");
@@ -34,7 +30,12 @@ export const viewers: lib.Viewers<
   string
 > = {
   field: {
-    viewer: ({ props: { formItem } }) => <span>{formItem.params.name}</span>,
+    viewer: ({ props: { formItem } }) => (
+      <span>
+        {formItem.params.name}
+        {formItem.params.required ? " *" : ""}
+      </span>
+    ),
   },
   heading: {
     viewer: ({ props: { formItem } }) => (
@@ -77,11 +78,37 @@ export const renderCard = (
     types.ListCtx
   >,
 ) => {
-  const { extra, ctx, formItem } = viewProps;
+  const { extra, ctx, formItem, variant } = viewProps;
+  const followUpChrome: Record<"default" | "followUp", CSSProperties> = {
+    default: {},
+    followUp: {
+      padding: 8,
+      borderRadius: 6,
+      background: "#fffbeb",
+      border: "1px solid #e6b800",
+    },
+  };
+  const badge: Record<"default" | "followUp", ReactNode> = {
+    default: null,
+    followUp: (
+      <span
+        title="Added follow-up"
+        aria-label="Added follow-up"
+        style={{ color: "#b45309", fontSize: 12, fontWeight: 700 }}
+      >
+        ✚
+      </span>
+    ),
+  };
   return (
-    <div>
+    <div style={followUpChrome[variant]}>
       <FieldRow
-        name={view}
+        name={
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+            {view}
+            {badge[variant]}
+          </span>
+        }
         focused={ctx.autoFocused(formItem.id)}
         actions={extra.actions}
         extra={extra.parentDeleted ? [] : [{ label: "Edit", onClick: extra.onEdit }]}

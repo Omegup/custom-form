@@ -2,9 +2,13 @@
  * Demo domain = form-item-editor demo types (`field` / `heading` / `panel`)
  * so the same editor stack serves the All-in story.
  *
- * List shell uses `section-view` (`SectionFormItemHOC` + `WebRecursiveEdit`);
- * dialog sessions still use form-item-editor / section-edit chrome via
- * `makeUseDialogs`.
+ * School data model — **two documents only**:
+ * 1. **CustomForm** (design) → `flatItems`
+ * 2. **FormResponse** → `formResponse` (`responses` + `changes` +
+ *    `feedbackHistory` + `status`) — null until first Send
+ *
+ * Design / Fill / Update are **views** over those docs, not separate stores.
+ * Teacher Update mutates the same FormResponse (remarks, follow-ups, feedback).
  */
 import type * as itemTypes from "../../form-item-editor/demo/formItemEditorDemoTypes.t";
 import type * as lib from "./library";
@@ -38,11 +42,63 @@ export type ListExtra = lib.ExtraDom & {
   onEdit: () => void;
 };
 
-export type StoryArgs = {
-  flatItems: itemTypes.FlatItems;
-  heading: string;
+/** Design → Fill → Update walkthrough stage (UI only — not a document). */
+export type DemoPhase = "design" | "fill" | "update";
+
+/** Teacher / student round statuses — school `FormResponseStatus`. */
+export type FeedbackStatus =
+  | "answered"
+  | "draft"
+  | "changesRequested"
+  | "approved"
+  | "rejected";
+
+export type FeedbackHistoryItem = {
+  status: FeedbackStatus;
+  comment?: string;
+  /** ISO string in the document (JSON-serializable). */
+  date: string;
 };
 
-export type DemoProps = StoryArgs & {
-  updateArgs: (patch: Partial<StoryArgs>) => void;
+/**
+ * School `FormResponse` — answers + teacher follow-up live on **one** document.
+ * Created by Fill → Send (`customForms.addFormResponse`); Update / feedback
+ * methods mutate this same record (`addAdditionalQuestions`, `addFeedback`).
+ *
+ * Shape mirrors school `FormResponse`, with slot-tree naming: `responses` is
+ * an array of `{ formItemId, response }` (not a Record). First insert uses
+ * `changes: {}`.
+ */
+export type FormResponseEntry = {
+  formItemId: string;
+  response: lib.Response;
+};
+
+export type FormResponseDoc = {
+  responses: FormResponseEntry[];
+  changes: lib.AdditionalChanges<itemTypes.TypeNames, itemTypes.Params>;
+  feedbackHistory: FeedbackHistoryItem[];
+  status: FeedbackStatus;
+};
+
+/** Props for `AllInEditor` — domain documents, not Storybook wire format. */
+export type DemoProps = {
+  flatItems: itemTypes.FlatItems;
+  heading: string;
+  phase: DemoPhase;
+  showDeleted: boolean;
+  /** Fill-session draft answers — not part of the FormResponse document. */
+  responses: Record<string, lib.Response>;
+  /** School FormResponse, or null before the first Send. */
+  formResponse: FormResponseDoc | null;
+  updateArgs: (
+    patch: Partial<{
+      flatItems: itemTypes.FlatItems;
+      heading: string;
+      phase: DemoPhase;
+      showDeleted: boolean;
+      responses: Record<string, lib.Response>;
+      formResponse: FormResponseDoc | null;
+    }>,
+  ) => void;
 };

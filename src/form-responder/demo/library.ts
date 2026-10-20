@@ -4,6 +4,7 @@ export type {
   TheParams,
   TheVariants,
   Children,
+  TypedFormItem,
   Viewers,
 } from "../../form";
 export { branded } from "../../form";

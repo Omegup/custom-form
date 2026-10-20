@@ -6,6 +6,7 @@ import type { ReactNode, Ref } from "react";
 import type {
   MetaDom,
   ParamsDom,
+  RecursiveFormItem,
   Response,
   ResponderAdditionalChanges,
   SectionMetaDom,
@@ -14,6 +15,8 @@ import type {
   SectionResponderHeader,
   SectionValidator,
   SectionWithItems,
+  TypedFormItem,
+  VariantsDom,
 } from "./_deps";
 
 /** Optional form title data — stand-in for school's `FormHeader`. */
@@ -35,6 +38,7 @@ export type FormResponderChrome = SectionResponderChrome & {
 export type CustomFormResponderProps<
   TypeNames extends string,
   Params extends ParamsDom<TypeNames>,
+  Variants extends VariantsDom<TypeNames>,
   Context extends SectionResponderContext,
   SectionConfig extends SectionResponderHeader,
   SectionMeta extends SectionMetaDom,
@@ -59,5 +63,16 @@ export type CustomFormResponderProps<
   /** Form-level validator — same shape as section (`SectionValidator`). */
   impRef: Ref<SectionValidator>;
   showDeleted: boolean;
+  resolveVariant: <K extends TypeNames>(
+    item: TypedFormItem<Params, K>,
+  ) => Variants[K];
+  /**
+   * Reviewer follow-ups keyed by origin item id — forwarded to each
+   * `SectionResponder`. Empty record when none.
+   */
+  followUpItems: Record<
+    string,
+    RecursiveFormItem<TypeNames, Params, Meta>[]
+  >;
   children?: ReactNode;
 };

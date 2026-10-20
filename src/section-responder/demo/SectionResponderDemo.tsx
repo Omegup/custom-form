@@ -105,7 +105,8 @@ export const SectionResponderDemo = ({
           setResponse={setResponse}
           getError={(id) => errors[id] ?? null}
           impRef={sectionRef}
-          variants={variants}
+          resolveVariant={(item) => variants[item.type]}
+          followUpItems={{}}
           i={0}
         />
         <button type="button" onClick={validateSection} style={{ alignSelf: "flex-start" }}>
